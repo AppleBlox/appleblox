@@ -1,0 +1,62 @@
+name: Build and Package app
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build app
+      run: npm run build
+
+    - name: Zip artifacts
+      run: |
+        cd dist
+        for dir in */; do
+          zip -r "${dir%/}.zip" "$dir"
+        done
+
+    - name: Upload (linux_arm64)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}_linux_arm64
+        path: dist/linux_arm64.zip
+
+    - name: Upload (linux_armhf)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}_linux_armhf
+        path: dist/linux_armhf.zip
+
+    - name: Upload (linux_x64)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}_linux_x64
+        path: dist/linux_x64.zip
+
+    - name: Upload (mac_universal)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}_mac_universal
+        path: dist/mac_universal.zip
+
+    - name: Upload (win_x64)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}_win_x64
+        path: dist/win_x64.zip

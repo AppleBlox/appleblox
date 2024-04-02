@@ -1,0 +1,54 @@
+{
+  "name": "appleblox",
+  "version": "1.1.1",
+  "description": "MacOS roblox launcher",
+  "main": "frontend/src/windows/main/main.ts",
+  "scripts": {
+    "vite:dev": "vite",
+    "dev": "vite-node scripts/package/dev.ts",
+    "build": "vite-node scripts/build/ts/index.ts",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "neu:empty": ""
+  },
+  "keywords": [
+    "svelte",
+    "neutralino",
+    "webdev",
+    "ts"
+  ],
+  "type": "module",
+  "author": "OrigamingWasTaken",
+  "license": "MIT",
+  "devDependencies": {
+    "@expo/spawn-async": "^1.7.2",
+    "@neutralinojs/neu": "^10.1.0",
+    "@sveltejs/vite-plugin-svelte": "^3.0.2",
+    "@tsconfig/svelte": "^5.0.2",
+    "@types/signale": "^1.4.7",
+    "@types/tar": "^6.1.11",
+    "autoprefixer": "^10.4.19",
+    "await-exec-typescript": "github:artemhp/await-exec-typescript",
+    "jszip": "^3.10.1",
+    "postcss": "^8.4.38",
+    "resedit": "^2.0.0",
+    "signale": "^1.4.0",
+    "svelte": "^4.2.11",
+    "svelte-check": "^3.6.4",
+    "tailwindcss": "^3.4.3",
+    "tar": "^6.2.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.3",
+    "vite-node": "^1.3.1",
+    "vite-plugin-html": "^3.2.2"
+  },
+  "dependencies": {
+    "@neutralinojs/lib": "^5.0.0",
+    "bits-ui": "^0.21.1",
+    "clsx": "^2.1.0",
+    "hotkeys-js": "^3.13.7",
+    "lucide-svelte": "^0.364.0",
+    "tailwind-merge": "^2.2.2",
+    "tailwind-variants": "^0.2.1"
+  }
+}

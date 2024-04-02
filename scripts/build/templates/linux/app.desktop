@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version={APP_VERSION}
+Encoding=UTF-8
+Name={APP_NAME}
+Icon={APP_ICON_PATH}
+Exec={APP_EXEC}
+Path={APP_PATH}
+Terminal=false
+Type=Application
