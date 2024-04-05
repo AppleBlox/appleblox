@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* For WebKit-based browsers */
+::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5d3b3b; /* Color of the scrollbar thumb (the draggable part) */
+  border-radius: 15px;
+}
+
+
 :root {
 	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;

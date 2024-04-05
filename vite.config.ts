@@ -2,6 +2,7 @@ import {defineConfig} from 'vite';
 import {svelte} from '@sveltejs/vite-plugin-svelte';
 import * as path from 'path';
 import {createHtmlPlugin} from 'vite-plugin-html';
+import neutralino from "./scripts/package/vite-plugin"
 
 const NEU_PORRT = 5174
 
@@ -9,15 +10,7 @@ const NEU_PORRT = 5174
 export default defineConfig({
 	root: 'frontend',
 	plugins: [
-		svelte(),
-		createHtmlPlugin({
-			template: 'index.html',
-			inject: {
-				data: {
-					url: `http://localhost:5174`
-				},
-			},
-		}),
+		svelte(), neutralino()
 	],
 	build: {
 		outDir: path.resolve('./frontend/dist'),

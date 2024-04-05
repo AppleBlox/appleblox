@@ -5,6 +5,7 @@ import './app.css'
 import './ts/window'
 import App from './App.svelte'
 import { init } from "@neutralinojs/lib"
+import Integrations from "./pages/Integrations.svelte"
 
 init()
 

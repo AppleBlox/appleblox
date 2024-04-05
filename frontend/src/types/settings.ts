@@ -1,6 +1,12 @@
 export type InteractableOptions = {
 	type: 'boolean';
 };
+
+export interface FFlag {
+	flag: string;
+	enabled: boolean;
+}
+
 export interface SettingsPanel {
 	name: string;
 	description: string;
@@ -16,8 +22,16 @@ export interface SettingsPanel {
 			options:
 				| {type: 'boolean'; state: boolean}
 				| {type: 'string'; default: string}
-				| {type: 'dropdown'; list: string[]; default: string}
-				| {type: 'number'; default: number};
+				| {type: 'dropdown'; list: {label: string; value: string}[]; default: {label: string; value: string}}
+				| {type: 'number'; default: number; max: number; min: number; step: number}
+				| {
+						type: 'button';
+						style: 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link' | 'default';
+						icon?: string;
+				  }
+				| {
+						type: 'ff_buttons_custom';
+				  };
 		}[];
 	}[];
 }

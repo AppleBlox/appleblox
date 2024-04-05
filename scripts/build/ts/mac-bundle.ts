@@ -47,7 +47,7 @@ export async function macBuild() {
 		const InfoPlistTemplate = fs
 			.readFileSync(path.resolve(__dirname, '../templates/mac/Info.plist'), 'utf-8')
 			.replaceAll('{APP_NAME}', BuildConfig.appName)
-			.replaceAll('{APP_ID}', BuildConfig.appIdentifier)
+			.replaceAll('{APP_ID}', neuConfig.applicationId)
 			.replaceAll('{APP_BUNDLE}', BuildConfig.appBundleName)
 			.replaceAll('{APP_MIN_OS}', BuildConfig.mac.minimumOS)
 			.replaceAll('{APP_VERSION}', neuConfig.version);
@@ -66,7 +66,9 @@ export async function macBuild() {
 		fs.copyFileSync(BuildConfig.mac.appIcon, path.resolve(Resources, 'icon.icns'));
 
 		// Libraries
-		copyFolderSync(Libraries, path.resolve(Resources, 'lib'));
+		if (fs.existsSync(Libraries)) {
+			copyFolderSync(Libraries, path.resolve(Resources, 'lib'));
+		}
 		l.complete(`mac_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 		console.log("")
 	}

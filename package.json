@@ -1,6 +1,6 @@
 {
   "name": "appleblox",
-  "version": "1.1.1",
+  "version": "0.1.0",
   "description": "MacOS roblox launcher",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {
@@ -24,6 +24,7 @@
     "@neutralinojs/neu": "^10.1.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.2",
     "@tsconfig/svelte": "^5.0.2",
+    "@types/path-browserify": "^1.0.2",
     "@types/signale": "^1.4.7",
     "@types/tar": "^6.1.11",
     "autoprefixer": "^10.4.19",
@@ -43,11 +44,14 @@
     "vite-plugin-html": "^3.2.2"
   },
   "dependencies": {
-    "@neutralinojs/lib": "^5.0.0",
-    "bits-ui": "^0.21.1",
+    "@neutralinojs/lib": "^5.1.0",
+    "bits-ui": "^0.21.2",
     "clsx": "^2.1.0",
     "hotkeys-js": "^3.13.7",
     "lucide-svelte": "^0.364.0",
+    "mode-watcher": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "svelte-sonner": "^0.3.21",
     "tailwind-merge": "^2.2.2",
     "tailwind-variants": "^0.2.1"
   }

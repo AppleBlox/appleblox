@@ -16,8 +16,8 @@
     "checkJs": true,
     "isolatedModules": true,
     "paths": {
-      "$lib": ["./frontend/src/lib"],
-      "$lib/*": ["./frontend/src/lib/*"],
+      "$lib": ["frontend/src/assets/panel/lib"],
+      "$lib/*": ["frontend/src/assets/panel/lib/*"],
       "@": ["./frontend/src/"],
       "@/*": ["./frontend/src/*"],
       "@root/*": ["./*"]

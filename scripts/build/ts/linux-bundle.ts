@@ -65,7 +65,9 @@ export async function linuxBuild() {
 		fs.copyFileSync(path.resolve('./neutralino.config.json'), path.resolve(zipDir, 'neutralino.config.json'));
 
 		// Libraries
-		copyFolderSync(Libraries, zipDir);
+		if (fs.existsSync(Libraries)) {
+			copyFolderSync(Libraries, zipDir);
+		}
 
 		// Executables
 		fs.copyFileSync(executable, path.resolve(zipDir, 'neu_main'));

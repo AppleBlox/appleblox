@@ -1,50 +1,89 @@
 <script lang="ts">
 import type {SettingsPanel} from '@/types/settings';
 import Panel from './Settings/Panel.svelte';
+import { debug } from '@neutralinojs/lib';
+import { saveSettings } from '../ts/settings';
+import { showNotification } from '../ts/notifications';
+
+function settingsChanged(o: Object) {
+	saveSettings("integrations",o)
+}
 
 const panelOpts: SettingsPanel = {
 	name: 'Integrations',
 	description: 'Configure the integrations between AppleBlox and various apps like Discord with Roblox',
-	id: "integrations",
+	id: 'integrations',
 	sections: [
 		{
 			name: 'Activity Notifications',
 			description: "Notifications about the game you're playing & your server location",
-			id: "activity",
+			id: 'activity',
 			interactables: [
 				{
-					label: 'Enable',
-					description: 'Enable this feature',
-                    id: "enable",
+					label: 'See server location when joining a game',
+					description: 'You will be notified of your current server location (EU, US, etc..)',
+					id: 'notify_location',
 					options: {
-						type: "boolean",
+						type: 'boolean',
+						state: true,
+					},
+				},
+				{
+					label: 'See current place when teleporting',
+					description: 'When you teleport (or join) a place, you will be notified of its name and other informations',
+					id: 'notify_place',
+					options: {
+						type: 'boolean',
+						state: false
+					},
+				},
+				{
+					label: 'Enable Bloxstrap SDK compatibility',
+					description: 'Activate a compatibility layer which tries to support every functions of the Bloxstrap SDK',
+					id: 'bloxstrap_sdk',
+					options: {
+						type: 'boolean',
+						state: false
+					},
+				},
+			],
+		},
+		{
+			name: 'Discord Rich Presence',
+			description: "Show information about what you're playing on Discord",
+			id: 'rpc',
+			interactables: [
+				{
+					label: 'Show game activity',
+					description: 'Shows the game you\'re playing on your profile',
+					id: 'rpc_activity',
+					options: {
+						type: 'boolean',
+						state: true,
+					},
+				},
+				{
+					label: 'Show game time',
+					description: 'Show the time since you started playing Roblox',
+					id: 'rpc_time',
+					options: {
+						type: 'boolean',
 						state: true
-					}
+					},
 				},
-                {
-					label: 'text here',
-					description: 'ejejeje',
-					id: "texthing",
+				{
+					label: 'Allow joining',
+					description: 'Allow friends / everyone (depends on your roblox settings) to join you in-game',
+					id: 'rpc_join',
 					options: {
-						type: "string",
-						default: "My default text"
-					}
+						type: 'boolean',
+						state: false
+					},
 				},
-                {
-					label: 'A dropdown heehe',
-					description: 'I can use dropdowns',
-					id: "dropdownthing",
-					options: {
-						type: "dropdown",
-						list: ["Banana","Apple","Orange"],
-                    	default: "Banana",
-					}
-				},
-                
 			],
 		},
 	],
 };
 </script>
 
-<Panel panel={panelOpts}/>
+<Panel panel={panelOpts} on:settingsChanged={(e)=>{settingsChanged(e.detail)}}/>

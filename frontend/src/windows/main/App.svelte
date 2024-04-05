@@ -4,13 +4,17 @@ import {Skeleton} from '$lib/components/ui/skeleton/index.js';
 import Integrations from './pages/Integrations.svelte';
 import {fly} from 'svelte/transition';
 import FastFlags from './pages/FastFlags.svelte';
+import { ModeWatcher } from 'mode-watcher';
+import { Toaster } from "$lib/components/ui/sonner";
 let currentPage: string;
 </script>
 
 <main>
+	<Toaster richColors/>
+	<ModeWatcher defaultMode="dark"/>
 	<Sidebar bind:currentPage />
 	<!-- Content div -->
-	<div class="fixed top-0 right-0 w-[82%]">
+	<div class="fixed overflow-y-scroll max-h-full top-0 left-36 w-[85%]">
 		{#if currentPage == 'integrations'}
 			<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 				<Integrations />

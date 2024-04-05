@@ -2,12 +2,12 @@ type MacArch = 'x64' | 'arm64' | 'universal';
 type LinuxArch = 'x64' | 'arm64' | 'armhf';
 
 export interface Config {
+	devPort: number,
 	projectPath: string;
 	outDir: string;
 	appName: string;
 	description: string;
 	appBundleName: string;
-	appIdentifier: string;
 	mac?: {
 		architecture: MacArch[];
 		minimumOS: string;
