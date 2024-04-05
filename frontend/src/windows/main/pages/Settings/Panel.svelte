@@ -54,6 +54,7 @@ $: {
 		dispatch('settingsChanged', sections);
 	}
 }
+
 </script>
 
 {#if settingsLoaded}
@@ -91,10 +92,7 @@ $: {
 						{:else if inter.options.type === 'dropdown'}
 							<Select.Root
 								items={inter.options.list}
-								selected={sections[section.id][inter.id]}
-								onSelectedChange={(e) => {
-									sections[section.id][inter.id] = e?.value
-								}}>
+								selected={sections[section.id][inter.id]}>
 								<Select.Trigger class="w-[180px] bg-gray-900 grayscale ml-auto mr-4 border-none">
 									<Select.Value placeholder={inter.options.default.label}/>
 								</Select.Trigger>
