@@ -5,6 +5,7 @@ export type InteractableOptions = {
 export interface FFlag {
 	flag: string;
 	enabled: boolean;
+	value: string
 }
 
 export interface SettingsPanel {

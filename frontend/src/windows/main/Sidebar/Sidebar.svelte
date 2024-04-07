@@ -1,13 +1,16 @@
 <script lang="ts">
 import {Separator} from '$lib/components/ui/separator/index.js';
+import {createEventDispatcher} from 'svelte';
 import logo from '@/assets/favicon.png';
 import {os} from '@neutralinojs/lib';
 
 import IntegrationsIcon from '@/assets/sidebar/integrations.png';
 import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
-import CommingSoonIcon from "@/assets/sidebar/comingsoon.png"
+import CommingSoonIcon from '@/assets/sidebar/comingsoon.png';
+import RobloxIcon from '@/assets/sidebar/roblox.png';
 
 import SidebarBtn from './SidebarBtn.svelte';
+import Button from '$lib/components/ui/button/button.svelte';
 
 interface SidebarItem {
 	label: string;
@@ -21,14 +24,17 @@ const sidebarBtns: SidebarItem[] = [
 ];
 
 export let currentPage: string = 'integrations';
+export let id: string;
 
 function sidebarItemClicked(e: CustomEvent) {
-	if (e.detail === "none") return;
+	if (e.detail === 'none') return;
 	currentPage = e.detail;
 }
+
+const dispatch = createEventDispatcher<{launchRoblox: boolean}>();
 </script>
 
-<div class="h-full bg-[#1B1B1B] w-36 fixed top-0 left-0 overflow-x-hidden">
+<div class="h-full bg-[#1B1B1B] w-36 fixed top-0 left-0 overflow-x-hidden select-none" {id}>
 	<a
 		href="https://github.com/OrigamingWasTaken/appleblox"
 		class="flex justify-center"
@@ -50,6 +56,14 @@ function sidebarItemClicked(e: CustomEvent) {
 			<SidebarBtn bind:currentPage {label} {id} {icon} on:sidebarClick={sidebarItemClicked} />
 		{/each}
 	</div>
+	<Button
+		class="flex bg-green-600 hover:bg-green-800 fixed bottom-4 left-5 font-mono"
+		on:click={() => {
+			dispatch('launchRoblox', true);
+		}}>
+		Launch
+		<img src={RobloxIcon} alt="Roblox Icon" class="ml-1 mt-[1px] w-5 h-5 towhite" />
+	</Button>
 </div>
 
 <style>

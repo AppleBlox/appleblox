@@ -4,33 +4,70 @@ import {Skeleton} from '$lib/components/ui/skeleton/index.js';
 import Integrations from './pages/Integrations.svelte';
 import {fly} from 'svelte/transition';
 import FastFlags from './pages/FastFlags.svelte';
-import { ModeWatcher } from 'mode-watcher';
-import { Toaster } from "$lib/components/ui/sonner";
+import {ModeWatcher} from 'mode-watcher';
+import {Toaster} from '$lib/components/ui/sonner';
+import {Progress} from '$lib/components/ui/progress';
+import {debug, os} from '@neutralinojs/lib';
+import {onMount} from 'svelte';
+import {hasRoblox} from './ts/roblox';
+
 let currentPage: string;
+let launchingRoblox = false;
+let launchProgess = 1;
+let ltext = 'Launching...';
+
+async function launchRoblox() {
+	launchingRoblox = true;
+	if (!await hasRoblox()) {
+		os.execCommand(`osascript <<'END'
+    set theAlertText to "Roblox is not installed"
+    set theAlertMessage to "To use AppleBlox, you first need to install Roblox. Would you like to open the download page?"
+    display alert theAlertText message theAlertMessage as critical buttons {"Cancel", "Open link"} default button "Open link" cancel button "Cancel" giving up after 60
+    set the button_pressed to the button returned of the result
+    if the button_pressed is "Open link" then
+        open location "https://roblox.com/download"
+    end if
+END`);
+		launchingRoblox = false;
+	}
+	
+}
 </script>
 
 <main>
-	<Toaster richColors/>
-	<ModeWatcher defaultMode="dark"/>
-	<Sidebar bind:currentPage />
+	<Toaster richColors />
+	<ModeWatcher defaultMode="dark" />
 	<!-- Content div -->
-	<div class="fixed overflow-y-scroll max-h-full top-0 left-36 w-[85%]">
-		{#if currentPage == 'integrations'}
-			<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
-				<Integrations />
-			</div>
-		{:else if currentPage === 'fastflags'}
-			<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
-				<FastFlags />
-			</div>
-		{:else}
-			<div class="flex items-center m-32 space-x-4 opacity-30">
-				<Skeleton class="h-12 w-12 rounded-full" />
-				<div class="space-y-2">
-					<Skeleton class="h-4 w-[250px]" />
-					<Skeleton class="h-4 w-[200px]" />
+	{#if launchingRoblox}
+		<div class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col">
+			<p class="font-bold text-2xl">{ltext}</p>
+			<Progress max={100} value={launchProgess} class="w-[60%] bg-neutral-700" />
+		</div>
+	{:else}
+		<Sidebar
+			bind:currentPage
+			on:launchRoblox={() => {
+				launchRoblox();
+			}}
+			id="sidebar" />
+		<div class="fixed overflow-y-scroll max-h-full top-0 left-36 w-[85%]">
+			{#if currentPage == 'integrations'}
+				<div in:fly={{y: -750, duration: 1000}} out:fly={{y: 400, duration: 400}}>
+					<Integrations />
 				</div>
-			</div>
-		{/if}
-	</div>
+			{:else if currentPage === 'fastflags'}
+				<div in:fly={{y: -750, duration: 1000}} out:fly={{y: 400, duration: 400}}>
+					<FastFlags />
+				</div>
+			{:else}
+				<div class="flex items-center m-32 space-x-4 opacity-30">
+					<Skeleton class="h-12 w-12 rounded-full" />
+					<div class="space-y-2">
+						<Skeleton class="h-4 w-[250px]" />
+						<Skeleton class="h-4 w-[200px]" />
+					</div>
+				</div>
+			{/if}
+		</div>
+	{/if}
 </main>

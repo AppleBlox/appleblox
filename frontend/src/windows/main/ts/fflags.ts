@@ -38,7 +38,7 @@ export async function setFlags(flags: FFlag[]) {
 }
 
 /** Sets a fflag to true or false */
-export async function setFlag(flag: string, enabled: boolean) {
+export async function setFlag(flag: string, enabled: boolean, value: string) {
 	// os.getPath("data") = ~/Library/Application Support
 	const dataPath = path.join(await os.getPath('data'), 'AppleBlox/.storage');
 	const filePath = path.join(dataPath, 'fflags.neustorage');
@@ -48,24 +48,24 @@ export async function setFlag(flag: string, enabled: boolean) {
 	}
 
 	// Load the fflags from the saved file || empty array
-	let fflags: {enabled: boolean; flag: string}[] = JSON.parse(await filesystem.readFile(filePath)) || [];
+	let fflags: FFlag[] = JSON.parse(await filesystem.readFile(filePath)) || [];
 	// Modify the flag if it exists or create a new one
 	if (fflags.find((f) => f.flag === flag)) {
-		fflags[fflags.findIndex((f) => f.flag === flag)].enabled = enabled;
+		fflags[fflags.findIndex((f) => f.flag === flag)] = {flag,enabled,value}
 	} else {
-		fflags.push({flag, enabled});
+		fflags.push({flag, enabled, value});
 	}
 	await setFlags(fflags)
 }
 
 /** Append a flag to the config file. If the one provided already exists, then this will return false */
-export async function addFlag(flag: string): Promise<boolean> {
+export async function addFlag(flag: string, value: string): Promise<boolean> {
     let flags: FFlag[] = await getFlags() || []
     if (flags.find(f => f.flag === flag)) {
         // The flag already exists
         return false
     } else {
-        flags.push({flag, enabled: true})
+        flags.push({flag, enabled: true, value})
         await setFlags(flags)
         return true
     }

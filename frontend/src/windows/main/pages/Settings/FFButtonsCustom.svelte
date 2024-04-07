@@ -1,5 +1,5 @@
 <script lang="ts">
-import {debug, os, storage, window as w} from '@neutralinojs/lib';
+import {debug, os, window as w} from '@neutralinojs/lib';
 import Button from '$lib/components/ui/button/button.svelte';
 import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 import * as Table from '$lib/components/ui/table/index.js';
@@ -8,45 +8,46 @@ import Help from '@/assets/panel/help.png';
 import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
 import More from '@/assets/panel/more.png';
 import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-import {addFlag, getFlags, removeFlag, setFlag} from '../../ts/fflags';
+import {addFlag, getFlags, removeFlag, setFlags} from '../../ts/fflags';
 import type {FFlag} from '@/types/settings';
 import Input from '$lib/components/ui/input/input.svelte';
-import {ScrollArea} from '$lib/components/ui/scroll-area/index.js';
 import {toast} from 'svelte-sonner';
 
-let fflags: FFlag[] = [
-	{
-		enabled: true,
-		flag: 'Loading...',
-	},
-];
+let fflags: FFlag[] = [];
 
-function setTableFlags() {
+function updateTable() {
 	getFlags()
-		.then((flags) => {
-			debug.log('Flags: ' + JSON.stringify(flags));
-			if (flags) {
-				fflags = flags;
-			}
-		})
-		.catch(console.error);
+	.then((flags) => {
+		if (flags) {
+			fflags = flags;
+		}
+	})
+	.catch(console.error);
 }
 
-setTableFlags();
+updateTable()
+
+$: {
+	setFlags(fflags)
+}
 
 let addedFlag: string;
 async function btnAddFlag() {
-	const add = await addFlag(addedFlag);
-	if (!add) {
-		toast.error('This flag already exists!');
-	} else {
-		setTableFlags();
+	if (!addedFlag) {
+		toast.error("You cannot add an empty flag!")
+		return
 	}
-}
-
-function updateEnable(f: FFlag, checked: boolean) {
-	setFlag(f.flag, checked);
-	fflags[fflags.findIndex((flag) => flag.flag === f.flag)].enabled = checked;
+	if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(addedFlag)) {
+		toast.error("A flag cannot contain special characters")
+		return
+	}
+	const add = await addFlag(addedFlag, '');
+	if (add) {
+		fflags.push({enabled: true, flag: addedFlag, value: "null"})
+		updateTable()
+	} else {
+		toast.error('This flag already exists!');
+	}
 }
 </script>
 
@@ -90,12 +91,12 @@ function updateEnable(f: FFlag, checked: boolean) {
 						<Table.Row class="w-full">
 							<Table.Cell role="checkbox" class="font-medium"
 								><Checkbox
-									checked={ff.enabled}
-									onCheckedChange={(checked) => {
-										updateEnable(ff, Boolean(checked));
-									}}
+									bind:checked={ff.enabled}
 									class="rounded-md mr-5" /></Table.Cell>
-							<Table.Cell class="w-full">{ff.flag}</Table.Cell>
+							<Table.Cell class="w-2xl">{ff.flag}</Table.Cell>
+							<Table.Cell class="w-full">
+								<Input placeholder="null" bind:value={ff.value} />
+							</Table.Cell>
 							<Table.Cell>
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger asChild let:builder>

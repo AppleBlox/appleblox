@@ -12,6 +12,7 @@ import {loadSettings} from '../../ts/settings';
 import Button from '$lib/components/ui/button/button.svelte';
 import { debug, os } from '@neutralinojs/lib';
 import FfButtonsCustom from './FFButtonsCustom.svelte';
+import { setFlags } from '../../ts/fflags';
 
 export let panel: SettingsPanel;
 
@@ -54,7 +55,6 @@ $: {
 		dispatch('settingsChanged', sections);
 	}
 }
-
 </script>
 
 {#if settingsLoaded}
@@ -81,7 +81,7 @@ $: {
 						{#if inter.options.type == 'button'}
 							<Button variant={inter.options.style || 'default'}>{inter.label}</Button>
 						{:else if inter.options.type == 'ff_buttons_custom'}
-							<FfButtonsCustom />
+							<FfButtonsCustom/>
 						{:else if inter.options.type === 'boolean'}
 							<Switch class="ml-auto mr-4" bind:checked={sections[section.id][inter.id]} />
 						{:else if inter.options.type === 'string'}
