@@ -4,27 +4,32 @@
 
 ---
 
-# Neutralino + Svelte
+# AppleBlox
 
-This is a starter template for neutralino that uses **Vite** and **Svelte**. You can directly write your app using svelte!
+AppleBlox is a simple Roblox launcher for **MacOS**, heavily inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap).
+Currently, the app is in developpement and lacks important features like launching roblox (Only the settings panel system has been done.)
 
-## Using the template
-Simply use the command `neu create app_name --template OrigamingWasTaken/neutralino-svelte`
+## Developpement
 
-Then `cd` into your project and do `npm install`
+To setup the app on your machine, clone this repo and run `npm install`.
+To start the **dev environnement**, run `npm run dev`.
+To **build and package the app**, run `npm run build`.
 
-## Running your app
+The app is made with [Svelte](https://svelte.dev) (Frontend) and [NeutralinoJS](https://neutralino.js.org) (Backend).
+If you haven't heard about NeutralinoJS, it is a lightweight alternative coded in **c++** to frameworks like Electron or NW.JS. It is still growing, but is stable enough to be used on one platform. You can learn more about it on https://neutralino.js.org/docs.
 
-To run your app, use the command `npm run dev`
+## Contributing
 
-## Building your app
+All contributions are welcome! Feel free to open issues and pull requests. For further discussion, contact me at `contact@origaming.ch` or on discord `@Origaming`.
 
-Fill the `build.config.ts` file in the root of the project and run the `npm run build` command.
+## Gallery
 
-> This will package your app for Linux, MacOS, and Windows
+<div align="center">
+    <img src=".github/assets/sc1.png" style="width:50%;">
+    <img src=".github/assets/sc2.png" style="width:50%;">
+</div>
 
-## Replacing Svelte
+## Credits
 
-This template can also support Vue, React, etc... as it uses Vite. You can easily swap the frontend.
-> Q: Why would I do this instead of using another template?
-> A: Well you see, the good thing about this template is that it includes crossplatform build and package scripts. So no need to make your own.
+Logo found on https://macosicons.com (Sorry but I couldn't find the designer's name ^^').
+Features inspirations from BloxStrap.
