@@ -11,6 +11,8 @@ Currently, the app is in developpement and lacks important features like launchi
 
 You can get a demo of the app from the [Releases](https://github.com/OrigamingWasTaken/appleblox/releases/tag/0.0.1)
 
+For more recent builds, see the [nightly releases](https://nightly.link/OrigamingWasTaken/appleblox/workflows/build/main?preview)
+
 ## Developpement
 
 To setup the app on your machine, clone this repo and run `npm install`.

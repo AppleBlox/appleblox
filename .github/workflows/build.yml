@@ -31,23 +31,11 @@ jobs:
           zip -r "${dir%/}.zip" "$dir"
         done
 
-    - name: Upload (linux_arm64)
+    - name: Upload (mac_x64)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}_linux_arm64
-        path: dist/linux_arm64.zip
-
-    - name: Upload (linux_armhf)
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.event.repository.name }}_linux_armhf
-        path: dist/linux_armhf.zip
-
-    - name: Upload (linux_x64)
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.event.repository.name }}_linux_x64
-        path: dist/linux_x64.zip
+        name: ${{ github.event.repository.name }}_mac_x64
+        path: dist/mac_x64.zip
 
     - name: Upload (mac_universal)
       uses: actions/upload-artifact@v4
@@ -55,8 +43,8 @@ jobs:
         name: ${{ github.event.repository.name }}_mac_universal
         path: dist/mac_universal.zip
 
-    - name: Upload (win_x64)
+    - name: Upload (mac_arm64)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}_win_x64
-        path: dist/win_x64.zip
+        name: ${{ github.event.repository.name }}_mac_arm64
+        path: dist/mac_arm64.zip
