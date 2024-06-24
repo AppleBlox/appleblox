@@ -14,21 +14,6 @@ const panelOpts: SettingsPanel = {
 	description: 'Configure certain details of the Roblox engine',
 	id: 'fastflags',
 	sections: [
-        {
-            name: "Advanced",
-            description: "Advanced editing of Roblox fast flags",
-            id: "advanced",
-            interactables: [
-                {
-                    label: "FFlags Buttons",
-                    description: "Not shown",
-                    id: "fflags_btns",
-                    options: {
-                        type: "ff_buttons_custom",
-                    }
-                }
-            ]
-        },
 		{
 			name: 'Presets',
 			description: 'Already made and easily togglable FFlags',
@@ -111,6 +96,21 @@ const panelOpts: SettingsPanel = {
 				},
 			],
 		},
+		{
+            name: "Advanced",
+            description: "Advanced editing of Roblox fast flags",
+            id: "advanced",
+            interactables: [
+                {
+                    label: "FFlags Buttons",
+                    description: "Not shown",
+                    id: "fflags_btns",
+                    options: {
+                        type: "ff_buttons_custom",
+                    }
+                }
+            ]
+        }
 	],
 };
 </script>

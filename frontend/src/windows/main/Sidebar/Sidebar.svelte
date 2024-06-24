@@ -8,6 +8,7 @@ import IntegrationsIcon from '@/assets/sidebar/integrations.png';
 import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
 import CommingSoonIcon from '@/assets/sidebar/comingsoon.png';
 import RobloxIcon from '@/assets/sidebar/roblox.png';
+import MiscIcon from "@/assets/sidebar/misc.png"
 
 import SidebarBtn from './SidebarBtn.svelte';
 import Button from '$lib/components/ui/button/button.svelte';
@@ -20,6 +21,7 @@ interface SidebarItem {
 const sidebarBtns: SidebarItem[] = [
 	{label: 'Integrations', id: 'integrations', icon: IntegrationsIcon},
 	{label: 'Fast Flags', id: 'fastflags', icon: FastFlagsIcon},
+	{label: 'Misc', id: 'misc', icon: MiscIcon},
 	{label: 'Coming Soon', id: 'none', icon: CommingSoonIcon},
 ];
 

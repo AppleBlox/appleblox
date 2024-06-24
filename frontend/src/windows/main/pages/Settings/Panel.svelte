@@ -16,7 +16,7 @@ import { setFlags } from '../../ts/fflags';
 
 export let panel: SettingsPanel;
 
-const dispatch = createEventDispatcher<{settingsChanged: Object}>();
+const dispatch = createEventDispatcher<{settingsChanged: Object,buttonClicked: string}>();
 
 let settingsLoaded = true;
 let sections: any = {};
@@ -79,7 +79,11 @@ $: {
 							</div>
 						{/if}
 						{#if inter.options.type == 'button'}
-							<Button variant={inter.options.style || 'default'}>{inter.label}</Button>
+						<div class="pt-2">
+							<Button variant={inter.options.style || 'default'} on:click={()=>{
+								dispatch("buttonClicked",inter.id)
+							}}>{inter.label}</Button>
+						</div>
 						{:else if inter.options.type == 'ff_buttons_custom'}
 							<FfButtonsCustom/>
 						{:else if inter.options.type === 'boolean'}
