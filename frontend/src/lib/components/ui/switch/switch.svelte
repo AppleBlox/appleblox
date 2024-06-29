@@ -22,7 +22,7 @@
 >
 	<SwitchPrimitive.Thumb
 		class={cn(
-			"pointer-events-none block h-5 w-5 rounded-full bg-slate-800 grayscale shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0 data-[state=unchecked]:outline-gray-500 data-[state=unchecked]:outline-[1.7px] data-[state=unchecked]:outline"
+			"pointer-events-none block h-5 w-5 rounded-full bg-slate-100 dark:bg-slate-800 grayscale shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0 data-[state=unchecked]:outline-gray-500 data-[state=unchecked]:outline-[1.7px] data-[state=unchecked]:outline"
 		)}
 	/>
 </SwitchPrimitive.Root>

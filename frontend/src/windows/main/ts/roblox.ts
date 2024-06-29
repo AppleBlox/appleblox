@@ -17,3 +17,8 @@ END`);
 		return false;
 	}
 }
+
+export async function isRobloxOpen() {
+    const cmd = await os.execCommand('ps aux | grep "Roblox" | grep -v "grep"')
+    return cmd.stdOut.includes("Roblox")
+}

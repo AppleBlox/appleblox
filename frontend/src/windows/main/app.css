@@ -4,21 +4,19 @@
 
 /* For WebKit-based browsers */
 ::-webkit-scrollbar {
-  width: 12px; /* Width of the scrollbar */
+	width: 12px; /* Width of the scrollbar */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #5d3b3b; /* Color of the scrollbar thumb (the draggable part) */
-  border-radius: 15px;
+	background: #5d3b3b; /* Color of the scrollbar thumb (the draggable part) */
+	border-radius: 15px;
 }
-
 
 :root {
 	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
 	font-weight: 400;
 
-	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
 	background-color: #242424;
 
@@ -29,54 +27,50 @@
 }
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 72.22% 50.59%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 346.8 77.2% 49.8%;
-    --radius: 0.3rem;
-  }
-  .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 95%;
-    --card: 24 9.8% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 346.8 77.2% 49.8%;
-  }
-}
-
-.towhite {
-	-webkit-filter: grayscale(1) invert(1);
-	filter: grayscale(1) invert(1);
+	:root {
+		--background: 360 11% 95%;
+		--foreground: 360 5% 10%;
+		--card: 360 11% 90%;
+		--card-foreground: 360 5% 15%;
+		--popover: 360 11% 95%;
+		--popover-foreground: 360 95% 10%;
+		--primary: 360 38% 56%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 360 11% 70%;
+		--secondary-foreground: 0 0% 0%;
+		--muted: 322 11% 85%;
+		--muted-foreground: 360 5% 35%;
+		--accent: 322 11% 80%;
+		--accent-foreground: 360 5% 15%;
+		--destructive: 0 50% 30%;
+		--destructive-foreground: 360 5% 90%;
+		--border: 360 20% 50%;
+		--input: 360 20% 23%;
+		--ring: 360 38% 56%;
+		--radius: 0.3rem;
+	}
+	.dark {
+		--background: 360 11% 10%;
+		--foreground: 360 5% 90%;
+		--card: 360 11% 10%;
+		--card-foreground: 360 5% 90%;
+		--popover: 360 11% 5%;
+		--popover-foreground: 360 5% 90%;
+		--primary: 360 38% 56%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 360 11% 20%;
+		--secondary-foreground: 0 0% 100%;
+		--muted: 322 11% 23%;
+		--muted-foreground: 360 5% 60%;
+		--accent: 322 11% 23%;
+		--accent-foreground: 360 5% 90%;
+		--destructive: 0 50% 30%;
+		--destructive-foreground: 360 5% 90%;
+		--border: 360 20% 23%;
+		--input: 360 20% 23%;
+		--ring: 360 38% 56%;
+		--radius: 0.3rem;
+	}
 }
 
 a {
@@ -93,9 +87,8 @@ body {
 	line-height: 1.5;
 	font-weight: 400;
 
-	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
+	background-color: light-dark(#fff, #242424);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -106,7 +99,7 @@ body {
 	place-items: center;
 	min-width: 320px;
 	min-height: 100vh;
-  overflow: hidden;
+	overflow: hidden;
 }
 
 h1 {
@@ -131,5 +124,12 @@ h1 {
 	}
 	body {
 		@apply bg-background text-foreground;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	.towhite {
+		-webkit-filter: grayscale(1) invert(1);
+		filter: grayscale(1) invert(1);
 	}
 }

@@ -49,7 +49,7 @@
     "clsx": "^2.1.0",
     "hotkeys-js": "^3.13.7",
     "lucide-svelte": "^0.364.0",
-    "mode-watcher": "^0.3.0",
+    "mode-watcher": "^0.3.1",
     "path-browserify": "^1.0.1",
     "svelte-sonner": "^0.3.21",
     "tailwind-merge": "^2.2.2",

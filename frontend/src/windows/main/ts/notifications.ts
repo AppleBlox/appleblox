@@ -14,7 +14,7 @@ export interface NotificationOptions {
 export function showNotification(options: NotificationOptions) {
     try {
         const alerter = libraryPath("notifications")
-        const cmd = `${alerter} -message "${options.content}" -title "${options.title}" ${options.group ? `-group "${options.group}"`: ""} -sender "Br" ${options.timeout ? '-timeout ' + Math.floor(options.timeout) : ''} ${options.sound ? '-sound default' : ''}`
+        const cmd = `${alerter} -message "${options.content}" -title "${options.title}" ${options.group ? `-group "${options.group}"`: ""} -sender "ch.origaming.appleblox" ${options.timeout ? '-timeout ' + Math.floor(options.timeout) : ''} ${options.sound ? '-sound default' : ''}`
         os.spawnProcess(cmd)
     } catch (err) {
         console.error(err)

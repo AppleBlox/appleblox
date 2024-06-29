@@ -4,13 +4,13 @@
 	import Integrations from "./pages/Integrations.svelte";
 	import { fly } from "svelte/transition";
 	import FastFlags from "./pages/FastFlags.svelte";
-	import { ModeWatcher } from "mode-watcher";
 	import { Toaster } from "$lib/components/ui/sonner";
 	import { Progress } from "$lib/components/ui/progress";
-	import { debug, os } from "@neutralinojs/lib";
-	import { onMount } from "svelte";
 	import { hasRoblox } from "./ts/roblox";
 	import Misc from "./pages/Misc.svelte";
+	import { toast } from "svelte-sonner";
+	import { debug, os } from "@neutralinojs/lib";
+	import { ModeWatcher, setMode } from "mode-watcher";
 
 	let currentPage: string;
 	let launchingRoblox = false;
@@ -24,11 +24,15 @@
 		}
 		// Implement launching logic
 	}
+
+	// Darkmode
+	setMode("system")
+
 </script>
 
 <main>
+	<ModeWatcher track={true}/>
 	<Toaster richColors />
-	<ModeWatcher defaultMode="dark" />
 	<!-- Content div -->
 	{#if launchingRoblox}
 		<div class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col">
