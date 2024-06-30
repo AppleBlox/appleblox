@@ -1,9 +1,11 @@
 import {debug, storage, filesystem, os} from '@neutralinojs/lib';
 import {pathExists} from './utils';
 
-async function dataPath(): Promise<string> {
+export async function dataPath(): Promise<string> {
 	return `${await os.getPath('data')}/AppleBlox/.storage`;
 }
+
+/** Copies the settings folder to Application Support */
 async function copyNeuStorage(panelId: string) {
 	const path = await dataPath();
 	if (!(await pathExists(path))) {

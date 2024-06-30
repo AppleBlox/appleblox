@@ -75,7 +75,7 @@
 							{#if inter.options.type !== 'button' && inter.options.type !== 'ff_buttons_custom'}
 								<div>
 									<p class="font-semibold text-[#1f1717] dark:text-red-100">{inter.label}</p>
-									<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{inter.description}</p>
+									<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{@html inter.description}</p>
 								</div>
 							{/if}
 							{#if inter.options.type == 'button'}

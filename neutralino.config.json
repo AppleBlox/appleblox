@@ -13,7 +13,8 @@
     "os.*",
     "storage.*",
     "filesystem.*",
-    "window.*"
+    "window.*",
+    "clipboard.*"
   ],
   "exportAuthInfo": false,
   "logging": {

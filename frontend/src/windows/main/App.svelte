@@ -6,11 +6,12 @@
 	import FastFlags from "./pages/FastFlags.svelte";
 	import { Toaster } from "$lib/components/ui/sonner";
 	import { Progress } from "$lib/components/ui/progress";
-	import { hasRoblox } from "./ts/roblox";
+	import { hasRoblox, parseFFlags } from "./ts/roblox";
 	import Misc from "./pages/Misc.svelte";
 	import { toast } from "svelte-sonner";
-	import { debug, os } from "@neutralinojs/lib";
+	import { debug, filesystem, os } from "@neutralinojs/lib";
 	import { ModeWatcher, setMode } from "mode-watcher";
+	import { pathExists } from "./ts/utils";
 
 	let currentPage: string;
 	let launchingRoblox = false;
@@ -22,7 +23,29 @@
 		if (!(await hasRoblox())) {
 			launchingRoblox = false;
 		}
-		// Implement launching logic
+		
+		// FFLAGS
+		launchProgess = 20
+		if (await pathExists("/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json")) {
+			await filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/")
+			ltext = "Removing current ClientAppSettings..."
+		}
+		launchProgess = 40
+		ltext = "Copying fast flags..."
+		await filesystem.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings").catch(console.error)
+		console.log(await parseFFlags(true))
+		const fflags = {...(await parseFFlags(false)), ...(await parseFFlags(true))}
+		await filesystem.writeFile("/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json",JSON.stringify(fflags))
+		launchProgess = 60
+		setTimeout(()=>{
+			os.execCommand("open /Applications/Roblox.app")
+			launchProgess = 100
+			ltext = "Roblox Launched"
+			setTimeout(()=>{
+				launchingRoblox = false
+				filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/").catch(console.error)
+			},1000)
+		},1000)
 	}
 
 	// Darkmode

@@ -53,26 +53,24 @@ const panelOpts: SettingsPanel = {
 					options: {
 						type: 'dropdown',
 						list: [
-							{label: 'Metal (M1/2/3)', value: 'metal'},
+							{label: 'Metal', value: 'metal'},
 							{label: 'Vulkan (MoltenVK)', value: 'vulkan'},
-							{label: 'Rosetta (Intel)', value: 'rosetta'},
+							{label: 'OpenGL (Intel)', value: 'opengl'},
 						],
-						default: {label: 'Metal (M1/2/3)', value: 'metal'},
+						default: {label: 'Metal', value: 'metal'},
 					},
 				},
 				{
-					label: 'Escape Menu Version',
-					description: 'Choose the version of your ESC menu',
-					id: 'ff_menu',
+					label: 'Hide GUI',
+					description: `Input the ID of any group you're in. Defaults to Ori's group Paper4win.
+						</br>&nbspCMD + Shift + B: Toggles GUIs in 3D space (BillboardGuis, etc)
+						</br>&nbspCMD + Shift + C: Toggles game-defined ScreenGuis
+						</br>&nbspCMD + Shift + G: Toggles Roblox CoreGuis
+						</br>&nbspCMD + Shift + N: Toggles player names, and other that shows...`,
+					id: 'ff_gui',
 					options: {
-						type: 'dropdown',
-						list: [
-							{label: 'Default', value: 'default'},
-							{label: 'Version 1', value: 'v1'},
-							{label: 'Version 2', value: 'v2'},
-							{label: 'Version 4', value: 'v4'},
-						],
-						default: {label: 'Default', value: 'default'},
+						type: "string",
+						default: "8699949"
 					},
 				},
 				{

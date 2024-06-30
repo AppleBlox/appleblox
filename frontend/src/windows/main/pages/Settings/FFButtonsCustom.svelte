@@ -1,5 +1,5 @@
 <script lang="ts">
-import {debug, os, window as w} from '@neutralinojs/lib';
+import {clipboard, debug, os, window as w} from '@neutralinojs/lib';
 import Button from '$lib/components/ui/button/button.svelte';
 import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 import * as Table from '$lib/components/ui/table/index.js';
@@ -49,6 +49,25 @@ async function btnAddFlag() {
 		toast.error('This flag already exists!');
 	}
 }
+
+async function pasteJson() {
+	let flags;
+	try {
+		flags = JSON.parse((await clipboard.readText()).trim())
+	} catch (err) {
+		toast.error("Invalid JSON")
+		console.error(err)
+		return;
+	}
+	console.log(flags)
+	for (const flag of Object.keys(flags)) {
+		fflags.push({enabled: true, flag, value: flags[flag]})
+		// svelte reactivity, don't delete
+		fflags = fflags;
+	}
+	toast.success(`Pasted ${flags.length} flags.`,{duration: 500})
+
+}
 </script>
 
 <div class="flex gap-3 mt-3">
@@ -71,7 +90,8 @@ async function btnAddFlag() {
 				<Table.Caption>
 					<div class="flex bg-[#161515] my-2 rounded-md p-3 justify-center">
 						<Input placeholder="Enter your flag" class="mr-3 w-[300px]" bind:value={addedFlag} />
-						<Button variant="secondary" on:click={btnAddFlag}>Add Flag</Button>
+						<Button variant="default" on:click={btnAddFlag}>Add Flag</Button>
+						<Button class="ml-3" variant="secondary" on:click={pasteJson}>Paste JSON</Button>
 					</div>
 				</Table.Caption>
 				<Table.Header>
@@ -110,8 +130,6 @@ async function btnAddFlag() {
 									</DropdownMenu.Trigger>
 									<DropdownMenu.Content>
 										<DropdownMenu.Group>
-											<DropdownMenu.Label>Options</DropdownMenu.Label>
-											<DropdownMenu.Separator />
 											<DropdownMenu.Item
 												class="cursor-pointer"
 												on:click={() => {
