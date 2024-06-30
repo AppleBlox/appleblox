@@ -31,6 +31,7 @@ All contributions are welcome! Feel free to open issues and pull requests. For f
 <div align="center">
     <img src=".github/assets/sc1.png" style="width:50%;">
     <img src=".github/assets/sc2.png" style="width:50%;">
+    <img src=".github/assets/sc3.png" style="width:50%;">
 </div>
 
 ## Credits
