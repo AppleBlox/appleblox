@@ -101,16 +101,16 @@
 							<Switch class="ml-auto mr-4" bind:checked={sections[section.id][inter.id]} />
 						{:else if inter.options.type === "string"}
 							<Input
-								class="dark:bg-neutral-900 bg-neutral-50 text-center border-none w-[250px] ml-auto mr-4 font-sans"
+								class="dark:bg-neutral-900 bg-neutral-300 text-center border-none w-[250px] ml-auto mr-4 font-sans"
 								bind:value={sections[section.id][inter.id]}
 								placeholder={inter.options.default}
 							/>
 						{:else if inter.options.type === "dropdown"}
 							<Select.Root items={inter.options.list} bind:selected={sections[section.id][inter.id]}>
 								<Select.Trigger class="w-[180px] dark:bg-neutral-900 bg-neutral-300 ml-auto mr-4 border-none">
-									<Select.Value placeholder={inter.options.default.label} />
+									<Select.Value class="text-black dark:text-white" placeholder={inter.options.default.label} />
 								</Select.Trigger>
-								<Select.Content class="bg-gray-900 grayscale border-none text-white">
+								<Select.Content class="dark:bg-gray-900 bg-neutral-200 grayscale border-none dark:text-white text-black">
 									<Select.Group>
 										{#each inter.options.list || [] as item}
 											<Select.Item value={item} label={item.label}>{item.label}</Select.Item>
