@@ -28,4 +28,7 @@ export default defineConfig({
 	server: {
 		host: 'localhost',
 	},
+	assetsInclude: [
+		"**/*.icns"
+	]
 });

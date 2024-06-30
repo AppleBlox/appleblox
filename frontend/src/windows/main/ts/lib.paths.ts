@@ -16,6 +16,7 @@ type LibPathsType = typeof LibPaths;
 
 export function libraryPath<T extends keyof LibPathsType>(libName: T): LibPathsType[T] | null {
 	if (!(libName in LibPaths)) return null;
+	// @ts-expect-error
     if (!(window.NL_OS.toLowerCase() in LibPaths[libName])) return null;
 	// @ts-expect-error
 	const path = LibPaths[libName][window.NL_OS.toLowerCase()];

@@ -9,7 +9,7 @@
 	import { hasRoblox, parseFFlags } from "./ts/roblox";
 	import Misc from "./pages/Misc.svelte";
 	import { toast } from "svelte-sonner";
-	import { debug, filesystem, os } from "@neutralinojs/lib";
+	import { app, debug, filesystem, os, window as w } from "@neutralinojs/lib";
 	import { ModeWatcher, setMode } from "mode-watcher";
 	import { pathExists } from "./ts/utils";
 
@@ -18,43 +18,56 @@
 	let launchProgess = 1;
 	let ltext = "Launching...";
 
+	async function checkArgs() {
+		if (window.NL_ARGS.includes("--launch")) {
+			w.hide().catch(console.error);
+			await launchRoblox();
+			setTimeout(()=>{
+				app.exit(0)
+			},7000)
+		}
+	}
+	checkArgs();
+
 	async function launchRoblox() {
 		launchingRoblox = true;
 		if (!(await hasRoblox())) {
 			launchingRoblox = false;
 		}
-		
+
 		// FFLAGS
-		launchProgess = 20
+		launchProgess = 20;
 		if (await pathExists("/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json")) {
-			await filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/")
-			ltext = "Removing current ClientAppSettings..."
+			await filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
+			ltext = "Removing current ClientAppSettings...";
 		}
-		launchProgess = 40
-		ltext = "Copying fast flags..."
-		await filesystem.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings").catch(console.error)
-		console.log(await parseFFlags(true))
-		const fflags = {...(await parseFFlags(false)), ...(await parseFFlags(true))}
-		await filesystem.writeFile("/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json",JSON.stringify(fflags))
-		launchProgess = 60
-		setTimeout(()=>{
-			os.execCommand("open /Applications/Roblox.app")
-			launchProgess = 100
-			ltext = "Roblox Launched"
-			setTimeout(()=>{
-				launchingRoblox = false
-				filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/").catch(console.error)
-			},1000)
-		},1000)
+		launchProgess = 40;
+		ltext = "Copying fast flags...";
+		await filesystem.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings").catch(console.error);
+		console.log(await parseFFlags(true));
+		const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
+		await filesystem.writeFile(
+			"/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json",
+			JSON.stringify(fflags)
+		);
+		launchProgess = 60;
+		setTimeout(() => {
+			os.execCommand("open /Applications/Roblox.app");
+			launchProgess = 100;
+			ltext = "Roblox Launched";
+			setTimeout(() => {
+				launchingRoblox = false;
+				filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/").catch(console.error);
+			}, 1000);
+		}, 1000);
 	}
 
 	// Darkmode
-	setMode("system")
-
+	setMode("system");
 </script>
 
 <main>
-	<ModeWatcher track={true}/>
+	<ModeWatcher track={true} />
 	<Toaster richColors />
 	<!-- Content div -->
 	{#if launchingRoblox}

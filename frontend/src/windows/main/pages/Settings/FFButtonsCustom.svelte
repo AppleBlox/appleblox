@@ -1,73 +1,72 @@
 <script lang="ts">
-import {clipboard, debug, os, window as w} from '@neutralinojs/lib';
-import Button from '$lib/components/ui/button/button.svelte';
-import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-import * as Table from '$lib/components/ui/table/index.js';
-import Edit from '@/assets/panel/edit.png';
-import Help from '@/assets/panel/help.png';
-import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
-import More from '@/assets/panel/more.png';
-import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-import {addFlag, getFlags, removeFlag, setFlags} from '../../ts/fflags';
-import type {FFlag} from '@/types/settings';
-import Input from '$lib/components/ui/input/input.svelte';
-import {toast} from 'svelte-sonner';
+	import { clipboard, debug, os, window as w } from "@neutralinojs/lib";
+	import Button from "$lib/components/ui/button/button.svelte";
+	import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+	import * as Table from "$lib/components/ui/table/index.js";
+	import Edit from "@/assets/panel/edit.png";
+	import Help from "@/assets/panel/help.png";
+	import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
+	import More from "@/assets/panel/more.png";
+	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+	import { addFlag, getFlags, removeFlag, setFlags } from "../../ts/fflags";
+	import type { FFlag } from "@/types/settings";
+	import Input from "$lib/components/ui/input/input.svelte";
+	import { toast } from "svelte-sonner";
 
-let fflags: FFlag[] = [];
+	let fflags: FFlag[] = [];
 
-function updateTable() {
-	getFlags()
-	.then((flags) => {
-		if (flags) {
-			fflags = flags;
+	function updateTable() {
+		getFlags()
+			.then((flags) => {
+				if (flags) {
+					fflags = flags;
+				}
+			})
+			.catch(console.error);
+	}
+
+	updateTable();
+
+	$: {
+		setFlags(fflags);
+	}
+
+	let addedFlag: string;
+	async function btnAddFlag() {
+		if (!addedFlag) {
+			toast.error("You cannot add an empty flag!");
+			return;
 		}
-	})
-	.catch(console.error);
-}
-
-updateTable()
-
-$: {
-	setFlags(fflags)
-}
-
-let addedFlag: string;
-async function btnAddFlag() {
-	if (!addedFlag) {
-		toast.error("You cannot add an empty flag!")
-		return
+		if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(addedFlag)) {
+			toast.error("A flag cannot contain special characters");
+			return;
+		}
+		const add = await addFlag(addedFlag, "");
+		if (add) {
+			fflags.push({ enabled: true, flag: addedFlag, value: "null" });
+			updateTable();
+		} else {
+			toast.error("This flag already exists!");
+		}
 	}
-	if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(addedFlag)) {
-		toast.error("A flag cannot contain special characters")
-		return
-	}
-	const add = await addFlag(addedFlag, '');
-	if (add) {
-		fflags.push({enabled: true, flag: addedFlag, value: "null"})
-		updateTable()
-	} else {
-		toast.error('This flag already exists!');
-	}
-}
 
-async function pasteJson() {
-	let flags;
-	try {
-		flags = JSON.parse((await clipboard.readText()).trim())
-	} catch (err) {
-		toast.error("Invalid JSON")
-		console.error(err)
-		return;
+	async function pasteJson() {
+		let flags;
+		try {
+			flags = JSON.parse((await clipboard.readText()).trim());
+		} catch (err) {
+			toast.error("Invalid JSON");
+			console.error(err);
+			return;
+		}
+		console.log(flags);
+		for (const flag of Object.keys(flags)) {
+			fflags.push({ enabled: true, flag, value: flags[flag] });
+			// svelte reactivity, don't delete
+			fflags = fflags;
+		}
+		toast.success(`Pasted ${flags.length} flags.`, { duration: 500 });
 	}
-	console.log(flags)
-	for (const flag of Object.keys(flags)) {
-		fflags.push({enabled: true, flag, value: flags[flag]})
-		// svelte reactivity, don't delete
-		fflags = fflags;
-	}
-	toast.success(`Pasted ${flags.length} flags.`,{duration: 500})
-
-}
 </script>
 
 <div class="flex gap-3 mt-3">
@@ -75,7 +74,8 @@ async function pasteJson() {
 		<AlertDialog.Trigger asChild let:builder>
 			<Button variant="default" builders={[builder]}>
 				<img src={Edit} alt="One icon" class="w-5 mr-2" />
-				Advanced FFlags text editor</Button>
+				Advanced FFlags text editor</Button
+			>
 		</AlertDialog.Trigger>
 		<AlertDialog.Content class="max-w-2xl">
 			<AlertDialog.Header>
@@ -110,9 +110,8 @@ async function pasteJson() {
 					{#each fflags as ff}
 						<Table.Row class="w-full">
 							<Table.Cell role="checkbox" class="font-medium"
-								><Checkbox
-									bind:checked={ff.enabled}
-									class="rounded-md mr-5" /></Table.Cell>
+								><Checkbox bind:checked={ff.enabled} class="rounded-md mr-5" /></Table.Cell
+							>
 							<Table.Cell class="w-2xl">{ff.flag}</Table.Cell>
 							<Table.Cell class="w-full">
 								<Input placeholder="null" bind:value={ff.value} />
@@ -124,7 +123,8 @@ async function pasteJson() {
 											size="icon"
 											variant="outline"
 											class="ml-auto rounded-md border-none h-7 w-7"
-											builders={[builder]}>
+											builders={[builder]}
+										>
 											<img src={More} alt="more icon lol" class="h-4 w-4 towhite" />
 										</Button>
 									</DropdownMenu.Trigger>
@@ -135,7 +135,8 @@ async function pasteJson() {
 												on:click={() => {
 													removeFlag(ff.flag);
 													fflags = fflags.filter((f) => f.flag !== ff.flag);
-												}}><p class="text-red-600">Remove</p></DropdownMenu.Item>
+												}}><p class="text-red-600">Remove</p></DropdownMenu.Item
+											>
 										</DropdownMenu.Group>
 									</DropdownMenu.Content>
 								</DropdownMenu.Root>
@@ -151,10 +152,11 @@ async function pasteJson() {
 	</AlertDialog.Root>
 	<Button
 		on:click={() => {
-			os.open('https://github.com/MaximumADHD/Roblox-FFlag-Tracker');
+			os.open("https://github.com/MaximumADHD/Roblox-FFlag-Tracker");
 		}}
-		variant={'secondary'}
-		class="bg-slate-900 text-slate-300 font-semibod grayscale">
+		variant={"secondary"}
+		class="bg-slate-900 text-slate-300 font-semibod grayscale"
+	>
 		<img src={Help} alt="Two icon" class="towhite w-5 mr-2" />
 		About Fast Flags
 	</Button>

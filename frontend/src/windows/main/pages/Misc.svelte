@@ -2,11 +2,13 @@
 	import type { SettingsPanel } from "@/types/settings";
 	import Panel from "./Settings/Panel.svelte";
 	import { saveSettings } from "../ts/settings";
-	import { showNotification } from "../ts/notifications";
 	import { toast } from "svelte-sonner";
-	import { isRobloxOpen } from "../ts/roblox";
-	import { events, os } from "@neutralinojs/lib";
+	import { isRobloxOpen, parseFFlags } from "../ts/roblox";
+	import { events, filesystem, os } from "@neutralinojs/lib";
 	import { sleep } from "$lib/appleblox";
+	import AppIcon from "@/assets/play.icns";
+	import path from "path-browserify";
+	import { pathExists } from "../ts/utils";
 
 	function settingsChanged(o: Object) {
 		saveSettings("misc", o);
@@ -32,6 +34,13 @@
 			}
 		}
 	});
+
+	async function loadImageToBlob(url: string): Promise<Blob> {
+		const response = await fetch(url);
+		const blob = await response.blob();
+		return blob;
+	}
+
 	async function buttonClicked(e: CustomEvent) {
 		const id = e.detail;
 		switch (id) {
@@ -53,6 +62,75 @@
 			case "close_roblox_btn":
 				await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
 				toast.success("All Roblox Instances have been closed.");
+				break;
+			case "create_shortcut_btn":
+				const savePath = await os
+					.showFolderDialog("Where should the shortcut be created?", { defaultPath: "/Applications/" })
+					.catch(console.error);
+				if (!savePath) {
+					toast.error("An error occured while trying to save the shortcut", { duration: 2000 });
+					return;
+				}
+				try {
+					if (await pathExists(path.join(savePath, "Launch Roblox.app"))) {
+						await filesystem.remove(path.join(savePath, "Launch Roblox.app"));
+					}
+					await filesystem.createDirectory(path.join(savePath, "Launch Roblox.app/Contents/MacOS"));
+					await filesystem.createDirectory(path.join(savePath, "Launch Roblox.app/Contents/Resources"));
+					await filesystem.writeFile(
+						path.join(savePath, "Launch Roblox.app/Contents/Info.plist"),
+						`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>launch</string>
+	<key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+    <key>CFBundleSupportedPlatforms</key>
+    <array>
+        <string>MacOSX</string>
+    </array>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.games</string>
+</dict>
+</plist>`
+					);
+					const blob = await loadImageToBlob(AppIcon);
+					await filesystem.writeBinaryFile(
+						path.join(savePath, "Launch Roblox.app/Contents/Resources/icon.icns"),
+						await blob.arrayBuffer()
+					);
+					await filesystem.writeFile(
+						path.join(savePath, "Launch Roblox.app/Contents/MacOS/launch"),
+						"#!/bin/bash\n" + path.join(path.dirname(window.NL_PATH), "MacOS/bootstrap") + " --launch"
+					);
+					await os.execCommand(
+						`chmod +x ${path.join(savePath, "Launch Roblox.app/Contents/MacOS/launch").replaceAll(" ", "\\ ")}`
+					);
+					toast.success(`Created a shortcut at "${path.join(savePath, "Launch Roblox.app")}"`);
+				} catch (err) {
+					console.error(err);
+					toast.error("An error occured while trying to save the shortcut", { duration: 2000 });
+					return;
+				}
+				break;
+			case "write_clientappsettings_btn":
+				try {
+					const filePath = "/Applications/Roblox.app/Contents/MacOS/ClientSettings/AppClientSettings.json";
+					if (await pathExists(filePath)) {
+						await filesystem.remove(filePath);
+					}
+					await filesystem.createDirectory(path.dirname(filePath))
+					const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
+					await filesystem.writeFile(filePath, JSON.stringify(fflags));
+					toast.success(`Wrote ClientAppSettings at "${filePath}"`);
+				} catch (err) {
+					console.error(err);
+					toast.error("An error occured while writing ClientAppSettings.json");
+				}
 				break;
 		}
 	}
@@ -87,11 +165,39 @@
 					},
 					{
 						label: "Terminate all instances",
-						description: "Closes every open Roblox instances. (This acts as a force-kill, so be sure to use this appropriately)",
+						description:
+							"Closes every open Roblox instances. (This acts as a force-kill, so be sure to use this appropriately)",
 						id: "close_roblox_btn",
 						options: {
 							type: "button",
 							style: "destructive",
+						},
+					},
+				],
+			},
+			{
+				name: "Roblox Launching",
+				description: "Settings about launching Roblox",
+				id: "multi_instances",
+				interactables: [
+					{
+						label: "Create a launch shortcut",
+						description:
+							"Creates a shortcut that can be used to launch Roblox (with all the AppleBlox features) without having to open this app.",
+						id: "create_shortcut_btn",
+						options: {
+							type: "button",
+							style: "default",
+						},
+					},
+					{
+						label: "Write ClientAppSettings.json",
+						description:
+							"Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended.",
+						id: "write_clientappsettings_btn",
+						options: {
+							type: "button",
+							style: "outline",
 						},
 					},
 				],
