@@ -9,6 +9,7 @@
 	import AppIcon from "@/assets/play.icns";
 	import path from "path-browserify";
 	import { pathExists } from "../ts/utils";
+	import { enableConsoleRedirection } from "../ts/debugging";
 
 	function settingsChanged(o: Object) {
 		saveSettings("misc", o);
@@ -24,7 +25,7 @@
 		const id = e.detail;
 		switch (id) {
 			case "multi_roblox_btn":
-				await enableMultiInstance()
+				await enableMultiInstance();
 				break;
 			case "open_instance_btn":
 				os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer; exit");
@@ -93,7 +94,7 @@
 					if (await pathExists(filePath)) {
 						await filesystem.remove(filePath);
 					}
-					await filesystem.createDirectory(path.dirname(filePath))
+					await filesystem.createDirectory(path.dirname(filePath));
 					const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
 					await filesystem.writeFile(filePath, JSON.stringify(fflags));
 					toast.success(`Wrote ClientAppSettings at "${filePath}"`);
@@ -102,6 +103,17 @@
 					toast.error("An error occured while writing ClientAppSettings.json");
 				}
 				break;
+			case "redirect_console":
+				enableConsoleRedirection();
+				toast.success("Console redirection enabled", { duration: 1000 });
+				break;
+			case "open_logs":
+				const logPath = path.join(window.NL_PATH,"neutralinojs.log")
+				if (!await pathExists(logPath)) {
+					toast.error("The logs file doesn't seem to exist.")
+					return;
+				}
+				os.execCommand(`open "${logPath}"`).catch(console.error)
 		}
 	}
 
@@ -148,7 +160,7 @@
 			{
 				name: "Roblox Launching",
 				description: "Settings about launching Roblox",
-				id: "multi_instances",
+				id: "roblox_launching",
 				interactables: [
 					{
 						label: "Create a launch shortcut",
@@ -165,6 +177,34 @@
 						description:
 							"Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended.",
 						id: "write_clientappsettings_btn",
+						options: {
+							type: "button",
+							style: "outline",
+						},
+					},
+				],
+			},
+			{
+				name: "Advanced",
+				description:
+					"You shouldn't touch this unless you know what you're doing. This is more meant as a debugging tool.",
+				id: "advanced",
+				interactables: [
+					{
+						label: "Redirect console.logs to file",
+						description:
+							"Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.",
+						id: "redirect_console",
+						options: {
+							type: "button",
+							style: "destructive",
+						},
+					},
+					{
+						label: "Open logs file",
+						description:
+							"Opens the logs file in the preffered text editor.",
+						id: "open_logs",
 						options: {
 							type: "button",
 							style: "outline",

@@ -1,17 +1,18 @@
 // Neutralino dev patch
 // import "$lib/neu/init"
 
-import './app.css'
-import './ts/window'
-import App from './App.svelte'
-import { init } from "@neutralinojs/lib"
-import Integrations from "./pages/Integrations.svelte"
+import "./app.css";
+import "./ts/window";
+import "./ts/debugging";
+import App from "./App.svelte";
+import { init } from "@neutralinojs/lib";
+import Integrations from "./pages/Integrations.svelte";
 
-init()
+init();
 
 const app = new App({
-  // @ts-expect-error
-  target: document.getElementById('app'),
-})
+	// @ts-expect-error
+	target: document.getElementById("app"),
+});
 
-export default app
+export default app;

@@ -20,6 +20,7 @@
 
 	async function checkArgs() {
 		if (window.NL_ARGS.includes("--launch")) {
+			debug.log("[INFO] Launching Roblox from '--launch?'")
 			w.hide().catch(console.error);
 			await launchRoblox();
 			setTimeout(()=>{
