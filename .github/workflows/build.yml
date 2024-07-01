@@ -41,16 +41,16 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}_mac_x64_${{ env.VERSION }}
-        path: dist/appleblox_x64_${{ env.VERSION }}.zip
+        path: dist/mac_x64_${{ env.VERSION }}.zip
 
     - name: Upload (mac_universal)
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}_mac_universal_${{ env.VERSION }}
-        path: dist/appleblox_universal_${{ env.VERSION }}.zip
+        path: dist/mac_universal_${{ env.VERSION }}.zip
 
     - name: Upload (mac_arm64)
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}_mac_arm64_${{ env.VERSION }}
-        path: dist/appleblox_arm64_${{ env.VERSION }}.zip
+        path: dist/mac_arm64_${{ env.VERSION }}.zip
