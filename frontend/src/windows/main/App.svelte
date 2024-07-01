@@ -23,7 +23,7 @@
 			w.hide().catch(console.error);
 			await launchRoblox();
 			setTimeout(()=>{
-				app.exit(0)
+				app.exit()
 			},7000)
 		}
 	}

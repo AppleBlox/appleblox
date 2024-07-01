@@ -4,7 +4,7 @@ import {getMode} from './env';
 import hotkeys from 'hotkeys-js';
 events
 	.on('windowClose', () => {
-		app.exit(0).catch(console.error);
+		app.exit().catch(console.error);
 	})
 	.catch(console.error)
 	.then(() => {
@@ -35,13 +35,13 @@ hotkeys('ctrl+z,cmd+z', (e) => {
 
 hotkeys('cmd+q,cmd+w', (e) => {
 	e.preventDefault();
-	app.exit(0);
+	app.exit();
 });
 
-hotkeys('ctrl+a,cmd+a', (e) => {
-	e.preventDefault();
-	document.execCommand('selectAll');
-});
+// hotkeys('ctrl+a,cmd+a', (e) => {
+// 	e.preventDefault();
+// 	document.execCommand('selectAll');
+// });
 
 export async function focusWindow() {
 	try {
