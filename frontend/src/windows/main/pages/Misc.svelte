@@ -3,7 +3,7 @@
 	import Panel from "./Settings/Panel.svelte";
 	import { saveSettings } from "../ts/settings";
 	import { toast } from "svelte-sonner";
-	import { isRobloxOpen, parseFFlags } from "../ts/roblox";
+	import { enableMultiInstance, isRobloxOpen, parseFFlags } from "../ts/roblox";
 	import { events, filesystem, os } from "@neutralinojs/lib";
 	import { sleep } from "$lib/appleblox";
 	import AppIcon from "@/assets/play.icns";
@@ -13,27 +13,6 @@
 	function settingsChanged(o: Object) {
 		saveSettings("misc", o);
 	}
-
-	let robloxProcessIds: number[] = [];
-	let processingIds: number[] = [];
-	events.on("spawnedProcess", async (e) => {
-		if (robloxProcessIds.includes(e.detail.id)) {
-			switch (e.detail.action) {
-				case "stdErr":
-				case "stdOut":
-					if (processingIds.includes(e.detail.id)) return;
-					processingIds.push(e.detail.id);
-					await sleep(1000);
-					toast.info("Terminating every Roblox processes...");
-					await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
-					break;
-				case "exit":
-					robloxProcessIds = robloxProcessIds.filter((id) => id !== e.detail.id);
-					toast.success("Multi-Instances should be active.");
-					break;
-			}
-		}
-	});
 
 	async function loadImageToBlob(url: string): Promise<Blob> {
 		const response = await fetch(url);
@@ -45,16 +24,7 @@
 		const id = e.detail;
 		switch (id) {
 			case "multi_roblox_btn":
-				if (!(await isRobloxOpen())) {
-					toast.info("Closing Roblox...", { duration: 1000 });
-					await os.execCommand(`pkill -9 Roblox`);
-
-					await sleep(1000);
-
-					toast.info("Opening Roblox...", { duration: 1000 });
-					const proc = await os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer");
-					robloxProcessIds.push(proc.id);
-				}
+				await enableMultiInstance()
 				break;
 			case "open_instance_btn":
 				os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer; exit");

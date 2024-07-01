@@ -1,7 +1,9 @@
+import { toast } from "svelte-sonner";
 import { dataPath } from "./settings";
 import { pathExists } from "./utils";
 import { filesystem, os } from "@neutralinojs/lib";
 import path from "path-browserify";
+import { sleep } from "$lib/appleblox";
 
 /** Checks if roblox is installed, and if not show a popup */
 export async function hasRoblox(): Promise<boolean> {
@@ -109,4 +111,45 @@ export async function parseFFlags(preset = false): Promise<Object> {
 		}
 		return fflagsJson;
 	}
+}
+
+export async function enableMultiInstance() {
+	if (!(await hasRoblox())) return;
+	if (await isRobloxOpen()) {
+		toast.info("Closing Roblox...",{duration: 1000})
+		await os.execCommand(`pkill -9 Roblox`)
+
+		await sleep(2000)
+
+		toast.info("Opening Roblox...",{duration: 1000})
+		await os.execCommand("open /Applications/Roblox.app",{background: true})
+
+		await sleep(1000);
+
+		toast.info("Terminating all processes...",{duration: 1000})
+		const result = await os.execCommand('ps aux | grep -i roblox | grep -v grep');
+        const processes = result.stdOut.split('\n').filter(line => line.includes('roblox'));
+		for (const proc of processes) {
+            const columns = proc.trim().split(/\s+/);
+            const pid = columns[1];
+            console.log(`Terminating Roblox Process (PID: ${pid})`);
+
+            try {
+                await os.execCommand(`kill -9 ${pid}`);
+            } catch (err) {
+                console.error(`Error terminating process ${pid}: ${err}`);
+				toast.error(`Error terminating process ${pid}: ${err}`)
+            }
+        }
+	}
+	// if (!(await isRobloxOpen())) {
+	// 	toast.info("Closing Roblox...", { duration: 1000 });
+	// 	await os.execCommand(`pkill -9 Roblox`);
+
+	// 	await sleep(1000);
+
+	// 	toast.info("Opening Roblox...", { duration: 1000 });
+	// 	const proc = await os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer");
+	// 	robloxProcessIds.push(proc.id);
+	// }
 }
