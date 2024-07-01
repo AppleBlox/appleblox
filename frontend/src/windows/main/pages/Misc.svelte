@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SettingsPanel } from "@/types/settings";
 	import Panel from "./Settings/Panel.svelte";
-	import { saveSettings } from "../ts/settings";
+	import { dataPath, saveSettings } from "../ts/settings";
 	import { toast } from "svelte-sonner";
 	import { enableMultiInstance, isRobloxOpen, parseFFlags } from "../ts/roblox";
 	import { events, filesystem, os } from "@neutralinojs/lib";
@@ -108,7 +108,7 @@
 				toast.success("Console redirection enabled", { duration: 1000 });
 				break;
 			case "open_logs":
-				const logPath = path.join(window.NL_PATH,"neutralinojs.log")
+				const logPath = path.join(path.dirname(await dataPath()),"appleblox.log")
 				if (!await pathExists(logPath)) {
 					toast.error("The logs file doesn't seem to exist.")
 					return;

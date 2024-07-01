@@ -18,7 +18,7 @@
   ],
   "exportAuthInfo": false,
   "logging": {
-    "writeToLogFile": true,
+    "writeToLogFile": false,
     "enabled": true
   },
   "tokenSecurity": "none",

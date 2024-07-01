@@ -1,8 +1,7 @@
-// This serves the purpose of redirecting every console logs to the neutralinojs.log file for debugging on the users' end.
-
-import { debug } from "@neutralinojs/lib";
-
-let isRedirectionEnabled = false;
+import { filesystem, os } from "@neutralinojs/lib";
+import path from "path-browserify";
+import { dataPath } from "./settings";
+import { pathExists } from "./utils";
 
 function formatConsoleLog(...args: any[]): string {
 	return args
@@ -43,16 +42,27 @@ function getCircularReplacer() {
 	};
 }
 
+async function appendLog(message: string) {
+	try {
+	    const appleBloxDir = path.dirname(await dataPath());
+		await filesystem.appendFile(path.join(appleBloxDir,"appleblox.log"), message + "\n");
+	} catch (err) {
+		console.error("Failed to write log to file", err);
+	}
+}
+
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
 const originalConsoleInfo = console.info;
 const originalConsoleDebug = console.debug;
 
+let isRedirectionEnabled = true;
+
 console.log = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		debug.log(formattedMessage);
+		appendLog(formattedMessage);
 	}
 	originalConsoleLog.apply(console, args);
 };
@@ -60,7 +70,7 @@ console.log = (...args: any[]) => {
 console.error = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		debug.log(formattedMessage);
+		appendLog(formattedMessage);
 	}
 	originalConsoleError.apply(console, args);
 };
@@ -68,7 +78,7 @@ console.error = (...args: any[]) => {
 console.warn = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		debug.log(formattedMessage);
+		appendLog(formattedMessage);
 	}
 	originalConsoleWarn.apply(console, args);
 };
@@ -76,7 +86,7 @@ console.warn = (...args: any[]) => {
 console.info = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		debug.log(formattedMessage);
+		appendLog(formattedMessage);
 	}
 	originalConsoleInfo.apply(console, args);
 };
@@ -84,12 +94,16 @@ console.info = (...args: any[]) => {
 console.debug = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		debug.log(formattedMessage);
+		appendLog(formattedMessage);
 	}
 	originalConsoleDebug.apply(console, args);
 };
 
-export function enableConsoleRedirection() {
+export async function enableConsoleRedirection() {
+	const appleBloxDir = path.dirname(await dataPath());
+	if (!pathExists(appleBloxDir)) {
+		await filesystem.createDirectory(appleBloxDir);
+	}
 	isRedirectionEnabled = true;
 }
 
