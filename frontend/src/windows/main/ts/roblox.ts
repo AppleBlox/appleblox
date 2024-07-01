@@ -35,20 +35,20 @@ export async function parseFFlags(preset = false): Promise<Object> {
 	const appPath = await dataPath();
 	let fflagsJson: { [key: string]: string | number } = {};
 	if (preset) {
-		if (!await pathExists(path.join(appPath,"fastflags.neustorage"))) {
-			return {}
+		if (!(await pathExists(path.join(appPath, "fastflags.neustorage")))) {
+			return {};
 		}
 		const neuPath = path.join(appPath, "fastflags.neustorage");
 		const ohioFinalBoss = JSON.parse(await filesystem.readFile(neuPath));
 		// i know this isn't efficient, but i didn't want to re-write the fastlfags saving system.
-        // in the future, i may change this to a dynamic system.
+		// in the future, i may change this to a dynamic system.
 		for (const name of Object.keys(ohioFinalBoss.presets)) {
-            const data = ohioFinalBoss.presets[name]
-            console.log(name,data)
+			const data = ohioFinalBoss.presets[name];
+			console.log(name, data);
 			switch (name) {
 				case "ff_fps":
 					if (data[0] > 60) {
-						fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";  
+						fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
 						fflagsJson["FFlagDebugGraphicsPreferVulkan"] = "true";
 					}
 					fflagsJson["DFIntTaskSchedulerTargetFps"] = data[0];
@@ -80,31 +80,31 @@ export async function parseFFlags(preset = false): Promise<Object> {
 							break;
 						case "vulkan":
 							fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
-						    fflagsJson["FFlagDebugGraphicsPreferVulkan"] = "true";
-                            break;
+							fflagsJson["FFlagDebugGraphicsPreferVulkan"] = "true";
+							break;
 					}
-                    break;
-                case "ff_gui":
-                    if (data.length < 1) break;
-                    fflagsJson["DFIntCanHideGuiGroupId"] = data
-                    break;
-                case "ff_display":
-                    if (data) {
-                        fflagsJson["DFIntDebugFRMQualityLevelOverride"] = 1
-                    };
-                    break;
-                case "ff_graphics":
-                    if (data) {
-                        fflagsJson["FFlagCommitToGraphicsQualityFix"] = "true"
-                        fflagsJson["FFlagFixGraphicsQuality"] = "true"
-                    }
-                    break;
+					break;
+				case "ff_gui":
+					if (data.length < 1) break;
+					fflagsJson["DFIntCanHideGuiGroupId"] = data;
+					break;
+				case "ff_display":
+					if (data) {
+						fflagsJson["DFIntDebugFRMQualityLevelOverride"] = 1;
+					}
+					break;
+				case "ff_graphics":
+					if (data) {
+						fflagsJson["FFlagCommitToGraphicsQualityFix"] = "true";
+						fflagsJson["FFlagFixGraphicsQuality"] = "true";
+					}
+					break;
 			}
 		}
 		return fflagsJson;
 	} else {
-		if (!await pathExists(path.join(appPath,"fflags.neustorage"))) {
-			return {}
+		if (!(await pathExists(path.join(appPath, "fflags.neustorage")))) {
+			return {};
 		}
 		const neuPath = path.join(appPath, "fflags.neustorage");
 		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(
@@ -122,40 +122,41 @@ export async function parseFFlags(preset = false): Promise<Object> {
 export async function enableMultiInstance() {
 	if (!(await hasRoblox())) return;
 	if (await isRobloxOpen()) {
-		toast.info("Closing Roblox...",{duration: 1000})
-		await os.execCommand(`pkill -9 Roblox`)
+		toast.info("Closing Roblox...", { duration: 1000 });
+		await os.execCommand(`pkill -9 Roblox`);
 
-		await sleep(2000)
-
-		toast.info("Opening Roblox...",{duration: 1000})
-		await os.execCommand("open /Applications/Roblox.app",{background: true})
-
-		await sleep(1000);
-
-		toast.info("Terminating all processes...",{duration: 1000})
-		const result = await os.execCommand('ps aux | grep -i roblox | grep -v grep');
-        const processes = result.stdOut.split('\n').filter(line => line.includes('roblox'));
-		for (const proc of processes) {
-            const columns = proc.trim().split(/\s+/);
-            const pid = columns[1];
-            console.log(`Terminating Roblox Process (PID: ${pid})`);
-
-            try {
-                await os.execCommand(`kill -9 ${pid}`);
-            } catch (err) {
-                console.error(`Error terminating process ${pid}: ${err}`);
-				toast.error(`Error terminating process ${pid}: ${err}`)
-            }
-        }
+		await sleep(2000);
 	}
-	// if (!(await isRobloxOpen())) {
-	// 	toast.info("Closing Roblox...", { duration: 1000 });
-	// 	await os.execCommand(`pkill -9 Roblox`);
 
-	// 	await sleep(1000);
+	toast.info("Opening Roblox...", { duration: 1000 });
+	await os.execCommand("open /Applications/Roblox.app", { background: true });
 
-	// 	toast.info("Opening Roblox...", { duration: 1000 });
-	// 	const proc = await os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer");
-	// 	robloxProcessIds.push(proc.id);
-	// }
+	await sleep(1000);
+
+	toast.info("Terminating all processes...", { duration: 1000 });
+	const result = await os.execCommand("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs");
+	const processes = result.stdOut.trim().split(" ")
+	for (const proc of processes) {
+		console.log(`Terminating Roblox Process (PID: ${proc})`);
+
+		try {
+			const cmd = await os.execCommand(`kill -9 ${proc}`);
+			console.log(cmd)
+		} catch (err) {
+			console.error(`Error terminating process ${proc}: ${err}`);
+			toast.error(`Error terminating process ${proc}: ${err}`);
+		}
+	}
+	
+	toast.success("Multi-instance should now be working!")
 }
+// if (!(await isRobloxOpen())) {
+// 	toast.info("Closing Roblox...", { duration: 1000 });
+// 	await os.execCommand(`pkill -9 Roblox`);
+
+// 	await sleep(1000);
+
+// 	toast.info("Opening Roblox...", { duration: 1000 });
+// 	const proc = await os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer");
+// 	robloxProcessIds.push(proc.id);
+// }
