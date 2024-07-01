@@ -35,6 +35,9 @@ export async function parseFFlags(preset = false): Promise<Object> {
 	const appPath = await dataPath();
 	let fflagsJson: { [key: string]: string | number } = {};
 	if (preset) {
+		if (!await pathExists(path.join(appPath,"fastflags.neustorage"))) {
+			return {}
+		}
 		const neuPath = path.join(appPath, "fastflags.neustorage");
 		const ohioFinalBoss = JSON.parse(await filesystem.readFile(neuPath));
 		// i know this isn't efficient, but i didn't want to re-write the fastlfags saving system.
@@ -100,6 +103,9 @@ export async function parseFFlags(preset = false): Promise<Object> {
 		}
 		return fflagsJson;
 	} else {
+		if (!await pathExists(path.join(appPath,"fflags.neustorage"))) {
+			return {}
+		}
 		const neuPath = path.join(appPath, "fflags.neustorage");
 		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(
 			await filesystem.readFile(neuPath)
