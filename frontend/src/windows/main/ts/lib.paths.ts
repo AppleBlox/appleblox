@@ -1,3 +1,5 @@
+// Used to import external binaries used in dev or production mode
+
 import { getMode } from './env';
 import { join } from "path-browserify";
 
@@ -5,18 +7,30 @@ import { join } from "path-browserify";
 const LibPaths = {
 	notifications: {
 		darwin: {
-			// Starting in the lib folder
-			prod: '/lib/alerter',
-			dev: '/build/lib/MacOS/alerter',
+			prod: '/lib/alerter_ablox',
+			dev: '/build/lib/MacOS/alerter_ablox',
 		},
+	},
+	discordrpc: {
+		darwin: {
+			prod: '/lib/discordrpc_ablox',
+			dev: '/build/lib/MacOS/discordrpc_ablox',
+		},
+	},
+	process_manager: {
+		darwin: {
+			prod: "/lib/process_manager",
+			dev: "/build/lib/MacOS/process_manager"
+		}
 	}
+
 } as const;
 
 type LibPathsType = typeof LibPaths;
 
 export function libraryPath<T extends keyof LibPathsType>(libName: T): LibPathsType[T] | null {
 	if (!(libName in LibPaths)) return null;
-	// @ts-expect-error
+	// @ts-ignore
     if (!(window.NL_OS.toLowerCase() in LibPaths[libName])) return null;
 	// @ts-expect-error
 	const path = LibPaths[libName][window.NL_OS.toLowerCase()];

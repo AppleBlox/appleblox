@@ -9,9 +9,7 @@
   "nativeAllowList": [
     "events.on",
     "app.exit",
-    "debug.log",
     "os.*",
-    "storage.*",
     "filesystem.*",
     "window.*",
     "clipboard.*"
