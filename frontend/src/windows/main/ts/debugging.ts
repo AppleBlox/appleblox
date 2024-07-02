@@ -4,7 +4,7 @@ import { dataPath, loadSettings } from "./settings";
 import { pathExists } from "./utils";
 
 function formatConsoleLog(...args: any[]): string {
-	return new Date().toLocaleTimeString() + args
+	return `[${new Date().toLocaleTimeString()}] ` + args
 		.map((arg) => {
 			if (arg === null) {
 				return "null";
