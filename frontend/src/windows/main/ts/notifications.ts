@@ -1,3 +1,4 @@
+// Handles notifications in the app using the alerter binary
 import { debug, events, os, window as w } from "@neutralinojs/lib"
 import { libraryPath } from "./lib.paths";
 import { focusWindow } from "./window";

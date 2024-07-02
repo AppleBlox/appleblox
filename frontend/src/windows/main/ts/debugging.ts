@@ -1,8 +1,10 @@
-import { filesystem, os } from "@neutralinojs/lib";
+// File with debugging functions
+import { filesystem } from "@neutralinojs/lib";
 import path from "path-browserify";
 import { dataPath, loadSettings } from "./settings";
 import { pathExists } from "./utils";
 
+/** Tries to format every variable to a string */
 function formatConsoleLog(...args: any[]): string {
 	return `[${new Date().toLocaleTimeString()}] ` + args
 		.map((arg) => {
@@ -42,6 +44,7 @@ function getCircularReplacer() {
 	};
 }
 
+/** Appends a message to the log file */
 async function appendLog(message: string) {
 	try {
 		const appleBloxDir = path.dirname(await dataPath());
