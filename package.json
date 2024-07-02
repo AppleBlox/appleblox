@@ -1,6 +1,6 @@
 {
   "name": "appleblox",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MacOS roblox launcher",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {
