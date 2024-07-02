@@ -35,16 +35,15 @@ export async function parseFFlags(preset = false): Promise<Object> {
 	const appPath = await dataPath();
 	let fflagsJson: { [key: string]: string | number } = {};
 	if (preset) {
-		if (!(await pathExists(path.join(appPath, "fastflags.neustorage")))) {
+		if (!(await pathExists(path.join(appPath, "fastflags.json")))) {
 			return {};
 		}
-		const neuPath = path.join(appPath, "fastflags.neustorage");
+		const neuPath = path.join(appPath, "fastflags.json");
 		const ohioFinalBoss = JSON.parse(await filesystem.readFile(neuPath));
 		// i know this isn't efficient, but i didn't want to re-write the fastlfags saving system.
 		// in the future, i may change this to a dynamic system.
 		for (const name of Object.keys(ohioFinalBoss.presets)) {
 			const data = ohioFinalBoss.presets[name];
-			console.log(name, data);
 			switch (name) {
 				case "ff_fps":
 					if (data[0] > 60) {
@@ -103,10 +102,10 @@ export async function parseFFlags(preset = false): Promise<Object> {
 		}
 		return fflagsJson;
 	} else {
-		if (!(await pathExists(path.join(appPath, "fflags.neustorage")))) {
+		if (!(await pathExists(path.join(appPath, "fflags.json")))) {
 			return {};
 		}
-		const neuPath = path.join(appPath, "fflags.neustorage");
+		const neuPath = path.join(appPath, "fflags.json");
 		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(
 			await filesystem.readFile(neuPath)
 		);
@@ -161,13 +160,3 @@ export async function enableMultiInstance() {
 		console.error(err);
 	}
 }
-// if (!(await isRobloxOpen())) {
-// 	toast.info("Closing Roblox...", { duration: 1000 });
-// 	await os.execCommand(`pkill -9 Roblox`);
-
-// 	await sleep(1000);
-
-// 	toast.info("Opening Roblox...", { duration: 1000 });
-// 	const proc = await os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer");
-// 	robloxProcessIds.push(proc.id);
-// }

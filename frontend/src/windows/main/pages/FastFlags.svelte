@@ -1,11 +1,9 @@
 <script lang="ts">
 import type {SettingsPanel} from '@/types/settings';
 import Panel from './Settings/Panel.svelte';
-
 import {saveSettings} from '../ts/settings';
-import { os } from '@neutralinojs/lib';
 
-function settingsChanged(o: Object) {
+function settingsChanged(o: {[key: string]: any}) {
 	saveSettings('fastflags', o);
 }
 

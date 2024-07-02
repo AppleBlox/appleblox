@@ -1,4 +1,4 @@
-import { debug, storage, filesystem, os } from "@neutralinojs/lib";
+import { debug, filesystem, os } from "@neutralinojs/lib";
 import { pathExists } from "./utils";
 
 export async function dataPath(): Promise<string> {

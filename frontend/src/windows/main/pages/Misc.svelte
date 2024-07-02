@@ -3,15 +3,14 @@
 	import Panel from "./Settings/Panel.svelte";
 	import { dataPath, saveSettings } from "../ts/settings";
 	import { toast } from "svelte-sonner";
-	import { enableMultiInstance, isRobloxOpen, parseFFlags } from "../ts/roblox";
+	import { enableMultiInstance, parseFFlags } from "../ts/roblox";
 	import { events, filesystem, os } from "@neutralinojs/lib";
-	import { sleep } from "$lib/appleblox";
 	import AppIcon from "@/assets/play.icns";
 	import path from "path-browserify";
 	import { pathExists } from "../ts/utils";
 	import { disableConsoleRedirection, enableConsoleRedirection } from "../ts/debugging";
 
-	function settingsChanged(o: Object) {
+	function settingsChanged(o: {[key: string]: any}) {
 		saveSettings("misc", o);
 	}
 

@@ -19,7 +19,7 @@
 
 	const dispatch = createEventDispatcher<{ settingsChanged: Object; buttonClicked: string; switchClicked: {id: string,state:boolean} }>();
 
-	let settingsLoaded = true;
+	let settingsLoaded = false;
 	let sections: any = {};
 	for (const section of panel.sections || []) {
 		sections[section.id] = {};
