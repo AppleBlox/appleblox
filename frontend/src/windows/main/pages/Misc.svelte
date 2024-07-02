@@ -9,7 +9,7 @@
 	import AppIcon from "@/assets/play.icns";
 	import path from "path-browserify";
 	import { pathExists } from "../ts/utils";
-	import { enableConsoleRedirection } from "../ts/debugging";
+	import { disableConsoleRedirection, enableConsoleRedirection } from "../ts/debugging";
 
 	function settingsChanged(o: Object) {
 		saveSettings("misc", o);
@@ -108,12 +108,25 @@
 				toast.success("Console redirection enabled", { duration: 1000 });
 				break;
 			case "open_logs":
-				const logPath = path.join(path.dirname(await dataPath()),"appleblox.log")
-				if (!await pathExists(logPath)) {
-					toast.error("The logs file doesn't seem to exist.")
+				const logPath = path.join(path.dirname(await dataPath()), "appleblox.log");
+				if (!(await pathExists(logPath))) {
+					toast.error("The logs file doesn't seem to exist.");
 					return;
 				}
-				os.execCommand(`open "${logPath}"`).catch(console.error)
+				os.execCommand(`open "${logPath}"`).catch(console.error);
+		}
+	}
+
+	async function switchClicked(e: CustomEvent) {
+		const { id, state } = e.detail;
+		switch (id) {
+			case "redirect_console":
+				if (state) {
+					enableConsoleRedirection();
+				} else {
+					disableConsoleRedirection();
+				}
+				break;
 		}
 	}
 
@@ -196,14 +209,13 @@
 							"Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.",
 						id: "redirect_console",
 						options: {
-							type: "button",
-							style: "destructive",
+							type: "boolean",
+							state: true,
 						},
 					},
 					{
 						label: "Open logs file",
-						description:
-							"Opens the logs file in the preffered text editor.",
+						description: "Opens the logs file in the preffered text editor.",
 						id: "open_logs",
 						options: {
 							type: "button",
@@ -219,6 +231,7 @@
 <Panel
 	panel={panelOpts}
 	on:buttonClicked={buttonClicked}
+	on:switchClicked={switchClicked}
 	on:settingsChanged={(e) => {
 		settingsChanged(e.detail);
 	}}

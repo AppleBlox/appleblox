@@ -17,7 +17,7 @@
 
 	export let panel: SettingsPanel;
 
-	const dispatch = createEventDispatcher<{ settingsChanged: Object; buttonClicked: string }>();
+	const dispatch = createEventDispatcher<{ settingsChanged: Object; buttonClicked: string; switchClicked: {id: string,state:boolean} }>();
 
 	let settingsLoaded = true;
 	let sections: any = {};
@@ -56,6 +56,7 @@
 			dispatch("settingsChanged", sections);
 		}
 	}
+
 </script>
 
 {#if settingsLoaded}
@@ -98,7 +99,9 @@
 						{:else if inter.options.type == "ff_buttons_custom"}
 							<FfButtonsCustom />
 						{:else if inter.options.type === "boolean"}
-							<Switch class="ml-auto mr-4" bind:checked={sections[section.id][inter.id]} />
+							<Switch class="ml-auto mr-4" bind:checked={sections[section.id][inter.id]} on:click={()=>{
+								dispatch("switchClicked",{id: inter.id, state: sections[section.id][inter.id]})
+							}} />
 						{:else if inter.options.type === "string"}
 							<Input
 								class="dark:bg-neutral-900 bg-neutral-300 text-center border-none w-[250px] ml-auto mr-4 font-sans"
