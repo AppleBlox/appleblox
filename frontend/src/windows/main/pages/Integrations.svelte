@@ -1,12 +1,32 @@
 <script lang="ts">
 	import type { SettingsPanel } from "@/types/settings";
 	import Panel from "./Settings/Panel.svelte";
-	import { debug } from "@neutralinojs/lib";
-	import { saveSettings } from "../ts/settings";
-	import { showNotification } from "../ts/notifications";
+	import { loadSettings, saveSettings } from "../ts/settings";
+	import { createRPC, terminateRPC } from "../ts/rpc";
 
-	function settingsChanged(o: Object) {
+	async function loadRPC(settings?: { [key: string]: any }) {
+		let o = settings;
+		if (o == null) {
+			o = await loadSettings("integrations")
+			if (o == null) {
+				return;
+			}
+		}
+		if (o.rpc.rpc_activity) {
+			await createRPC({
+				details: "Browsing the menus",
+				state: "Beta",
+				large_image: "appleblox",
+				large_image_text: "AppleBlox Logo",
+			});
+		} else {
+			await terminateRPC();
+		}
+	}
+
+	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings("integrations", o);
+		loadRPC(o)
 	}
 
 	const panelOpts: SettingsPanel = {
