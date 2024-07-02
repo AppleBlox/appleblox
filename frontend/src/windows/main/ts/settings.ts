@@ -54,7 +54,7 @@ export async function saveSettings(panelId: string, data: Object): Promise<void>
 }
 
 /** Loads the data from the specified panelID */
-export async function loadSettings(panelId: string): Promise<{ [key: string]: Object } | undefined> {
+export async function loadSettings(panelId: string): Promise<{ [key: string]: any } | undefined> {
 	try {
 		const filepath = `${await dataPath()}/${panelId}.json`;
 		if (!(await pathExists(filepath))) {

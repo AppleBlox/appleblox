@@ -20,47 +20,61 @@
 
 	async function checkArgs() {
 		if (window.NL_ARGS.includes("--launch")) {
-			debug.log("[INFO] Launching Roblox from '--launch?'")
+			debug.log("Launching Roblox from '--launch?'");
 			w.hide().catch(console.error);
 			await launchRoblox();
-			setTimeout(()=>{
-				app.exit()
-			},7000)
+			setTimeout(() => {
+				app.exit();
+			}, 7000);
 		}
 	}
 	checkArgs();
 
 	async function launchRoblox() {
-		launchingRoblox = true;
-		if (!(await hasRoblox())) {
-			launchingRoblox = false;
-		}
-
-		// FFLAGS
-		launchProgess = 20;
-		if (await pathExists("/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json")) {
-			await filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
-			ltext = "Removing current ClientAppSettings...";
-		}
-		launchProgess = 40;
-		ltext = "Copying fast flags...";
-		await filesystem.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings").catch(console.error);
-		console.log(await parseFFlags(true));
-		const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
-		await filesystem.writeFile(
-			"/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json",
-			JSON.stringify(fflags)
-		);
-		launchProgess = 60;
-		setTimeout(() => {
-			os.execCommand("open /Applications/Roblox.app");
-			launchProgess = 100;
-			ltext = "Roblox Launched";
-			setTimeout(() => {
+		try {
+			console.log("Launching Roblox");
+			launchingRoblox = true;
+			if (!(await hasRoblox())) {
+				console.log("Roblox is not installed. Exiting launch process.");
 				launchingRoblox = false;
-				filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/").catch(console.error);
+			}
+
+			launchProgess = 20;
+			if (await pathExists("/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json")) {
+				console.log(
+					"Removing current ClientAppSettings.json file in /Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json"
+				);
+				await filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
+				ltext = "Removing current ClientAppSettings...";
+			}
+			launchProgess = 40;
+			ltext = "Copying fast flags...";
+			console.log("Copying fast flags");
+			await filesystem.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings");
+			console.log("Parsing saved FFlags");
+			const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
+			console.log(fflags);
+			await filesystem.writeFile(
+				"/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json",
+				JSON.stringify(fflags)
+			);
+			console.log("Wrote FFlags to /Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json");
+			launchProgess = 60;
+			setTimeout(() => {
+				os.execCommand("open /Applications/Roblox.app");
+				console.log("Opening Roblox");
+				launchProgess = 100;
+				ltext = "Roblox Launched";
+				setTimeout(() => {
+					launchingRoblox = false;
+					filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
+					console.log("Deleted /Applications/Roblox.app/Contents/MacOS/ClientSettings/");
+				}, 1000);
 			}, 1000);
-		}, 1000);
+		} catch (err) {
+			console.error("An error occured while launching Roblox");
+			console.error(err);
+		}
 	}
 
 	// Darkmode

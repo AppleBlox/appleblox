@@ -1,10 +1,10 @@
 import { filesystem, os } from "@neutralinojs/lib";
 import path from "path-browserify";
-import { dataPath } from "./settings";
+import { dataPath, loadSettings } from "./settings";
 import { pathExists } from "./utils";
 
 function formatConsoleLog(...args: any[]): string {
-	return args
+	return new Date().toLocaleTimeString() + args
 		.map((arg) => {
 			if (arg === null) {
 				return "null";
@@ -44,8 +44,8 @@ function getCircularReplacer() {
 
 async function appendLog(message: string) {
 	try {
-	    const appleBloxDir = path.dirname(await dataPath());
-		await filesystem.appendFile(path.join(appleBloxDir,"appleblox.log"), message + "\n");
+		const appleBloxDir = path.dirname(await dataPath());
+		await filesystem.appendFile(path.join(appleBloxDir, "appleblox.log"), message + "\n");
 	} catch (err) {
 		console.error("Failed to write log to file", err);
 	}
@@ -57,12 +57,18 @@ const originalConsoleWarn = console.warn;
 const originalConsoleInfo = console.info;
 const originalConsoleDebug = console.debug;
 
-let isRedirectionEnabled = true;
+let isRedirectionEnabled = false;
+(async () => {
+	const settings = await loadSettings("misc");
+	if (!settings) return;
+	console.log(settings);
+	isRedirectionEnabled = settings.advanced.redirect_console;
+})();
 
 console.log = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		appendLog(formattedMessage);
+		appendLog("[INFO] " + formattedMessage);
 	}
 	originalConsoleLog.apply(console, args);
 };
@@ -70,7 +76,7 @@ console.log = (...args: any[]) => {
 console.error = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		appendLog(formattedMessage);
+		appendLog("[ERROR] " + formattedMessage);
 	}
 	originalConsoleError.apply(console, args);
 };
@@ -78,7 +84,7 @@ console.error = (...args: any[]) => {
 console.warn = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		appendLog(formattedMessage);
+		appendLog("[WARN] " + formattedMessage);
 	}
 	originalConsoleWarn.apply(console, args);
 };
@@ -86,7 +92,7 @@ console.warn = (...args: any[]) => {
 console.info = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		appendLog(formattedMessage);
+		appendLog("[INFO] " + formattedMessage);
 	}
 	originalConsoleInfo.apply(console, args);
 };
@@ -94,7 +100,7 @@ console.info = (...args: any[]) => {
 console.debug = (...args: any[]) => {
 	if (isRedirectionEnabled) {
 		const formattedMessage = formatConsoleLog(...args);
-		appendLog(formattedMessage);
+		appendLog("[DEBUG] " + formattedMessage);
 	}
 	originalConsoleDebug.apply(console, args);
 };
@@ -105,8 +111,10 @@ export async function enableConsoleRedirection() {
 		await filesystem.createDirectory(appleBloxDir);
 	}
 	isRedirectionEnabled = true;
+	console.log("Enabled console redirection");
 }
 
 export function disableConsoleRedirection() {
 	isRedirectionEnabled = false;
+	console.log("Disabled console redirection");
 }

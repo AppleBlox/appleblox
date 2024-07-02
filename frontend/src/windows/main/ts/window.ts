@@ -1,4 +1,4 @@
-import {events, app, debug, os, window as w} from '@neutralinojs/lib';
+import {events, app, os, window as w} from '@neutralinojs/lib';
 import {getMode} from './env';
 
 import hotkeys from 'hotkeys-js';
@@ -8,7 +8,7 @@ events
 	})
 	.catch(console.error)
 	.then(() => {
-		debug.log('Attached window closer').catch(console.error);
+		console.log('App will exit when the window is closed')
 	});
 
 // Shortcuts like copy, paste, quit, etc... (they are unimplemented by default in NeuJS)

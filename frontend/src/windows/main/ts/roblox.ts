@@ -120,35 +120,46 @@ export async function parseFFlags(preset = false): Promise<Object> {
 }
 
 export async function enableMultiInstance() {
-	if (!(await hasRoblox())) return;
-	if (await isRobloxOpen()) {
-		toast.info("Closing Roblox...", { duration: 1000 });
-		await os.execCommand(`pkill -9 Roblox`);
+	try {
+		if (!(await hasRoblox())) return;
+		if (await isRobloxOpen()) {
+			toast.info("Closing Roblox...", { duration: 1000 });
+			console.log("Closing Roblox");
+			const robloxKill = await os.execCommand(`pkill -9 Roblox`);
+			console.log(robloxKill)
 
-		await sleep(2000);
-	}
-
-	toast.info("Opening Roblox...", { duration: 1000 });
-	await os.execCommand("open /Applications/Roblox.app", { background: true });
-
-	await sleep(1000);
-
-	toast.info("Terminating all processes...", { duration: 1000 });
-	const result = await os.execCommand("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs");
-	const processes = result.stdOut.trim().split(" ")
-	for (const proc of processes) {
-		console.log(`Terminating Roblox Process (PID: ${proc})`);
-
-		try {
-			const cmd = await os.execCommand(`kill -9 ${proc}`);
-			console.log(cmd)
-		} catch (err) {
-			console.error(`Error terminating process ${proc}: ${err}`);
-			toast.error(`Error terminating process ${proc}: ${err}`);
+			await sleep(2000);
 		}
+
+		toast.info("Opening Roblox...", { duration: 1000 });
+		console.log("Opening Roblox")
+		await os.execCommand("open /Applications/Roblox.app", { background: true });
+
+		await sleep(1000);
+
+		toast.info("Terminating all processes...", { duration: 1000 });
+		console.log("Terminating all Roblox processes")
+		const result = await os.execCommand("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs");
+		console.log(result)
+		const processes = result.stdOut.trim().split(" ");
+		for (const proc of processes) {
+			console.log(`Terminating Roblox Process (PID: ${proc})`);
+
+			try {
+				const cmd = await os.execCommand(`kill -9 ${proc}`);
+				console.log(cmd);
+			} catch (err) {
+				console.error(`Error terminating process ${proc}: ${err}`);
+				toast.error(`Error terminating process ${proc}: ${err}`);
+			}
+		}
+
+		toast.success("Multi-instance should now be working!");
+	} catch (err) {
+		toast.error("An error occured while enabling MultiInstance");
+		console.error("An error occured while enabling MultiInstance");
+		console.error(err);
 	}
-	
-	toast.success("Multi-instance should now be working!")
 }
 // if (!(await isRobloxOpen())) {
 // 	toast.info("Closing Roblox...", { duration: 1000 });

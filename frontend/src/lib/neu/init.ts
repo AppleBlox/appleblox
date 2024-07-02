@@ -10,7 +10,7 @@ if (import.meta.env.DEV) {
 		window.NL_PORT = port;
 		window.NL_TOKEN = accessToken;
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		console.error('Auth file not found, native API calls will not work.');
 	}
 }
