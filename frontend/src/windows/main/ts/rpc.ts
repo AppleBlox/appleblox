@@ -60,10 +60,12 @@ export async function createRPC(opts: createRPCOpts) {
 		}
 	}
 	const cmd = `${libraryPath("discordrpc")} -c ${APPLICATION_ID} ${args.join(" ")}`;
-	const proc = await os.execCommand(cmd,{background: true});
+	const proc = await os.spawnProcess(cmd);
 	console.log(`[RPC] Start with: ${cmd}`)
 }
 
 export async function terminateRPC() {
-	await os.execCommand(`ps aux | grep -i discordrpc_ablox | grep -v grep | awk '{print $2}' | xargs kill -9`)
+	for (const proc of (await os.execCommand(`pgrep -f "discordrpc_ablox"`)).stdOut.split("\n")) {
+		await os.execCommand(`kill -9 ${proc}`)
+	}
 }

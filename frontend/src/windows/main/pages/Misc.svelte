@@ -121,6 +121,7 @@
 		switch (id) {
 			case "redirect_console":
 				if (state) {
+					console.log(state)
 					enableConsoleRedirection();
 				} else {
 					disableConsoleRedirection();

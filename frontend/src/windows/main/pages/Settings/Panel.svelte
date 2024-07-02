@@ -100,7 +100,7 @@
 							<FfButtonsCustom />
 						{:else if inter.options.type === "boolean"}
 							<Switch class="ml-auto mr-4" bind:checked={sections[section.id][inter.id]} on:click={()=>{
-								dispatch("switchClicked",{id: inter.id, state: sections[section.id][inter.id]})
+								dispatch("switchClicked",{id: inter.id, state: !sections[section.id][inter.id]})
 							}} />
 						{:else if inter.options.type === "string"}
 							<Input
