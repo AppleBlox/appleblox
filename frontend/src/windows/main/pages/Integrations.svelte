@@ -2,17 +2,17 @@
 	import type { SettingsPanel } from "@/types/settings";
 	import Panel from "./Settings/Panel.svelte";
 	import { loadSettings, saveSettings } from "../ts/settings";
-	import { createRPC, terminateRPC } from "../ts/rpc";
+	import { createRPC, getRPCAgentState, terminateRPC } from "../ts/rpc";
 
 	async function loadRPC(settings?: { [key: string]: any }) {
-		let o = settings;
-		if (o == null) {
-			o = await loadSettings("integrations")
-			if (o == null) {
+		if (settings == null) {
+			settings = await loadSettings("integrations")
+			if (settings == null) {
 				return;
 			}
 		}
-		if (o.rpc.rpc_activity) {
+		if (settings.rpc.enable_rpc) {
+			if (await getRPCAgentState()) return;
 			await createRPC({
 				details: "Browsing the menus",
 				state: "Beta",
@@ -74,6 +74,15 @@
 				description: "Show information about what you're playing on Discord",
 				id: "rpc",
 				interactables: [
+					{
+						label: "Enable RPC",
+						description: "Whether to enable or disable the Discord RPC",
+						id: "enable_rpc",
+						options: {
+							type: "boolean",
+							state: true,
+						},
+					},
 					{
 						label: "Show game activity",
 						description: "Shows the game you're playing on your profile",

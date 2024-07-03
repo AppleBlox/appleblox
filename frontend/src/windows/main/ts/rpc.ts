@@ -64,8 +64,14 @@ export async function createRPC(opts: createRPCOpts) {
 	console.log(`[RPC] Start with: ${cmd}`)
 }
 
+/** Kills the RPC Agent */
 export async function terminateRPC() {
 	for (const proc of (await os.execCommand(`pgrep -f "discordrpc_ablox"`)).stdOut.split("\n")) {
 		await os.execCommand(`kill -9 ${proc}`)
 	}
+}
+
+/** Returns true if the agent is active and false if not */
+export async function getRPCAgentState() {
+	return (await os.execCommand('pgrep -f "discordrpc_ablox"')).stdOut.split("\n").length > 1
 }
