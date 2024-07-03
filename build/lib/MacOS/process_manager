@@ -1,42 +1,25 @@
 #!/bin/bash
 
-if [[ "$1" == "--dev" ]]; then
-    PROCESS_NAME="neutralino"
-else
-    PROCESS_NAME="AppleBlox.app"
-fi
-
-check_process_running() {
-    ps aux | grep -i "$PROCESS_NAME" | grep -v grep | awk '{print $2}' | xargs
-}
-
-# Main function
-main() {
-    sleep 1
+monitor_input() {
+    read -t 2 -n 1 input
     
-    while true; do
-        if [ -n "$(check_process_running)" ]; then
-            echo "Process '$PROCESS_NAME' is running."
-            sleep 5
-        else
-            echo "Process '$PROCESS_NAME' has stopped."
-            ps aux | grep -i '_ablox' | grep -v grep | awk '{print $2}' | xargs kill -9
-            
-            echo "Killed all '_ablox' processes."
-            break
-        fi
-    done
+    if [ $? -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
-file_path="$HOME/Library/Application Support/AppleBlox/process_manager.log"
-if [ -f "$file_path" ]; then
-    line_count=$(wc -l < "$file_path")
-    if [ "$line_count" -gt 100 ]; then
-        rm "$file_path"
-        echo "File deleted as it had more than 100 lines."
+while true; do
+    # Check if there has been any input for the last 2 seconds
+    if monitor_input; then
+        # Reset the read timer if there was input
+        continue
     fi
-else
-    touch "$file_path"
-fi
+    
+    # No input for 2 seconds, kill processes ending with "_ablox"
+    pkill -f _ablox
+    break;
+done
 
-main "$@" >> "$file_path" 2>&1
+exit 0
