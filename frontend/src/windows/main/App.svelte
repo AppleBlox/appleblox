@@ -7,11 +7,11 @@
 	import { Toaster } from "$lib/components/ui/sonner";
 	import { Progress } from "$lib/components/ui/progress";
 	import { hasRoblox, parseFFlags } from "./ts/roblox";
-	import Misc from "./pages/Misc.svelte";
-	import { toast } from "svelte-sonner";
-	import { app, debug, filesystem, os, window as w } from "@neutralinojs/lib";
+	import Misc from "./pages/Misc.svelte";;
+	import { app, debug, os, window as w } from "@neutralinojs/lib";
 	import { ModeWatcher, setMode } from "mode-watcher";
 	import { pathExists } from "./ts/utils";
+	import shellFS from "./ts/fs";
 
 	let currentPage: string;
 	let launchingRoblox = false;
@@ -44,17 +44,17 @@
 				console.log(
 					"Removing current ClientAppSettings.json file in /Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json"
 				);
-				await filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
+				await shellFS.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/")
 				ltext = "Removing current ClientAppSettings...";
 			}
 			launchProgess = 40;
 			ltext = "Copying fast flags...";
 			console.log("Copying fast flags");
-			await filesystem.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings");
+			await shellFS.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings");
 			console.log("Parsing saved FFlags");
 			const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
 			console.log(fflags);
-			await filesystem.writeFile(
+			await shellFS.writeFile(
 				"/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json",
 				JSON.stringify(fflags)
 			);
@@ -67,7 +67,7 @@
 				ltext = "Roblox Launched";
 				setTimeout(() => {
 					launchingRoblox = false;
-					filesystem.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
+					shellFS.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
 					console.log("Deleted /Applications/Roblox.app/Contents/MacOS/ClientSettings/");
 				}, 1000);
 			}, 1000);
