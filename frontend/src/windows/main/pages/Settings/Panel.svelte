@@ -17,7 +17,11 @@
 
 	export let panel: SettingsPanel;
 
-	const dispatch = createEventDispatcher<{ settingsChanged: Object; buttonClicked: string; switchClicked: {id: string,state:boolean} }>();
+	const dispatch = createEventDispatcher<{
+		settingsChanged: Object;
+		buttonClicked: string;
+		switchClicked: { id: string; state: boolean };
+	}>();
 
 	let settingsLoaded = false;
 	let sections: any = {};
@@ -56,7 +60,6 @@
 			dispatch("settingsChanged", sections);
 		}
 	}
-
 </script>
 
 {#if settingsLoaded}
@@ -99,9 +102,13 @@
 						{:else if inter.options.type == "ff_buttons_custom"}
 							<FfButtonsCustom />
 						{:else if inter.options.type === "boolean"}
-							<Switch class="ml-auto mr-4" bind:checked={sections[section.id][inter.id]} on:click={()=>{
-								dispatch("switchClicked",{id: inter.id, state: !sections[section.id][inter.id]})
-							}} />
+							<Switch
+								class="ml-auto mr-4"
+								bind:checked={sections[section.id][inter.id]}
+								on:click={() => {
+									dispatch("switchClicked", { id: inter.id, state: !sections[section.id][inter.id] });
+								}}
+							/>
 						{:else if inter.options.type === "string"}
 							<Input
 								class="dark:bg-neutral-900 bg-neutral-300 text-center border-none w-[250px] ml-auto mr-4 font-sans"
@@ -113,7 +120,9 @@
 								<Select.Trigger class="w-[180px] dark:bg-neutral-900 bg-neutral-300 ml-auto mr-4 border-none">
 									<Select.Value class="text-black dark:text-white" placeholder={inter.options.default.label} />
 								</Select.Trigger>
-								<Select.Content class="dark:bg-gray-900 bg-neutral-200 grayscale border-none dark:text-white text-black">
+								<Select.Content
+									class="dark:bg-gray-900 bg-neutral-200 grayscale border-none dark:text-white text-black"
+								>
 									<Select.Group>
 										{#each inter.options.list || [] as item}
 											<Select.Item value={item} label={item.label}>{item.label}</Select.Item>

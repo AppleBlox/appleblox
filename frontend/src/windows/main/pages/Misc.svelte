@@ -4,13 +4,15 @@
 	import { dataPath, saveSettings } from "../ts/settings";
 	import { toast } from "svelte-sonner";
 	import { enableMultiInstance, parseFFlags } from "../ts/roblox";
-	import { events, filesystem, os } from "@neutralinojs/lib";
+	import { filesystem, os } from "@neutralinojs/lib";
 	import AppIcon from "@/assets/play.icns";
 	import path from "path-browserify";
 	import { pathExists } from "../ts/utils";
-	import { disableConsoleRedirection, enableConsoleRedirection } from "../ts/debugging";
+	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from "../ts/debugging";
+	import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+	import { Button } from "$lib/components/ui/button/index.js";
 
-	function settingsChanged(o: {[key: string]: any}) {
+	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings("misc", o);
 	}
 
@@ -19,6 +21,8 @@
 		const blob = await response.blob();
 		return blob;
 	}
+
+	let clearLogsPopup = false;
 
 	async function buttonClicked(e: CustomEvent) {
 		const id = e.detail;
@@ -113,6 +117,10 @@
 					return;
 				}
 				os.execCommand(`open "${logPath}"`).catch(console.error);
+				break;
+			case "clear_logs":
+				clearLogsPopup = true;
+				break;
 		}
 	}
 
@@ -121,7 +129,6 @@
 		switch (id) {
 			case "redirect_console":
 				if (state) {
-					console.log(state)
 					enableConsoleRedirection();
 				} else {
 					disableConsoleRedirection();
@@ -222,11 +229,44 @@
 							style: "outline",
 						},
 					},
+					{
+						label: "Clear logs",
+						description: "Clears the logs file",
+						id: "clear_logs",
+						options: {
+							type: "button",
+							style: "destructive",
+						},
+					},
 				],
 			},
 		],
 	};
 </script>
+
+<AlertDialog.Root bind:open={clearLogsPopup}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+			<AlertDialog.Description>
+				This action cannot be undone. This will permanently delete your logs.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action
+				on:click={() => {
+					clearLogs().then(()=>{
+						toast.success("The logs have been cleared")
+					}).
+					catch(() => {
+						toast.error("An error occured while clearing the logs");
+					});
+				}}>Continue</AlertDialog.Action
+			>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 
 <Panel
 	panel={panelOpts}

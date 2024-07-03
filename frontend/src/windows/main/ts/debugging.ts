@@ -6,29 +6,32 @@ import { pathExists } from "./utils";
 
 /** Tries to format every variable to a string */
 function formatConsoleLog(...args: any[]): string {
-	return `[${new Date().toLocaleTimeString()}] ` + args
-		.map((arg) => {
-			if (arg === null) {
-				return "null";
-			} else if (arg === undefined) {
-				return "undefined";
-			} else if (typeof arg === "string") {
-				return arg;
-			} else if (typeof arg === "number") {
-				return arg.toString();
-			} else if (typeof arg === "boolean") {
-				return arg.toString();
-			} else if (Array.isArray(arg)) {
-				return JSON.stringify(arg);
-			} else if (typeof arg === "object") {
-				return JSON.stringify(arg, getCircularReplacer());
-			} else if (typeof arg === "function") {
-				return arg.toString();
-			} else {
-				return String(arg);
-			}
-		})
-		.join(" ");
+	return (
+		`[${new Date().toLocaleTimeString()}] ` +
+		args
+			.map((arg) => {
+				if (arg === null) {
+					return "null";
+				} else if (arg === undefined) {
+					return "undefined";
+				} else if (typeof arg === "string") {
+					return arg;
+				} else if (typeof arg === "number") {
+					return arg.toString();
+				} else if (typeof arg === "boolean") {
+					return arg.toString();
+				} else if (Array.isArray(arg)) {
+					return JSON.stringify(arg);
+				} else if (typeof arg === "object") {
+					return JSON.stringify(arg, getCircularReplacer());
+				} else if (typeof arg === "function") {
+					return arg.toString();
+				} else {
+					return String(arg);
+				}
+			})
+			.join(" ")
+	);
 }
 
 function getCircularReplacer() {
@@ -42,6 +45,17 @@ function getCircularReplacer() {
 		}
 		return value;
 	};
+}
+
+/** Clears the logs */
+export async function clearLogs() {
+	try {
+		const appleBloxDir = path.dirname(await dataPath());
+		await filesystem.writeFile(path.join(appleBloxDir, "appleblox.log"), "");
+	} catch (err) {
+		console.error("Failed to clear the logs:");
+		console.error(err);
+	}
 }
 
 /** Appends a message to the log file */
