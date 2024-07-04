@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
     - name: Checkout Repository
@@ -20,6 +20,9 @@ jobs:
 
     - name: Install Dependencies
       run: npm ci
+
+    - name: Install create-dmg
+      run: brew install create-dmg
 
     - name: Build and package app
       run: npm run build:release
