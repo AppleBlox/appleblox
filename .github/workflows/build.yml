@@ -21,36 +21,27 @@ jobs:
     - name: Install Dependencies
       run: npm ci
 
-    - name: Build app
-      run: npm run build
+    - name: Build and package app
+      run: npm run build:release
 
     - name: Get version from package.json
       id: get_version
       run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_ENV
 
-    - name: Zip artifacts
-      run: |
-        cd dist
-        for dir in */; do
-          zip -r "${dir%/}_${VERSION}.zip" "$dir"
-        done
-      env:
-        VERSION: ${{ env.VERSION }}
-
     - name: Upload (mac_x64)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}_x64_${{ env.VERSION }}
-        path: dist/mac_x64_${{ env.VERSION }}.zip
+        name:  dist/AppleBlox-${{ env.VERSION }}_x64.dmg
+        path:  dist/AppleBlox-${{ env.VERSION }}_x64.dmg
 
     - name: Upload (mac_universal)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}_universal_${{ env.VERSION }}
-        path: dist/mac_universal_${{ env.VERSION }}.zip
+        name: AppleBlox-${{ env.VERSION }}_universal.dmg
+        path:  dist/AppleBlox-${{ env.VERSION }}_universal.dmg
 
     - name: Upload (mac_arm64)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}_arm64_${{ env.VERSION }}
-        path: dist/mac_arm64_${{ env.VERSION }}.zip
+        name: AppleBlox-${{ env.VERSION }}_arm64.dmg
+        path: dist/AppleBlox-${{ env.VERSION }}_arm64.dmg

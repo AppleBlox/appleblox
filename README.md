@@ -24,9 +24,13 @@ If you're worried that those could be modified by me or another contributor to i
 
 ## Developpement
 
-To setup the app on your machine, clone this repo and run `npm install`.
+To setup the app on your machine, clone this repo and run `npm install`. You will also need to install some packages with the command: `brew install create-dmg`.
+
 To start the **dev environnement**, run `npm run dev`.
-To **build and package the app**, run `npm run build`.
+
+To **build**, run `npm run build`. (If you don't want to create dmgs)
+
+To **build and package the app**, run `npm run build:release`.
 
 The app is made with [Svelte](https://svelte.dev) (Frontend) and [NeutralinoJS](https://neutralino.js.org) (Backend).
 If you haven't heard about NeutralinoJS, it is a lightweight alternative coded in **c++** to frameworks like Electron or NW.JS. It is still growing, but is stable enough to be used on one platform. You can learn more about it on https://neutralino.js.org/docs.
