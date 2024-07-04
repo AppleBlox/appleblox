@@ -34,7 +34,7 @@ jobs:
     - name: Upload (mac_x64)
       uses: actions/upload-artifact@v4
       with:
-        name:  dist/AppleBlox-${{ env.VERSION }}_x64.dmg
+        name:  AppleBlox-${{ env.VERSION }}_x64.dmg
         path:  dist/AppleBlox-${{ env.VERSION }}_x64.dmg
 
     - name: Upload (mac_universal)
