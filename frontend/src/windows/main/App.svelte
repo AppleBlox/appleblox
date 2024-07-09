@@ -6,95 +6,92 @@
 	import FastFlags from "./pages/FastFlags.svelte";
 	import { Toaster } from "$lib/components/ui/sonner";
 	import { Progress } from "$lib/components/ui/progress";
-	import { hasRoblox, parseFFlags } from "./ts/roblox";
-	import Misc from "./pages/Misc.svelte";;
-	import { app, debug, os, window as w } from "@neutralinojs/lib";
+	import Misc from "./pages/Misc.svelte";
+	import { app, os, window as w } from "@neutralinojs/lib";
 	import { ModeWatcher, setMode } from "mode-watcher";
-	import { pathExists } from "./ts/utils";
-	import shellFS from "./ts/fs";
+	import Credits from "./pages/Credits.svelte";
+	import { launchRoblox } from "./ts/roblox/launch";
+	import { loadSettings } from "./ts/settings";
+	import Updater from "./Updater.svelte";
 
 	let currentPage: string;
-	let launchingRoblox = false;
-	let launchProgess = 1;
-	let ltext = "Launching...";
 
+	let launchInfo = {
+		launching: false,
+		progress: 1,
+		text: "Launching...",
+	};
+
+	// Checks if the app is opened with the --launch argument
 	async function checkArgs() {
 		if (window.NL_ARGS.includes("--launch")) {
-			debug.log("Launching Roblox from '--launch?'");
-			w.hide().catch(console.error);
-			await launchRoblox();
-			setTimeout(() => {
-				app.exit();
-			}, 7000);
+			console.debug("Launching Roblox from '--launch?'");
+
+			// Here we check if the Discord RPC options is enabled. If it is, then don't close the app.
+			const integrationSettings = await loadSettings("integrations");
+			if (integrationSettings && integrationSettings.rpc.enable_rpc) {
+				console.log("Not closing the app because RPC is enabled");
+
+				// Defines which values should be modified during the launch phase (the loading progress, text, etc...)
+				await launchRoblox(
+					(value) => (launchInfo.launching = value),
+					(value) => (launchInfo.progress = value),
+					(value) => (launchInfo.text = value)
+				);
+			} else {
+				w.hide().catch(console.error);
+				await launchRoblox(
+					(value) => (launchInfo.launching = value),
+					(value) => (launchInfo.progress = value),
+					(value) => (launchInfo.text = value)
+				);
+				await app.exit();
+			}
 		}
 	}
 	checkArgs();
 
-	async function launchRoblox() {
-		try {
-			console.log("Launching Roblox");
-			launchingRoblox = true;
-			if (!(await hasRoblox())) {
-				console.log("Roblox is not installed. Exiting launch process.");
-				launchingRoblox = false;
-			}
-
-			launchProgess = 20;
-			if (await pathExists("/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json")) {
-				console.log(
-					"Removing current ClientAppSettings.json file in /Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json"
-				);
-				await shellFS.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/")
-				ltext = "Removing current ClientAppSettings...";
-			}
-			launchProgess = 40;
-			ltext = "Copying fast flags...";
-			console.log("Copying fast flags");
-			await shellFS.createDirectory("/Applications/Roblox.app/Contents/MacOS/ClientSettings");
-			console.log("Parsing saved FFlags");
-			const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
-			console.log(fflags);
-			await shellFS.writeFile(
-				"/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json",
-				JSON.stringify(fflags)
-			);
-			console.log("Wrote FFlags to /Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json");
-			launchProgess = 60;
-			setTimeout(() => {
-				os.execCommand("open /Applications/Roblox.app");
-				console.log("Opening Roblox");
-				launchProgess = 100;
-				ltext = "Roblox Launched";
-				setTimeout(() => {
-					launchingRoblox = false;
-					shellFS.remove("/Applications/Roblox.app/Contents/MacOS/ClientSettings/");
-					console.log("Deleted /Applications/Roblox.app/Contents/MacOS/ClientSettings/");
-				}, 1000);
-			}, 1000);
-		} catch (err) {
-			console.error("An error occured while launching Roblox");
-			console.error(err);
-		}
-	}
-
-	// Darkmode
+	// Sets the theme to the system's mode
 	setMode("system");
+
+	// Handle app links
+	document.addEventListener('click', (event)=>{
+        if (!event.target) return;
+        // @ts-expect-error
+        if (event.target.tagName === 'A') {
+            // Prevent default behavior (opening link)
+            event.preventDefault();
+
+            // Get the URL from the clicked link
+            // @ts-expect-error
+            const url = event.target.href;
+            console.log(`Opening link: ${url}`);
+
+            // Example: Open link in a new tab
+            os.open(url);
+        }
+    });
 </script>
 
 <main>
+	<Updater />
 	<ModeWatcher track={true} />
 	<Toaster richColors />
 	<!-- Content div -->
-	{#if launchingRoblox}
+	{#if launchInfo.launching}
 		<div class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col">
-			<p class="font-bold text-2xl">{ltext}</p>
-			<Progress max={100} value={launchProgess} class="w-[60%] bg-neutral-700" />
+			<p class="font-bold text-2xl">{launchInfo.text}</p>
+			<Progress max={100} value={launchInfo.progress} class="w-[60%] bg-neutral-700" />
 		</div>
 	{:else}
 		<Sidebar
 			bind:currentPage
-			on:launchRoblox={() => {
-				launchRoblox();
+			on:launchRoblox={async () => {
+				await launchRoblox(
+					(value) => (launchInfo.launching = value),
+					(value) => (launchInfo.progress = value),
+					(value) => (launchInfo.text = value)
+				);
 			}}
 			id="sidebar"
 		/>
@@ -110,6 +107,10 @@
 			{:else if currentPage === "misc"}
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Misc />
+				</div>
+			{:else if currentPage === "credits"}
+				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
+					<Credits />
 				</div>
 			{:else}
 				<div class="flex items-center m-32 space-x-4 opacity-30">

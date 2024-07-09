@@ -1,65 +1,58 @@
 import "./app.css";
 import "./ts/window";
+import "./ts/roblox/path"
 import "./ts/debugging";
 import App from "./App.svelte";
 import { events, init, os } from "@neutralinojs/lib";
 import { version } from "../../../../package.json";
-import { createRPC, getRPCAgentState } from "./ts/rpc";
-import { libraryPath } from "./ts/lib.paths";
-import { getMode } from "./ts/env";
+import { DiscordRPC } from "./ts/rpc";
+import { libraryPath } from "./ts/libraries";
 import { loadSettings } from "./ts/settings";
+import { AbloxWatchdog } from "./ts/watchdog";
+import { sleep } from "$lib/appleblox";
 
+// Initialize NeutralinoJS
 init();
 
+// Store the RPC instance
+let rpc: DiscordRPC | null = null;
+
+// When NeutralinoJS is ready:
 events.on("ready", async () => {
 	setTimeout(async () => {
-		console.log(
-			`
-      ===========
-      AppleBlox v${version}
-      Current Time: ${new Date().toLocaleString()}
-      NeutralinoJS Version: ${window.NL_VERSION}
-      ${(await os.execCommand("uname -a")).stdOut}===========
-      `.replace(/  +/g, "")
-		);
+		console.log("\n");
+		console.log("===========");
+		console.log(`AppleBlox v${version}`);
+		console.log(`Current Time: ${new Date().toLocaleString()}`);
+		console.log(`NeutralinoJS Version: ${window.NL_VERSION}`);
+		console.log(`${(await os.execCommand("uname -a")).stdOut.trim()}`);
+		console.log("===========");
 
-		// discordrpc
-		if (!(await getRPCAgentState())) {
-			const settings = await loadSettings("integrations");
-			if (!settings) {
-				console.log("No settings bruuu");
-				return;
-			}
-			if (!settings.rpc.enable_rpc) return;
-			await createRPC({
-				details: "Browsing the menus",
-				state: "Beta",
-				large_image: "appleblox",
-				large_image_text: "AppleBlox Logo",
+		/** Launch the process manager */
+		const watchdog = new AbloxWatchdog();
+		watchdog.start().catch(console.error);
+
+		// DiscordRPC
+		const settings = await loadSettings("integrations");
+		if (settings && settings.rpc.enable_rpc) {
+			rpc = new DiscordRPC();
+			await rpc.start({
+				clientId: "1257650541677383721",
+				details: "Currently in the launcher",
+				state: "using AppleBlox",
+				largeImage: "appleblox",
+				largeImageText: "AppleBlox Logo",
+				enableTime: true
 			});
 		}
-
-		// launch the process manager that will kill the subprocesses if AppleBlox is closed (prevents memory leaks)
-		const procCmd = `${libraryPath("process_manager")}`;
-		console.log(procCmd);
-		const procMonitor = await os.spawnProcess(procCmd);
-
-		events.on("spawnedProcess", (e) => {
-			if (e.detail.id === procMonitor.id) {
-				console.log(e.detail.action);
-				switch (e.detail.action) {
-					case "stdOut":
-					case "stdErr":
-						console.log("[PROM] " + e.detail.data);
-				}
-			}
-		});
-
-		setInterval(async () => {
-			await os.updateSpawnedProcess(procMonitor.id, "stdIn", "Alive");
-			// await os.updateSpawnedProcess(procMonitor.id, "stdInEnd");
-		}, 500);
 	}, 500);
+});
+
+// Cleanup when the application is closing
+events.on("windowClose", async () => {
+	if (rpc) {
+		await rpc.destroy();
+	}
 });
 
 const app = new App({

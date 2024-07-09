@@ -2,31 +2,41 @@
 	import type { SettingsPanel } from "@/types/settings";
 	import Panel from "./Settings/Panel.svelte";
 	import { loadSettings, saveSettings } from "../ts/settings";
-	import { createRPC, getRPCAgentState, terminateRPC } from "../ts/rpc";
+	import { DiscordRPC } from "../ts/rpc";
+	import { os } from "@neutralinojs/lib";
+
+	let rpc: DiscordRPC | null = null;
 
 	async function loadRPC(settings?: { [key: string]: any }) {
 		if (settings == null) {
-			settings = await loadSettings("integrations")
+			settings = await loadSettings("integrations");
 			if (settings == null) {
 				return;
 			}
 		}
 		if (settings.rpc.enable_rpc) {
-			if (await getRPCAgentState()) return;
-			await createRPC({
-				details: "Browsing the menus",
-				state: "Beta",
-				large_image: "appleblox",
-				large_image_text: "AppleBlox Logo",
-			});
-		} else {
-			await terminateRPC();
+			if (!rpc) {
+				rpc = new DiscordRPC();
+			}
+			await rpc
+				.start({
+					clientId: "1257650541677383721",
+					details: "Currently in the launcher",
+					state: "using AppleBlox",
+					largeImage: "appleblox",
+					largeImageText: "AppleBlox Logo",
+					enableTime: true,
+				})
+				.catch(console.error);
+		} else if (rpc) {
+			await rpc.destroy();
+			rpc = null;
 		}
 	}
 
 	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings("integrations", o);
-		loadRPC(o)
+		loadRPC(o);
 	}
 
 	const panelOpts: SettingsPanel = {
@@ -48,16 +58,15 @@
 							state: true,
 						},
 					},
-					{
+					/*{
 						label: "See current place when teleporting",
-						description:
-							"When you teleport (or join) a place, you will be notified of its name and other informations",
+						description: "When you teleport (or join) a place, you will be notified of its name and other informations",
 						id: "notify_place",
 						options: {
 							type: "boolean",
 							state: false,
 						},
-					},
+					},*/
 					{
 						label: "Enable Bloxstrap SDK compatibility",
 						description: "Activate a compatibility layer which tries to support every functions of the Bloxstrap SDK",
