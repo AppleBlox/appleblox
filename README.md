@@ -7,7 +7,7 @@
 # AppleBlox
 
 AppleBlox is a simple Roblox launcher for **MacOS**, heavily inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap).
-Currently, the app is in developpement and lacks important features like Discord RPC.
+Supports DiscordRPC, Fast-flags & more to come.
 
 You can get a demo of the app from the [Releases](https://github.com/OrigamingWasTaken/appleblox/releases/latest)
 
