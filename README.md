@@ -41,10 +41,13 @@ All contributions are welcome! Feel free to open issues and pull requests. For f
 
 ## Gallery
 
-<div align="center">
-    <img src=".github/assets/src1.png" style="width:50%;">
-    <img src=".github/assets/src2.png" style="width:50%;">
-    <img src=".github/assets/src3.png" style="width:50%;">
+<div float="left">
+    <img src=".github/assets/src1.png" style="width:35%;">
+    <img src=".github/assets/src2.png" style="width:35%;">
+    <img src=".github/assets/src3.png" style="width:35%;">
+    <img src=".github/assets/src4.png" style="width:35%;">
+    <img src=".github/assets/src5.png" style="width:35%;">
+    <img src=".github/assets/src6.png" style="width:25%;">
 </div>
 
 ## Credits
