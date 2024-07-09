@@ -64,9 +64,9 @@
 
 {#if settingsLoaded}
 	<div class="font-mono grid grid-cols-1 h-full text-start m-5">
-		<div class="bg-[#d7d7d7] dark:bg-gray-900 grayscale p-2 rounded-md">
+		<div class="bg-[#d7d7d7] dark:bg-gray-900 grayscale p-4 rounded-md">
 			<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
-			<p class="text-[15px] text-neutral-700 dark:text-white">{panel.description}</p>
+			<p class="text-[13px] text-neutral-700 dark:text-neutral-300">{@html panel.description}</p>
 		</div>
 		{#each panel.sections || [] as section}
 			<div class="mt-5">
@@ -120,9 +120,7 @@
 								<Select.Trigger class="w-[180px] dark:bg-neutral-900 bg-neutral-300 ml-auto mr-4 border-none">
 									<Select.Value class="text-black dark:text-white" placeholder={inter.options.default.label} />
 								</Select.Trigger>
-								<Select.Content
-									class="dark:bg-gray-900 bg-neutral-200 grayscale border-none dark:text-white text-black"
-								>
+								<Select.Content class="dark:bg-gray-900 bg-neutral-200 grayscale border-none dark:text-white text-black">
 									<Select.Group>
 										{#each inter.options.list || [] as item}
 											<Select.Item value={item} label={item.label}>{item.label}</Select.Item>
@@ -133,13 +131,7 @@
 							</Select.Root>
 						{:else if inter.options.type === "number"}
 							<div class="flex flex-grow justify-end">
-								<Slider
-									step={inter.options.step}
-									max={inter.options.max}
-									min={inter.options.min}
-									bind:value={sections[section.id][inter.id]}
-									class="max-w-[50%]"
-								/>
+								<Slider step={inter.options.step} max={inter.options.max} min={inter.options.min} bind:value={sections[section.id][inter.id]} class="max-w-[50%]" />
 								<Input
 									class="max-w-[20%] text-center bg-gray-900 border-none grayscale ml-5 mr-4"
 									bind:value={sections[section.id][inter.id][0]}

@@ -1,6 +1,6 @@
 // Handles notifications in the app using the alerter binary
 import { debug, events, os, window as w } from "@neutralinojs/lib"
-import { libraryPath } from "./lib.paths";
+import { libraryPath } from "./libraries";
 import { focusWindow } from "./window";
 
 export interface NotificationOptions {
@@ -9,7 +9,6 @@ export interface NotificationOptions {
     group?: string,
     sound?: boolean,
     timeout?: number,
-    type?: os.Icon,
 }
 
 export function showNotification(options: NotificationOptions) {

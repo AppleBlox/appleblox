@@ -3,7 +3,7 @@
 	import Panel from "./Settings/Panel.svelte";
 	import { dataPath, saveSettings } from "../ts/settings";
 	import { toast } from "svelte-sonner";
-	import { enableMultiInstance, parseFFlags } from "../ts/roblox";
+	import { enableMultiInstance, parseFFlags } from "../ts/roblox/utils";
 	import { filesystem, os } from "@neutralinojs/lib";
 	import AppIcon from "@/assets/play.icns";
 	import path from "path-browserify";
@@ -11,6 +11,7 @@
 	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from "../ts/debugging";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
 	import { Button } from "$lib/components/ui/button/index.js";
+	import { getRobloxPath } from "../ts/roblox/path";
 
 	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings("misc", o);
@@ -31,7 +32,7 @@
 				await enableMultiInstance();
 				break;
 			case "open_instance_btn":
-				os.spawnProcess("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer; exit");
+				os.spawnProcess(`${path.join(getRobloxPath(),"Contents/MacOS/RobloxPlayer")}; exit`);
 				break;
 			case "close_roblox_btn":
 				await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
@@ -93,7 +94,7 @@
 				break;
 			case "write_clientappsettings_btn":
 				try {
-					const filePath = "/Applications/Roblox.app/Contents/MacOS/ClientSettings/AppClientSettings.json";
+					const filePath = path.join(getRobloxPath(),"Contents/MacOS/ClientSettings/AppClientSettings.json");
 					if (await pathExists(filePath)) {
 						await filesystem.remove(filePath);
 					}
@@ -237,7 +238,7 @@
 							type: "button",
 							style: "destructive",
 						},
-					},
+					}
 				],
 			},
 		],
