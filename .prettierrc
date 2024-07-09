@@ -2,7 +2,7 @@
 	"trailingComma": "es5",
 	"bracketSpacing": true,
 	"arrowParens": "always",
-	"printWidth": 130,
+	"printWidth": 200,
 	"useTabs": true,
 	"tabWidth": 4,
 	"semi": true

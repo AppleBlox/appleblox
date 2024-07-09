@@ -1,8 +1,10 @@
 // File with debugging functions
+// It will redirect the app's logs to the appleblox.log file while still logging in the web browser
 import { filesystem } from "@neutralinojs/lib";
 import path from "path-browserify";
 import { dataPath, loadSettings } from "./settings";
 import { pathExists } from "./utils";
+import * as StackTrace from "stacktrace-js";
 
 /** Tries to format every variable to a string */
 function formatConsoleLog(...args: any[]): string {
@@ -68,6 +70,20 @@ async function appendLog(message: string) {
 	}
 }
 
+function createLoggerFunction(originalFunction: Function, logLevel: string) {
+	return async function (...args: any[]) {
+		if (isRedirectionEnabled) {
+			const formattedMessage = formatConsoleLog(...args);
+			await appendLog(formattedMessage);
+			// Use apply to maintain the correct context and pass all arguments
+			originalFunction.apply(console, [...args]);
+		} else {
+			// If redirection is not enabled, just call the original function
+			originalFunction.apply(console, args);
+		}
+	};
+}
+
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
@@ -75,52 +91,38 @@ const originalConsoleInfo = console.info;
 const originalConsoleDebug = console.debug;
 
 let isRedirectionEnabled = false;
+let overriddenConsoleFunctions = false;
+
 (async () => {
 	const settings = await loadSettings("misc");
 	if (!settings) return;
-	console.log(settings);
 	isRedirectionEnabled = settings.advanced.redirect_console;
+	if (isRedirectionEnabled) {
+		overrideConsoleFunctions();
+	}
 })();
 
-console.log = (...args: any[]) => {
-	if (isRedirectionEnabled) {
-		const formattedMessage = formatConsoleLog(...args);
-		appendLog("[INFO] " + formattedMessage);
+function overrideConsoleFunctions() {
+	if (!overriddenConsoleFunctions) {
+		console.log = createLoggerFunction(originalConsoleLog, "INFO");
+		console.error = createLoggerFunction(originalConsoleError, "ERROR");
+		console.warn = createLoggerFunction(originalConsoleWarn, "WARN");
+		console.info = createLoggerFunction(originalConsoleInfo, "INFO");
+		console.debug = createLoggerFunction(originalConsoleDebug, "DEBUG");
+		overriddenConsoleFunctions = true;
 	}
-	originalConsoleLog.apply(console, args);
-};
+}
 
-console.error = (...args: any[]) => {
-	if (isRedirectionEnabled) {
-		const formattedMessage = formatConsoleLog(...args);
-		appendLog("[ERROR] " + formattedMessage);
+function restoreConsoleFunctions() {
+	if (overriddenConsoleFunctions) {
+		console.log = originalConsoleLog;
+		console.error = originalConsoleError;
+		console.warn = originalConsoleWarn;
+		console.info = originalConsoleInfo;
+		console.debug = originalConsoleDebug;
+		overriddenConsoleFunctions = false;
 	}
-	originalConsoleError.apply(console, args);
-};
-
-console.warn = (...args: any[]) => {
-	if (isRedirectionEnabled) {
-		const formattedMessage = formatConsoleLog(...args);
-		appendLog("[WARN] " + formattedMessage);
-	}
-	originalConsoleWarn.apply(console, args);
-};
-
-console.info = (...args: any[]) => {
-	if (isRedirectionEnabled) {
-		const formattedMessage = formatConsoleLog(...args);
-		appendLog("[INFO] " + formattedMessage);
-	}
-	originalConsoleInfo.apply(console, args);
-};
-
-console.debug = (...args: any[]) => {
-	if (isRedirectionEnabled) {
-		const formattedMessage = formatConsoleLog(...args);
-		appendLog("[DEBUG] " + formattedMessage);
-	}
-	originalConsoleDebug.apply(console, args);
-};
+}
 
 export async function enableConsoleRedirection() {
 	const appleBloxDir = path.dirname(await dataPath());
@@ -128,10 +130,12 @@ export async function enableConsoleRedirection() {
 		await filesystem.createDirectory(appleBloxDir);
 	}
 	isRedirectionEnabled = true;
+	overrideConsoleFunctions();
 	console.log("Enabled console redirection");
 }
 
 export function disableConsoleRedirection() {
 	isRedirectionEnabled = false;
+	restoreConsoleFunctions();
 	console.log("Disabled console redirection");
 }
