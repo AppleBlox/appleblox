@@ -59,7 +59,6 @@
 			console.error(err);
 			return;
 		}
-		console.log(flags);
 		for (const flag of Object.keys(flags)) {
 			fflags.push({ enabled: true, flag, value: flags[flag] });
 			// svelte reactivity, don't delete

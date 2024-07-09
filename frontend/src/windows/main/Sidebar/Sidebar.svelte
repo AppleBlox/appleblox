@@ -9,6 +9,7 @@
 	import CommingSoonIcon from '@/assets/sidebar/comingsoon.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
 	import MiscIcon from "@/assets/sidebar/misc.png"
+	import CreditsIcon from "@/assets/sidebar/credits.png"
 	
 	import SidebarBtn from './SidebarBtn.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -22,7 +23,7 @@
 		{label: 'Integrations', id: 'integrations', icon: IntegrationsIcon},
 		{label: 'Fast Flags', id: 'fastflags', icon: FastFlagsIcon},
 		{label: 'Misc', id: 'misc', icon: MiscIcon},
-		{label: 'Coming Soon', id: 'none', icon: CommingSoonIcon},
+		{label: 'Credits', id: 'credits', icon: CreditsIcon},
 	];
 	
 	export let currentPage: string = 'integrations';
