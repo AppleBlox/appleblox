@@ -162,7 +162,7 @@ async function onGameEvent(data: GameEventInfo) {
 					const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
 					console.log(`Server is located in "${ipReq.city}"`);
 					showNotification({
-						content: `Your server is located in "${ipReq.city}"`,
+						content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
 						title: "Server Joined",
 						timeout: 5,
 						sound: false,
