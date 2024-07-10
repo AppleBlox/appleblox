@@ -57,6 +57,14 @@
 						options: {
 							type: "none"
 						},
+					},
+					{
+						label: "Icons - https://icons8.com",
+						description: "All the icons used in the app.",
+						id: "devs_list",
+						options: {
+							type: "none"
+						},
 					}
 				],
 			},

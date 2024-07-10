@@ -127,6 +127,10 @@ h1 {
 	}
 }
 
+.towhite-always {
+	-webkit-filter: grayscale(1) invert(1);
+	filter: grayscale(1) invert(1);
+}
 @media (prefers-color-scheme: dark) {
 	.towhite {
 		-webkit-filter: grayscale(1) invert(1);

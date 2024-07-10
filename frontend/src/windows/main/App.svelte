@@ -20,6 +20,7 @@
 		launching: false,
 		progress: 1,
 		text: "Launching...",
+		isConnected: false,
 	};
 
 	// Checks if the app is opened with the --launch argument
@@ -34,6 +35,7 @@
 
 				// Defines which values should be modified during the launch phase (the loading progress, text, etc...)
 				await launchRoblox(
+					(value) => (launchInfo.isConnected = value),
 					(value) => (launchInfo.launching = value),
 					(value) => (launchInfo.progress = value),
 					(value) => (launchInfo.text = value)
@@ -41,6 +43,7 @@
 			} else {
 				w.hide().catch(console.error);
 				await launchRoblox(
+					(value) => (launchInfo.isConnected = value),
 					(value) => (launchInfo.launching = value),
 					(value) => (launchInfo.progress = value),
 					(value) => (launchInfo.text = value)
@@ -86,8 +89,10 @@
 	{:else}
 		<Sidebar
 			bind:currentPage
+			bind:isLaunched={launchInfo.isConnected}
 			on:launchRoblox={async () => {
 				await launchRoblox(
+					(value) => (launchInfo.isConnected = value),
 					(value) => (launchInfo.launching = value),
 					(value) => (launchInfo.progress = value),
 					(value) => (launchInfo.text = value)

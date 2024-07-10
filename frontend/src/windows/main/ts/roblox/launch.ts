@@ -212,7 +212,12 @@ async function onGameEvent(data: GameEventInfo) {
 }
 
 /** Launches a Roblox instance */
-export async function launchRoblox(setLaunchingRoblox: (value: boolean) => void, setLaunchProgress: (value: number) => void, setLaunchText: (value: string) => void) {
+export async function launchRoblox(
+	setRobloxConnected: (value: boolean) => void,
+	setLaunchingRoblox: (value: boolean) => void,
+	setLaunchProgress: (value: number) => void,
+	setLaunchText: (value: string) => void
+) {
 	if (rbxInstance || (await os.execCommand('pgrep -f "Roblox"')).stdOut.trim().length > 2) {
 		setLaunchText("Roblox is already open");
 		setLaunchingRoblox(false);
@@ -252,9 +257,11 @@ export async function launchRoblox(setLaunchingRoblox: (value: boolean) => void,
 				const robloxInstance = new RobloxInstance(true);
 				await robloxInstance.init();
 				await robloxInstance.start();
+				setRobloxConnected(true);
 				rbxInstance = robloxInstance;
 				robloxInstance.on("gameEvent", onGameEvent);
 				robloxInstance.on("exit", () => {
+					setRobloxConnected(false);
 					rbxInstance = null;
 					console.log("Roblox exited");
 				});
@@ -279,5 +286,6 @@ export async function launchRoblox(setLaunchingRoblox: (value: boolean) => void,
 		console.error("An error occured while launching Roblox");
 		console.error(err);
 		setLaunchingRoblox(false);
+		setRobloxConnected(false);
 	}
 }
