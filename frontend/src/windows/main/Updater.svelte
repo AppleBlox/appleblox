@@ -67,7 +67,7 @@
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action
 				on:click={() => {
-					os.open(`https://github.com/OrigamingWasTaken/appleblox/releases/download/latest/AppleBlox-${updateVersion}_${getArch()}.dmg`);
+					os.open(`https://github.com/OrigamingWasTaken/appleblox/releases/download/${updateVersion}/AppleBlox-${updateVersion}_${getArch()}.dmg`);
 				}}>Install</AlertDialog.Action
 			>
 		</AlertDialog.Footer>
