@@ -3,6 +3,11 @@
 </div>
 
 ---
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/OrigamingWasTaken/appleblox/build.yml?color=%23F43F5E)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/OrigamingWasTaken/appleblox/total?color=%23F43F5E)
+![GitHub License](https://img.shields.io/github/license/OrigamingWasTaken/appleblox?color=%23F43F5E)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/OrigamingWasTaken/appleblox?color=%23F43F5E)
+![Static Badge](https://img.shields.io/badge/built_with_apples-%23F43F5E)
 
 # AppleBlox
 
