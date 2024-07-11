@@ -10,10 +10,9 @@
 	import LoadingSpinner from "../../util/LoadingSpinner.svelte";
 	import { loadSettings } from "../../ts/settings";
 	import Button from "$lib/components/ui/button/button.svelte";
-	import { debug, os } from "@neutralinojs/lib";
 	import FfButtonsCustom from "./FFButtonsCustom.svelte";
-	import { setFlags } from "../../ts/fflags";
 	import * as Tooltip from "$lib/components/ui/tooltip";
+	import { haveSameKeys } from "../../ts/utils";
 
 	export let panel: SettingsPanel;
 
@@ -46,11 +45,15 @@
 	loadSettings(panel.id)
 		.then((s) => {
 			if (s) {
+				if (!haveSameKeys(sections, s)) {
+					dispatch("settingsChanged", sections);
+					return;
+				}
 				sections = s;
 			}
 			settingsLoaded = true;
 		})
-		.catch((err) => {
+		.catch(async (err) => {
 			settingsLoaded = true;
 			console.error(err);
 		});

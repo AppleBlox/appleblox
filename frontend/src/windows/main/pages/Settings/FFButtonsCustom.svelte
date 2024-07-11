@@ -8,7 +8,7 @@
 	import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
 	import More from "@/assets/panel/more.png";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-	import { addFlag, getFlags, removeFlag, setFlags } from "../../ts/fflags";
+	import { addFlag, getFlags, removeFlag, setFlags } from "../../ts/roblox/fflags";
 	import type { FFlag } from "@/types/settings";
 	import Input from "$lib/components/ui/input/input.svelte";
 	import { toast } from "svelte-sonner";

@@ -1,5 +1,5 @@
 import { toast } from "svelte-sonner";
-import { dataPath } from "../settings";
+import { dataPath, loadSettings } from "../settings";
 import { pathExists } from "../utils";
 import { filesystem, os } from "@neutralinojs/lib";
 import path from "path-browserify";
@@ -32,91 +32,6 @@ export async function isRobloxOpen() {
 }
 
 /** Returns a JSON object in the form of the ClientSettings.json file for the FFLags */
-export async function parseFFlags(preset = false): Promise<Object> {
-	// Get the path to Application Supoort
-	const appPath = await dataPath();
-	let fflagsJson: { [key: string]: string | number } = {};
-	if (preset) {
-		if (!(await pathExists(path.join(appPath, "fastflags.json")))) {
-			return {};
-		}
-		const neuPath = path.join(appPath, "fastflags.json");
-		const ohioFinalBoss = JSON.parse(await filesystem.readFile(neuPath));
-		// i know this isn't efficient, but i didn't want to re-write the fastlfags saving system.
-		// in the future, i may change this to a dynamic system.
-		for (const name of Object.keys(ohioFinalBoss.presets)) {
-			const data = ohioFinalBoss.presets[name];
-			switch (name) {
-				case "ff_fps":
-					if (data[0] > 60) {
-						fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
-						fflagsJson["FFlagDebugGraphicsPreferVulkan"] = "true";
-					}
-					fflagsJson["DFIntTaskSchedulerTargetFps"] = data[0];
-					break;
-				case "ff_lightning":
-					if (data.disabled) break;
-					switch (data.value) {
-						case "voxel":
-							fflagsJson["DFFlagDebugRenderForceTechnologyVoxel"] = "true";
-							break;
-						case "shadowmap":
-							fflagsJson["FFlagDebugForceFutureIsBrightPhase2"] = "true";
-							break;
-						case "future":
-							fflagsJson["FFlagDebugForceFutureIsBrightPhase3"] = "true";
-							break;
-					}
-					break;
-				case "ff_engine":
-					if (data.disabled) break;
-					switch (data.value) {
-						// don't know if disabling Metal works, need testing. For now it uses OpenGL
-						case "opengl":
-							fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
-							fflagsJson["FFlagDebugGraphicsPreferOpenGL"] = "true";
-							break;
-						case "metal":
-							fflagsJson["FFlagDebugGraphicsPreferMetal"] = "true";
-							break;
-						case "vulkan":
-							fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
-							fflagsJson["FFlagDebugGraphicsPreferVulkan"] = "true";
-							break;
-					}
-					break;
-				case "ff_gui":
-					if (data.length < 1) break;
-					fflagsJson["DFIntCanHideGuiGroupId"] = data;
-					break;
-				case "ff_display":
-					if (data) {
-						fflagsJson["DFIntDebugFRMQualityLevelOverride"] = 1;
-					}
-					break;
-				case "ff_graphics":
-					if (data) {
-						fflagsJson["FFlagCommitToGraphicsQualityFix"] = "true";
-						fflagsJson["FFlagFixGraphicsQuality"] = "true";
-					}
-					break;
-			}
-		}
-		return fflagsJson;
-	} else {
-		if (!(await pathExists(path.join(appPath, "fflags.json")))) {
-			return {};
-		}
-		const neuPath = path.join(appPath, "fflags.json");
-		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(await filesystem.readFile(neuPath));
-		for (const flag of skibidiOhioFanumTax) {
-			if (flag.enabled) {
-				fflagsJson[flag.flag] = flag.value;
-			}
-		}
-		return fflagsJson;
-	}
-}
 
 export async function enableMultiInstance() {
 	try {

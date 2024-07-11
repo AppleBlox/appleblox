@@ -1,15 +1,19 @@
-import { hasRoblox, parseFFlags } from "./utils";
+import { hasRoblox } from "./utils";
 import { pathExists, curlGet } from "../utils";
 import shellFS from "../shellfs";
 import { GameEventInfo, RobloxInstance } from "./instance";
 import { DiscordRPC, RPCOptions } from "../rpc";
-import { os } from "@neutralinojs/lib";
+import { computer, os } from "@neutralinojs/lib";
 import { loadSettings } from "../settings";
 import { toast } from "svelte-sonner";
 import { sleep } from "$lib/appleblox";
 import { showNotification } from "../notifications";
 import { getRobloxPath } from "./path";
 import path from "path-browserify";
+import { RobloxWindow } from "./window";
+import { parseFFlags } from "./fflags";
+
+let escFullscreen: boolean | null = null;
 
 interface RobloxGame {
 	id: number;
@@ -170,7 +174,7 @@ async function onGameEvent(data: GameEventInfo) {
 				}
 				break;
 			case "GameMessageEntry":
-				if (settings && !settings.activity.bloxstrap_sdk) return;
+				if (settings && !settings.sdk.enabled) return;
 				try {
 					const json = data.data.match(/\{.*\}/);
 					if (!json) {
@@ -200,6 +204,50 @@ async function onGameEvent(data: GameEventInfo) {
 								rpcOptions = options;
 								await rpc.start(options);
 							}
+							break;
+						case "SetWindow":
+							if (settings && !settings.sdk.window) return;
+							try {
+								const screenSize = (await computer.getDisplays())[0].resolution;
+								if (inst.reset) {
+									RobloxWindow.resize(screenSize.width, screenSize.height - 100);
+									return;
+								}
+								if (!escFullscreen) {
+									RobloxWindow.toggleFullscreen(false);
+									escFullscreen = true;
+								}
+								await sleep(1200);
+								if (inst.x && inst.y) {
+									await RobloxWindow.moveTo(inst.x, inst.y);
+								}
+								if (inst.width && inst.height) {
+									let scaling = {
+										width: 1,
+										height: 1,
+									};
+									if (inst.scaleWidth && inst.scaleHeight) {
+										scaling = {
+											width: screenSize.width / inst.scaleWidth / 1.5,
+											height: screenSize.height / inst.scaleHeight / 1.5,
+										};
+									}
+									await RobloxWindow.resize(inst.width * scaling.width, inst.height * scaling.height);
+									break;
+								}
+								break;
+							} catch (err) {
+								console.error(err);
+							}
+							break;
+						case "RestoreWindow":
+							const screenSize = (await computer.getDisplays())[0].resolution;
+							if (escFullscreen) {
+								await RobloxWindow.moveTo(0, 0);
+								RobloxWindow.resize(screenSize.width, screenSize.height - 100);
+								return;
+							}
+							RobloxWindow.toggleFullscreen(true);
 							break;
 					}
 				} catch (err) {

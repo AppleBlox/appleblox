@@ -3,7 +3,8 @@
 	import Panel from "./Settings/Panel.svelte";
 	import { dataPath, saveSettings } from "../ts/settings";
 	import { toast } from "svelte-sonner";
-	import { enableMultiInstance, parseFFlags } from "../ts/roblox/utils";
+	import { enableMultiInstance } from "../ts/roblox/utils";
+	import { parseFFlags } from "../ts/roblox/fflags";
 	import { filesystem, os } from "@neutralinojs/lib";
 	import AppIcon from "@/assets/play.icns";
 	import path from "path-browserify";

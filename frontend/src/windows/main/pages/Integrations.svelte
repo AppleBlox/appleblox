@@ -67,16 +67,32 @@
 							state: false,
 						},
 					},*/
+				],
+			},
+			{
+				name: "Bloxstrap SDK",
+				description: "Replica of the Bloxstrap SDK. Makes it so games can control certain aspect of your Roblox instance",
+				id: "sdk",
+				interactables: [
 					{
-						label: "Enable Bloxstrap SDK compatibility",
+						label: "Enable SDK",
 						description: "Activate a compatibility layer which tries to support every functions of the Bloxstrap SDK",
-						id: "bloxstrap_sdk",
+						id: "enabled",
 						options: {
 							type: "boolean",
 							state: false,
 						},
 					},
-				],
+					{
+						label: "Let games control your window",
+						description: "Games can define the size of your Roblox window",
+						id: "window",
+						options: {
+							type: "boolean",
+							state: false,
+						},
+					},
+				]
 			},
 			{
 				name: "Discord Rich Presence",

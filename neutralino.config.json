@@ -12,7 +12,8 @@
     "os.*",
     "filesystem.*",
     "window.*",
-    "clipboard.*"
+    "clipboard.*",
+    "computer.*"
   ],
   "exportAuthInfo": false,
   "logging": {

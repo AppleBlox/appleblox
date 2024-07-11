@@ -201,6 +201,13 @@ export class RobloxInstance {
 	}
 
 	private processLines(lines: string[]) {
+
+		// lines.forEach((line)=>{
+		// 	if (line.includes("SetWindow")) {
+		// 		console.log(line)
+		// 	}
+		// })
+
 		for (const entry of Entries) {
 			const includedLines = lines.filter((line) => line.includes(entry.match));
 			for (const line of includedLines) {
