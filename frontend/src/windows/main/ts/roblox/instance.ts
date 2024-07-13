@@ -1,9 +1,9 @@
 import { events, filesystem, os } from "@neutralinojs/lib";
-import { hasRoblox } from "./utils";
 import { isProcessAlive, removeNonUTF8CharactersFromString } from "../utils";
-import { sleep } from "$lib/appleblox";
+import { sleep } from "../utils";
 import path from "path-browserify";
 import { getRobloxPath } from "./path";
+import Roblox from ".";
 
 type EventHandler = (data?: any) => void;
 type Event = "exit" | "gameInfo" | "gameEvent";
@@ -90,6 +90,10 @@ export class RobloxInstance {
 	private events: { [key: string]: EventHandler[] } = {};
 	private gameInstance: number | null = null;
 	private latestLogPath: string | null = null;
+	private logsInstance: os.SpawnedProcess | null = null;
+	private lastLogs: string = "";
+	private isWatching: boolean = false;
+	private onEvent: Promise<events.Response> | null = null;
 
 	/** Adds a handler to an event */
 	public on(event: Event, handler: EventHandler) {
@@ -116,17 +120,13 @@ export class RobloxInstance {
 	}
 
 	watchLogs: boolean;
-	robloxInstalled: boolean;
 	constructor(watch: boolean) {
 		this.watchLogs = watch;
-		this.robloxInstalled = false;
 	}
 
 	/** Initalize class values */
 	public async init() {
-		if (await hasRoblox(false)) {
-			this.robloxInstalled = true;
-		}
+		if (!(await Roblox.Utils.hasRoblox())) return;
 	}
 
 	/** Starts the Roblox Instance */
@@ -157,57 +157,66 @@ export class RobloxInstance {
 		let tries = 10;
 		while (this.latestLogPath == null) {
 			if (tries < 1) {
-				throw new Error(`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}". Stopping.`)
+				throw new Error(`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}". Stopping.`);
 			}
 			const latestFile = (await os.execCommand(`cd "${logsDirectory}" && ls -t | head -1`)).stdOut.trim();
 			const latestFilePath = path.join(logsDirectory, latestFile);
 			const createdAt = (await filesystem.getStats(latestFilePath)).createdAt;
 			const timeDifference = (Date.now() - createdAt) / 1000;
 			if (timeDifference < 15) {
-				console.log(`Found latest log: "${latestFilePath}"`)
+				console.log(`Found latest log: "${latestFilePath}"`);
 				this.latestLogPath = latestFilePath;
 			} else {
-				tries--
-				console.log(`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}" (${tries}). Retrying in 1 second.`)
+				tries--;
+				console.log(`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}" (${tries}). Retrying in 1 second.`);
 				await sleep(1000);
 			}
 		}
 
-		let lastPosition = 0;
+		// Read the first content, to not miss anything
+		await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
+		const content = (await os.execCommand(`cat /tmp/roblox_ablox.log`)).stdOut;
+		// Spawns the logs watcher, and be sure that it kills any previous one
+		await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
+		this.logsInstance = await os.spawnProcess(`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done
+`);
+		console.log(`Logs watcher started with PID: ${this.logsInstance.pid}`);
+
+		this.onEvent = events.on("spawnedProcess", async (evt: CustomEvent) => {
+			// Check if the event comes from the logs watcher, and that it is stdOut
+			if (!this.isWatching || !this.logsInstance || evt.detail.id !== this.logsInstance.id) return;
+			if (evt.detail.action === "exit") {
+				console.log("Logs watcher exited");
+				console.log("Restarting logs watcher");
+				await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
+				await sleep()
+				this.logsInstance = await os.spawnProcess(`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done`);
+				return;
+			}
+			await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
+			const content = (await os.execCommand(`cat /tmp/roblox_ablox.log`)).stdOut;
+			const newContent = content.split("\n").filter((l) => !this.lastLogs.includes(l));
+			await this.processLines(newContent);
+			this.lastLogs = content;
+		});
+
+		await this.processLines(content.split("\n"));
+		this.lastLogs = content;
+		this.isWatching = true;
+
 		const intervalId = setInterval(async () => {
 			// Check if instance is still alive
 			if (this.gameInstance && !(await isProcessAlive(this.gameInstance))) {
 				this.gameInstance = null;
 				this.emit("exit");
+				await this.cleanup();
 				console.log("Instance is null, stopping.");
 				clearInterval(intervalId);
-			}
-
-			// Get the new lines
-			try {
-				// filesystem.readFile() cannot access this file, and we use iconv to remove non-utf8 characters that could make the program crash.
-				await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
-				const content = (await os.execCommand(`cat /tmp/roblox_ablox.log`)).stdOut;
-				if (content.length > lastPosition) {
-					const newContent = content.slice(lastPosition);
-					const newLines = newContent.split("\n").filter((line) => line.trim() !== "");
-					this.processLines(newLines);
-					lastPosition = content.length;
-				}
-			} catch (err) {
-				console.error("Error while watching instance logs", err);
 			}
 		}, 500);
 	}
 
 	private processLines(lines: string[]) {
-
-		// lines.forEach((line)=>{
-		// 	if (line.includes("SetWindow")) {
-		// 		console.log(line)
-		// 	}
-		// })
-
 		for (const entry of Entries) {
 			const includedLines = lines.filter((line) => line.includes(entry.match));
 			for (const line of includedLines) {
@@ -226,10 +235,17 @@ export class RobloxInstance {
 		}
 	}
 
+	public async cleanup() {
+		this.isWatching = false;
+		this.onEvent = null;
+		// Kill logs watcher
+		await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
+	}
+
 	/** Quits Roblox */
 	public async quit() {
 		if (this.gameInstance == null) throw new Error("The instance hasn't be started yet");
-
+		await this.cleanup();
 		console.log("Quitting Roblox");
 		await os.execCommand(`kill -9 ${this.gameInstance}`);
 	}
