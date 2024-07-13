@@ -1,6 +1,6 @@
 {
   "name": "appleblox",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "MacOS roblox launcher",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {
@@ -51,7 +51,6 @@
     "bits-ui": "^0.21.11",
     "clsx": "^2.1.0",
     "hotkeys-js": "^3.13.7",
-    "iconv-lite": "^0.6.3",
     "lucide-svelte": "^0.364.0",
     "mode-watcher": "^0.3.1",
     "path-browserify": "^1.0.1",
