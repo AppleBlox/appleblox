@@ -6,7 +6,8 @@ on:
 
 jobs:
   virustotal:
-    permissions: contents
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       -
