@@ -1,5 +1,4 @@
 import { filesystem, os } from "@neutralinojs/lib";
-import * as iconv from "iconv-lite";
 
 /** Checks if the path provided exists */
 export async function pathExists(path: string) {
@@ -92,3 +91,7 @@ export function haveSameKeys(obj1: object, obj2: object): boolean {
 
     return true;
 }
+
+export function sleep(ms = 0) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }

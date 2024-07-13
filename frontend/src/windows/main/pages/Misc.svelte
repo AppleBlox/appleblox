@@ -3,16 +3,14 @@
 	import Panel from "./Settings/Panel.svelte";
 	import { dataPath, saveSettings } from "../ts/settings";
 	import { toast } from "svelte-sonner";
-	import { enableMultiInstance } from "../ts/roblox/utils";
-	import { parseFFlags } from "../ts/roblox/fflags";
 	import { filesystem, os } from "@neutralinojs/lib";
 	import AppIcon from "@/assets/play.icns";
 	import path from "path-browserify";
 	import { pathExists } from "../ts/utils";
 	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from "../ts/debugging";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-	import { Button } from "$lib/components/ui/button/index.js";
 	import { getRobloxPath } from "../ts/roblox/path";
+	import Roblox from "../ts/roblox";
 
 	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings("misc", o);
@@ -30,7 +28,7 @@
 		const id = e.detail;
 		switch (id) {
 			case "multi_roblox_btn":
-				await enableMultiInstance();
+				await Roblox.Utils.enableMultiInstance();
 				break;
 			case "open_instance_btn":
 				os.spawnProcess(`${path.join(getRobloxPath(),"Contents/MacOS/RobloxPlayer")}; exit`);
@@ -100,7 +98,7 @@
 						await filesystem.remove(filePath);
 					}
 					await filesystem.createDirectory(path.dirname(filePath));
-					const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
+					const fflags = { ...(await Roblox.FFlags.parseFlags(false)), ...(await Roblox.FFlags.parseFlags(true)) };
 					await filesystem.writeFile(filePath, JSON.stringify(fflags));
 					toast.success(`Wrote ClientAppSettings at "${filePath}"`);
 				} catch (err) {

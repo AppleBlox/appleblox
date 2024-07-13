@@ -8,15 +8,15 @@
 	import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
 	import More from "@/assets/panel/more.png";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-	import { addFlag, getFlags, removeFlag, setFlags } from "../../ts/roblox/fflags";
 	import type { FFlag } from "@/types/settings";
 	import Input from "$lib/components/ui/input/input.svelte";
 	import { toast } from "svelte-sonner";
+	import Roblox from "../../ts/roblox";
 
 	let fflags: FFlag[] = [];
 
 	function updateTable() {
-		getFlags()
+		Roblox.FFlags.getFlags()
 			.then((flags) => {
 				if (flags) {
 					fflags = flags;
@@ -28,7 +28,7 @@
 	updateTable();
 
 	$: {
-		setFlags(fflags);
+		Roblox.FFlags.setFlags(fflags);
 	}
 
 	let addedFlag: string;
@@ -41,7 +41,7 @@
 			toast.error("A flag cannot contain special characters");
 			return;
 		}
-		const add = await addFlag(addedFlag, "");
+		const add = await Roblox.FFlags.addFlag(addedFlag, "");
 		if (add) {
 			fflags.push({ enabled: true, flag: addedFlag, value: "null" });
 			updateTable();
@@ -132,7 +132,7 @@
 											<DropdownMenu.Item
 												class="cursor-pointer"
 												on:click={() => {
-													removeFlag(ff.flag);
+													Roblox.FFlags.removeFlag(ff.flag);
 													fflags = fflags.filter((f) => f.flag !== ff.flag);
 												}}><p class="text-red-600">Remove</p></DropdownMenu.Item
 											>

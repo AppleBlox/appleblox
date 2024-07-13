@@ -4,12 +4,13 @@ import path from "path-browserify";
 import type { FFlag } from "@/types/settings";
 import { dataPath, loadSettings } from "../settings";
 
-/** Returns every saved FFlags */
-export async function getFlags(): Promise<FFlag[] | undefined> {
+export class RobloxFFlags {
+	/** Returns every saved FFlags */
+static async getFlags(): Promise<FFlag[] | undefined> {
 	// Read the saved fflags file inside Application Support
 	const filePath = path.join(await dataPath(),"fflags.json");
 	if (!(await pathExists(filePath))) {
-		await setFlags([]);
+		await this.setFlags([]);
 	}
 	const fileContent = await filesystem.readFile(filePath);
 	try {
@@ -21,7 +22,7 @@ export async function getFlags(): Promise<FFlag[] | undefined> {
 }
 
 /** Saves and backup fflags */
-export async function setFlags(flags: FFlag[]) {
+static async setFlags(flags: FFlag[]) {
 	const configPath = await dataPath();
 	const filePath = path.join(configPath, "fflags.json");
 	// Check if the AppleBlox/config dir exsits
@@ -37,7 +38,7 @@ export async function setFlags(flags: FFlag[]) {
 }
 
 /** Sets a fflag to true or false */
-export async function setFlag(flag: string, enabled: boolean, value: string) {
+static async setFlag(flag: string, enabled: boolean, value: string) {
 	const configPath = await dataPath()
 	const filePath = path.join(configPath, "fflags.json");
 	// Check if the AppleBlox/config dir exsits
@@ -53,27 +54,27 @@ export async function setFlag(flag: string, enabled: boolean, value: string) {
 	} else {
 		fflags.push({ flag, enabled, value });
 	}
-	await setFlags(fflags);
+	await this.setFlags(fflags);
 }
 
 /** Append a flag to the config file. If the one provided already exists, then this will return false */
-export async function addFlag(flag: string, value: string): Promise<boolean> {
-	let flags: FFlag[] = (await getFlags()) || [];
+static async addFlag(flag: string, value: string): Promise<boolean> {
+	let flags: FFlag[] = (await this.getFlags()) || [];
 	if (flags.find((f) => f.flag === flag)) {
 		// The flag already exists
 		return false;
 	} else {
 		flags.push({ flag, enabled: true, value });
-		await setFlags(flags);
+		await this.setFlags(flags);
 		return true;
 	}
 }
 
 /** Removes the provided flag. If it's doesn't exist, returns false */
-export async function removeFlag(flag: string): Promise<boolean> {
-	let flags: FFlag[] = (await getFlags()) || [];
+static async removeFlag(flag: string): Promise<boolean> {
+	let flags: FFlag[] = (await this.getFlags()) || [];
 	if (flags.find((f) => f.flag === flag)) {
-		await setFlags(flags.filter((f) => f.flag !== flag));
+		await this.setFlags(flags.filter((f) => f.flag !== flag));
 		return true;
 	} else {
 		// The flag doesn't exist
@@ -81,7 +82,7 @@ export async function removeFlag(flag: string): Promise<boolean> {
 	}
 }
 
-export async function parseFFlags(preset = false): Promise<Object> {
+static async parseFlags(preset = false): Promise<Object> {
 	// Get the path to Application Supoort
 	const appPath = await dataPath();
 	let fflagsJson: { [key: string]: string | number } = {};
@@ -172,4 +173,5 @@ export async function parseFFlags(preset = false): Promise<Object> {
 		}
 		return fflagsJson;
 	}
+}
 }

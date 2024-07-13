@@ -6,10 +6,8 @@ import App from "./App.svelte";
 import { events, init, os } from "@neutralinojs/lib";
 import { version } from "../../../../package.json";
 import { DiscordRPC } from "./ts/rpc";
-import { libraryPath } from "./ts/libraries";
 import { loadSettings } from "./ts/settings";
 import { AbloxWatchdog } from "./ts/watchdog";
-import { sleep } from "$lib/appleblox";
 
 // Initialize NeutralinoJS
 init();
