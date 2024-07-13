@@ -3,6 +3,7 @@
 	import { createEventDispatcher } from "svelte";
 	import logo from "@/assets/favicon.png";
 	import { os } from "@neutralinojs/lib";
+	import { version } from "../../../../../package.json";
 
 	import IntegrationsIcon from "@/assets/sidebar/integrations.png";
 	import FastFlagsIcon from "@/assets/sidebar/fastflags.png";
@@ -14,7 +15,6 @@
 
 	import SidebarBtn from "./SidebarBtn.svelte";
 	import Button from "$lib/components/ui/button/button.svelte";
-	import { Play } from "lucide-svelte";
 
 	export let isLaunched = false;
 
@@ -66,7 +66,9 @@
 			{/each}
 		</div>
 	</div>
-	<div class="flex justify-center mb-4">
+	<div class="flex flex-col items-center mb-4">
+		<p class="text-sm text-gray-500 mb-2">v{version}</p>
+		
 		<Button
 			class={`${isLaunched ? "bg-blue-400 hover:bg-blue-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-800"} font-mono`}
 			on:click={() => {

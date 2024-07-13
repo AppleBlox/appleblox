@@ -1,27 +1,10 @@
-import { debug, filesystem, os } from "@neutralinojs/lib";
+import { filesystem, os } from "@neutralinojs/lib";
 import { pathExists } from "./utils";
 import path from "path-browserify";
 
 export async function dataPath(): Promise<string> {
 	return path.join(await os.getPath("data"), "AppleBlox", "config");
 }
-
-/** Copies the settings folder to Application Support */
-// async function copyNeuStorage(panelId: string) {
-// 	const path = await dataPath();
-// 	if (!(await pathExists(path))) {
-// 		await filesystem.createDirectory(path);
-// 	}
-// 	try {
-// 		const filepath = `${path}/${panelId}.json`;
-// 		if (await pathExists(filepath)) {
-// 			await filesystem.remove(filepath);
-// 		}
-// 		await filesystem.copy(`${window.NL_PATH}/.storage/${panelId}.json`, filepath);
-// 	} catch (err) {
-// 		console.error(err);
-// 	}
-// }
 
 /** Saves the data provided to the Application Support folder */
 let saveQueue: { [key: string]: string } = {};

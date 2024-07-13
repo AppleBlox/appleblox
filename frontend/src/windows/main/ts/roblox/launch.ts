@@ -180,6 +180,7 @@ async function onGameEvent(data: GameEventInfo) {
 					const { data: inst, command } = message;
 					switch (command) {
 						case "SetRichPresence":
+							if (settings && !settings.sdk.sdk_rpc) return;
 							let options: RPCOptions = { clientId: "1257650541677383721", enableTime: settings ? settings.rpc.rpc_time : true };
 							if (inst.details) options.details = inst.details;
 							if (inst.state) options.state = inst.state;

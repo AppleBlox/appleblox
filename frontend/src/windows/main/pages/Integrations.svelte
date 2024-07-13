@@ -84,7 +84,16 @@
 						},
 					},
 					{
-						label: "Let games control your window",
+						label: "Control RPC",
+						description: "Games can change your DiscordRPC",
+						id: "sdK_rpc",
+						options: {
+							type: "boolean",
+							state: false,
+						},
+					},
+					{
+						label: "Control Roblox window",
 						description: "Games can define the size of your Roblox window",
 						id: "window",
 						options: {

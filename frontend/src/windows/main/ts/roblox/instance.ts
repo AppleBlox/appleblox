@@ -93,7 +93,7 @@ export class RobloxInstance {
 	private logsInstance: os.SpawnedProcess | null = null;
 	private lastLogs: string = "";
 	private isWatching: boolean = false;
-	private onEvent: Promise<events.Response> | null = null;
+	private onEvent: Promise<events.Response> | null = null
 
 	/** Adds a handler to an event */
 	public on(event: Event, handler: EventHandler) {
@@ -134,10 +134,12 @@ export class RobloxInstance {
 		if (this.gameInstance) throw new Error("An instance is already running");
 
 		console.log("Opening Roblox instance");
+		// Launch Roblox
 		await os.execCommand(`open "${getRobloxPath()}"`);
 
 		await sleep(1000);
 
+		// We find every roblox processes and get the RobloxPlayer one
 		const robloxProcess = await (await os.execCommand('pgrep -f "Roblox"')).stdOut.split("\n");
 		for (const pid of robloxProcess) {
 			const info = (await os.execCommand(`ps -p ${pid} -o command=`)).stdOut.trim();

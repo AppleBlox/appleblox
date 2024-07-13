@@ -4,6 +4,7 @@ import { launchRoblox } from "./launch";
 import { RobloxUtils } from "./utils";
 import { RobloxWindow } from "./window";
 
+// Simple export
 class Roblox {
     static FFlags = RobloxFFlags
     static Instance = RobloxInstance
