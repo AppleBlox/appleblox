@@ -1,4 +1,4 @@
-name: released
+name: Virustotal Scan
 
 on:
   release:
