@@ -18,7 +18,7 @@ You can get a demo of the app from the [Releases](https://github.com/OrigamingWa
 
 For more recent builds, see the [nightly releases](https://nightly.link/OrigamingWasTaken/appleblox/workflows/build/main?preview)
 
-## Compiled Binaries
+## Pre-compiled Binaries
 
 AppleBlox contains pre-compiled binaries of some programs at `build/lib/MacOS` from:
 - https://github.com/vjeantet/alerter (Taken from the github releases)
@@ -26,7 +26,7 @@ AppleBlox contains pre-compiled binaries of some programs at `build/lib/MacOS` f
 - https://github.com/OrigamingWasTaken/window_manager (Built from source on my machine)
 
 I plan on modifying this to compile those binaries at build step, but that would mean having to install Rust and Xcode, so I'm not really sure...
-If you're worried that those could be modified by me or another contributor to include malicious code, you can always scan the app on https://www.virustotal.com .
+If you're worried that those could be modified by me or another contributor to include malicious code, you can look at the "VirusTotal Scan" GitHub workflow. This workflow scans the release assets for malicious code.
 
 ## Developpement
 
