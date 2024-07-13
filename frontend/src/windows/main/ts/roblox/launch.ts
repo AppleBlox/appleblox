@@ -1,4 +1,3 @@
-import { hasRoblox } from "./utils";
 import { pathExists, curlGet } from "../utils";
 import shellFS from "../shellfs";
 import { GameEventInfo, RobloxInstance } from "./instance";
@@ -6,14 +5,11 @@ import { DiscordRPC, RPCOptions } from "../rpc";
 import { computer, os } from "@neutralinojs/lib";
 import { loadSettings } from "../settings";
 import { toast } from "svelte-sonner";
-import { sleep } from "$lib/appleblox";
+import { sleep } from "../utils";
 import { showNotification } from "../notifications";
 import { getRobloxPath } from "./path";
 import path from "path-browserify";
-import { RobloxWindow } from "./window";
-import { parseFFlags } from "./fflags";
-
-let escFullscreen: boolean | null = null;
+import Roblox from ".";
 
 interface RobloxGame {
 	id: number;
@@ -75,7 +71,6 @@ let rpcOptions: RPCOptions = {
 	smallImage: "appleblox",
 	smallImageText: "Playing with AppleBlox",
 };
-
 let rbxInstance: RobloxInstance | null = null;
 
 async function onGameEvent(data: GameEventInfo) {
@@ -210,16 +205,11 @@ async function onGameEvent(data: GameEventInfo) {
 							try {
 								const screenSize = (await computer.getDisplays())[0].resolution;
 								if (inst.reset) {
-									RobloxWindow.resize(screenSize.width, screenSize.height - 100);
+									Roblox.Window.maximize();
 									return;
 								}
-								if (!escFullscreen) {
-									RobloxWindow.toggleFullscreen(false);
-									escFullscreen = true;
-								}
-								await sleep(1200);
 								if (inst.x && inst.y) {
-									await RobloxWindow.moveTo(inst.x, inst.y);
+									await Roblox.Window.move(inst.x, inst.y);
 								}
 								if (inst.width && inst.height) {
 									let scaling = {
@@ -228,11 +218,11 @@ async function onGameEvent(data: GameEventInfo) {
 									};
 									if (inst.scaleWidth && inst.scaleHeight) {
 										scaling = {
-											width: screenSize.width / inst.scaleWidth / 1.5,
-											height: screenSize.height / inst.scaleHeight / 1.5,
+											width: screenSize.width / inst.scaleWidth,
+											height: screenSize.height / inst.scaleHeight,
 										};
 									}
-									await RobloxWindow.resize(inst.width * scaling.width, inst.height * scaling.height);
+									Roblox.Window.resize(inst.width * scaling.width, inst.height * scaling.height);
 									break;
 								}
 								break;
@@ -241,13 +231,12 @@ async function onGameEvent(data: GameEventInfo) {
 							}
 							break;
 						case "RestoreWindow":
-							const screenSize = (await computer.getDisplays())[0].resolution;
-							if (escFullscreen) {
-								await RobloxWindow.moveTo(0, 0);
-								RobloxWindow.resize(screenSize.width, screenSize.height - 100);
-								return;
-							}
-							RobloxWindow.toggleFullscreen(true);
+							Roblox.Window.maximize();
+							break;
+						case "SetWindowDefault":
+							Roblox.Window.setFullscreen(false);
+							await sleep(500);
+							Roblox.Window.maximize();
 							break;
 					}
 				} catch (err) {
@@ -266,7 +255,7 @@ export async function launchRoblox(
 	setLaunchProgress: (value: number) => void,
 	setLaunchText: (value: string) => void
 ) {
-	if (rbxInstance || (await os.execCommand('pgrep -f "Roblox"')).stdOut.trim().length > 2) {
+	if (rbxInstance || (await os.execCommand('pgrep -f "RobloxPlayer"')).stdOut.trim().length > 2) {
 		setLaunchText("Roblox is already open");
 		setLaunchingRoblox(false);
 		toast.error("Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.");
@@ -276,7 +265,7 @@ export async function launchRoblox(
 	try {
 		console.log("Launching Roblox");
 		setLaunchingRoblox(true);
-		if (!(await hasRoblox())) {
+		if (!(await Roblox.Utils.hasRoblox())) {
 			console.log("Roblox is not installed. Exiting launch process.");
 			setLaunchingRoblox(false);
 			return;
@@ -295,7 +284,7 @@ export async function launchRoblox(
 		console.log("Copying fast flags");
 		await shellFS.createDirectory(path.join(robloxPath, "Contents/MacOS/ClientSettings"));
 		console.log("Parsing saved FFlags");
-		const fflags = { ...(await parseFFlags(false)), ...(await parseFFlags(true)) };
+		const fflags = { ...(await Roblox.FFlags.parseFlags(false)), ...(await Roblox.FFlags.parseFlags(true)) };
 		console.log(fflags);
 		await shellFS.writeFile(path.join(robloxPath, "Contents/MacOS/ClientSettings/ClientAppSettings.json"), JSON.stringify(fflags));
 		console.log(`Wrote FFlags to ${path.join(robloxPath, "Contents/MacOS/ClientSettings/ClientAppSettings.json")}`);

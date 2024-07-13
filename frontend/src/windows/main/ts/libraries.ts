@@ -22,7 +22,13 @@ const LibPaths = {
 			prod: "/lib/watchdog",
 			dev: "/build/lib/MacOS/watchdog"
 		}
-	}
+	},
+	window_manager: {
+		darwin: {
+			prod: "/lib/window_manager",
+			dev: "/build/lib/MacOS/window_manager"
+		}
+	},
 
 } as const;
 

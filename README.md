@@ -23,8 +23,9 @@ For more recent builds, see the [nightly releases](https://nightly.link/Origamin
 AppleBlox contains pre-compiled binaries of some programs at `build/lib/MacOS` from:
 - https://github.com/vjeantet/alerter (Taken from the github releases)
 - https://github.com/Rayrsn/Discord-RPC-cli (Built from source on my machine)
+- https://github.com/OrigamingWasTaken/window_manager (Built from source on my machine)
 
-I plan on modifying this to compile those binaries at build step, but that would mean having to install Rust and Go, so I'm not really sure...
+I plan on modifying this to compile those binaries at build step, but that would mean having to install Rust and Xcode, so I'm not really sure...
 If you're worried that those could be modified by me or another contributor to include malicious code, you can always scan the app on https://www.virustotal.com .
 
 ## Developpement

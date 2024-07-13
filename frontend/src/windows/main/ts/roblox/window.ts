@@ -1,62 +1,60 @@
-import { os } from "@neutralinojs/lib";
+import { computer, os } from "@neutralinojs/lib";
+import { libraryPath } from "../libraries";
+
+const window_manager = libraryPath("window_manager")
 
 export class RobloxWindow {
-	public static async isFullscreen() {
-		return !(await os.execCommand(`osascript -e 'tell application "System Events" to tell process "Roblox" to get value of attribute "AXFullScreen" of window 1'`)).stdOut.includes("false");
-	}
+	private readonly windowId: number = 1;
 
-	public static async toggleFullscreen(state: boolean) {
-		if (state) {
-			if (await this.isFullscreen()) return;
-			await os.execCommand(
-				`osascript -e 'tell application "Roblox" to activate' -e 'delay 0.5' -e 'tell application "System Events" to tell process "Roblox" to if (value of attribute "AXFullScreen" of window 1) is false then keystroke "f" using {command down}'`
-			);
-		} else {
-			if (await !this.isFullscreen()) return;
-			await os.execCommand(
-				`osascript -e 'tell application "Roblox" to activate' -e 'delay 0.5' -e 'tell application "System Events" to tell process "Roblox" to keystroke "f" using {command down}'`
-			);
-		}
-	}
-
-	public static async moveTo(x: number | string, y: number | string) {
-		os.execCommand(`osascript -e 'on run {endX, endY}
-    set steps to 2
-    set delayTime to 0.001
-    tell application "System Events" to tell process "Roblox"
-        set {startX, startY} to position of front window
-        set stepX to (endX - startX) / steps
-        set stepY to (endY - startY) / steps
-        repeat with i from 0 to steps
-            set posX to startX + (i * stepX)
-            set posY to startY + (i * stepY)
-            set position of front window to {posX, posY}
-            delay delayTime
-        end repeat
-        set position of front window to {endX, endY}
-    end tell
-end run' -- ${x} ${y}`);
+	/**
+	 * Move the Roblox window smoothly
+	 * @param x The target x-coordinate
+	 * @param y The target y-coordinate
+	 */
+	public static async move(x: number | string, y: number | string) {
+		os.execCommand(`${window_manager} move "Roblox" ${x} ${y}`);
 		console.log(`Moved Roblox window to "${x},${y}"`);
 	}
-
+	/**
+	 * Resize the Roblox window smoothly
+	 * @param width The target width
+	 * @param height The target height
+	 */
 	public static async resize(width: number | string, height: number | string) {
-		os.execCommand(`osascript -e 'on run {endWidth, endHeight}
-    set steps to 2
-    set delayTime to 0.001
-    tell application "System Events" to tell process "Roblox"
-        set {startWidth, startHeight} to size of front window
-        set stepWidth to (endWidth - startWidth) / steps
-        set stepHeight to (endHeight - startHeight) / steps
-        repeat with i from 0 to steps
-            set newWidth to startWidth + (i * stepWidth)
-            set newHeight to startHeight + (i * stepHeight)
-            set size of front window to {newWidth, newHeight}
-            delay delayTime
-        end repeat
-        set size of front window to {endWidth, endHeight}
-    end tell
-end run' -- ${width} ${height}
-`);
+		os.execCommand(`${window_manager} resize "Roblox" ${width} ${height}`);
 		console.log(`Resized Roblox window to "${width},${height}"`);
+	}
+
+	public static async isFullscreen(): Promise<boolean> {
+		const getInfoCmd = await os.execCommand(`osascript -e 'tell application "System Events"
+            tell application "Roblox" to activate
+            try
+                tell process "Roblox"
+                    set isFullscreen to value of attribute "AXFullScreen" of front window
+                end tell
+                return isFullscreen
+            on error
+                return "true"
+            end try
+        end tell'
+        `);
+		return getInfoCmd.stdOut.trim() === "true";
+	}
+
+	/**
+	 * Set the fullscreen mode for the Roblox window
+	 * @param fullscreen If true, activates fullscreen mode; if false, deactivates it
+	 */
+	public static async setFullscreen(fullscreen: boolean): Promise<void> {
+		if ((await this.isFullscreen()) === fullscreen) return;
+		await os.execCommand(
+			`osascript -e 'tell application "Roblox" to activate' -e 'delay 0.5' -e 'tell application "System Events" to tell process "Roblox" to keystroke "f" using {command down}'`
+		);
+	}
+
+	public static async maximize() {
+		this.move(0, 0);
+		const screenSize = (await computer.getDisplays())[0].resolution;
+		this.resize(screenSize.width, screenSize.height - 100);
 	}
 }
