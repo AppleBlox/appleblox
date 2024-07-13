@@ -8,6 +8,8 @@ jobs:
   virustotal:
     permissions:
       contents: write
+      actions: read
+      packages: read
     runs-on: ubuntu-latest
     steps:
       -
