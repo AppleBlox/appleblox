@@ -71,7 +71,7 @@
 			{
 				name: "Inspirations",
 				description: "Technologies used",
-				id: "technologies",
+				id: "inspirations",
 				interactables: [
 					{
 						label: "Bloxstrap - https://github.com/pizzaboxer/bloxstrap",
