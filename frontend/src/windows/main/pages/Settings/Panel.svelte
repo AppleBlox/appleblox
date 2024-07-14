@@ -139,7 +139,6 @@
 									class="max-w-[20%] text-center bg-gray-900 border-none grayscale ml-5 mr-4"
 									bind:value={sections[section.id][inter.id][0]}
 									placeholder={inter.options.default.toString()}
-									disabled={true}
 								/>
 							</div>
 						{/if}

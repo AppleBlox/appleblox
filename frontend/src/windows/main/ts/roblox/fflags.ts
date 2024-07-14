@@ -85,78 +85,181 @@ export class RobloxFFlags {
 	static async parseFlags(preset = false): Promise<Object> {
 		// Get the path to Application Supoort
 		const appPath = await dataPath();
-		let fflagsJson: { [key: string]: string | number } = {};
+		let fflagsJson: { [key: string]: string | number | boolean } = {};
+		// utility function
+		const makeflag = (flags: { [key: string]: number | string | boolean }) => {
+			for (const [flag, value] of Object.entries(flags)) {
+				fflagsJson[flag] = value;
+			}
+		};
+
 		if (preset) {
-			if (!(await pathExists(path.join(appPath, "fastflags.json")))) {
+			const categories = await loadSettings("fastflags");
+			if (!categories) {
+				console.error("Couldn't load the 'fastlfags' settings while parsing FFlags");
 				return {};
 			}
-			const neuPath = path.join(appPath, "fastflags.json");
-			const ohioFinalBoss = JSON.parse(await filesystem.readFile(neuPath));
 			// i know this isn't efficient, but i didn't want to re-write the fastlfags saving system.
 			// in the future, i may change this to a dynamic system.
-			for (const name of Object.keys(ohioFinalBoss.presets)) {
-				const data = ohioFinalBoss.presets[name];
+			// Graphics
+			for (const name of Object.keys(categories.graphics)) {
+				const data = categories.graphics[name];
+				if (typeof data === "boolean" && !data) continue;
 				switch (name) {
 					case "ff_fps":
 						if (data[0] > 60) {
-							fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
-							fflagsJson["FFlagDebugGraphicsPreferVulkan"] = "true";
+							makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
 						}
-						fflagsJson["DFIntTaskSchedulerTargetFps"] = data[0];
+						makeflag({ DFIntTaskSchedulerTargetFps: data[0] });
 						break;
 					case "ff_lightning":
-						if (data.disabled) break;
 						switch (data.value) {
 							case "voxel":
-								fflagsJson["DFFlagDebugRenderForceTechnologyVoxel"] = "true";
+								makeflag({ DFFlagDebugRenderForceTechnologyVoxel: true });
 								break;
 							case "shadowmap":
-								fflagsJson["FFlagDebugForceFutureIsBrightPhase2"] = "true";
+								makeflag({ FFlagDebugForceFutureIsBrightPhase2: true });
 								break;
 							case "future":
-								fflagsJson["FFlagDebugForceFutureIsBrightPhase3"] = "true";
+								makeflag({ FFlagDebugForceFutureIsBrightPhase3: true });
 								break;
 						}
 						break;
 					case "ff_engine":
-						if (data.disabled) break;
 						switch (data.value) {
 							// don't know if disabling Metal works, need testing. For now it uses OpenGL
 							case "opengl":
-								fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
-								fflagsJson["FFlagDebugGraphicsPreferOpenGL"] = "true";
+								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferOpenGL: true });
 								break;
 							case "metal":
-								fflagsJson["FFlagDebugGraphicsPreferMetal"] = "true";
+								makeflag({ FFlagDebugGraphicsPreferMetal: true });
 								break;
 							case "vulkan":
-								fflagsJson["FFlagDebugGraphicsDisableMetal"] = "true";
-								fflagsJson["FFlagDebugGraphicsPreferVulkan"] = "true";
+								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
 								break;
 						}
 						break;
-					case "ff_gui":
-						if (data.length < 1) break;
-						fflagsJson["DFIntCanHideGuiGroupId"] = data;
+					case "ff_voxel_shadows":
+						makeflag({ DFFlagDebugPauseVoxelizer: true });
 						break;
 					case "ff_display":
-						if (data) {
-							fflagsJson["DFIntDebugFRMQualityLevelOverride"] = 1;
-						}
+						makeflag({ DFIntDebugFRMQualityLevelOverride: 1 });
 						break;
 					case "ff_graphics":
-						if (data) {
-							fflagsJson["FFlagCommitToGraphicsQualityFix"] = "true";
-							fflagsJson["FFlagFixGraphicsQuality"] = "true";
-						}
+						makeflag({ FFlagCommitToGraphicsQualityFix: true, FFlagFixGraphicsQuality: true });
+						break;
+					case "ff_grass":
+						makeflag({ FIntFRMMinGrassDistance: 0, FIntFRMMaxGrassDistance: 0, FIntRenderGrassDetailStrands: 0, FIntRenderGrassHeightScaler: 0 });
+						break;
+					case "ff_shadows":
+						makeflag({ FIntRenderShadowIntensity: 0 });
+						break;
+					case "ff_player_shadows":
+						makeflag({ FIntRenderShadowIntensity: 0 });
+						break;
+					case "ff_postfx":
+						makeflag({ FFlagDisablePostFx: true });
+						break;
+					case "ff_antialiasing":
+						makeflag({ FIntDebugForceMSAASamples: 0 });
+						break;
+					case "ff_polygons":
+						makeflag({
+							DFIntCSGLevelOfDetailSwitchingDistance: 0,
+							DFIntCSGLevelOfDetailSwitchingDistanceL12: 0,
+							DFIntCSGLevelOfDetailSwitchingDistanceL23: 0,
+							DFIntCSGLevelOfDetailSwitchingDistanceL34: 0,
+						});
+						break;
+					case "ff_light_updates":
+						makeflag({ FIntRenderLocalLightUpdatesMax: 1, FIntRenderLocalLightUpdatesMin: 1 });
+						break;
+				}
+			}
+
+			// Visual
+			for (const name of Object.keys(categories.visual)) {
+				const data = categories.visual[name];
+				if (typeof data === "boolean" && !data) continue;
+				switch (name) {
+					case "ff_textures":
+						makeflag({
+							FStringPartTexturePackTablePre2022: '{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
+							FStringPartTexturePackTable2022: '{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
+							FStringTerrainMaterialTablePre2022: "",
+							FStringTerrainMaterialTable2022: "",
+						});
+						break;
+					case "ff_lowquality":
+						makeflag({ DFFlagTextureQualityOverrideEnabled: true, DFIntTextureQualityOverride: 0 });
+						break;
+					case "ff_players_textures":
+						makeflag({ DFIntTextureCompositorActiveJobs: 0 });
+						break;
+					case "ff_debug_sky":
+						makeflag({ FFlagDebugSkyGray: true });
+						break;
+					case "ff_outlines":
+						makeflag({ DFFlagDebugDrawBroadPhaseAABBs: true });
+						break;
+				}
+			}
+
+			// UI
+			for (const name of Object.keys(categories.ui)) {
+				const data = categories.ui[name];
+				if (typeof data === "boolean" && !data) continue;
+				switch (name) {
+					case "ff_font_size":
+						makeflag({ FIntFontSizePadding: data[0] });
+						break;
+					case "ff_chromeui":
+						makeflag({
+							FFlagEnableInGameMenuChrome: true,
+							FFlagEnableReportAbuseMenuRoactABTest2: true,
+							FFlagChromeBetaFeature: true,
+							FFlagEnableInGameMenuChromeABTest2: true,
+						});
+						break;
+				}
+			}
+
+			// Utility
+			for (const name of Object.keys(categories.utility)) {
+				const data = categories.utility[name];
+				if (typeof data === "boolean" && !data) continue;
+				switch (name) {
+					case "ff_gui":
+						makeflag({ DFIntCanHideGuiGroupId: data });
+						break;
+					case "ff_fullbright":
+						makeflag({
+							FFlagFastGPULightCulling3: true,
+							FIntRenderShadowIntensity: 0,
+							DFIntCullFactorPixelThresholdShadowMapHighQuality: 2147483647,
+							DFIntCullFactorPixelThresholdShadowMapLowQuality: 2147483647,
+							FFlagNewLightAttenuation: true,
+							FIntRenderShadowmapBias: -1,
+							DFFlagDebugPauseVoxelizer: true,
+						});
+						break;
+					case "ff_telemetry":
+						makeflag({
+							FFlagDebugDisableTelemetryEphemeralCounter: true,
+							FFlagDebugDisableTelemetryEphemeralStat: true,
+							FFlagDebugDisableTelemetryEventIngest: true,
+							FFlagDebugDisableTelemetryPoint: true,
+							FFlagDebugDisableTelemetryV2Counter: true,
+							FFlagDebugDisableTelemetryV2Event: true,
+							FFlagDebugDisableTelemetryV2Stat: true,
+						});
 						break;
 				}
 			}
 
 			const integrationsFlags = await loadSettings("integrations");
-			if (integrationsFlags && integrationsFlags.sdk.enabled) {
-				fflagsJson["FFlagUserIsBloxstrap"] = "true";
-				if (integrationsFlags.sdk.window) fflagsJson["FFlagUserAllowsWindowMovement"] = "true";
+			if (integrationsFlags && integrationsFlags.sdk.enabled && integrationsFlags.sdk.window) {
+				makeflag({ FFlagUserIsBloxstrap: true, FFlagUserAllowsWindowMovement: true });
 			}
 
 			return fflagsJson;

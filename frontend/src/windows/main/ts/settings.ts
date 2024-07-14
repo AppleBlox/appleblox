@@ -7,50 +7,26 @@ export async function dataPath(): Promise<string> {
 }
 
 /** Saves the data provided to the Application Support folder */
-let saveQueue: { [key: string]: string } = {};
+let saveQueue: { panelId: string; data: string }[] = [];
 let hasInterval = false;
 if (!hasInterval) {
 	hasInterval = true;
-	setInterval(() => {
-		for (const [path, data] of Object.entries(saveQueue)) {
-			filesystem.writeFile(path, data).catch(console.error);
-			delete saveQueue[path];
+	setInterval(async () => {
+		const savePath = await dataPath();
+		// Create the directory if it doesn't exist
+		await os.execCommand(`mkdir -p "${savePath}"`);
+		for (const { panelId, data } of saveQueue) {
+			const filePath = path.join(savePath, panelId + ".json");
+			await os.execCommand(`rm -f "${filePath}"`);
+			await filesystem.writeFile(filePath, data).catch(console.error);
+			saveQueue = saveQueue.filter((q) => q.panelId !== panelId);
 		}
-	}, 1000);
+	}, 100);
 }
 
-// Keeps track of the debounces
-const lastSaveTime = new Map<string, number>();
 /** Saves the settings of a panel by its ID. Can only save a panel once every 100ms */
 export async function saveSettings(panelId: string, data: Object): Promise<void> {
-    const now = Date.now();
-    const lastSave = lastSaveTime.get(panelId);
-
-	// ignore save requests if they don't wait 100ms
-    if (lastSave && (now - lastSave) < 100) {
-        return;
-    }
-
-    // update the last save time
-    lastSaveTime.set(panelId, now);
-
-    try {
-        const savePath = await dataPath();
-        if (!(await pathExists(savePath))) {
-            await filesystem.createDirectory(savePath);
-        }
-        try {
-			const filepath = `${savePath}/${panelId}.json`;
-            if (await pathExists(filepath)) {
-                await filesystem.remove(filepath);
-            }
-            saveQueue[`${savePath}/${panelId}.json`] = JSON.stringify(data);
-        } catch (err) {
-            console.error(err);
-        }
-    } catch (err) {
-        throw err;
-    }
+	saveQueue.push({ panelId, data: JSON.stringify(data) });
 }
 
 /** Loads the data from the specified panelID */

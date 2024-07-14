@@ -23,7 +23,7 @@
   "tokenSecurity": "none",
   "modes": {
     "window": {
-      "title": "appleblox",
+      "title": "AppleBlox",
       "width": 1000,
       "height": 600,
       "minWidth": 400,
