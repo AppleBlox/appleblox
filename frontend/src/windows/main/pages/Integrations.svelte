@@ -57,16 +57,7 @@
 							type: "boolean",
 							state: true,
 						},
-					},
-					/*{
-						label: "See current place when teleporting",
-						description: "When you teleport (or join) a place, you will be notified of its name and other informations",
-						id: "notify_place",
-						options: {
-							type: "boolean",
-							state: false,
-						},
-					},*/
+					}
 				],
 			},
 			{
@@ -154,5 +145,6 @@
 	panel={panelOpts}
 	on:settingsChanged={(e) => {
 		settingsChanged(e.detail);
+		console.log(e.detail)
 	}}
 />
