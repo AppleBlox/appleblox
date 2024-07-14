@@ -71,7 +71,7 @@
 			<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
 			<p class="text-[13px] text-neutral-700 dark:text-neutral-300">{@html panel.description}</p>
 		</div>
-		{#each panel.sections || [] as section}
+		{#each panel.sections || [] as section (section.id)}
 			<div class="mt-5">
 				<p class="text-xl font-bold text-red-600 dark:text-red-400">{section.name}</p>
 				<p class="text-[13px] text-black dark:text-neutral-50">{section.description}</p>
