@@ -3,10 +3,9 @@ import { filesystem, os } from "@neutralinojs/lib";
 /** Checks if the path provided exists */
 export async function pathExists(path: string) {
 	try {
-		await filesystem.getStats(path);
-		return true;
+		return (await os.execCommand(`[ -e "${path}" ] && echo "true" || echo "false"`)).stdOut.trim() === "true"
 	} catch (err) {
-		return false;
+		console.error(err);
 	}
 }
 
