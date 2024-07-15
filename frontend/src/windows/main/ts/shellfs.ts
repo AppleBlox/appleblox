@@ -41,6 +41,51 @@ class shellFS {
             console.error(err);
         }
     }
+
+    /**
+     * Copy the file/folder at the specified path.
+     * @param source - The path where the source is.
+     * @param dest - Where to copy.
+     */
+    public static async copy(source: string, dest: string, recursive = false): Promise<void> {
+        try {
+            const cmd = `cp ${recursive ? '-r ' : ''} "${source}" "${dest}"`
+            await os.execCommand(cmd)
+        } catch (err) {
+            console.error("Couldn't copy");
+            console.error(err);
+        }
+    }
+
+    /**
+     * Move the file/folder at the specified path.
+     * @param source - The path where the source is.
+     * @param dest - Where to move.
+     */
+    public static async move(source: string, dest: string): Promise<void> {
+        try {
+            const cmd = `mv "${source}" "${dest}"`
+            await os.execCommand(cmd);
+        } catch (err) {
+            console.error("Couldn't move");
+            console.error(err);
+        }
+    }
+
+    /**
+     * Merge the file/folder at the specified path.
+     * @param source - The path where the source is.
+     * @param dest - Where to merge.
+     */
+    public static async merge(source: string, dest: string): Promise<void> {
+        try {
+            const cmd = `rsync -a "${source}" "${dest}"`
+            await os.execCommand(cmd);
+        } catch (err) {
+            console.error("Couldn't merge");
+            console.error(err);
+        }
+    }
 }
 
 export default shellFS;
