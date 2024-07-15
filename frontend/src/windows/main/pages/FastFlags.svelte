@@ -220,8 +220,26 @@
 						},
 					},
 					{
+						label: "Use old font",
+						description: "Revert BuilderFont",
+						id: "ff_old_font",
+						options: {
+							type: "boolean",
+							state: false,
+						},
+					},
+					{
+						label: "Disable ChromeUI",
+						description: "Shows the new ChromeUI interface (leave AB testing)",
+						id: "ff_chromeui_off",
+						options: {
+							type: "boolean",
+							state: false,
+						},
+					},
+					{
 						label: "Enable ChromeUI",
-						description: "Shows the new ChromeUI interface",
+						description: "Shows the new ChromeUI interface (if you haven't got it already)",
 						id: "ff_chromeui",
 						options: {
 							type: "boolean",

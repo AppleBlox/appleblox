@@ -213,6 +213,9 @@ export class RobloxFFlags {
 					case "ff_font_size":
 						makeflag({ FIntFontSizePadding: data[0] });
 						break;
+					case "ff_old_font":
+						makeflag({ FFlagEnableNewFontNameMappingABTest2: false });
+						break;
 					case "ff_chromeui":
 						makeflag({
 							FFlagEnableInGameMenuChrome: true,
@@ -220,6 +223,9 @@ export class RobloxFFlags {
 							FFlagChromeBetaFeature: true,
 							FFlagEnableInGameMenuChromeABTest2: true,
 						});
+						break;
+					case "ff_chromui_off":
+						makeflag({ FFlagEnableInGameMenuChromeABTest3: false });
 						break;
 				}
 			}
