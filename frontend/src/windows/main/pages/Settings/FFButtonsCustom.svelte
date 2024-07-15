@@ -37,7 +37,7 @@
 			toast.error("You cannot add an empty flag!");
 			return;
 		}
-		if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(addedFlag)) {
+		if (/[!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(addedFlag)) {
 			toast.error("A flag cannot contain special characters");
 			return;
 		}
