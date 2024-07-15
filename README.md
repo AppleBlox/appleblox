@@ -10,7 +10,6 @@
 ![Static Badge](https://img.shields.io/badge/built_with_apples-%23F43F5E)
 
 # AppleBlox
-<sub>https://appleblox.com/</sub>
 
 AppleBlox is a simple Roblox launcher for **MacOS**, heavily inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap).
 Supports DiscordRPC, Fast-flags & more to come.
