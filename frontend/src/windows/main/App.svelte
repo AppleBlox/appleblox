@@ -13,6 +13,7 @@
 	import { launchRoblox } from "./ts/roblox/launch";
 	import { loadSettings } from "./ts/settings";
 	import Updater from "./Updater.svelte";
+	import Mods from "./pages/Mods.svelte";
 
 	let currentPage: string;
 
@@ -58,22 +59,22 @@
 	setMode("system");
 
 	// Handle app links
-	document.addEventListener('click', (event)=>{
-        if (!event.target) return;
-        // @ts-expect-error
-        if (event.target.tagName === 'A') {
-            // Prevent default behavior (opening link)
-            event.preventDefault();
+	document.addEventListener("click", (event) => {
+		if (!event.target) return;
+		// @ts-expect-error
+		if (event.target.tagName === "A") {
+			// Prevent default behavior (opening link)
+			event.preventDefault();
 
-            // Get the URL from the clicked link
-            // @ts-expect-error
-            const url = event.target.href;
-            console.log(`Opening link: ${url}`);
+			// Get the URL from the clicked link
+			// @ts-expect-error
+			const url = event.target.href;
+			console.log(`Opening link: ${url}`);
 
-            // Example: Open link in a new tab
-            os.open(url);
-        }
-    });
+			// Example: Open link in a new tab
+			os.open(url);
+		}
+	});
 </script>
 
 <main>
@@ -116,6 +117,10 @@
 			{:else if currentPage === "credits"}
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Credits />
+				</div>
+			{:else if currentPage === "mods"}
+				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
+					<Mods />
 				</div>
 			{:else}
 				<div class="flex items-center m-32 space-x-4 opacity-30">

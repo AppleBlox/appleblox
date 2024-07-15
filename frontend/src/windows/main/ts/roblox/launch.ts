@@ -280,6 +280,15 @@ export async function launchRoblox(
 			await shellFS.remove(path.join(robloxPath, "Contents/MacOS/ClientSettings/"));
 			setLaunchText("Removing current ClientAppSettings...");
 		}
+
+		const modSettings = await loadSettings("mods");
+		if (modSettings && modSettings.general.enable_mods) {
+			setLaunchProgress(30);
+			setLaunchText("Copying Mods...");
+
+			await Roblox.Mods.copyToFiles();
+		}
+
 		setLaunchProgress(40);
 		setLaunchText("Copying fast flags...");
 		console.log("Copying fast flags");
@@ -301,6 +310,11 @@ export async function launchRoblox(
 				robloxInstance.on("exit", () => {
 					setRobloxConnected(false);
 					rbxInstance = null;
+					Roblox.Mods.restoreRobloxFolders()
+						.catch(console.error)
+						.then(() => {
+							console.log(`Removed mod files from "${path.join(robloxPath, "Contents/Resources/")}"`);
+						});
 					console.log("Roblox exited");
 				});
 			} catch (err) {

@@ -13,6 +13,7 @@
 	import FfButtonsCustom from "./FFButtonsCustom.svelte";
 	import * as Tooltip from "$lib/components/ui/tooltip";
 	import { haveSameKeys } from "../../ts/utils";
+	import ModsUi from "./ModsUI.svelte";
 
 	export let panel: SettingsPanel;
 
@@ -80,7 +81,7 @@
 						<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
 					{/if}
 					<div class="flex items-center">
-						{#if inter.options.type !== "button" && inter.options.type !== "ff_buttons_custom"}
+						{#if inter.options.type !== "button" && inter.options.type !== "ff_buttons_custom" && !inter.hideTitle}
 							<div>
 								<p class="font-semibold text-[#1f1717] dark:text-red-100">{inter.label}</p>
 								<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{@html inter.description}</p>
@@ -104,6 +105,8 @@
 							</div>
 						{:else if inter.options.type == "ff_buttons_custom"}
 							<FfButtonsCustom />
+						{:else if inter.options.type == "mods_ui"}
+							<ModsUi />
 						{:else if inter.options.type === "boolean"}
 							<Switch
 								class="ml-auto mr-4"

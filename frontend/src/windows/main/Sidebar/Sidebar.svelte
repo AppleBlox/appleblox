@@ -9,6 +9,7 @@
 	import FastFlagsIcon from "@/assets/sidebar/fastflags.png";
 	import RobloxIcon from "@/assets/sidebar/roblox.png";
 	import PlayIcon from "@/assets/sidebar/play.png";
+	import ModsIcon from "@/assets/sidebar/mods.png";
 
 	import MiscIcon from "@/assets/sidebar/misc.png";
 	import CreditsIcon from "@/assets/sidebar/credits.png";
@@ -26,6 +27,7 @@
 	const sidebarBtns: SidebarItem[] = [
 		{ label: "Integrations", id: "integrations", icon: IntegrationsIcon },
 		{ label: "Fast Flags", id: "fastflags", icon: FastFlagsIcon },
+		{ label: "Mods", id: "mods", icon: ModsIcon },
 		{ label: "Misc", id: "misc", icon: MiscIcon },
 		{ label: "Credits", id: "credits", icon: CreditsIcon },
 	];
