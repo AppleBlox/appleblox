@@ -18,6 +18,40 @@ You can get a demo of the app from the [Releases](https://github.com/OrigamingWa
 
 For more recent builds, see the [nightly releases](https://nightly.link/OrigamingWasTaken/appleblox/workflows/build/main?preview)
 
+# Features
+
+#### Integrations
+
+- Discord Rich Presence
+	 Show which games you're playing, when you started, and supports buttons to join your server. If the Bloxstrap SDK settings has been enabled, games will be able to set custom rich presence.
+- Server notifications
+	 When joining a server, you will be notified of its location. (Exemple: Paris, Île-de-France, FR)
+- Bloxstrap SDK
+	 AppleBlox supports many features from Bloxstrap including [the sdk](https://github.com/pizzaboxer/bloxstrap/wiki/Integrating-Bloxstrap-functionality-into-your-game). This let's games set custom **discord rich presence**, and with our addons, much more like control the Roblox window ([see this exemple for a rythm game](https://streamable.com/jwidvp?t=55)).
+
+#### Fast Flags
+
+- Presets
+     You can use various presets to tweak your game. Things like: FPS cap, lightning technology, rendering engine, etc... Some can be used to get better performance in-game.
+- Advanced Editor
+     You can also add your own FastFlags using the advanced editor. You can add flags, set their value, and enable / disable them. All modifications will be carried across Roblox updates.
+
+#### Mods
+
+You can add mods to tweak Roblox's UI via the `~Library/AppleBlox/Mods` folder (there is a button in the app to open it). To do so, simply drag a Mod folder into this location. Exemple:
+insert image here
+
+Then, from AppleBlox, you can choose to enable / disable mods globally or individually. Please note that mods are loaded in alphabetical order (123,abc).
+
+#### Misc Features
+
+- Multi-instances
+     Launch multiple windows of Roblox at the same time. Please note that AppleBlox only tracks data of **1** window, launched from the main menu.
+- Launch Shortcut
+     Easily save a shortcut to launch Roblox directly.
+- Console Redirection
+     Used for saving JavaScript logs to a file.
+
 ## Pre-compiled Binaries
 
 AppleBlox contains pre-compiled binaries of some programs at `build/lib/MacOS` from:
