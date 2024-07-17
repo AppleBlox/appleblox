@@ -1,7 +1,7 @@
-import { computer, os } from "@neutralinojs/lib";
-import { libraryPath } from "../libraries";
+import { computer, os } from '@neutralinojs/lib';
+import { libraryPath } from '../libraries';
 
-const window_manager = libraryPath("window_manager")
+const window_manager = libraryPath('window_manager');
 
 export class RobloxWindow {
 	private readonly windowId: number = 1;
@@ -38,7 +38,7 @@ export class RobloxWindow {
             end try
         end tell'
         `);
-		return getInfoCmd.stdOut.trim() === "true";
+		return getInfoCmd.stdOut.trim() === 'true';
 	}
 
 	/**
@@ -52,9 +52,15 @@ export class RobloxWindow {
 		);
 	}
 
+	/** Maximizes the roblox window on the desktop */
 	public static async maximize() {
 		this.move(0, 0);
 		const screenSize = (await computer.getDisplays())[0].resolution;
 		this.resize(screenSize.width, screenSize.height - 100);
+	}
+
+	/** Sets the desktop resolution */
+	public static async setDesktopRes(width: number | string, height: number | string, duration = 1) {
+		os.execCommand(`${libraryPath('window_manager')} setres ${width} ${height} ${duration} 1`, { background: true });
 	}
 }

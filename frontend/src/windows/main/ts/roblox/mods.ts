@@ -1,19 +1,21 @@
-import path from "path-browserify";
-import { pathExists, sleep } from "../utils";
-import { filesystem, os } from "@neutralinojs/lib";
-import { getRobloxPath } from "./path";
-import shellFS from "../shellfs";
+import path from 'path-browserify';
+import { pathExists, sleep } from '../utils';
+import { filesystem, os } from '@neutralinojs/lib';
+import { getRobloxPath } from './path';
+import shellFS from '../shellfs';
+import { toast } from 'svelte-sonner';
+import { showNotification } from '../notifications';
 
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
 	static async loadMods(): Promise<{ filename: string; path: string; state: boolean }[]> {
-		const modsFolder = path.join(await os.getEnv("HOME"), "Library/AppleBlox/mods");
+		const modsFolder = path.join(await os.getEnv('HOME'), 'Library/AppleBlox/mods');
 		if (!(await pathExists(modsFolder))) return [];
 		const entries = await filesystem.readDirectory(modsFolder, { recursive: false });
-		const mods = entries.filter((entry) => entry.type === "DIRECTORY");
+		const mods = entries.filter((entry) => entry.type === 'DIRECTORY');
 		return mods
-			.map((mod) => ({ filename: mod.entry.replace(/\.disabled$/, ""), path: mod.path, state: !path.basename(mod.path).endsWith(".disabled") }))
-			.sort((a, b) => ("" + a).localeCompare(b.filename, undefined, { numeric: true }));
+			.map((mod) => ({ filename: mod.entry.replace(/\.disabled$/, ''), path: mod.path, state: !path.basename(mod.path).endsWith('.disabled') }))
+			.sort((a, b) => ('' + a).localeCompare(b.filename, undefined, { numeric: true }));
 	}
 
 	/** Copy the mods to Roblox's files */
@@ -22,17 +24,17 @@ export class RobloxMods {
 		const mods = (await this.loadMods()).filter((m) => m.state).reverse();
 		if (mods.length < 1) return;
 
-		const resourcesFolder = path.join(await getRobloxPath(), "Contents/Resources/");
+		const resourcesFolder = path.join(await getRobloxPath(), 'Contents/Resources/');
 		// Backup, and don't overwrite previous backups (if the previous backup is still here, that means AppleBlox didn't have the chance to restore it last run)
-		const resBackupFolder = path.join(await getRobloxPath(), "Contents/.abloxk");
-		if (!await pathExists(resBackupFolder)) {
-      console.log("Backing up Resources folder")
-			await shellFS.copy(resourcesFolder, path.join(await getRobloxPath(), "Contents/.abloxk"), true);
+		const resBackupFolder = path.join(await getRobloxPath(), 'Contents/.abloxk');
+		if (!(await pathExists(resBackupFolder))) {
+			console.log('Backing up Resources folder');
+			await shellFS.copy(resourcesFolder, path.join(await getRobloxPath(), 'Contents/.abloxk'), true);
 		}
 
 		for (const mod of mods) {
 			console.log(`Adding mod "${mod.path}"`);
-			const subs = (await filesystem.readDirectory(mod.path, { recursive: false })).filter((s) => s.entry !== ".DS_Store");
+			const subs = (await filesystem.readDirectory(mod.path, { recursive: false })).filter((s) => s.entry !== '.DS_Store');
 			for (const sub of subs) {
 				// Merge mod subfolder with roblox files
 				await shellFS.merge(sub.path, resourcesFolder);
@@ -42,8 +44,19 @@ export class RobloxMods {
 
 	/** Restore original roblox folders */
 	static async restoreRobloxFolders() {
-		const resourcesFolder = path.join(await getRobloxPath(), "Contents/Resources/");
-		const resBackupFolder = path.join(await getRobloxPath(), "Contents/.abloxk");
+		const resourcesFolder = path.join(await getRobloxPath(), 'Contents/Resources/');
+		const resBackupFolder = path.join(await getRobloxPath(), 'Contents/.abloxk');
+
+		if (!(await pathExists(resBackupFolder))) {
+			toast.error("The 'Resources' hasn't been found. Mods will not be removed.");
+			showNotification({
+				title: 'Error while removing mods',
+				content: "The 'Resources' hasn't been found. Mods will not be removed.",
+				sound: true,
+				timeout: 6
+			});
+			return
+		}
 
 		await shellFS.remove(resourcesFolder);
 		await shellFS.copy(resBackupFolder, resourcesFolder, true);

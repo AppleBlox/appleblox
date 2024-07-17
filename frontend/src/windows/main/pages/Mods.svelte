@@ -65,7 +65,7 @@
 					},
 					{
 						label: "Join Bloxstrap Discord server",
-						description: "Opens the Mods folder in Finder",
+						description: "Opens the Discord server invitation link (go to the #mods channel)",
 						id: "join_bloxstrap",
 						options: {
 							type: "button",
@@ -76,6 +76,15 @@
 						label: "Enable Mods",
 						description: "Enable/Disable your mods",
 						id: "enable_mods",
+						options: {
+							type: "boolean",
+							state: false,
+						},
+					},
+					{
+						label: "Fix Resolution",
+						description: "Maximizes the resolution when opening Roblox. This fixes some icons not showing in some cases.",
+						id: "spoof_res",
 						options: {
 							type: "boolean",
 							state: false,
