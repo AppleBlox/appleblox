@@ -1,7 +1,7 @@
 import { pathExists, curlGet } from '../utils';
 import shellFS from '../shellfs';
 import { GameEventInfo, RobloxInstance } from './instance';
-import { DiscordRPC, RPCOptions } from '../rpc';
+import { RPCController, RPCOptions } from '../rpc';
 import { computer, os } from '@neutralinojs/lib';
 import { loadSettings } from '../settings';
 import { toast } from 'svelte-sonner';
@@ -65,7 +65,6 @@ export interface IPResponse {
 	readme: string;
 }
 
-let rpc: DiscordRPC | null = null;
 let rpcOptions: RPCOptions = {
 	clientId: '1257650541677383721',
 	smallImage: 'appleblox',
@@ -133,14 +132,8 @@ async function onGameEvent(data: GameEventInfo) {
 					delete rpcOptions.buttonUrl2;
 				}
 
-				if (rpc) {
-					await rpc.update(rpcOptions);
-					console.log('Updated Roblox Game RPC');
-				} else {
-					rpc = new DiscordRPC();
-					await rpc.start(rpcOptions);
-					console.log('Started Roblox Game RPC');
-				}
+				await RPCController.set(rpcOptions);
+				console.log('Message Roblox Game RPC');
 				break;
 			case 'GameDisconnected':
 			case 'GameLeaving':
@@ -151,12 +144,7 @@ async function onGameEvent(data: GameEventInfo) {
 					largeImageText: 'AppleBlox Logo',
 					enableTime: true,
 				};
-				if (rpc) {
-					await rpc.update(normalRpcOptions);
-				} else {
-					rpc = new DiscordRPC();
-					await rpc.start(normalRpcOptions);
-				}
+				RPCController.set(normalRpcOptions);
 				console.log('Disconnected/Left game');
 				break;
 			case 'GameJoinedEntry':
@@ -199,13 +187,7 @@ async function onGameEvent(data: GameEventInfo) {
 								options.largeImage = `https://assetdelivery.roblox.com/v1/asset/?id=${inst.largeImage.assetId}`;
 							}
 							console.log('GameMessageEntry RPC:', options);
-							if (rpc) {
-								await rpc.update(options);
-							} else {
-								rpc = new DiscordRPC();
-								rpcOptions = options;
-								await rpc.start(options);
-							}
+							RPCController.set(options);
 							break;
 						case 'SetWindow':
 							if (settings && !settings.sdk.window) return;

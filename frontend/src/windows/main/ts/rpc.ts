@@ -81,7 +81,11 @@ export class DiscordRPC {
 			return;
 		}
 
-		const args = DiscordRPC.buildArgs(options);
+		const rpcOptions = {
+			...options,
+			state: options.state || ""
+		}
+		const args = DiscordRPC.buildArgs(rpcOptions);
 
 		// Kill any existing discordrpc processes
 		await os.execCommand(`pkill -f "discordrpc_ablox"`);
@@ -230,5 +234,24 @@ export class DiscordRPC {
 		if (options.disableColor) args.push("-C");
 
 		return args;
+	}
+}
+
+let discordRPC: DiscordRPC | null = null;
+export class RPCController {
+	public static async set(options: RPCOptions) {
+		if (discordRPC) {
+			await discordRPC.update(options)
+		} else {
+			discordRPC = new DiscordRPC()
+			await discordRPC.start(options)
+		}
+	}
+
+	public static async stop() {
+		if (discordRPC) {
+			discordRPC.destroy()
+		}
+		await os.execCommand(`pkill -f "discordrpc_ablox"`);
 	}
 }

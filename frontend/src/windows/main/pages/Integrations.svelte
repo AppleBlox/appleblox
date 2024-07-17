@@ -1,136 +1,128 @@
 <script lang="ts">
-	import type { SettingsPanel } from "@/types/settings";
-	import Panel from "./Settings/Panel.svelte";
-	import { loadSettings, saveSettings } from "../ts/settings";
-	import { DiscordRPC } from "../ts/rpc";
-	import { os } from "@neutralinojs/lib";
-
-	let rpc: DiscordRPC | null = null;
+	import type { SettingsPanel } from '@/types/settings';
+	import Panel from './Settings/Panel.svelte';
+	import { loadSettings, saveSettings } from '../ts/settings';
+	import { RPCController } from '../ts/rpc';
+	import { os } from '@neutralinojs/lib';
 
 	async function loadRPC(settings?: { [key: string]: any }) {
 		if (settings == null) {
-			settings = await loadSettings("integrations");
+			settings = await loadSettings('integrations');
 			if (settings == null) {
 				return;
 			}
 		}
 		if (settings.rpc.enable_rpc) {
-			if (!rpc) {
-				rpc = new DiscordRPC();
-			}
-			await rpc
-				.start({
-					clientId: "1257650541677383721",
-					details: "Currently in the launcher",
-					largeImage: "appleblox",
-					largeImageText: "AppleBlox Logo",
-					enableTime: true,
-				})
-				.catch(console.error);
-		} else if (rpc) {
-			await rpc.destroy();
-			rpc = null;
+			await RPCController.set({
+				clientId: '1257650541677383721',
+				details: 'Currently in the launcher',
+				largeImage: 'appleblox',
+				largeImageText: 'AppleBlox Logo',
+				enableTime: true,
+			}).catch(console.error);
+		} else {
+			await RPCController.stop();
 		}
 	}
 
 	function settingsChanged(o: { [key: string]: any }) {
-		saveSettings("integrations", o);
+		saveSettings('integrations', o);
 		loadRPC(o);
 	}
 
 	const panelOpts: SettingsPanel = {
-		name: "Integrations",
-		description: "Configure the integrations between AppleBlox and various apps like Discord with Roblox",
-		id: "integrations",
+		name: 'Integrations',
+		description: 'Configure the integrations between AppleBlox and various apps like Discord with Roblox',
+		id: 'integrations',
 		sections: [
 			{
-				name: "Activity Notifications",
+				name: 'Activity Notifications',
 				description: "Notifications about the game you're playing & your server location",
-				id: "activity",
+				id: 'activity',
 				interactables: [
 					{
-						label: "See server location when joining a game",
-						description: "You will be notified of your current server location (EU, US, etc..)",
-						id: "notify_location",
+						label: 'See server location when joining a game',
+						description: 'You will be notified of your current server location (EU, US, etc..)',
+						id: 'notify_location',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: true,
 						},
-					}
+					},
 				],
 			},
 			{
-				name: "Bloxstrap SDK",
-				description: "Replica of the Bloxstrap SDK. Makes it so games can control certain aspect of your Roblox instance",
-				id: "sdk",
+				name: 'Bloxstrap SDK',
+				description: 'Replica of the Bloxstrap SDK. Makes it so games can control certain aspect of your Roblox instance',
+				id: 'sdk',
 				interactables: [
 					{
-						label: "Enable SDK",
-						description: "Activate a compatibility layer which tries to support every functions of the Bloxstrap SDK",
-						id: "enabled",
+						label: 'Enable SDK',
+						description: 'Activate a compatibility layer which tries to support every functions of the Bloxstrap SDK',
+						id: 'enabled',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: false,
 						},
 					},
 					{
-						label: "Control RPC",
-						description: "Games can change your DiscordRPC",
-						id: "sdk_rpc",
+						label: 'Control RPC',
+						description: 'Games can change your DiscordRPC',
+						id: 'sdk_rpc',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: false,
 						},
 					},
 					{
-						label: "Control Roblox window",
-						description: "Games can define the size of your Roblox window",
-						id: "window",
+						label: 'Control Roblox window',
+						description: 'Games can define the size of your Roblox window',
+						id: 'window',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: false,
 						},
 					},
-				]
+				],
 			},
 			{
-				name: "Discord Rich Presence",
+				name: 'Discord Rich Presence',
 				description: "Show information about what you're playing on Discord",
-				id: "rpc",
+				id: 'rpc',
 				interactables: [
 					{
-						label: "Enable RPC",
-						description: "Whether to enable or disable the Discord RPC",
-						id: "enable_rpc",
+						label: 'Enable RPC',
+						description: 'Whether to enable or disable the Discord RPC',
+						id: 'enable_rpc',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: true,
 						},
 					},
 					{
-						label: "Show game activity",
+						label: 'Show game activity',
 						description: "Shows the game you're playing on your profile",
-						id: "rpc_activity",
+						id: 'rpc_activity',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: true,
 						},
 					},
 					{
-						label: "Show game time",
-						description: "Show the time since you started playing Roblox",
-						id: "rpc_time",
+						label: 'Show game time',
+						description: 'Show the time since you started playing Roblox',
+						id: 'rpc_time',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: true,
 						},
 					},
 					{
-						label: "Allow joining",
-						description: "Allow friends / everyone (depends on your roblox settings) to join you in-game",
-						id: "rpc_join",
+						label: 'Allow joining',
+						description: 'Allow friends / everyone (depends on your roblox settings) to join you in-game',
+						id: 'rpc_join',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: false,
 						},
 					},
@@ -144,6 +136,6 @@
 	panel={panelOpts}
 	on:settingsChanged={(e) => {
 		settingsChanged(e.detail);
-		console.log(e.detail)
+		console.log(e.detail);
 	}}
 />
