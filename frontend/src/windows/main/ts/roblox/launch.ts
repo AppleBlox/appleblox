@@ -79,6 +79,12 @@ async function onGameEvent(data: GameEventInfo) {
 	try {
 		switch (data.event) {
 			case 'GameJoiningEntry':
+				// Change the resolution to support mods
+				if (modSettings && modSettings.general.enable_mods) {
+					const maxRes = (await os.execCommand(`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`)).stdOut.trim().split(' ');
+					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 6);
+				}
+
 				const placeMatch = data.data.match(/place\s+(\d+)\s+/);
 				if (!placeMatch) {
 					console.error("Couldn't retrieve the placeId from the logs");
@@ -120,7 +126,7 @@ async function onGameEvent(data: GameEventInfo) {
 					rpcOptions = {
 						...rpcOptions,
 						buttonText2: 'Join server',
-						buttonUrl2: `"https://rpcdeeplinks.netlify.app?url=roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}"`,
+						buttonUrl2: `"roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}"`,
 					};
 				} else {
 					delete rpcOptions.buttonText2;
@@ -141,7 +147,6 @@ async function onGameEvent(data: GameEventInfo) {
 				const normalRpcOptions = {
 					clientId: '1257650541677383721',
 					details: 'Currently in the launcher',
-					state: 'using AppleBlox',
 					largeImage: 'appleblox',
 					largeImageText: 'AppleBlox Logo',
 					enableTime: true,
@@ -155,12 +160,6 @@ async function onGameEvent(data: GameEventInfo) {
 				console.log('Disconnected/Left game');
 				break;
 			case 'GameJoinedEntry':
-				// Change the resolution to support mods
-				if (modSettings && modSettings.general.enable_mods) {
-					const maxRes = (await os.execCommand(`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`)).stdOut.trim().split(' ');
-					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 3);
-				}
-
 				// Add the join server button
 				const server = data.data.substring(10).split('|');
 				console.log(`Current server: ${server[0]}, Port: ${server[1]}`);

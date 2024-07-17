@@ -37,7 +37,6 @@ events.on("ready", async () => {
 			await rpc.start({
 				clientId: "1257650541677383721",
 				details: "Currently in the launcher",
-				state: "using AppleBlox",
 				largeImage: "appleblox",
 				largeImageText: "AppleBlox Logo",
 				enableTime: true

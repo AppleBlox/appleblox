@@ -87,7 +87,7 @@
 						id: "spoof_res",
 						options: {
 							type: "boolean",
-							state: false,
+							state: true,
 						},
 					},
 					{

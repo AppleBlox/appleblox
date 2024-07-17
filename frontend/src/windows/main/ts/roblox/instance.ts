@@ -24,6 +24,10 @@ const Entries: Entry[] = [
 		match: "[FLog::Output] ! Joining game",
 	},
 	{
+		event: "GameStartJoining",
+		match: "[FLog::SingleSurfaceApp] launchUGCGameInternal"
+	},
+	{
 		event: "GameJoiningPrivateServer",
 		match: "[FLog::GameJoinUtil] GameJoinUtil::joinGamePostPrivateServer",
 	},
@@ -82,7 +86,7 @@ const Patterns: Pattern[] = [
 	{
 		event: "GameCrashEntry",
 		regex: /\[FLog::CrashReportLog\] (.*)/g,
-	},
+	}
 ];
 
 export class RobloxInstance {
@@ -188,7 +192,8 @@ export class RobloxInstance {
 			// Check if the event comes from the logs watcher, and that it is stdOut
 			if (!this.isWatching || !this.logsInstance || evt.detail.id !== this.logsInstance.id) return;
 			if (evt.detail.action === "exit") {
-				console.log("Logs watcher exited");
+				console.log("Logs watcher exited with output: ")
+				console.log(evt.detail.data);
 				console.log("Restarting logs watcher");
 				await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
 				await sleep()
@@ -219,6 +224,8 @@ export class RobloxInstance {
 	}
 
 	private processLines(lines: string[]) {
+		for (const entry of Entries)
+
 		for (const entry of Entries) {
 			const includedLines = lines.filter((line) => line.includes(entry.match));
 			for (const line of includedLines) {

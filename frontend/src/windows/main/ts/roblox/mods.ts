@@ -53,15 +53,20 @@ export class RobloxMods {
 				title: 'Error while removing mods',
 				content: "The 'Resources' hasn't been found. Mods will not be removed.",
 				sound: true,
-				timeout: 6
+				timeout: 6,
 			});
-			return
+			return;
 		}
 
 		await shellFS.remove(resourcesFolder);
 		await shellFS.copy(resBackupFolder, resourcesFolder, true);
 		await shellFS.remove(resBackupFolder);
 
+		showNotification({
+			title: 'Resources restored',
+			content: 'Roblox has been cleaned of any Mods remnants..',
+			timeout: 5,
+		});
 		await sleep(100);
 	}
 }

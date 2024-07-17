@@ -22,7 +22,6 @@
 				.start({
 					clientId: "1257650541677383721",
 					details: "Currently in the launcher",
-					state: "using AppleBlox",
 					largeImage: "appleblox",
 					largeImageText: "AppleBlox Logo",
 					enableTime: true,
@@ -77,7 +76,7 @@
 					{
 						label: "Control RPC",
 						description: "Games can change your DiscordRPC",
-						id: "sdK_rpc",
+						id: "sdk_rpc",
 						options: {
 							type: "boolean",
 							state: false,
