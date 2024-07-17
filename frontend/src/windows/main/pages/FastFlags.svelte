@@ -25,7 +25,7 @@
 							type: "number",
 							default: 60,
 							min: 1,
-							max: 9999,
+							max: 300,
 							step: 1,
 						},
 					},
@@ -190,16 +190,7 @@
 							type: "boolean",
 							state: false,
 						},
-					},
-					{
-						label: "Draw outlines",
-						description: "Draws outlines around every parts",
-						id: "ff_outlines",
-						options: {
-							type: "boolean",
-							state: false,
-						},
-					},
+					}
 				],
 			},
 			{

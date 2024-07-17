@@ -199,9 +199,6 @@ export class RobloxFFlags {
 					case "ff_debug_sky":
 						makeflag({ FFlagDebugSkyGray: true });
 						break;
-					case "ff_outlines":
-						makeflag({ DFFlagDebugDrawBroadPhaseAABBs: true });
-						break;
 				}
 			}
 
