@@ -70,7 +70,7 @@
 			},
 			{
 				name: "Inspirations",
-				description: "Technologies used",
+				description: "People or projects that gave ideas for AppleBlox",
 				id: "inspirations",
 				interactables: [
 					{
