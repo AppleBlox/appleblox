@@ -34,7 +34,8 @@ For more recent builds, see the [nightly releases](https://nightly.link/Origamin
 #### Mods
 
 You can add mods to tweak Roblox's UI via the `~Library/AppleBlox/Mods` folder (there is a button in the app to open it). To do so, simply drag a Mod folder into this location. Exemple:
-[CleanShot 2024-07-17 at 22 46 42@2x](https://github.com/user-attachments/assets/587330fe-9f50-4349-9379-794853b28527)
+
+![CleanShot 2024-07-17 at 22 46 42@2x](https://github.com/user-attachments/assets/587330fe-9f50-4349-9379-794853b28527)
 
 
 Then, from AppleBlox, you can choose to enable / disable mods globally or individually. Please note that mods are loaded in alphabetical order (123,abc).
