@@ -30,7 +30,7 @@
 					{
 						label: "Testers",
 						description: testerlist,
-						id: "devs_list",
+						id: "testers",
 						options: {
 							type: "none"
 						},
@@ -45,7 +45,7 @@
 					{
 						label: "NeutralinoJS - https://neutralino.js.org",
 						description: "The framework used to access the filesystem, etc... and package html,js and css as an app.",
-						id: "devs_list",
+						id: "neutralino",
 						options: {
 							type: "none"
 						},
@@ -53,7 +53,7 @@
 					{
 						label: "Svelte - https://svelte.dev",
 						description: "Framework used for the UI and frontend.",
-						id: "devs_list",
+						id: "svelte",
 						options: {
 							type: "none"
 						},
@@ -61,7 +61,7 @@
 					{
 						label: "Icons - https://icons8.com",
 						description: "All the icons used in the app.",
-						id: "devs_list",
+						id: "icons",
 						options: {
 							type: "none"
 						},
