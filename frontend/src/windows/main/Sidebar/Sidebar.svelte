@@ -29,7 +29,7 @@
 		{ label: "Fast Flags", id: "fastflags", icon: FastFlagsIcon },
 		{ label: "Mods", id: "mods", icon: ModsIcon },
 		{ label: "Misc", id: "misc", icon: MiscIcon },
-		{ label: "Credits", id: "credits", icon: CreditsIcon },
+		{ label: "Info", id: "informations", icon: CreditsIcon },
 	];
 
 	export let currentPage: string = "integrations";

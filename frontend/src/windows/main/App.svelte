@@ -9,10 +9,10 @@
 	import Misc from './pages/Misc.svelte';
 	import { app, os, window as w } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
-	import Credits from './pages/Credits.svelte';
+	import Informations from './pages/Informations.svelte';
 	import { launchRoblox } from './ts/roblox/launch';
 	import { loadSettings } from './ts/settings';
-	import Updater from './Updater.svelte';
+	import Updater from './util/Updater.svelte';
 	import Mods from './pages/Mods.svelte';
 
 	let currentPage: string;
@@ -43,7 +43,6 @@
 	// Sets the theme to the system's mode
 	setMode('system');
 
-	// Handle app links
 	document.addEventListener('click', (event) => {
 		if (!event.target) return;
 		// @ts-expect-error
@@ -101,9 +100,9 @@
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Misc />
 				</div>
-			{:else if currentPage === 'credits'}
+			{:else if currentPage === 'informations'}
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
-					<Credits />
+					<Informations />
 				</div>
 			{:else if currentPage === 'mods'}
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
