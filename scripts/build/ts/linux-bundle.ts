@@ -3,9 +3,9 @@ import neuConfig from '@root/neutralino.config.json';
 import BuildConfig from '@root/build.config';
 import fs from 'fs';
 import path from 'path';
-import {Signale} from 'signale';
-import {c} from 'tar';
-import {copyFolderSync} from './utils';
+import { Signale } from 'signale';
+import { c } from 'tar';
+import { copyFolderSync } from './utils';
 
 export async function linuxBuild() {
 	const logger = new Signale();
@@ -20,11 +20,11 @@ export async function linuxBuild() {
 	for (const app of BuildConfig.linux.architecture) {
 		const appTime = performance.now();
 		const appDist = path.resolve(Dist, 'linux_' + app, BuildConfig.appBundleName);
-		fs.mkdirSync(appDist, {recursive: true});
+		fs.mkdirSync(appDist, { recursive: true });
 		const zipDir = path.resolve(appDist, 'zip');
 		fs.mkdirSync(zipDir);
 
-		const l = new Signale({scope: 'build-linux_' + app, interactive: true});
+		const l = new Signale({ scope: 'build-linux_' + app, interactive: true });
 		l.await(`Building linux-${app}`);
 
 		const neuResources = path.resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
@@ -73,8 +73,8 @@ export async function linuxBuild() {
 		fs.copyFileSync(executable, path.resolve(zipDir, 'neu_main'));
 
 		// Zip
-		await c({gzip: true, file: path.join(appDist, BuildConfig.appName + '.tgz'), cwd: zipDir}, ['.']);
-		fs.rmSync(zipDir, {recursive: true});
+		await c({ gzip: true, file: path.join(appDist, BuildConfig.appName + '.tgz'), cwd: zipDir }, ['.']);
+		fs.rmSync(zipDir, { recursive: true });
 
 		l.complete(`linux_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 		console.log('');
