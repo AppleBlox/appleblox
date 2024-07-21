@@ -32,7 +32,6 @@
     "autoprefixer": "^10.4.19",
     "await-exec-typescript": "github:artemhp/await-exec-typescript",
     "fs-extra": "^11.2.0",
-    "jszip": "^3.10.1",
     "postcss": "^8.4.38",
     "resedit": "^2.0.0",
     "signale": "^1.4.0",

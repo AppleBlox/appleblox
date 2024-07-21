@@ -48,10 +48,10 @@ export class RobloxMods {
 		const resBackupFolder = path.join(await getRobloxPath(), 'Contents/.abloxk');
 
 		if (!(await pathExists(resBackupFolder))) {
-			toast.error("The 'Resources' hasn't been found. Mods will not be removed.");
+			toast.error("The 'Resources' backup hasn't been found. Mods will not be removed.");
 			showNotification({
 				title: 'Error while removing mods',
-				content: "The 'Resources' hasn't been found. Mods will not be removed.",
+				content: "The 'Resources' backup hasn't been found. Mods will not be removed.",
 				sound: true,
 				timeout: 6,
 			});

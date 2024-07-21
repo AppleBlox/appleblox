@@ -1,14 +1,14 @@
-import { filesystem } from "@neutralinojs/lib";
-import { pathExists } from "../utils";
-import path from "path-browserify";
-import type { FFlag } from "@/types/settings";
-import { dataPath, loadSettings } from "../settings";
+import { filesystem } from '@neutralinojs/lib';
+import { pathExists } from '../utils';
+import path from 'path-browserify';
+import type { FFlag } from '@/types/settings';
+import { dataPath, loadSettings } from '../settings';
 
 export class RobloxFFlags {
 	/** Returns every saved FFlags */
 	static async getFlags(): Promise<FFlag[] | undefined> {
 		// Read the saved fflags file inside Application Support
-		const filePath = path.join(await dataPath(), "fflags.json");
+		const filePath = path.join(await dataPath(), 'fflags.json');
 		if (!(await pathExists(filePath))) {
 			await this.setFlags([]);
 		}
@@ -24,7 +24,7 @@ export class RobloxFFlags {
 	/** Saves and backup fflags */
 	static async setFlags(flags: FFlag[]) {
 		const configPath = await dataPath();
-		const filePath = path.join(configPath, "fflags.json");
+		const filePath = path.join(configPath, 'fflags.json');
 		// Check if the AppleBlox/config dir exsits
 		if (!(await pathExists(configPath))) {
 			await filesystem.createDirectory(configPath);
@@ -40,7 +40,7 @@ export class RobloxFFlags {
 	/** Sets a fflag to true or false */
 	static async setFlag(flag: string, enabled: boolean, value: string) {
 		const configPath = await dataPath();
-		const filePath = path.join(configPath, "fflags.json");
+		const filePath = path.join(configPath, 'fflags.json');
 		// Check if the AppleBlox/config dir exsits
 		if (!(await pathExists(configPath))) {
 			await filesystem.createDirectory(configPath);
@@ -94,7 +94,7 @@ export class RobloxFFlags {
 		};
 
 		if (preset) {
-			const categories = await loadSettings("fastflags");
+			const categories = await loadSettings('fastflags');
 			if (!categories) {
 				console.error("Couldn't load the 'fastlfags' settings while parsing FFlags");
 				return {};
@@ -104,66 +104,63 @@ export class RobloxFFlags {
 			// Graphics
 			for (const name of Object.keys(categories.graphics)) {
 				const data = categories.graphics[name];
-				if (typeof data === "boolean" && !data) continue;
+				if (typeof data === 'boolean' && !data) continue;
 				switch (name) {
-					case "ff_fps":
-						if (data[0] > 60) {
-							makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
-						}
+					case 'ff_fps':
 						makeflag({ DFIntTaskSchedulerTargetFps: data[0] });
 						break;
-					case "ff_lightning":
+					case 'ff_lightning':
 						switch (data.value) {
-							case "voxel":
+							case 'voxel':
 								makeflag({ DFFlagDebugRenderForceTechnologyVoxel: true });
 								break;
-							case "shadowmap":
+							case 'shadowmap':
 								makeflag({ FFlagDebugForceFutureIsBrightPhase2: true });
 								break;
-							case "future":
+							case 'future':
 								makeflag({ FFlagDebugForceFutureIsBrightPhase3: true });
 								break;
 						}
 						break;
-					case "ff_engine":
+					case 'ff_engine':
 						switch (data.value) {
 							// don't know if disabling Metal works, need testing. For now it uses OpenGL
-							case "opengl":
+							case 'opengl':
 								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferOpenGL: true });
 								break;
-							case "metal":
+							case 'metal':
 								makeflag({ FFlagDebugGraphicsPreferMetal: true });
 								break;
-							case "vulkan":
+							case 'vulkan':
 								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
 								break;
 						}
 						break;
-					case "ff_voxel_shadows":
+					case 'ff_voxel_shadows':
 						makeflag({ DFFlagDebugPauseVoxelizer: true });
 						break;
-					case "ff_display":
+					case 'ff_display':
 						makeflag({ DFIntDebugFRMQualityLevelOverride: 1 });
 						break;
-					case "ff_graphics":
+					case 'ff_graphics':
 						makeflag({ FFlagCommitToGraphicsQualityFix: true, FFlagFixGraphicsQuality: true });
 						break;
-					case "ff_grass":
+					case 'ff_grass':
 						makeflag({ FIntFRMMinGrassDistance: 0, FIntFRMMaxGrassDistance: 0, FIntRenderGrassDetailStrands: 0, FIntRenderGrassHeightScaler: 0 });
 						break;
-					case "ff_shadows":
+					case 'ff_shadows':
 						makeflag({ FIntRenderShadowIntensity: 0 });
 						break;
-					case "ff_player_shadows":
+					case 'ff_player_shadows':
 						makeflag({ FIntRenderShadowIntensity: 0 });
 						break;
-					case "ff_postfx":
+					case 'ff_postfx':
 						makeflag({ FFlagDisablePostFx: true });
 						break;
-					case "ff_antialiasing":
+					case 'ff_antialiasing':
 						makeflag({ FIntDebugForceMSAASamples: 0 });
 						break;
-					case "ff_polygons":
+					case 'ff_polygons':
 						makeflag({
 							DFIntCSGLevelOfDetailSwitchingDistance: 0,
 							DFIntCSGLevelOfDetailSwitchingDistanceL12: 0,
@@ -171,7 +168,7 @@ export class RobloxFFlags {
 							DFIntCSGLevelOfDetailSwitchingDistanceL34: 0,
 						});
 						break;
-					case "ff_light_updates":
+					case 'ff_light_updates':
 						makeflag({ FIntRenderLocalLightUpdatesMax: 1, FIntRenderLocalLightUpdatesMin: 1 });
 						break;
 				}
@@ -180,23 +177,23 @@ export class RobloxFFlags {
 			// Visual
 			for (const name of Object.keys(categories.visual)) {
 				const data = categories.visual[name];
-				if (typeof data === "boolean" && !data) continue;
+				if (typeof data === 'boolean' && !data) continue;
 				switch (name) {
-					case "ff_textures":
+					case 'ff_textures':
 						makeflag({
 							FStringPartTexturePackTablePre2022: '{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
 							FStringPartTexturePackTable2022: '{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
-							FStringTerrainMaterialTablePre2022: "",
-							FStringTerrainMaterialTable2022: "",
+							FStringTerrainMaterialTablePre2022: '',
+							FStringTerrainMaterialTable2022: '',
 						});
 						break;
-					case "ff_lowquality":
+					case 'ff_lowquality':
 						makeflag({ DFFlagTextureQualityOverrideEnabled: true, DFIntTextureQualityOverride: 0 });
 						break;
-					case "ff_players_textures":
+					case 'ff_players_textures':
 						makeflag({ DFIntTextureCompositorActiveJobs: 0 });
 						break;
-					case "ff_debug_sky":
+					case 'ff_debug_sky':
 						makeflag({ FFlagDebugSkyGray: true });
 						break;
 				}
@@ -205,15 +202,15 @@ export class RobloxFFlags {
 			// UI
 			for (const name of Object.keys(categories.ui)) {
 				const data = categories.ui[name];
-				if (typeof data === "boolean" && !data) continue;
+				if (typeof data === 'boolean' && !data) continue;
 				switch (name) {
-					case "ff_font_size":
+					case 'ff_font_size':
 						makeflag({ FIntFontSizePadding: data[0] });
 						break;
-					case "ff_old_font":
+					case 'ff_old_font':
 						makeflag({ FFlagEnableNewFontNameMappingABTest2: false });
 						break;
-					case "ff_chromeui":
+					case 'ff_chromeui':
 						makeflag({
 							FFlagEnableInGameMenuChrome: true,
 							FFlagEnableReportAbuseMenuRoactABTest2: true,
@@ -221,7 +218,7 @@ export class RobloxFFlags {
 							FFlagEnableInGameMenuChromeABTest2: true,
 						});
 						break;
-					case "ff_chromui_off":
+					case 'ff_chromui_off':
 						makeflag({ FFlagEnableInGameMenuChromeABTest3: false });
 						break;
 				}
@@ -230,12 +227,12 @@ export class RobloxFFlags {
 			// Utility
 			for (const name of Object.keys(categories.utility)) {
 				const data = categories.utility[name];
-				if (typeof data === "boolean" && !data) continue;
+				if (typeof data === 'boolean' && !data) continue;
 				switch (name) {
-					case "ff_gui":
+					case 'ff_gui':
 						makeflag({ DFIntCanHideGuiGroupId: data });
 						break;
-					case "ff_fullbright":
+					case 'ff_fullbright':
 						makeflag({
 							FFlagFastGPULightCulling3: true,
 							FIntRenderShadowIntensity: 0,
@@ -246,7 +243,7 @@ export class RobloxFFlags {
 							DFFlagDebugPauseVoxelizer: true,
 						});
 						break;
-					case "ff_telemetry":
+					case 'ff_telemetry':
 						makeflag({
 							FFlagDebugDisableTelemetryEphemeralCounter: true,
 							FFlagDebugDisableTelemetryEphemeralStat: true,
@@ -260,17 +257,17 @@ export class RobloxFFlags {
 				}
 			}
 
-			const integrationsFlags = await loadSettings("integrations");
+			const integrationsFlags = await loadSettings('integrations');
 			if (integrationsFlags && integrationsFlags.sdk.enabled && integrationsFlags.sdk.window) {
 				makeflag({ FFlagUserIsBloxstrap: true, FFlagUserAllowsWindowMovement: true });
 			}
 
 			return fflagsJson;
 		} else {
-			if (!(await pathExists(path.join(appPath, "fflags.json")))) {
+			if (!(await pathExists(path.join(appPath, 'fflags.json')))) {
 				return {};
 			}
-			const neuPath = path.join(appPath, "fflags.json");
+			const neuPath = path.join(appPath, 'fflags.json');
 			const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(await filesystem.readFile(neuPath));
 			for (const flag of skibidiOhioFanumTax) {
 				if (flag.enabled) {

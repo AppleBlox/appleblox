@@ -306,11 +306,13 @@ export async function launchRoblox(
 				rbxInstance = robloxInstance;
 				robloxInstance.on('gameEvent', onGameEvent);
 				robloxInstance.on('exit', async () => {
-					await Roblox.Mods.restoreRobloxFolders()
-						.catch(console.error)
-						.then(() => {
-							console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
-						});
+					if (modSettings && modSettings.general.enable_mods) {
+						await Roblox.Mods.restoreRobloxFolders()
+							.catch(console.error)
+							.then(() => {
+								console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
+							});
+					}
 					setRobloxConnected(false);
 					rbxInstance = null;
 					console.log('Roblox exited');
