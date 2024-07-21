@@ -14,6 +14,7 @@
 	import { loadSettings } from './ts/settings';
 	import Updater from './util/Updater.svelte';
 	import Mods from './pages/Mods.svelte';
+	import Onboarding from './util/Onboarding.svelte';
 
 	let currentPage: string;
 
@@ -64,6 +65,7 @@
 </script>
 
 <main>
+	<Onboarding />
 	<Updater />
 	<ModeWatcher track={true} />
 	<Toaster richColors />

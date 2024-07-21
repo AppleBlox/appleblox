@@ -9,7 +9,7 @@ import { showNotification } from '../notifications';
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
 	static async loadMods(): Promise<{ filename: string; path: string; state: boolean }[]> {
-		const modsFolder = path.join(await os.getEnv('HOME'), 'Library/AppleBlox/mods');
+		const modsFolder = path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/mods');
 		if (!(await pathExists(modsFolder))) return [];
 		const entries = await filesystem.readDirectory(modsFolder, { recursive: false });
 		const mods = entries.filter((entry) => entry.type === 'DIRECTORY');

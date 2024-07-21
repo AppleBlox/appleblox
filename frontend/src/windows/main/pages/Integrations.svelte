@@ -136,6 +136,5 @@
 	panel={panelOpts}
 	on:settingsChanged={(e) => {
 		settingsChanged(e.detail);
-		console.log(e.detail);
 	}}
 />
