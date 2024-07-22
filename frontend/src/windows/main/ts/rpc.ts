@@ -239,14 +239,32 @@ export class DiscordRPC {
 }
 
 let discordRPC: DiscordRPC | null = null;
+const presets: {[key: string]: RPCOptions} = {
+	inRobloxApp: {
+		clientId: '1257650541677383721',
+		details: 'Currently browsing the menus',
+		state: 'In the launcher',
+		largeImage: 'roblox',
+		largeImageText: 'Roblox',
+		enableTime: true,
+	},
+};
+
 export class RPCController {
+	public static preset(preset: string) {
+		if (presets[preset]) {
+			this.set(presets[preset])
+		}
+	}
+
 	public static async set(options: RPCOptions) {
 		if (discordRPC) {
-			await discordRPC.update(options);
+			discordRPC.stop();
 		} else {
-			discordRPC = new DiscordRPC();
-			await discordRPC.start(options);
+			await os.execCommand(`pkill -f "discordrpc_ablox"`);
 		}
+		discordRPC = new DiscordRPC();
+		await discordRPC.start(options);
 	}
 
 	public static async stop() {

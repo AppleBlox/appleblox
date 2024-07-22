@@ -26,18 +26,6 @@ events.on('ready', async () => {
 		/** Launch the process manager */
 		const watchdog = new AbloxWatchdog();
 		watchdog.start().catch(console.error);
-
-		// DiscordRPC
-		const settings = await loadSettings('integrations');
-		if (settings && settings.rpc.enable_rpc) {
-			await RPCController.set({
-				clientId: '1257650541677383721',
-				details: 'Currently in the launcher',
-				largeImage: 'appleblox',
-				largeImageText: 'AppleBlox Logo',
-				enableTime: true,
-			});
-		}
 	}, 500);
 });
 

@@ -137,14 +137,9 @@ async function onGameEvent(data: GameEventInfo) {
 				break;
 			case 'GameDisconnected':
 			case 'GameLeaving':
-				const normalRpcOptions = {
-					clientId: '1257650541677383721',
-					details: 'Currently in the launcher',
-					largeImage: 'appleblox',
-					largeImageText: 'AppleBlox Logo',
-					enableTime: true,
-				};
-				RPCController.set(normalRpcOptions);
+				if (settings && settings.rpc.enable_rpc) {
+					RPCController.preset('inRobloxApp');
+				}
 				console.log('Disconnected/Left game');
 				break;
 			case 'GameJoinedEntry':
@@ -294,7 +289,7 @@ export async function launchRoblox(
 					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);
 					showNotification({
 						title: 'Resolution changed',
-						content: "Your resolution was temporarily changed (5s) by the 'Spoof Resolution' setting.",
+						content: "Your resolution was temporarily changed (5s) by the 'Fix Resolution' setting.",
 						timeout: 10,
 					});
 				}
@@ -304,6 +299,12 @@ export async function launchRoblox(
 				await robloxInstance.start();
 				setRobloxConnected(true);
 				rbxInstance = robloxInstance;
+
+				const integrationsSettings = await loadSettings('integrations');
+				if (integrationsSettings && integrationsSettings.rpc.enable_rpc) {
+					RPCController.preset('inRobloxApp');
+				}
+
 				robloxInstance.on('gameEvent', onGameEvent);
 				robloxInstance.on('exit', async () => {
 					if (modSettings && modSettings.general.enable_mods) {
@@ -313,6 +314,7 @@ export async function launchRoblox(
 								console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
 							});
 					}
+					RPCController.stop()
 					setRobloxConnected(false);
 					rbxInstance = null;
 					console.log('Roblox exited');

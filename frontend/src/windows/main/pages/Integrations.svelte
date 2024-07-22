@@ -3,7 +3,6 @@
 	import Panel from './Settings/Panel.svelte';
 	import { loadSettings, saveSettings } from '../ts/settings';
 	import { RPCController } from '../ts/rpc';
-	import { os } from '@neutralinojs/lib';
 
 	async function loadRPC(settings?: { [key: string]: any }) {
 		if (settings == null) {
@@ -12,15 +11,7 @@
 				return;
 			}
 		}
-		if (settings.rpc.enable_rpc) {
-			await RPCController.set({
-				clientId: '1257650541677383721',
-				details: 'Currently in the launcher',
-				largeImage: 'appleblox',
-				largeImageText: 'AppleBlox Logo',
-				enableTime: true,
-			}).catch(console.error);
-		} else {
+		if (!settings.rpc.enable_rpc) {
 			await RPCController.stop();
 		}
 	}
