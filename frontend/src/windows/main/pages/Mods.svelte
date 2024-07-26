@@ -7,6 +7,10 @@
 	import { toast } from 'svelte-sonner';
 	import { saveSettings } from '../ts/settings';
 
+	import ApplebloxIcon from '@/assets/panel/appleblox.png';
+	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
+	import { Folder } from 'lucide-svelte';
+
 	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings('mods', o);
 	}
@@ -27,6 +31,9 @@
 				break;
 			case 'join_bloxstrap':
 				os.open('https://discord.gg/nKjV3mGq6R');
+				break;
+			case 'join_appleblox':
+				os.open('https://appleblox.com/discord');
 				break;
 			case 'mods_help':
 				os.open('https://github.com/pizzaboxer/bloxstrap/wiki/Adding-custom-mods');
@@ -52,6 +59,9 @@
 						options: {
 							type: 'button',
 							style: 'default',
+							icon: {
+								name: 'Folder',
+							},
 						},
 					},
 					{
@@ -61,6 +71,21 @@
 						options: {
 							type: 'button',
 							style: 'secondary',
+							icon: {
+								name: 'Book',
+							},
+						},
+					},
+					{
+						label: 'Join AppleBlox Discord server',
+						description: 'Opens the Discord server invitation link (go to the #mods channel)',
+						id: 'join_appleblox',
+						options: {
+							type: 'button',
+							style: 'outline',
+							icon: {
+								src: ApplebloxIcon,
+							},
 						},
 					},
 					{
@@ -70,6 +95,9 @@
 						options: {
 							type: 'button',
 							style: 'outline',
+							icon: {
+								src: BloxstrapIcon,
+							},
 						},
 					},
 					{

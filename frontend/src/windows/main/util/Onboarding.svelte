@@ -23,10 +23,10 @@
 <AlertDialog.Root bind:open={show}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Welcome to AppleBlox</AlertDialog.Title>
+			<AlertDialog.Title class="dark:text-white text-black">Welcome to AppleBlox</AlertDialog.Title>
 			<AlertDialog.Description>
 				<p>We are thrilled to have you here! For starters, you should check out the <strong>Integrations & FastFlags </strong>tab.</p>
-				<p>If you want to add <strong>Mods</strong>, you should join the Bloxstrap Discord server from the mods tab.</p>
+				<p>If you want to add <strong>Mods</strong>, you should join the AppleBlox or Bloxstrap Discord server from the support/mods tab.</p>
 				<br />
 				<p>
 					🌟 Don't forget to leave a <strong>Star</strong> on the <a href="https://github.com/OrigamingWasTaken/appleblox">GitHub repo</a> and join the

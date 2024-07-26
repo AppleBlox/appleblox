@@ -9,7 +9,7 @@
 	import Misc from './pages/Misc.svelte';
 	import { app, os, window as w } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
-	import Informations from './pages/Informations.svelte';
+	import Support from './pages/Support.svelte';
 	import { launchRoblox } from './ts/roblox/launch';
 	import { loadSettings } from './ts/settings';
 	import Updater from './util/Updater.svelte';
@@ -102,9 +102,9 @@
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Misc />
 				</div>
-			{:else if currentPage === 'informations'}
+			{:else if currentPage === 'support'}
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
-					<Informations />
+					<Support />
 				</div>
 			{:else if currentPage === 'mods'}
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>

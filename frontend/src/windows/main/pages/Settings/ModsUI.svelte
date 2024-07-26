@@ -60,7 +60,7 @@
 					Roblox.Mods.loadMods().then((m) => (mods = m));
 				}}
 			>
-				<img src={RefreshIcon} alt="Refresh icon" class="towhite w-[50%]" />
+				<img src={RefreshIcon} alt="Refresh icon" class="towhite-always w-[50%]" />
 			</Button>
 		</div>
 

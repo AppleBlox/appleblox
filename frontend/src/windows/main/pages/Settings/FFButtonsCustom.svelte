@@ -156,7 +156,7 @@
 		variant={"secondary"}
 		class="bg-slate-900 text-slate-300 font-semibod grayscale"
 	>
-		<img src={Help} alt="Two icon" class="towhite w-5 mr-2" />
+		<img src={Help} alt="Two icon" class="towhite-always w-5 mr-2" />
 		About Fast Flags
 	</Button>
 </div>

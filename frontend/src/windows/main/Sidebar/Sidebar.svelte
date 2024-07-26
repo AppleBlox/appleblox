@@ -1,21 +1,25 @@
 <script lang="ts">
-	import { Separator } from "$lib/components/ui/separator/index.js";
-	import { createEventDispatcher } from "svelte";
-	import logo from "@/assets/favicon.png";
-	import { os } from "@neutralinojs/lib";
-	import { version } from "../../../../../package.json";
+	import { Separator } from '$lib/components/ui/separator/index.js';
+	import { createEventDispatcher } from 'svelte';
+	import logo from '@/assets/favicon.png';
+	import { os } from '@neutralinojs/lib';
+	import { version } from '../../../../../package.json';
 
-	import IntegrationsIcon from "@/assets/sidebar/integrations.png";
-	import FastFlagsIcon from "@/assets/sidebar/fastflags.png";
-	import RobloxIcon from "@/assets/sidebar/roblox.png";
-	import PlayIcon from "@/assets/sidebar/play.png";
-	import ModsIcon from "@/assets/sidebar/mods.png";
+	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
+	import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
+	import RobloxIcon from '@/assets/sidebar/roblox.png';
+	import PlayIcon from '@/assets/sidebar/play.png';
+	import ModsIcon from '@/assets/sidebar/mods.png';
+	import DiscordIcon from "@/assets/panel/discord.png"
+	import GithubIcon from "@/assets/panel/github.png"
+	import BugsIcon from "@/assets/sidebar/bugs.png"
 
-	import MiscIcon from "@/assets/sidebar/misc.png";
-	import CreditsIcon from "@/assets/sidebar/credits.png";
+	import MiscIcon from '@/assets/sidebar/misc.png';
+	import CreditsIcon from '@/assets/sidebar/credits.png';
 
-	import SidebarBtn from "./SidebarBtn.svelte";
-	import Button from "$lib/components/ui/button/button.svelte";
+	import SidebarBtn from './SidebarBtn.svelte';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import LinkBtn from './LinkBtn.svelte';
 
 	export let isLaunched = false;
 
@@ -25,18 +29,30 @@
 		icon: string;
 	}
 	const sidebarBtns: SidebarItem[] = [
-		{ label: "Integrations", id: "integrations", icon: IntegrationsIcon },
-		{ label: "Fast Flags", id: "fastflags", icon: FastFlagsIcon },
-		{ label: "Mods", id: "mods", icon: ModsIcon },
-		{ label: "Misc", id: "misc", icon: MiscIcon },
-		{ label: "Info", id: "informations", icon: CreditsIcon },
+		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
+		{ label: 'Fast Flags', id: 'fastflags', icon: FastFlagsIcon },
+		{ label: 'Mods', id: 'mods', icon: ModsIcon },
+		{ label: 'Misc', id: 'misc', icon: MiscIcon },
+		{ label: 'Support', id: 'support', icon: CreditsIcon },
 	];
 
-	export let currentPage: string = "integrations";
+	interface SidebarLink {
+		label: string;
+		icon: string;
+		url: string;
+	}
+
+	const linksBtns: SidebarLink[] = [
+		{label: "Discord", icon: DiscordIcon, url: "https://appleblox.com/discord"},
+		{label: "GitHub", icon: GithubIcon, url: "https://github.com/OrigamingWasTaken/appleblox"},
+		{label: "Issues", icon: BugsIcon, url: "https://github.com/OrigamingWasTaken/appleblox/issues"}
+	];
+
+	export let currentPage: string = 'integrations';
 	export let id: string;
 
 	function sidebarItemClicked(e: CustomEvent) {
-		if (e.detail === "none") return;
+		if (e.detail === 'none') return;
 		currentPage = e.detail;
 	}
 
@@ -51,7 +67,7 @@
 			target="_blank"
 			rel="noreferrer"
 			on:click={() => {
-				os.open("https://github.com/OrigamingWasTaken/appleblox").catch(console.error);
+				os.open('https://github.com/OrigamingWasTaken/appleblox').catch(console.error);
 			}}
 		>
 			<div class="mt-3 flex">
@@ -67,15 +83,23 @@
 				<SidebarBtn bind:currentPage {label} {id} {icon} on:sidebarClick={sidebarItemClicked} />
 			{/each}
 		</div>
+		<div class="m-4">
+			<Separator class="my-1 bg-gray-500" />
+		</div>
+		<div class="mt-3 grid grid-cols-1">
+			{#each linksBtns as { label, url, icon }}
+				<LinkBtn {label} {url} {icon}/>
+			{/each}
+		</div>
 	</div>
 	<div class="flex flex-col items-center mb-4">
 		<p class="text-sm text-gray-500 mb-2">v{version}</p>
-		
+
 		<Button
-			class={`${isLaunched ? "bg-blue-400 hover:bg-blue-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-800"} font-mono`}
+			class={`${isLaunched ? 'bg-blue-400 hover:bg-blue-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-800'} font-mono`}
 			on:click={() => {
 				if (isLaunched) return;
-				dispatch("launchRoblox", true);
+				dispatch('launchRoblox', true);
 			}}
 		>
 			{#if isLaunched}

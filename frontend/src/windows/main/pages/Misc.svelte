@@ -154,6 +154,9 @@
 						options: {
 							type: "button",
 							style: "default",
+							icon: {
+								name: "PanelsTopLeft"
+							}
 						},
 					},
 					{
@@ -163,6 +166,9 @@
 						options: {
 							type: "button",
 							style: "secondary",
+							icon: {
+								name: "PictureInPicture"
+							}
 						},
 					},
 					{
@@ -173,6 +179,9 @@
 						options: {
 							type: "button",
 							style: "destructive",
+							icon: {
+								name: "BugOff"
+							}
 						},
 					},
 				],
@@ -190,6 +199,9 @@
 						options: {
 							type: "button",
 							style: "default",
+							icon: {
+								name: "Play"
+							}
 						},
 					},
 					{
@@ -200,6 +212,9 @@
 						options: {
 							type: "button",
 							style: "outline",
+							icon: {
+								name: "Braces"
+							}
 						},
 					},
 				],
@@ -227,6 +242,9 @@
 						options: {
 							type: "button",
 							style: "outline",
+							icon: {
+								name: "List"
+							}
 						},
 					},
 					{
@@ -236,6 +254,9 @@
 						options: {
 							type: "button",
 							style: "destructive",
+							icon: {
+								name: "Trash2"
+							}
 						},
 					}
 				],

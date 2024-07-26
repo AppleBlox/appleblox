@@ -8,6 +8,7 @@
 ![GitHub License](https://img.shields.io/github/license/OrigamingWasTaken/appleblox?color=%23F43F5E)
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/OrigamingWasTaken/appleblox?color=%23F43F5E)
 ![Static Badge](https://img.shields.io/badge/built_with_apples-%23F43F5E)
+[![Discord](https://img.shields.io/discord/1263512148450082837?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.gg/MWHgn8VNZT)
 
 # AppleBlox
 

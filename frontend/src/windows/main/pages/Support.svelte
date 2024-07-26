@@ -24,9 +24,9 @@
 	`;
 
 	const panelOpts: SettingsPanel = {
-		name: 'Informations',
+		name: 'Support',
 		description: 'Useful resources, people that helped making the app and technologies used',
-		id: 'informations',
+		id: 'support',
 		sections: [
 			{
 				name: 'Useful resources & support',
@@ -39,7 +39,9 @@
 						id: 'discord_btn',
 						options: {
 							type: 'button',
-							icon: DiscordIcon,
+							icon: {
+								src: DiscordIcon
+							},
 							style: 'default',
 						},
 					},
@@ -49,7 +51,9 @@
 						id: 'github_btn',
 						options: {
 							type: 'button',
-							icon: GithubIcon,
+							icon: {
+								src: GithubIcon
+							},
 							style: 'secondary',
 						},
 					},

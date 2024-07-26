@@ -22,6 +22,6 @@
 >
 	<slot {builder} />
 	<div>
-		<ChevronDown class="h-4 w-4 opacity-50" />
+		<ChevronDown class="h-4 w-4 opacity-50 text-black dark:text-white" />
 	</div>
 </SelectPrimitive.Trigger>
