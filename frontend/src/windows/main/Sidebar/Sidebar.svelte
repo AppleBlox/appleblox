@@ -10,9 +10,9 @@
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import ModsIcon from '@/assets/sidebar/mods.png';
-	import DiscordIcon from "@/assets/panel/discord.png"
-	import GithubIcon from "@/assets/panel/github.png"
-	import BugsIcon from "@/assets/sidebar/bugs.png"
+	import DiscordIcon from '@/assets/panel/discord.png';
+	import GithubIcon from '@/assets/panel/github.png';
+	import BugsIcon from '@/assets/sidebar/bugs.png';
 
 	import MiscIcon from '@/assets/sidebar/misc.png';
 	import CreditsIcon from '@/assets/sidebar/credits.png';
@@ -20,6 +20,8 @@
 	import SidebarBtn from './SidebarBtn.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import LinkBtn from './LinkBtn.svelte';
+	import { getMode, pathExists } from '../ts/utils';
+	import path from 'path-browserify';
 
 	export let isLaunched = false;
 
@@ -28,13 +30,30 @@
 		id: string;
 		icon: string;
 	}
-	const sidebarBtns: SidebarItem[] = [
+	let sidebarBtns: SidebarItem[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
 		{ label: 'Fast Flags', id: 'fastflags', icon: FastFlagsIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Support', id: 'support', icon: CreditsIcon },
 	];
+
+	let isDevBtnAdded = false;
+	if (getMode() === 'dev' && !isDevBtnAdded) {
+		sidebarBtns.push({ label: 'Dev', id: 'dev', icon: '' });
+		isDevBtnAdded = true;
+	}
+	(async () => {
+		if (await pathExists(path.join(await os.getEnv('HOME'), 'adevmode'))) {
+			console.log('App is in dev mode.');
+			if (!isDevBtnAdded) {
+				sidebarBtns.push({ label: 'Dev', id: 'dev', icon: '' });
+				isDevBtnAdded = true;
+			}
+		} else {
+			console.log('App is in production mode.');
+		}
+	})();
 
 	interface SidebarLink {
 		label: string;
@@ -43,9 +62,9 @@
 	}
 
 	const linksBtns: SidebarLink[] = [
-		{label: "Discord", icon: DiscordIcon, url: "https://appleblox.com/discord"},
-		{label: "GitHub", icon: GithubIcon, url: "https://github.com/OrigamingWasTaken/appleblox"},
-		{label: "Issues", icon: BugsIcon, url: "https://github.com/OrigamingWasTaken/appleblox/issues"}
+		{ label: 'Discord', icon: DiscordIcon, url: 'https://appleblox.com/discord' },
+		{ label: 'GitHub', icon: GithubIcon, url: 'https://github.com/OrigamingWasTaken/appleblox' },
+		{ label: 'Issues', icon: BugsIcon, url: 'https://github.com/OrigamingWasTaken/appleblox/issues' },
 	];
 
 	export let currentPage: string = 'integrations';
@@ -88,7 +107,7 @@
 		</div>
 		<div class="mt-3 grid grid-cols-1">
 			{#each linksBtns as { label, url, icon }}
-				<LinkBtn {label} {url} {icon}/>
+				<LinkBtn {label} {url} {icon} />
 			{/each}
 		</div>
 	</div>
