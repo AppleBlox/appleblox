@@ -51,3 +51,11 @@ export async function focusWindow() {
 		console.error(err);
 	}
 }
+
+export async function setWindowVisibility(state: boolean) {
+	try {
+		os.execCommand(`osascript -e 'tell application "System Events" to set visible of every process whose unix id is ${window.NL_PID} to ${state}'`)
+	} catch (err) {
+		console.error(err);
+	}
+}
