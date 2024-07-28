@@ -10,6 +10,7 @@ import { showNotification } from '../notifications';
 import { getRobloxPath } from './path';
 import path from 'path-browserify';
 import Roblox from '.';
+import { setWindowVisibility } from '../window';
 
 interface RobloxGame {
 	id: number;
@@ -237,7 +238,8 @@ export async function launchRoblox(
 	setRobloxConnected: (value: boolean) => void,
 	setLaunchingRoblox: (value: boolean) => void,
 	setLaunchProgress: (value: number) => void,
-	setLaunchText: (value: string) => void
+	setLaunchText: (value: string) => void,
+	robloxUrl?: string
 ) {
 	if (rbxInstance || (await os.execCommand('pgrep -f "RobloxPlayer"')).stdOut.trim().length > 2) {
 		setLaunchText('Roblox is already open');
@@ -293,10 +295,9 @@ export async function launchRoblox(
 						timeout: 10,
 					});
 				}
-
 				const robloxInstance = new RobloxInstance(true);
 				await robloxInstance.init();
-				await robloxInstance.start();
+				await robloxInstance.start(robloxUrl);
 				setRobloxConnected(true);
 				rbxInstance = robloxInstance;
 
@@ -314,17 +315,20 @@ export async function launchRoblox(
 								console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
 							});
 					}
-					RPCController.stop()
+					RPCController.stop();
+					setWindowVisibility(true);
 					setRobloxConnected(false);
 					rbxInstance = null;
 					console.log('Roblox exited');
 				});
 			} catch (err) {
-				await Roblox.Mods.restoreRobloxFolders()
-					.catch(console.error)
-					.then(() => {
-						console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
-					});
+				if (modSettings && modSettings.general.enable_mods) {
+					await Roblox.Mods.restoreRobloxFolders()
+						.catch(console.error)
+						.then(() => {
+							console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
+						});
+				}
 				console.error(err);
 				setLaunchingRoblox(false);
 				toast.error('An error occured while starting Roblox.');
@@ -335,6 +339,7 @@ export async function launchRoblox(
 
 			setLaunchProgress(100);
 			setLaunchText('Roblox Launched');
+			setWindowVisibility(false);
 			setTimeout(() => {
 				setLaunchingRoblox(false);
 				shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
