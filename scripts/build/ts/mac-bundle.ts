@@ -1,4 +1,5 @@
 import neuConfig from '@root/neutralino.config.json';
+import { version } from "@root/package.json"
 import BuildConfig from '@root/build.config';
 import fs from 'fs';
 import path from 'path';
@@ -50,7 +51,7 @@ export async function macBuild() {
 			.replaceAll('{APP_ID}', neuConfig.applicationId)
 			.replaceAll('{APP_BUNDLE}', BuildConfig.appBundleName)
 			.replaceAll('{APP_MIN_OS}', BuildConfig.mac.minimumOS)
-			.replaceAll('{APP_VERSION}', neuConfig.version);
+			.replaceAll('{APP_VERSION}', version);
 		fs.writeFileSync(InfoPlist, InfoPlistTemplate);
 
 		// Executables

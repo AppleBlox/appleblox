@@ -29,6 +29,18 @@ const LibPaths = {
 			dev: "/build/lib/MacOS/window_manager"
 		}
 	},
+	urlscheme: {
+		darwin: {
+			prod: "/lib/urlscheme",
+			dev: "/build/lib/MacOS/urlscheme"
+		}
+	},
+	urlhandler: {
+		darwin: {
+			prod: "/lib/AppleBloxUrlHandler.app",
+			dev: "/build/lib/MacOS/AppleBloxUrlHandler.app"
+		}
+	}
 
 } as const;
 

@@ -45,14 +45,15 @@ Then, from AppleBlox, you can choose to enable / disable mods globally or indivi
 
 - **Multi-instances**, launch multiple windows of Roblox at the same time. Please note that AppleBlox only tracks data of **1** window, launched from the main menu.
 - **Launch Shortcut**, easily save a shortcut to launch Roblox directly.
-- **Console Redirection**, used for saving JavaScript logs to a file.
+
+...and more.
 
 ## Pre-compiled Binaries
 
 AppleBlox contains pre-compiled binaries of some programs at `build/lib/MacOS` from:
 - https://github.com/vjeantet/alerter (Taken from the github releases)
 - https://github.com/Rayrsn/Discord-RPC-cli (Built from source on my machine)
-- https://github.com/OrigamingWasTaken/window_manager (Built from source on my machine)
+- https://github.com/OrigamingWasTaken/utility_cli (Built from source on my machine)
 
 I plan on modifying this to compile those binaries at build step, but that would mean having to install Rust and Xcode, so I'm not really sure...
 If you're worried that those could be modified by me or another contributor to include malicious code, you can look at the "VirusTotal Scan" GitHub workflow. This workflow scans the release assets for malicious code.

@@ -1,25 +1,34 @@
 <script lang="ts">
-	import type { SettingsPanel } from "@/types/settings";
-	import Panel from "./Settings/Panel.svelte";
-	import { dataPath, saveSettings } from "../ts/settings";
-	import { toast } from "svelte-sonner";
-	import { filesystem, os } from "@neutralinojs/lib";
-	import AppIcon from "@/assets/play.icns";
-	import path from "path-browserify";
-	import { pathExists } from "../ts/utils";
-	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from "../ts/debugging";
-	import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-	import { getRobloxPath } from "../ts/roblox/path";
-	import Roblox from "../ts/roblox";
+	import type { SettingsPanel } from '@/types/settings';
+	import Panel from './Settings/Panel.svelte';
+	import { dataPath, loadSettings, saveSettings } from '../ts/settings';
+	import { toast } from 'svelte-sonner';
+	import { filesystem, os } from '@neutralinojs/lib';
+	import path from 'path-browserify';
+	import { pathExists } from '../ts/utils';
+	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { getRobloxPath } from '../ts/roblox/path';
+	import Roblox from '../ts/roblox';
+	import { Book, Braces, BugOff, List, PictureInPicture, Play, Trash2 } from 'lucide-svelte';
+	import { libraryPath } from '../ts/libraries';
+
+	// Check for URL scheme (better solution?)
+	// let settingsLoaded = false
+	// $: if (settingsLoaded) {
+	// 	(async()=>{
+	// 		let settings = await loadSettings("misc")
+	// 		if (!settings) return;
+	// 		const cmd = await os.execCommand(`${libraryPath("urlscheme")} check roblox ch.origaming.appleblox.url`)
+	// 		console.debug(cmd)
+	// 		settings.roblox_launching.use_roblox_url = cmd.stdOut.includes("true")
+	// 		saveSettings("misc",settings)
+	// 	})();
+	// }
 
 	function settingsChanged(o: { [key: string]: any }) {
-		saveSettings("misc", o);
-	}
-
-	async function loadImageToBlob(url: string): Promise<Blob> {
-		const response = await fetch(url);
-		const blob = await response.blob();
-		return blob;
+		// settingsLoaded = true
+		saveSettings('misc', o);
 	}
 
 	let clearLogsPopup = false;
@@ -27,73 +36,28 @@
 	async function buttonClicked(e: CustomEvent) {
 		const id = e.detail;
 		switch (id) {
-			case "multi_roblox_btn":
+			case 'multi_roblox_btn':
 				await Roblox.Utils.enableMultiInstance();
 				break;
-			case "open_instance_btn":
-				os.spawnProcess(`${path.join(getRobloxPath(),"Contents/MacOS/RobloxPlayer")}; exit`);
+			case 'open_instance_btn':
+				os.spawnProcess(`${path.join(getRobloxPath(), 'Contents/MacOS/RobloxPlayer')}; exit`);
 				break;
-			case "close_roblox_btn":
+			case 'close_roblox_btn':
 				await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
-				toast.success("All Roblox Instances have been closed.");
+				toast.success('All Roblox Instances have been closed.');
 				break;
-			case "create_shortcut_btn":
-				const savePath = await os
-					.showFolderDialog("Where should the shortcut be created?", { defaultPath: "/Applications/" })
-					.catch(console.error);
-				if (!savePath) {
-					toast.error("An error occured while trying to save the shortcut", { duration: 2000 });
-					return;
-				}
+			case 'create_shortcut_btn':
 				try {
-					if (await pathExists(path.join(savePath, "Launch Roblox.app"))) {
-						await filesystem.remove(path.join(savePath, "Launch Roblox.app"));
-					}
-					await filesystem.createDirectory(path.join(savePath, "Launch Roblox.app/Contents/MacOS"));
-					await filesystem.createDirectory(path.join(savePath, "Launch Roblox.app/Contents/Resources"));
-					await filesystem.writeFile(
-						path.join(savePath, "Launch Roblox.app/Contents/Info.plist"),
-						`<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key>
-    <string>launch</string>
-	<key>CFBundleIconFile</key>
-    <string>icon.icns</string>
-    <key>CFBundleSupportedPlatforms</key>
-    <array>
-        <string>MacOSX</string>
-    </array>
-    <key>LSMinimumSystemVersion</key>
-    <string>14.0</string>
-    <key>LSApplicationCategoryType</key>
-    <string>public.app-category.games</string>
-</dict>
-</plist>`
-					);
-					const blob = await loadImageToBlob(AppIcon);
-					await filesystem.writeBinaryFile(
-						path.join(savePath, "Launch Roblox.app/Contents/Resources/icon.icns"),
-						await blob.arrayBuffer()
-					);
-					await filesystem.writeFile(
-						path.join(savePath, "Launch Roblox.app/Contents/MacOS/launch"),
-						"#!/bin/bash\n" + path.join(path.dirname(window.NL_PATH), "MacOS/bootstrap") + " --launch"
-					);
-					await os.execCommand(
-						`chmod +x ${path.join(savePath, "Launch Roblox.app/Contents/MacOS/launch").replaceAll(" ", "\\ ")}`
-					);
-					toast.success(`Created a shortcut at "${path.join(savePath, "Launch Roblox.app")}"`);
+					await Roblox.Utils.createShortcut();
 				} catch (err) {
 					console.error(err);
-					toast.error("An error occured while trying to save the shortcut", { duration: 2000 });
+					toast.error('An error occured while trying to save the shortcut', { duration: 2000 });
 					return;
 				}
 				break;
-			case "write_clientappsettings_btn":
+			case 'write_clientappsettings_btn':
 				try {
-					const filePath = path.join(getRobloxPath(),"Contents/MacOS/ClientSettings/AppClientSettings.json");
+					const filePath = path.join(getRobloxPath(), 'Contents/MacOS/ClientSettings/AppClientSettings.json');
 					if (await pathExists(filePath)) {
 						await filesystem.remove(filePath);
 					}
@@ -103,22 +67,22 @@
 					toast.success(`Wrote ClientAppSettings at "${filePath}"`);
 				} catch (err) {
 					console.error(err);
-					toast.error("An error occured while writing ClientAppSettings.json");
+					toast.error('An error occured while writing ClientAppSettings.json');
 				}
 				break;
-			case "redirect_console":
+			case 'redirect_console':
 				enableConsoleRedirection();
-				toast.success("Console redirection enabled", { duration: 1000 });
+				toast.success('Console redirection enabled', { duration: 1000 });
 				break;
-			case "open_logs":
-				const logPath = path.join(path.dirname(await dataPath()), "appleblox.log");
+			case 'open_logs':
+				const logPath = path.join(path.dirname(await dataPath()), 'appleblox.log');
 				if (!(await pathExists(logPath))) {
 					toast.error("The logs file doesn't seem to exist.");
 					return;
 				}
 				os.execCommand(`open "${logPath}"`).catch(console.error);
 				break;
-			case "clear_logs":
+			case 'clear_logs':
 				clearLogsPopup = true;
 				break;
 		}
@@ -127,138 +91,148 @@
 	async function switchClicked(e: CustomEvent) {
 		const { id, state } = e.detail;
 		switch (id) {
-			case "redirect_console":
+			case 'redirect_console':
 				if (state) {
 					enableConsoleRedirection();
 				} else {
 					disableConsoleRedirection();
 				}
 				break;
+			case 'use_roblox_url':
+				console.log(state)
+				Roblox.Utils.toggleURI(state).catch((err) => {
+					toast.error('An error occured');
+					console.error(err);
+				});
 		}
 	}
 
 	const panelOpts: SettingsPanel = {
-		name: "Misc",
-		description: "Various miscellaneous features and options",
-		id: "misc",
+		name: 'Misc',
+		description: 'Various miscellaneous features and options',
+		id: 'misc',
 		sections: [
 			{
-				name: "Multi Instances",
-				description: "Makes it so multiple Roblox windows can be opnened at once.",
-				id: "multi_instances",
+				name: 'Multi Instances',
+				description: 'Makes it so multiple Roblox windows can be opnened at once.',
+				id: 'multi_instances',
 				interactables: [
 					{
-						label: "Enable Multi Instances",
-						description: "Makes it so multiple Roblox windows can be opnened at once.",
-						id: "multi_roblox_btn",
+						label: 'Enable Multi Instances',
+						description: 'Makes it so multiple Roblox windows can be opnened at once.',
+						id: 'multi_roblox_btn',
 						options: {
-							type: "button",
-							style: "default",
+							type: 'button',
+							style: 'default',
 							icon: {
-								name: "PanelsTopLeft"
-							}
+								component: Book,
+							},
 						},
 					},
 					{
-						label: "Open Instance",
-						description: "Opens an instance of the Roblox app. (Achieves the same goal as opening from the web)",
-						id: "open_instance_btn",
+						label: 'Open Instance',
+						description: 'Opens an instance of the Roblox app. (Achieves the same goal as opening from the web)',
+						id: 'open_instance_btn',
 						options: {
-							type: "button",
-							style: "secondary",
+							type: 'button',
+							style: 'secondary',
 							icon: {
-								name: "PictureInPicture"
-							}
+								component: PictureInPicture,
+							},
 						},
 					},
 					{
-						label: "Terminate all instances",
-						description:
-							"Closes every open Roblox instances. (This acts as a force-kill, so be sure to use this appropriately)",
-						id: "close_roblox_btn",
+						label: 'Terminate all instances',
+						description: 'Closes every open Roblox instances. (This acts as a force-kill, so be sure to use this appropriately)',
+						id: 'close_roblox_btn',
 						options: {
-							type: "button",
-							style: "destructive",
+							type: 'button',
+							style: 'destructive',
 							icon: {
-								name: "BugOff"
-							}
+								component: BugOff,
+							},
 						},
 					},
 				],
 			},
 			{
-				name: "Roblox Launching",
-				description: "Settings about launching Roblox",
-				id: "roblox_launching",
+				name: 'Roblox Launching',
+				description: 'Settings about launching Roblox',
+				id: 'roblox_launching',
 				interactables: [
 					{
-						label: "Create a launch shortcut",
-						description:
-							"Creates a shortcut that can be used to launch Roblox (with all the AppleBlox features) without having to open this app.",
-						id: "create_shortcut_btn",
+						label: 'Support launching from the website',
+						description: 'Replaces roblox:// and roblox-player:// to open AppleBlox instead of Roblox.',
+						id: 'use_roblox_url',
 						options: {
-							type: "button",
-							style: "default",
-							icon: {
-								name: "Play"
-							}
+							type: 'boolean',
+							state: false,
 						},
 					},
 					{
-						label: "Write ClientAppSettings.json",
-						description:
-							"Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended.",
-						id: "write_clientappsettings_btn",
+						label: 'Create a launch shortcut',
+						description: 'Creates a shortcut that can be used to launch Roblox (with all the AppleBlox features) without having to open this app.',
+						id: 'create_shortcut_btn',
 						options: {
-							type: "button",
-							style: "outline",
+							type: 'button',
+							style: 'default',
 							icon: {
-								name: "Braces"
-							}
+								component: Play,
+							},
+						},
+					},
+					{
+						label: 'Write ClientAppSettings.json',
+						description: "Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended.",
+						id: 'write_clientappsettings_btn',
+						options: {
+							type: 'button',
+							style: 'outline',
+							icon: {
+								component: Braces,
+							},
 						},
 					},
 				],
 			},
 			{
-				name: "Advanced",
-				description:
-					"You shouldn't touch this unless you know what you're doing. This is more meant as a debugging tool.",
-				id: "advanced",
+				name: 'Advanced',
+				description: "You shouldn't touch this unless you know what you're doing. This is more meant as a debugging tool.",
+				id: 'advanced',
 				interactables: [
 					{
-						label: "Redirect console.logs to file",
-						description:
-							"Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.",
-						id: "redirect_console",
+						label: 'Redirect console.logs to file',
+						description: 'Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.',
+						id: 'redirect_console',
 						options: {
-							type: "boolean",
+							type: 'boolean',
 							state: true,
 						},
 					},
 					{
-						label: "Open logs file",
-						description: "Opens the logs file in the preffered text editor.",
-						id: "open_logs",
+						label: 'Open logs file',
+						description: 'Opens the logs file in the preffered text editor.',
+						id: 'open_logs',
 						options: {
-							type: "button",
-							style: "outline",
+							type: 'button',
+							style: 'outline',
 							icon: {
-								name: "List"
-							}
+								component: List,
+							},
 						},
 					},
 					{
-						label: "Clear logs",
-						description: "Clears the logs file",
-						id: "clear_logs",
+						label: 'Clear logs',
+						description: 'Clears the logs file',
+						id: 'clear_logs',
 						options: {
-							type: "button",
-							style: "destructive",
+							type: 'button',
+							style: 'destructive',
 							icon: {
-								name: "Trash2"
-							}
+								component: Trash2,
+							},
 						},
-					}
+					},
 				],
 			},
 		],
@@ -269,20 +243,19 @@
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete your logs.
-			</AlertDialog.Description>
+			<AlertDialog.Description>This action cannot be undone. This will permanently delete your logs.</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action
 				on:click={() => {
-					clearLogs().then(()=>{
-						toast.success("The logs have been cleared")
-					}).
-					catch(() => {
-						toast.error("An error occured while clearing the logs");
-					});
+					clearLogs()
+						.then(() => {
+							toast.success('The logs have been cleared');
+						})
+						.catch(() => {
+							toast.error('An error occured while clearing the logs');
+						});
 				}}>Continue</AlertDialog.Action
 			>
 		</AlertDialog.Footer>
