@@ -110,7 +110,7 @@ export class RobloxFFlags {
 						makeflag({ DFIntTaskSchedulerTargetFps: data[0] });
 						break;
 					case 'ff_lightning':
-						switch (data.value) {
+						switch (data.value.value) {
 							case 'voxel':
 								makeflag({ DFFlagDebugRenderForceTechnologyVoxel: true });
 								break;
@@ -123,7 +123,7 @@ export class RobloxFFlags {
 						}
 						break;
 					case 'ff_engine':
-						switch (data.value) {
+						switch (data.value.value) {
 							// don't know if disabling Metal works, need testing. For now it uses OpenGL
 							case 'opengl':
 								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferOpenGL: true });
@@ -210,16 +210,54 @@ export class RobloxFFlags {
 					case 'ff_old_font':
 						makeflag({ FFlagEnableNewFontNameMappingABTest2: false });
 						break;
-					case 'ff_chromeui':
-						makeflag({
-							FFlagEnableInGameMenuChrome: true,
-							FFlagEnableReportAbuseMenuRoactABTest2: true,
-							FFlagChromeBetaFeature: true,
-							FFlagEnableInGameMenuChromeABTest2: true,
-						});
-						break;
-					case 'ff_chromui_off':
-						makeflag({ FFlagEnableInGameMenuChromeABTest3: false });
+					case 'ff_menu_version':
+						switch (data.value.value) {
+							case 'v1':
+								makeflag({ /* v2 */ FFlagDisableNewIGMinDUA: true, /* v4 */ FFlagEnableInGameMenuControls: false, FFlagEnableInGameMenuModernization: false,  /* ABTest */  FFlagEnableMenuControlsABTest: false, FFlagEnableV3MenuABTest3: false, FFlagEnableInGameMenuChromeABTest3: false,  /* Chrome */  FFlagEnableInGameMenuChrome: false });
+								// makeflag({
+								// 	FFlagDisableNewIGMinDUA: true,
+								// 	FFlagEnableInGameMenuControls: true,
+								// 	FFlagEnableInGameMenuModernization: true,
+								// 	FFlagEnableMenuControlsABTest: true,
+								// 	FFlagEnableMenuModernizationABTest: true,
+								// 	FFlagEnableMenuModernizationABTest2: true,
+								// 	FFlagEnableV3MenuABTest3: true,
+								// });
+								break;
+							case 'v2':
+								makeflag({
+									/* v2 */ FFlagDisableNewIGMinDUA: false,
+									/* v4 */ FFlagEnableInGameMenuControls: false,
+									FFlagEnableInGameMenuModernization: false,
+									/* ABTest */ FFlagEnableMenuControlsABTest: false,
+									FFlagEnableV3MenuABTest3: false,
+									FFlagEnableInGameMenuChromeABTest3: false,
+									/* Chrome */ FFlagEnableInGameMenuChrome: false,
+								});
+								break;
+							case 'v4':
+								makeflag({
+									/* v2 */ FFlagDisableNewIGMinDUA: true,
+									/* v4 */ FFlagEnableInGameMenuControls: true,
+									FFlagEnableInGameMenuModernization: true,
+									/* ABTest */ FFlagEnableMenuControlsABTest: false,
+									FFlagEnableV3MenuABTest3: false,
+									FFlagEnableInGameMenuChromeABTest3: false,
+									/* Chrome */ FFlagEnableInGameMenuChrome: false,
+								});
+								break;
+							case 'v4chrome':
+								makeflag({
+									/* v2 */ FFlagDisableNewIGMinDUA: true,
+									/* v4 */ FFlagEnableInGameMenuControls: true,
+									FFlagEnableInGameMenuModernization: true,
+									/* ABTest */ FFlagEnableMenuControlsABTest: false,
+									FFlagEnableV3MenuABTest3: false,
+									FFlagEnableInGameMenuChromeABTest3: false,
+									/* Chrome */ FFlagEnableInGameMenuChrome: true,
+								});
+								break;
+						}
 						break;
 				}
 			}

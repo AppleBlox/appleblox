@@ -199,6 +199,22 @@
 				id: 'ui',
 				interactables: [
 					{
+						label: 'Menu version',
+						description: 'Choose the version of the Roblox menu',
+						id: 'ff_menu_version',
+						options: {
+							type: 'dropdown',
+							default: { label: 'Default', value: 'default' },
+							list: [
+								{ label: 'Version 1 (2015)', value: 'v1' },
+								{ label: 'Version 2 (2020)', value: 'v2' },
+								{ label: 'Version 4 (2023)', value: 'v4' },
+								{ label: 'Version 4 (Chrome)', value: 'v4chrome' },
+								{ label: 'Default', value: 'default' }
+							],
+						},
+					},
+					{
 						label: 'Custom font size',
 						description: 'Changes the font size',
 						id: 'ff_font_size',
@@ -214,24 +230,6 @@
 						label: 'Use old font',
 						description: 'Revert BuilderFont',
 						id: 'ff_old_font',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Disable ChromeUI',
-						description: 'Shows the new ChromeUI interface (leave AB testing)',
-						id: 'ff_chromeui_off',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Enable ChromeUI',
-						description: "Shows the new ChromeUI interface (if you haven't got it already)",
-						id: 'ff_chromeui',
 						options: {
 							type: 'boolean',
 							state: false,
