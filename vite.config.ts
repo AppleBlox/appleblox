@@ -1,17 +1,12 @@
-import {defineConfig} from 'vite';
-import {svelte} from '@sveltejs/vite-plugin-svelte';
+import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import * as path from 'path';
-import {createHtmlPlugin} from 'vite-plugin-html';
-import neutralino from "./scripts/package/vite-plugin"
-
-const NEU_PORRT = 5174
+import neutralino from './scripts/package/vite-plugin';
 
 // https://vitejs.dev/config/
 export default defineConfig({
 	root: 'frontend',
-	plugins: [
-		svelte(), neutralino()
-	],
+	plugins: [svelte(), neutralino()],
 	build: {
 		outDir: path.resolve('./frontend/dist'),
 		rollupOptions: {
@@ -28,7 +23,5 @@ export default defineConfig({
 	server: {
 		host: 'localhost',
 	},
-	assetsInclude: [
-		"**/*.icns"
-	]
+	assetsInclude: ['**/*.icns'],
 });

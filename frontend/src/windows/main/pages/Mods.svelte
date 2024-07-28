@@ -9,7 +9,7 @@
 
 	import ApplebloxIcon from '@/assets/panel/appleblox.png';
 	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
-	import { Folder } from 'lucide-svelte';
+	import { Folder, Book} from 'lucide-svelte';
 
 	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings('mods', o);
@@ -60,7 +60,7 @@
 							type: 'button',
 							style: 'default',
 							icon: {
-								name: 'Folder',
+								component: Folder,
 							},
 						},
 					},
@@ -72,7 +72,7 @@
 							type: 'button',
 							style: 'secondary',
 							icon: {
-								name: 'Book',
+								component: Book,
 							},
 						},
 					},
@@ -115,7 +115,7 @@
 						id: 'spoof_res',
 						options: {
 							type: 'boolean',
-							state: true,
+							state: false,
 						},
 					},
 					{

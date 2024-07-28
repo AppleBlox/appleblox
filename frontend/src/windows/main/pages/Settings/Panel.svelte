@@ -14,7 +14,6 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { haveSameKeys } from '../../ts/utils';
 	import ModsUi from './ModsUI.svelte';
-	import * as icons from 'lucide-svelte';
 	import { cn } from '$lib/utils.js';
 
 	export let panel: SettingsPanel;
@@ -99,8 +98,8 @@
 												dispatch('buttonClicked', inter.id);
 											}}
 										>
-											{#if inter.options.icon?.name}
-												<svelte:component this={icons[inter.options.icon.name]} class={cn(inter.options.icon.props,"h-5 w-5 mr-2")} />
+											{#if inter.options.icon?.component}
+												<svelte:component this={inter.options.icon.component} class={cn(inter.options.icon.props,"h-5 w-5 mr-2")} />
 											{:else if inter.options.icon?.src}
 												<img src={inter.options.icon?.src} alt="Panel Icon" class={cn(inter.options.icon.props,"h-5 w-5 mr-2")}>
 											{/if}

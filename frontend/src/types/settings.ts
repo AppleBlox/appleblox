@@ -1,4 +1,4 @@
-import * as icons from 'lucide-svelte';
+import type { ComponentType, SvelteComponent } from 'svelte';
 
 export type InteractableOptions = {
 	type: 'boolean';
@@ -11,7 +11,7 @@ export interface FFlag {
 }
 
 export interface Icon {
-	name?: keyof typeof icons;
+	component?: ComponentType<SvelteComponent>;
 	props?: string;
 	src?: string;
 }
