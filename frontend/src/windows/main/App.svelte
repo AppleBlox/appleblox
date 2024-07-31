@@ -7,7 +7,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { Progress } from '$lib/components/ui/progress';
 	import Misc from './pages/Misc.svelte';
-	import { os} from '@neutralinojs/lib';
+	import { computer, os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
 	import Support from './pages/Support.svelte';
 	import { launchRoblox } from './ts/roblox/launch';
@@ -15,6 +15,7 @@
 	import Mods from './pages/Mods.svelte';
 	import Onboarding from './util/Onboarding.svelte';
 	import Dev from './pages/Dev.svelte';
+	import { loadSettings } from './ts/settings';
 
 	let currentPage: string;
 
@@ -39,10 +40,10 @@
 			);
 		}
 
-		const robloxArg = window.NL_ARGS.find(arg => arg.includes("roblox="))
+		const robloxArg = window.NL_ARGS.find((arg) => arg.includes('roblox='));
 		if (robloxArg) {
 			console.debug("Launching Roblox from '--roblox'");
-			const robloxUrl = robloxArg.slice(9)
+			const robloxUrl = robloxArg.slice(9);
 
 			await launchRoblox(
 				(value) => (launchInfo.isConnected = value),

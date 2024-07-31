@@ -68,12 +68,25 @@
 						},
 					},
 					{
-						label: 'Preserve quality with graphics slider',
-						description: 'Instead of reducing the render distance and quality, this option will only reduce the render distance',
-						id: 'ff_display',
+						label: 'Force graphic value',
+						description: '(Enables the option below)',
+						id: 'ff_display_toggle',
 						options: {
 							type: 'boolean',
 							state: false,
+						},
+					},
+					{
+						label: 'Graphics quality w/ render distance',
+						description: 'Choose a graphic value (slider in settings) to force. This lets you have a high render distance while keeping the same level of graphics.',
+						id: 'ff_display',
+						toggle: "ff_display_toggle",
+						options: {
+							type: 'number',
+							default: 5,
+							max: 10,
+							min: 1,
+							step: 1,
 						},
 					},
 					{
@@ -210,7 +223,7 @@
 								{ label: 'Version 2 (2020)', value: 'v2' },
 								{ label: 'Version 4 (2023)', value: 'v4' },
 								{ label: 'Version 4 (Chrome)', value: 'v4chrome' },
-								{ label: 'Default', value: 'default' }
+								{ label: 'Default', value: 'default' },
 							],
 						},
 					},

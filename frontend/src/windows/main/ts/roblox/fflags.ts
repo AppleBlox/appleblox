@@ -1,8 +1,9 @@
-import { filesystem } from '@neutralinojs/lib';
+import { computer, filesystem } from '@neutralinojs/lib';
 import { pathExists } from '../utils';
 import path from 'path-browserify';
 import type { FFlag } from '@/types/settings';
 import { dataPath, loadSettings } from '../settings';
+import { showNotification } from '../notifications';
 
 export class RobloxFFlags {
 	/** Returns every saved FFlags */
@@ -102,11 +103,26 @@ export class RobloxFFlags {
 			// i know this isn't efficient, but i didn't want to re-write the fastlfags saving system.
 			// in the future, i may change this to a dynamic system.
 			// Graphics
+			let forceVulkan = false;
 			for (const name of Object.keys(categories.graphics)) {
 				const data = categories.graphics[name];
 				if (typeof data === 'boolean' && !data) continue;
 				switch (name) {
 					case 'ff_fps':
+						if (categories.graphics.ff_engine.value.value !== 'vulkan') {
+							const displays = await computer.getDisplays();
+							const refreshRate = displays.reduce((max, current) => (current.refreshRate > max.refreshRate ? current : max)).refreshRate;
+							console.log(`Monitor Refresh rate: ${refreshRate}`);
+							if (data[0] > refreshRate) {
+								forceVulkan = true;
+								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
+								showNotification({
+									title: 'Renderer defaulted to Vulkan',
+									content: `Your monitor does not meet the requirements to use Metal at the selected fps cap.`,
+									timeout: 10,
+								});
+							}
+						}
 						makeflag({ DFIntTaskSchedulerTargetFps: data[0] });
 						break;
 					case 'ff_lightning':
@@ -123,6 +139,7 @@ export class RobloxFFlags {
 						}
 						break;
 					case 'ff_engine':
+						if (forceVulkan) break;
 						switch (data.value.value) {
 							// don't know if disabling Metal works, need testing. For now it uses OpenGL
 							case 'opengl':
@@ -140,7 +157,8 @@ export class RobloxFFlags {
 						makeflag({ DFFlagDebugPauseVoxelizer: true });
 						break;
 					case 'ff_display':
-						makeflag({ DFIntDebugFRMQualityLevelOverride: 1 });
+						if (!categories.graphics.ff_display_toggle) break;
+						makeflag({ DFIntDebugFRMQualityLevelOverride: data[0] });
 						break;
 					case 'ff_graphics':
 						makeflag({ FFlagCommitToGraphicsQualityFix: true, FFlagFixGraphicsQuality: true });
@@ -213,7 +231,15 @@ export class RobloxFFlags {
 					case 'ff_menu_version':
 						switch (data.value.value) {
 							case 'v1':
-								makeflag({ /* v2 */ FFlagDisableNewIGMinDUA: true, /* v4 */ FFlagEnableInGameMenuControls: false, FFlagEnableInGameMenuModernization: false,  /* ABTest */  FFlagEnableMenuControlsABTest: false, FFlagEnableV3MenuABTest3: false, FFlagEnableInGameMenuChromeABTest3: false,  /* Chrome */  FFlagEnableInGameMenuChrome: false });
+								makeflag({
+									/* v2 */ FFlagDisableNewIGMinDUA: true,
+									/* v4 */ FFlagEnableInGameMenuControls: false,
+									FFlagEnableInGameMenuModernization: false,
+									/* ABTest */ FFlagEnableMenuControlsABTest: false,
+									FFlagEnableV3MenuABTest3: false,
+									FFlagEnableInGameMenuChromeABTest3: false,
+									/* Chrome */ FFlagEnableInGameMenuChrome: false,
+								});
 								// makeflag({
 								// 	FFlagDisableNewIGMinDUA: true,
 								// 	FFlagEnableInGameMenuControls: true,
@@ -248,13 +274,10 @@ export class RobloxFFlags {
 								break;
 							case 'v4chrome':
 								makeflag({
-									/* v2 */ FFlagDisableNewIGMinDUA: true,
-									/* v4 */ FFlagEnableInGameMenuControls: true,
-									FFlagEnableInGameMenuModernization: true,
-									/* ABTest */ FFlagEnableMenuControlsABTest: false,
-									FFlagEnableV3MenuABTest3: false,
-									FFlagEnableInGameMenuChromeABTest3: false,
-									/* Chrome */ FFlagEnableInGameMenuChrome: true,
+									FFlagEnableInGameMenuChrome: true,
+									FFlagEnableReportAbuseMenuRoactABTest2: true,
+									FFlagChromeBetaFeature: true,
+									FFlagEnableInGameMenuChromeABTest2: true,
 								});
 								break;
 						}
