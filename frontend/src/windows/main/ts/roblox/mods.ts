@@ -5,6 +5,7 @@ import { getRobloxPath } from './path';
 import shellFS from '../shellfs';
 import { toast } from 'svelte-sonner';
 import { showNotification } from '../notifications';
+import { loadSettings } from '../settings';
 
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
@@ -68,5 +69,73 @@ export class RobloxMods {
 			timeout: 5,
 		});
 		await sleep(100);
+	}
+
+	/** Applies the custom font */
+	static async applyCustomFont(modsSettings: { [key: string]: any }) {
+		// Exit if set to null
+		if (!modsSettings.builtin.custom_font) return;
+
+		console.log('Applying custom font');
+
+		const fontExt = path.extname(modsSettings.builtin.custom_font);
+		const fontPath = path.join(await os.getEnv('HOME'), `Library/Application Support/AppleBlox/.cache/fonts/CustomFont${fontExt}`);
+		if (!(await pathExists(fontPath))) {
+			console.error('Could not find the path to the custom font file.');
+			return;
+		}
+		const robloxFontsPath = path.join(getRobloxPath(), 'Contents/Resources/content/fonts');
+		if (!(await pathExists(robloxFontsPath))) {
+			console.error('Could not find the roblox fonts folder.');
+			return;
+		}
+		const fontFamiliesPath = path.join(robloxFontsPath, 'families');
+
+		// Copy CustomFont.* file and make a backup
+		await shellFS.copy(fontPath, robloxFontsPath);
+		const cacheDir = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts/families');
+		await shellFS.remove(cacheDir);
+		await shellFS.createDirectory(path.dirname(cacheDir));
+		if (!(await pathExists(cacheDir))) {
+			await shellFS.copy(fontFamiliesPath, cacheDir, true);
+		}
+
+		// Apply to every files
+		const entries = await filesystem.readDirectory(fontFamiliesPath);
+		for (const file of entries) {
+			try {
+				const content = await filesystem.readFile(file.path);
+				let jsonContent = JSON.parse(content);
+				for (const [key] of Object.keys(jsonContent.faces)) {
+					jsonContent.faces[key].assetId = `rbxasset://fonts/CustomFont${fontExt}`;
+				}
+				await filesystem.writeFile(file.path, JSON.stringify(jsonContent));
+			} catch (err) {
+				console.error(`Error when applying custom font to: "${file.path}"`);
+				continue;
+			}
+		}
+
+		console.log('Added custom font');
+	}
+
+	/** Removes the custom font */
+	static async removeCustomFont(modsSettings: { [key: string]: any }) {
+		// Exit if set to null
+		if (!modsSettings.builtin.custom_font) return;
+
+		console.log('Removing custom font');
+
+		const fontExt = path.extname(modsSettings.builtin.custom_font);
+		const fontsFolderPath = path.join(getRobloxPath(), 'Contents/Resources/content/fonts');
+		const customFontPath = path.join(getRobloxPath(), fontsFolderPath, `CustomFont${fontExt}`);
+		const familiesPath = path.join(getRobloxPath(), fontsFolderPath, 'families');
+		const cacheDir = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts/families');
+
+		await shellFS.remove(customFontPath);
+		await shellFS.remove(familiesPath);
+		await shellFS.copy(cacheDir, fontsFolderPath, true);
+
+		console.log('Removed custom font');
 	}
 }

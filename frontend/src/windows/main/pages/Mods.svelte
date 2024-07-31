@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SettingsPanel } from '@/types/settings';
 	import Panel from './Settings/Panel.svelte';
-	import { os } from '@neutralinojs/lib';
+	import { filesystem, os } from '@neutralinojs/lib';
 	import path from 'path-browserify';
 	import { sleep } from '../ts/utils';
 	import { toast } from 'svelte-sonner';
@@ -9,7 +9,8 @@
 
 	import ApplebloxIcon from '@/assets/panel/appleblox.png';
 	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
-	import { Folder, Book} from 'lucide-svelte';
+	import { Folder, Book } from 'lucide-svelte';
+	import shellFS from '../ts/shellfs';
 
 	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings('mods', o);
@@ -41,11 +42,47 @@
 		}
 	}
 
+	async function onFileAdded(e: CustomEvent) {
+		const { id, filePath } = e.detail;
+		switch (id) {
+			case 'custom_font':
+				const cachePath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts');
+				await shellFS.createDirectory(cachePath);
+				await filesystem.copy(filePath, path.join(cachePath, `CustomFont${path.extname(filePath)}`));
+				break;
+		}
+	}
+
+	async function onFileRemoved(e: CustomEvent) {
+		const { id, filePath } = e.detail;
+		switch (id) {
+			case 'custom_font':
+				await os.execCommand('rm -f ~/"Library/Application Support/AppleBlox/.cache/fonts/CustomFont".*');
+				break;
+		}
+	}
+
 	const panelOpts: SettingsPanel = {
 		name: 'Mods',
 		description: 'Textures and other enhancement for the Roblox app',
 		id: 'mods',
 		sections: [
+			{
+				name: 'Built-in',
+				description: 'Built-in mods and features you can directly use',
+				id: 'builtin',
+				interactables: [
+					{
+						label: 'Custom font',
+						description: 'Choose a custom font to apply to Roblox',
+						id: 'custom_font',
+						options: {
+							type: 'file',
+							accept: ['ttf', 'otf', 'ttc'],
+						},
+					},
+				],
+			},
 			{
 				name: 'General',
 				description:
@@ -136,6 +173,8 @@
 <Panel
 	panel={panelOpts}
 	on:buttonClicked={onButtonClicked}
+	on:fileAdded={onFileAdded}
+	on:fileRemoved={onFileRemoved}
 	on:settingsChanged={(e) => {
 		settingsChanged(e.detail);
 	}}
