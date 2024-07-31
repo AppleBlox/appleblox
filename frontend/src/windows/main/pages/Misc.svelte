@@ -106,7 +106,7 @@
 				});
 		}
 	}
-
+	
 	const panelOpts: SettingsPanel = {
 		name: 'Misc',
 		description: 'Various miscellaneous features and options',
@@ -196,10 +196,19 @@
 				],
 			},
 			{
-				name: 'Advanced',
-				description: "You shouldn't touch this unless you know what you're doing. This is more meant as a debugging tool.",
+				name: 'Other',
+				description: "Features that don't really have a category.",
 				id: 'advanced',
 				interactables: [
+					{
+						label: "Enable sound for all notifications",
+						description: "Will play a sound for every AppleBlox notification",
+						id: "notify_all",
+						options: {
+							type: "boolean",
+							state: false
+						}
+					},
 					{
 						label: 'Redirect console.logs to file',
 						description: 'Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.',
