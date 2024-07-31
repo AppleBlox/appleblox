@@ -1,17 +1,24 @@
 <script lang="ts" type="module">
 	import type { SettingsPanel } from '@/types/settings';
+	import { os, filesystem } from '@neutralinojs/lib';
+	import path from 'path-browserify';
+	import shellFS from '../../ts/shellfs';
+	import { toast } from 'svelte-sonner';
 
 	import { Input } from '$lib/components/ui/input/index.js';
+	import { Label } from '$lib/components/ui/label/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import * as Select from '$lib/components/ui/select/index.js';
 	import { Slider } from '$lib/components/ui/slider/index.js';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { Trash2, Upload } from 'lucide-svelte';
+
 	import { createEventDispatcher } from 'svelte';
 	import LoadingSpinner from '../../util/LoadingSpinner.svelte';
 	import { loadSettings } from '../../ts/settings';
-	import Button from '$lib/components/ui/button/button.svelte';
 	import FfButtonsCustom from './FFButtonsCustom.svelte';
-	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { haveSameKeys } from '../../ts/utils';
 	import ModsUi from './ModsUI.svelte';
 	import { cn } from '$lib/utils.js';
@@ -22,6 +29,8 @@
 		settingsChanged: Object;
 		buttonClicked: string;
 		switchClicked: { id: string; state: boolean };
+		fileAdded: { id: string; filePath: string };
+		fileRemoved: { id: string; filePath: string };
 	}>();
 
 	let settingsLoaded = false;
@@ -41,6 +50,8 @@
 				case 'number':
 					sections[section.id][inter.id] = [inter.options.default];
 					break;
+				case 'file':
+					sections[section.id][inter.id] = null;
 			}
 		}
 	}
@@ -81,9 +92,9 @@
 					{#if inter.options.type !== 'button' && inter.options.type !== 'ff_buttons_custom'}
 						<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
 					{/if}
-					<div class="flex items-center">
+					<div class={`flex items-center ${inter.toggle ? (sections[section.id][inter.toggle] ? '' : 'grayscale cursor-not-allowed opacity-60 select-one pointer-events-none') : ''}`}>
 						{#if inter.options.type !== 'button' && inter.options.type !== 'ff_buttons_custom' && !inter.hideTitle}
-							<div>
+							<div class={inter.options.type === "number" ? 'w-[500px]': ''}>
 								<p class="font-semibold text-[#1f1717] dark:text-red-100">{inter.label}</p>
 								<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{@html inter.description}</p>
 							</div>
@@ -99,9 +110,9 @@
 											}}
 										>
 											{#if inter.options.icon?.component}
-												<svelte:component this={inter.options.icon.component} class={cn(inter.options.icon.props,"h-5 w-5 mr-2")} />
+												<svelte:component this={inter.options.icon.component} class={cn(inter.options.icon.props, 'h-5 w-5 mr-2')} />
 											{:else if inter.options.icon?.src}
-												<img src={inter.options.icon?.src} alt="Panel Icon" class={cn(inter.options.icon.props,"h-5 w-5 mr-2")}>
+												<img src={inter.options.icon?.src} alt="Panel Icon" class={cn(inter.options.icon.props, 'h-5 w-5 mr-2')} />
 											{/if}
 											{inter.label}</Button
 										>
@@ -129,6 +140,46 @@
 								bind:value={sections[section.id][inter.id]}
 								placeholder={inter.options.default}
 							/>
+						{:else if inter.options.type === 'file'}
+							<Button
+								class="ml-auto mr-4 bg-background border w-64 text-foreground data-[hasfile=true]:bg-red-500 data-[hasfile=true]:border-neutral-800 data-[hasfile=true]:border-2"
+								variant="ghost"
+								data-hasfile={sections[section.id][inter.id] ? true : false}
+								on:click={async () => {
+									try {
+										// Remove file
+										if (inter.options.type !== 'file') return;
+										if (sections[section.id][inter.id]) {
+											dispatch('fileRemoved', { id: inter.id, filePath: sections[section.id][inter.id] });
+											sections[section.id][inter.id] = null;
+											return;
+										}
+
+										// Chose file
+										let options = { multiSelections: false, filters: [{ name: 'Font files', extensions: inter.options.accept }] };
+										if (inter.options.default) {
+											// @ts-expect-error
+											options.defaultPath = inter.options.default;
+										}
+
+										const entries = await os.showOpenDialog('Choose your font file', options);
+										if (entries.length < 1) return;
+										dispatch('fileAdded', { id: inter.id, filePath: entries[0] });
+										sections[section.id][inter.id] = entries[0];
+									} catch (err) {
+										toast.error('An error occured');
+										console.error(err);
+									}
+								}}
+							>
+								{#if sections[section.id][inter.id]}
+									<Trash2 class="w-5 h-5 mr-2" />
+									<p class="inline-block align-middle overflow-hidden whitespace-nowrap overflow-ellipsis [direction:rtl] w-full">{path.basename(sections[section.id][inter.id])}</p>
+								{:else}
+									<Upload class="w-5 h-5 mr-2" />
+									Choose file
+								{/if}
+							</Button>
 						{:else if inter.options.type === 'dropdown'}
 							<Select.Root items={inter.options.list} bind:selected={sections[section.id][inter.id]}>
 								<Select.Trigger class="w-[180px] dark:bg-neutral-900 bg-neutral-300 ml-auto mr-4 border-none">

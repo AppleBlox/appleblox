@@ -10,7 +10,7 @@ import { showNotification } from '../notifications';
 import { getRobloxPath } from './path';
 import path from 'path-browserify';
 import Roblox from '.';
-import { setWindowVisibility } from '../window';
+import { focusWindow, setWindowVisibility } from '../window';
 
 interface RobloxGame {
 	id: number;
@@ -111,30 +111,32 @@ async function onGameEvent(data: GameEventInfo) {
 				console.log('Game Image: ', gameImageReq);
 				const gameImage: GameImageRes = gameImageReq.data[0];
 
-				rpcOptions = {
-					...rpcOptions,
-					details: `Playing ${gameInfo.name}`,
-					state: `by ${gameInfo.creator.name}`,
-					buttonText1: 'See game page',
-					buttonUrl1: `https://www.roblox.com/games/${placeId}/`,
-					largeImage: gameImage.imageUrl,
-					largeImageText: gameInfo.name,
-					enableTime: settings ? settings.rpc.rpc_time : true,
-				};
-
-				if (jobId && settings && settings.rpc.rpc_join) {
+				if (settings && settings.rpc.enable_rpc) {
 					rpcOptions = {
 						...rpcOptions,
-						buttonText2: 'Join server',
-						buttonUrl2: `"roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}"`,
+						details: `Playing ${gameInfo.name}`,
+						state: `by ${gameInfo.creator.name}`,
+						buttonText1: 'See game page',
+						buttonUrl1: `https://www.roblox.com/games/${placeId}/`,
+						largeImage: gameImage.imageUrl,
+						largeImageText: gameInfo.name,
+						enableTime: settings ? settings.rpc.rpc_time : true,
 					};
-				} else {
-					delete rpcOptions.buttonText2;
-					delete rpcOptions.buttonUrl2;
-				}
 
-				await RPCController.set(rpcOptions);
-				console.log('Message Roblox Game RPC');
+					if (jobId && settings && settings.rpc.rpc_join) {
+						rpcOptions = {
+							...rpcOptions,
+							buttonText2: 'Join server',
+							buttonUrl2: `"roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}"`,
+						};
+					} else {
+						delete rpcOptions.buttonText2;
+						delete rpcOptions.buttonUrl2;
+					}
+
+					await RPCController.set(rpcOptions);
+					console.log('Message Roblox Game RPC');
+				}
 				break;
 			case 'GameDisconnected':
 			case 'GameLeaving':
@@ -257,21 +259,24 @@ export async function launchRoblox(
 			return;
 		}
 
+		const modSettings = await loadSettings('mods');
+		if (modSettings) {
+			if (modSettings.general.enable_mods) {
+				setLaunchProgress(20);
+				setLaunchText('Copying Mods...');
+
+				await Roblox.Mods.copyToFiles();
+			}
+			await Roblox.Mods.applyCustomFont(modSettings);
+		}
+
 		const robloxPath = getRobloxPath();
 
-		setLaunchProgress(20);
+		setLaunchProgress(30);
 		if (await pathExists(path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'))) {
 			console.log(`Removing current ClientAppSettings.json file in ${path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json')}`);
 			await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
 			setLaunchText('Removing current ClientAppSettings...');
-		}
-
-		const modSettings = await loadSettings('mods');
-		if (modSettings && modSettings.general.enable_mods) {
-			setLaunchProgress(30);
-			setLaunchText('Copying Mods...');
-
-			await Roblox.Mods.copyToFiles();
 		}
 
 		setLaunchProgress(40);
@@ -308,15 +313,19 @@ export async function launchRoblox(
 
 				robloxInstance.on('gameEvent', onGameEvent);
 				robloxInstance.on('exit', async () => {
-					if (modSettings && modSettings.general.enable_mods) {
-						await Roblox.Mods.restoreRobloxFolders()
-							.catch(console.error)
-							.then(() => {
-								console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
-							});
+					if (modSettings) {
+						if (modSettings.general.enable_mods) {
+							await Roblox.Mods.restoreRobloxFolders()
+								.catch(console.error)
+								.then(() => {
+									console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
+								});
+						}
+						await Roblox.Mods.removeCustomFont(modSettings);
 					}
 					RPCController.stop();
 					setWindowVisibility(true);
+					focusWindow();
 					setRobloxConnected(false);
 					rbxInstance = null;
 					console.log('Roblox exited');
