@@ -13,6 +13,7 @@
 	import DiscordIcon from '@/assets/panel/discord.png';
 	import GithubIcon from '@/assets/panel/github.png';
 	import BugsIcon from '@/assets/sidebar/bugs.png';
+	import KillIcon from '@/assets/sidebar/kill.png';
 
 	import MiscIcon from '@/assets/sidebar/misc.png';
 	import CreditsIcon from '@/assets/sidebar/credits.png';
@@ -70,9 +71,24 @@
 	export let currentPage: string = 'integrations';
 	export let id: string;
 
+	let isHovering = false;
+
+	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : 'Play';
+	$: buttonIcon = buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
+
 	function sidebarItemClicked(e: CustomEvent) {
 		if (e.detail === 'none') return;
 		currentPage = e.detail;
+	}
+
+	function handleMouseEnter() {
+		isHovering = true;
+		console.log(isHovering);
+	}
+
+	function handleMouseLeave() {
+		isHovering = false;
+		console.log(isHovering);
 	}
 
 	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
@@ -114,21 +130,21 @@
 	<div class="flex flex-col items-center mb-4">
 		<p class="text-sm text-gray-500 mb-2">v{version}</p>
 
-		<Button
-			class={`${isLaunched ? 'bg-blue-400 hover:bg-blue-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-800'} font-mono`}
-			on:click={() => {
-				if (isLaunched) return;
-				dispatch('launchRoblox', true);
-			}}
-		>
-			{#if isLaunched}
-				<p class="font-mono">Active</p>
-				<img src={PlayIcon} alt="Roblox Icon" class="ml-1 mt-[1px] w-5 h-5 towhite-always" />
-			{:else}
-				<p class="font-mono">Play</p>
-				<img src={RobloxIcon} alt="Roblox Icon" class="ml-1 mt-[1px] w-5 h-5 towhite-always" />
-			{/if}
-		</Button>
+		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-[105px]">
+			<Button
+				class={`${isLaunched ? 'bg-blue-400 hover:bg-red-500' : 'bg-green-600 hover:bg-green-800'} font-mono w-full`}
+				on:click={() => {
+					if (isLaunched) {
+						os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
+						return;
+					};
+					dispatch('launchRoblox', true);
+				}}
+			>
+				<img src={buttonIcon} alt="Button Icon" class="mr-1 mt-[1px] w-5 h-5 towhite-always" />
+				<p class="font-mono transition duration-150">{buttonState}</p>
+			</Button>
+		</div>
 	</div>
 </div>
 
