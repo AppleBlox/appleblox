@@ -1,71 +1,71 @@
 <script lang="ts">
-	import { clipboard, debug, os, window as w } from "@neutralinojs/lib";
-	import Button from "$lib/components/ui/button/button.svelte";
-	import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-	import * as Table from "$lib/components/ui/table/index.js";
-	import Edit from "@/assets/panel/edit.png";
-	import Help from "@/assets/panel/help.png";
-	import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
-	import More from "@/assets/panel/more.png";
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-	import type { FFlag } from "@/types/settings";
-	import Input from "$lib/components/ui/input/input.svelte";
-	import { toast } from "svelte-sonner";
-	import Roblox from "../../ts/roblox";
+import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+import Button from '$lib/components/ui/button/button.svelte';
+import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
+import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+import Input from '$lib/components/ui/input/input.svelte';
+import * as Table from '$lib/components/ui/table/index.js';
+import Edit from '@/assets/panel/edit.png';
+import Help from '@/assets/panel/help.png';
+import More from '@/assets/panel/more.png';
+import type { FFlag } from '@/types/settings';
+import { os, clipboard, debug, window as w } from '@neutralinojs/lib';
+import { toast } from 'svelte-sonner';
+import Roblox from '../../ts/roblox';
 
-	let fflags: FFlag[] = [];
+let fflags: FFlag[] = [];
 
-	function updateTable() {
-		Roblox.FFlags.getFlags()
-			.then((flags) => {
-				if (flags) {
-					fflags = flags;
-				}
-			})
-			.catch(console.error);
+function updateTable() {
+	Roblox.FFlags.getFlags()
+		.then((flags) => {
+			if (flags) {
+				fflags = flags;
+			}
+		})
+		.catch(console.error);
+}
+
+updateTable();
+
+$: {
+	Roblox.FFlags.setFlags(fflags);
+}
+
+let addedFlag: string;
+async function btnAddFlag() {
+	if (!addedFlag) {
+		toast.error('You cannot add an empty flag!');
+		return;
 	}
-
-	updateTable();
-
-	$: {
-		Roblox.FFlags.setFlags(fflags);
+	if (/[!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(addedFlag)) {
+		toast.error('A flag cannot contain special characters');
+		return;
 	}
-
-	let addedFlag: string;
-	async function btnAddFlag() {
-		if (!addedFlag) {
-			toast.error("You cannot add an empty flag!");
-			return;
-		}
-		if (/[!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(addedFlag)) {
-			toast.error("A flag cannot contain special characters");
-			return;
-		}
-		const add = await Roblox.FFlags.addFlag(addedFlag, "");
-		if (add) {
-			fflags.push({ enabled: true, flag: addedFlag, value: "null" });
-			updateTable();
-		} else {
-			toast.error("This flag already exists!");
-		}
+	const add = await Roblox.FFlags.addFlag(addedFlag, '');
+	if (add) {
+		fflags.push({ enabled: true, flag: addedFlag, value: 'null' });
+		updateTable();
+	} else {
+		toast.error('This flag already exists!');
 	}
+}
 
-	async function pasteJson() {
-		let flags;
-		try {
-			flags = JSON.parse((await clipboard.readText()).trim());
-		} catch (err) {
-			toast.error("Invalid JSON");
-			console.error(err);
-			return;
-		}
-		for (const flag of Object.keys(flags)) {
-			fflags.push({ enabled: true, flag, value: flags[flag] });
-			// svelte reactivity, don't delete
-			fflags = fflags;
-		}
-		toast.success(`Pasted ${flags.length} flags.`, { duration: 500 });
+async function pasteJson() {
+	let flags;
+	try {
+		flags = JSON.parse((await clipboard.readText()).trim());
+	} catch (err) {
+		toast.error('Invalid JSON');
+		console.error(err);
+		return;
 	}
+	for (const flag of Object.keys(flags)) {
+		fflags.push({ enabled: true, flag, value: flags[flag] });
+		// svelte reactivity, don't delete
+		fflags = fflags;
+	}
+	toast.success(`Pasted ${flags.length} flags.`, { duration: 500 });
+}
 </script>
 
 <div class="flex gap-3 mt-3">

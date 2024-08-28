@@ -1,25 +1,25 @@
 <script lang="ts">
-	import Sidebar from './Sidebar/Sidebar.svelte';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
-	import Integrations from './pages/Integrations.svelte';
-	import { fly } from 'svelte/transition';
-	import FastFlags from './pages/FastFlags.svelte';
-	import { Toaster } from '$lib/components/ui/sonner';
 	import { Progress } from '$lib/components/ui/progress';
-	import Misc from './pages/Misc.svelte';
-	import { computer, os } from '@neutralinojs/lib';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
+	import { Toaster } from '$lib/components/ui/sonner';
+	import { os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
+	import { fly } from 'svelte/transition';
+	import Sidebar from './Sidebar/Sidebar.svelte';
+	import Dev from './pages/Dev.svelte';
+	import FastFlags from './pages/FastFlags.svelte';
+	import Integrations from './pages/Integrations.svelte';
+	import Misc from './pages/Misc.svelte';
+	import Mods from './pages/Mods.svelte';
 	import Support from './pages/Support.svelte';
 	import { launchRoblox } from './ts/roblox/launch';
-	import Updater from './util/Updater.svelte';
-	import Mods from './pages/Mods.svelte';
 	import Onboarding from './util/Onboarding.svelte';
-	import Dev from './pages/Dev.svelte';
-	import { loadSettings } from './ts/settings';
+	import Updater from './util/Updater.svelte';
+	import Roblox from './pages/Roblox.svelte';
 
 	let currentPage: string;
 
-	let launchInfo = {
+	const launchInfo = {
 		launching: false,
 		progress: 1,
 		text: 'Launching...',
@@ -128,6 +128,10 @@
 			{:else if currentPage === 'dev'}
 				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Dev />
+				</div>
+			{:else if currentPage === 'roblox'}
+				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
+					<Roblox />
 				</div>
 			{:else}
 				<div class="flex items-center m-32 space-x-4 opacity-30">

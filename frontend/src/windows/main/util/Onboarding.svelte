@@ -1,26 +1,26 @@
 <script lang="ts">
-	import { loadSettings, saveSettings } from '../ts/settings';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { os } from '@neutralinojs/lib';
-	import Misc from '../pages/Misc.svelte';
-	import Roblox from '../ts/roblox';
-	import { toast } from 'svelte-sonner';
+import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+import { Button } from '$lib/components/ui/button/index.js';
+import { os } from '@neutralinojs/lib';
+import { toast } from 'svelte-sonner';
+import Misc from '../pages/Misc.svelte';
+import Roblox from '../ts/roblox';
+import { loadSettings, saveSettings } from '../ts/settings';
 
-	let settings = null;
-	let show = false;
-	let shortcutAndUrl = false;
-	loadSettings('onboarding').then((s) => {
-		if (s) {
-			settings = s;
-			if (s.show) {
-				show = true;
-			}
-		} else {
-			saveSettings('onboarding', { show: true });
+let settings = null;
+let show = false;
+let shortcutAndUrl = false;
+loadSettings('onboarding').then((s) => {
+	if (s) {
+		settings = s;
+		if (s.show) {
 			show = true;
 		}
-	});
+	} else {
+		saveSettings('onboarding', { show: true });
+		show = true;
+	}
+});
 </script>
 
 <AlertDialog.Root bind:open={show}>

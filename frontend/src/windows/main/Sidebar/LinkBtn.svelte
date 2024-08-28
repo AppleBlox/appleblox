@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { os } from "@neutralinojs/lib";
+import { os } from '@neutralinojs/lib';
 
-	export let label: string;
-	export let icon: string;
-	export let url: string;
-	</script>
+export let label: string;
+export let icon: string;
+export let url: string;
+</script>
 	
 	<button
 		class="flex items-center justify-center mb-2"

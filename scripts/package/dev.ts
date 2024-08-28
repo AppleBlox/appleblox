@@ -1,10 +1,10 @@
-import spawn, { type SpawnPromise, type SpawnResult} from '@expo/spawn-async';
-import path from 'path';
-import { existsSync, chmodSync, rmSync } from 'fs';
+import { chmodSync, existsSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import spawn, { type SpawnPromise, type SpawnResult } from '@expo/spawn-async';
 
 async function main() {
 	// Clear terminal
-	process.stdout.write('\x1b[2J')
+	process.stdout.write('\x1b[2J');
 	process.stdout.write('\x1b[0f');
 
 	// Get the correct binary name
@@ -20,33 +20,25 @@ async function main() {
 			break;
 	}
 	// Start the vite dev server
-	const vite = spawn('vite', ["dev"], {
+	const vite = spawn('vite', ['dev'], {
 		cwd: process.cwd(),
 		detached: false,
 		stdio: 'inherit',
 	});
 	// Delay to be sure vite was built
-	console.log("Waiting 2500ms...")
-	await new Promise(r => setTimeout(r, 2500));
+	console.log('Waiting 2500ms...');
+	await new Promise((r) => setTimeout(r, 2500));
 
-	const args = [
-		'--window-enable-inspector=true',
-		'--export-auth-info',
-		'--load-dir-res',
-		`--path=${path.resolve('.')}`,
-		'--neu-dev-extension',
-		'--url=http://localhost:5173',
-		"--port=5174"
-	];
+	const args = ['--window-enable-inspector=true', '--export-auth-info', '--load-dir-res', `--path=${path.resolve('.')}`, '--neu-dev-extension', '--url=http://localhost:5173', '--port=5174'];
 	// Chmod +x the binary to be able to run it
 	let bpath: string;
-	if (process.platform !== "win32") {
-		bpath = path.resolve(`./bin/neutralino-${binaryOS}_${process.arch}`)
-		chmodSync(bpath,"755");
+	if (process.platform !== 'win32') {
+		bpath = path.resolve(`./bin/neutralino-${binaryOS}_${process.arch}`);
+		chmodSync(bpath, '755');
 	} else {
-		bpath = 'start ' + path.resolve(`./bin/neutralino-${binaryOS}_x64.exe`)
+		bpath = `start ${path.resolve(`./bin/neutralino-${binaryOS}_x64.exe`)}`;
 	}
-	
+
 	await spawn(bpath, args, {
 		cwd: process.cwd(),
 		detached: false,

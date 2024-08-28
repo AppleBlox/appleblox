@@ -1,21 +1,21 @@
+import AppIcon from '@/assets/play.icns';
+import { sleep } from '@/windows/main/ts/utils';
+import { os, filesystem } from '@neutralinojs/lib';
+import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
+import { libraryPath } from '../libraries';
 import { dataPath, loadSettings } from '../settings';
 import { pathExists } from '../utils';
-import { filesystem, os } from '@neutralinojs/lib';
-import path from 'path-browserify';
-import { sleep } from '@/windows/main/ts/utils';
 import { getRobloxPath } from './path';
-import AppIcon from '@/assets/play.icns';
-import { libraryPath } from '../libraries';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
 	static async hasRoblox(popup = true): Promise<boolean> {
 		if (await pathExists(path.join(getRobloxPath(), 'Contents/MacOS/RobloxPlayer'))) {
 			return true;
-		} else {
-			if (!popup) return false;
-			os.execCommand(`osascript <<'END'
+		}
+		if (!popup) return false;
+		os.execCommand(`osascript <<'END'
     set theAlertText to "Roblox is not installed"
     set theAlertMessage to "To use AppleBlox, you first need to install Roblox. Would you like to open the download page?"
     display alert theAlertText message theAlertMessage as critical buttons {"Cancel", "Open link"} default button "Open link" cancel button "Cancel" giving up after 60
@@ -24,8 +24,7 @@ export class RobloxUtils {
         open location "https://roblox.com/download"
     end if
 END`);
-			return false;
-		}
+		return false;
 	}
 
 	/** Uses cli to check if any instance of roblox is open */
@@ -38,11 +37,11 @@ END`);
 
 	static async enableMultiInstance() {
 		try {
-			if (!(await this.hasRoblox())) return;
-			if (await this.isRobloxOpen()) {
+			if (!(await RobloxUtils.hasRoblox())) return;
+			if (await RobloxUtils.isRobloxOpen()) {
 				toast.info('Closing Roblox...', { duration: 1000 });
 				console.log('Closing Roblox');
-				const robloxKill = await os.execCommand(`pkill -9 Roblox`);
+				const robloxKill = await os.execCommand('pkill -9 Roblox');
 				console.log(robloxKill);
 
 				await sleep(2000);
@@ -114,16 +113,20 @@ END`);
 		const response = await fetch(AppIcon);
 		const blob = await response.blob();
 		await filesystem.writeBinaryFile(path.join(savePath, 'Launch Roblox.app/Contents/Resources/icon.icns'), await blob.arrayBuffer());
-		await filesystem.writeFile(path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'), '#!/bin/bash\n' + path.join(path.dirname(window.NL_PATH), 'MacOS/bootstrap') + ' --launch');
+		await filesystem.writeFile(path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'), `#!/bin/bash\n${path.join(path.dirname(window.NL_PATH), 'MacOS/bootstrap')} --launch`);
 		await os.execCommand(`chmod +x ${path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ ')}`);
 		toast.success(`Created a shortcut at "${path.join(savePath, 'Launch Roblox.app')}"`);
+	}
+
+	/* Checks if the URI feature is enabled*/
+	static async isUriEnabled() {
+		return (await os.execCommand(`${libraryPath('urlscheme')} check roblox-player ch.origaming.appleblox.url`)).stdOut.includes('true');
 	}
 
 	/** Toggles wether or not opening roblox:// and roblox-player:// links should open AppleBlox */
 	static async toggleURI(state: boolean, notif = true) {
 		const urlscheme = `${libraryPath('urlscheme')}`;
 		if (state) {
-			// await os.execCommand(`open "${libraryPath("urlhandler")}"`)
 			await os.execCommand(`${urlscheme} set roblox ch.origaming.appleblox.url`);
 			await os.execCommand(`${urlscheme} set roblox-player ch.origaming.appleblox.url`);
 			if (notif) {
@@ -136,5 +139,17 @@ END`);
 				toast.success('Restored roblox URI');
 			}
 		}
+	}
+
+	static async killAll() {
+		await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
+	}
+
+	static async quit() {
+		await os.execCommand(`osascript -e 'tell application "Roblox" to if it is running then quit'`);
+		while ((await os.execCommand('ps aux | grep RobloxPlayer | grep -v grep')).stdOut.trim().length > 2) {
+			await sleep(500);
+		}
+		return;
 	}
 }

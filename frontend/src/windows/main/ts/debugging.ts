@@ -1,47 +1,50 @@
 // File with debugging functions
 // It will redirect the app's logs to the appleblox.log file while still logging in the web browser
-import { filesystem } from "@neutralinojs/lib";
-import path from "path-browserify";
-import { dataPath, loadSettings } from "./settings";
-import { pathExists } from "./utils";
-import * as StackTrace from "stacktrace-js";
+import { filesystem } from '@neutralinojs/lib';
+import path from 'path-browserify';
+import * as StackTrace from 'stacktrace-js';
+import { dataPath, loadSettings } from './settings';
+import { pathExists } from './utils';
 
 /** Tries to format every variable to a string */
 function formatConsoleLog(...args: any[]): string {
-	return (
-		`[${new Date().toLocaleTimeString()}] ` +
-		args
-			.map((arg) => {
-				if (arg === null) {
-					return "null";
-				} else if (arg === undefined) {
-					return "undefined";
-				} else if (typeof arg === "string") {
-					return arg;
-				} else if (typeof arg === "number") {
-					return arg.toString();
-				} else if (typeof arg === "boolean") {
-					return arg.toString();
-				} else if (Array.isArray(arg)) {
-					return JSON.stringify(arg);
-				} else if (typeof arg === "object") {
-					return JSON.stringify(arg, getCircularReplacer());
-				} else if (typeof arg === "function") {
-					return arg.toString();
-				} else {
-					return String(arg);
-				}
-			})
-			.join(" ")
-	);
+	return `[${new Date().toLocaleTimeString()}] ${args
+		.map((arg) => {
+			if (arg === null) {
+				return 'null';
+			}
+			if (arg === undefined) {
+				return 'undefined';
+			}
+			if (typeof arg === 'string') {
+				return arg;
+			}
+			if (typeof arg === 'number') {
+				return arg.toString();
+			}
+			if (typeof arg === 'boolean') {
+				return arg.toString();
+			}
+			if (Array.isArray(arg)) {
+				return JSON.stringify(arg);
+			}
+			if (typeof arg === 'object') {
+				return JSON.stringify(arg, getCircularReplacer());
+			}
+			if (typeof arg === 'function') {
+				return arg.toString();
+			}
+			return String(arg);
+		})
+		.join(' ')}`;
 }
 
 function getCircularReplacer() {
 	const seen = new WeakSet();
 	return (key: string, value: any) => {
-		if (typeof value === "object" && value !== null) {
+		if (typeof value === 'object' && value !== null) {
 			if (seen.has(value)) {
-				return "[Circular]";
+				return '[Circular]';
 			}
 			seen.add(value);
 		}
@@ -53,9 +56,9 @@ function getCircularReplacer() {
 export async function clearLogs() {
 	try {
 		const appleBloxDir = path.dirname(await dataPath());
-		await filesystem.writeFile(path.join(appleBloxDir, "appleblox.log"), "");
+		await filesystem.writeFile(path.join(appleBloxDir, 'appleblox.log'), '');
 	} catch (err) {
-		console.error("Failed to clear the logs:");
+		console.error('Failed to clear the logs:');
 		console.error(err);
 	}
 }
@@ -64,14 +67,14 @@ export async function clearLogs() {
 async function appendLog(message: string) {
 	try {
 		const appleBloxDir = path.dirname(await dataPath());
-		await filesystem.appendFile(path.join(appleBloxDir, "appleblox.log"), message + "\n");
+		await filesystem.appendFile(path.join(appleBloxDir, 'appleblox.log'), `${message}\n`);
 	} catch (err) {
-		console.error("Failed to write log to file", err);
+		console.error('Failed to write log to file', err);
 	}
 }
 
 function createLoggerFunction(originalFunction: Function, logLevel: string) {
-	return async function (...args: any[]) {
+	return async (...args: any[]) => {
 		if (isRedirectionEnabled) {
 			const formattedMessage = formatConsoleLog(...args);
 			await appendLog(formattedMessage);
@@ -94,7 +97,7 @@ let isRedirectionEnabled = false;
 let overriddenConsoleFunctions = false;
 
 (async () => {
-	const settings = await loadSettings("misc");
+	const settings = await loadSettings('misc');
 	if (!settings) return;
 	isRedirectionEnabled = settings.advanced.redirect_console;
 	if (isRedirectionEnabled) {
@@ -104,11 +107,11 @@ let overriddenConsoleFunctions = false;
 
 function overrideConsoleFunctions() {
 	if (!overriddenConsoleFunctions) {
-		console.log = createLoggerFunction(originalConsoleLog, "INFO");
-		console.error = createLoggerFunction(originalConsoleError, "ERROR");
-		console.warn = createLoggerFunction(originalConsoleWarn, "WARN");
-		console.info = createLoggerFunction(originalConsoleInfo, "INFO");
-		console.debug = createLoggerFunction(originalConsoleDebug, "DEBUG");
+		console.log = createLoggerFunction(originalConsoleLog, 'INFO');
+		console.error = createLoggerFunction(originalConsoleError, 'ERROR');
+		console.warn = createLoggerFunction(originalConsoleWarn, 'WARN');
+		console.info = createLoggerFunction(originalConsoleInfo, 'INFO');
+		console.debug = createLoggerFunction(originalConsoleDebug, 'DEBUG');
 		overriddenConsoleFunctions = true;
 	}
 }
@@ -131,11 +134,11 @@ export async function enableConsoleRedirection() {
 	}
 	isRedirectionEnabled = true;
 	overrideConsoleFunctions();
-	console.log("Enabled console redirection");
+	console.log('Enabled console redirection');
 }
 
 export function disableConsoleRedirection() {
 	isRedirectionEnabled = false;
 	restoreConsoleFunctions();
-	console.log("Disabled console redirection");
+	console.log('Disabled console redirection');
 }

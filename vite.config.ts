@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite';
+import * as path from 'node:path';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import * as path from 'path';
+import { defineConfig } from 'vite';
 import neutralino from './scripts/package/vite-plugin';
 
 // https://vitejs.dev/config/

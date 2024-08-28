@@ -1,44 +1,51 @@
 <script lang="ts">
 	import { Separator } from '$lib/components/ui/separator/index.js';
-	import { createEventDispatcher } from 'svelte';
 	import logo from '@/assets/favicon.png';
 	import { os } from '@neutralinojs/lib';
+	import { createEventDispatcher } from 'svelte';
 	import { version } from '../../../../../package.json';
 
-	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
-	import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
-	import RobloxIcon from '@/assets/sidebar/roblox.png';
-	import PlayIcon from '@/assets/sidebar/play.png';
-	import ModsIcon from '@/assets/sidebar/mods.png';
 	import DiscordIcon from '@/assets/panel/discord.png';
 	import GithubIcon from '@/assets/panel/github.png';
 	import BugsIcon from '@/assets/sidebar/bugs.png';
+	import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
+	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
 	import KillIcon from '@/assets/sidebar/kill.png';
+	import ModsIcon from '@/assets/sidebar/mods.png';
+	import PlayIcon from '@/assets/sidebar/play.png';
+	import RobloxIcon from '@/assets/sidebar/roblox.png';
 
-	import MiscIcon from '@/assets/sidebar/misc.png';
 	import CreditsIcon from '@/assets/sidebar/credits.png';
+	import MiscIcon from '@/assets/sidebar/misc.png';
 
-	import SidebarBtn from './SidebarBtn.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import LinkBtn from './LinkBtn.svelte';
-	import { getMode, pathExists } from '../ts/utils';
 	import path from 'path-browserify';
+	import Roblox from '../ts/roblox';
+	import { getMode, pathExists } from '../ts/utils';
+	import LinkBtn from './LinkBtn.svelte';
+	import SidebarBtn from './SidebarBtn.svelte';
 
-	export let isLaunched = false;
+	export const isLaunched: boolean = false;
+	export let currentPage = 'integrations';
+	export let id: string;
 
-	interface SidebarItem {
-		label: string;
-		id: string;
-		icon: string;
-	}
-	let sidebarBtns: SidebarItem[] = [
+	// Sidebar Buttons
+	const linksBtns: { label: string; icon: string; url: string }[] = [
+		{ label: 'Discord', icon: DiscordIcon, url: 'https://appleblox.com/discord' },
+		{ label: 'GitHub', icon: GithubIcon, url: 'https://github.com/OrigamingWasTaken/appleblox' },
+		{ label: 'Issues', icon: BugsIcon, url: 'https://github.com/OrigamingWasTaken/appleblox/issues' },
+	];
+
+	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
+		{ label: 'Roblox', id: 'roblox', icon: RobloxIcon },
 		{ label: 'Fast Flags', id: 'fastflags', icon: FastFlagsIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Support', id: 'support', icon: CreditsIcon },
 	];
 
+	// App mode check (add 'Dev' sidebar button)
 	let isDevBtnAdded = false;
 	if (getMode() === 'dev' && !isDevBtnAdded) {
 		sidebarBtns.push({ label: 'Dev', id: 'dev', icon: '' });
@@ -46,7 +53,7 @@
 	}
 	(async () => {
 		if (await pathExists(path.join(await os.getEnv('HOME'), 'adevmode'))) {
-			console.log('App is in dev mode.');
+			console.log('App is in developpement mode.');
 			if (!isDevBtnAdded) {
 				sidebarBtns.push({ label: 'Dev', id: 'dev', icon: '' });
 				isDevBtnAdded = true;
@@ -56,41 +63,26 @@
 		}
 	})();
 
-	interface SidebarLink {
-		label: string;
-		icon: string;
-		url: string;
-	}
-
-	const linksBtns: SidebarLink[] = [
-		{ label: 'Discord', icon: DiscordIcon, url: 'https://appleblox.com/discord' },
-		{ label: 'GitHub', icon: GithubIcon, url: 'https://github.com/OrigamingWasTaken/appleblox' },
-		{ label: 'Issues', icon: BugsIcon, url: 'https://github.com/OrigamingWasTaken/appleblox/issues' },
-	];
-
-	export let currentPage: string = 'integrations';
-	export let id: string;
-
+	// Play button text and color
 	let isHovering = false;
-
 	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : 'Play';
 	$: buttonIcon = buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
 
+	function handleMouseEnter() {
+		isHovering = true;
+	}
+
+	function handleMouseLeave() {
+		isHovering = false;
+	}
+
+	// Change page on button click
 	function sidebarItemClicked(e: CustomEvent) {
 		if (e.detail === 'none') return;
 		currentPage = e.detail;
 	}
 
-	function handleMouseEnter() {
-		isHovering = true;
-		console.log(isHovering);
-	}
-
-	function handleMouseLeave() {
-		isHovering = false;
-		console.log(isHovering);
-	}
-
+	// Launch roblox event
 	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
 </script>
 
@@ -135,9 +127,9 @@
 				class={`${isLaunched ? 'bg-blue-400 hover:bg-red-500' : 'bg-green-600 hover:bg-green-800'} font-mono w-full`}
 				on:click={() => {
 					if (isLaunched) {
-						os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
+						Roblox.Utils.killAll();
 						return;
-					};
+					}
 					dispatch('launchRoblox', true);
 				}}
 			>

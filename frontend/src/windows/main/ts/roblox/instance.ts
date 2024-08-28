@@ -1,9 +1,9 @@
-import { events, filesystem, os } from '@neutralinojs/lib';
+import { events, os, filesystem } from '@neutralinojs/lib';
+import path from 'path-browserify';
+import Roblox from '.';
 import { isProcessAlive, removeNonUTF8CharactersFromString } from '../utils';
 import { sleep } from '../utils';
-import path from 'path-browserify';
 import { getRobloxPath } from './path';
-import Roblox from '.';
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';
@@ -95,8 +95,8 @@ export class RobloxInstance {
 	private gameInstance: number | null = null;
 	private latestLogPath: string | null = null;
 	private logsInstance: os.SpawnedProcess | null = null;
-	private lastLogs: string = '';
-	private isWatching: boolean = false;
+	private lastLogs = '';
+	private isWatching = false;
 	private onEvent: Promise<events.Response> | null = null;
 
 	/** Adds a handler to an event */
@@ -158,7 +158,7 @@ export class RobloxInstance {
 			if (info.length < 2) continue;
 			const processFileName = path.basename(info);
 			if (processFileName === 'RobloxPlayer') {
-				this.gameInstance = parseInt(pid);
+				this.gameInstance = Number.parseInt(pid);
 			}
 		}
 
@@ -189,7 +189,7 @@ export class RobloxInstance {
 
 		// Read the first content, to not miss anything
 		await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
-		const content = (await os.execCommand(`cat /tmp/roblox_ablox.log`)).stdOut;
+		const content = (await os.execCommand('cat /tmp/roblox_ablox.log')).stdOut;
 		// Spawns the logs watcher, and be sure that it kills any previous one
 		await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
 		this.logsInstance = await os.spawnProcess(`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done
@@ -219,7 +219,7 @@ export class RobloxInstance {
 				await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
 
 				// Read the content of the converted file
-				const content = (await os.execCommand(`cat /tmp/roblox_ablox.log`)).stdOut;
+				const content = (await os.execCommand('cat /tmp/roblox_ablox.log')).stdOut;
 
 				// Process only new lines
 				const contentLines = content.split('\n');

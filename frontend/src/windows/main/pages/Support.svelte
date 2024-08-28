@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { SettingsPanel } from '@/types/settings';
-	import Panel from './Settings/Panel.svelte';
 	import DiscordIcon from '@/assets/panel/discord.png';
 	import GithubIcon from '@/assets/panel/github.png';
+	import type { SettingsPanel } from '@/types/settings';
 	import { os } from '@neutralinojs/lib';
+	import Panel from './Settings/Panel.svelte';
 
 	function onButtonClicked(id: string) {
 		switch (id) {
@@ -35,24 +35,24 @@
 				interactables: [
 					{
 						label: 'Join Discord server',
-						description: `appleblox.com/discord`,
+						description: 'appleblox.com/discord',
 						id: 'discord_btn',
 						options: {
 							type: 'button',
 							icon: {
-								src: DiscordIcon
+								src: DiscordIcon,
 							},
 							style: 'default',
 						},
 					},
 					{
 						label: 'GitHub Repo',
-						description: `Takes you to the github repo`,
+						description: 'Takes you to the github repo',
 						id: 'github_btn',
 						options: {
 							type: 'button',
 							icon: {
-								src: GithubIcon
+								src: GithubIcon,
 							},
 							style: 'secondary',
 						},
@@ -132,6 +132,9 @@
 	};
 </script>
 
-<Panel panel={panelOpts} on:buttonClicked={(e)=>{
-	onButtonClicked(e.detail)
-}}/>
+<Panel
+	panel={panelOpts}
+	on:buttonClicked={(e) => {
+		onButtonClicked(e.detail);
+	}}
+/>

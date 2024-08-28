@@ -1,11 +1,11 @@
+import { os, filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
-import { pathExists, sleep } from '../utils';
-import { filesystem, os } from '@neutralinojs/lib';
-import { getRobloxPath } from './path';
-import shellFS from '../shellfs';
 import { toast } from 'svelte-sonner';
 import { showNotification } from '../notifications';
 import { loadSettings } from '../settings';
+import shellFS from '../shellfs';
+import { pathExists, sleep } from '../utils';
+import { getRobloxPath } from './path';
 
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
@@ -16,13 +16,13 @@ export class RobloxMods {
 		const mods = entries.filter((entry) => entry.type === 'DIRECTORY');
 		return mods
 			.map((mod) => ({ filename: mod.entry.replace(/\.disabled$/, ''), path: mod.path, state: !path.basename(mod.path).endsWith('.disabled') }))
-			.sort((a, b) => ('' + a).localeCompare(b.filename, undefined, { numeric: true }));
+			.sort((a, b) => `${a}`.localeCompare(b.filename, undefined, { numeric: true }));
 	}
 
 	/** Copy the mods to Roblox's files */
 	static async copyToFiles() {
 		// Load the mods. We reverse to respect the alphabetical priority
-		const mods = (await this.loadMods()).filter((m) => m.state).reverse();
+		const mods = (await RobloxMods.loadMods()).filter((m) => m.state).reverse();
 		if (mods.length < 1) return;
 
 		const resourcesFolder = path.join(await getRobloxPath(), 'Contents/Resources/');
@@ -105,14 +105,13 @@ export class RobloxMods {
 		for (const file of entries) {
 			try {
 				const content = await filesystem.readFile(file.path);
-				let jsonContent = JSON.parse(content);
+				const jsonContent = JSON.parse(content);
 				for (const [key] of Object.keys(jsonContent.faces)) {
 					jsonContent.faces[key].assetId = `rbxasset://fonts/CustomFont${fontExt}`;
 				}
 				await filesystem.writeFile(file.path, JSON.stringify(jsonContent));
 			} catch (err) {
 				console.error(`Error when applying custom font to: "${file.path}"`);
-				continue;
 			}
 		}
 

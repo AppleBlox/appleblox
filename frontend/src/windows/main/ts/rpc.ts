@@ -1,4 +1,4 @@
-import { debug, events, os } from '@neutralinojs/lib';
+import { events, os, debug } from '@neutralinojs/lib';
 import { libraryPath } from './libraries';
 
 /**
@@ -56,7 +56,7 @@ export interface RPCOptions {
 }
 
 export class DiscordRPC {
-	private static binaryPath: string = `${libraryPath('discordrpc')}`;
+	private static binaryPath = `${libraryPath('discordrpc')}`;
 	private static process: any | null = null;
 	private static instances: Set<DiscordRPC> = new Set();
 	private static currentOptions: RPCOptions | null = null;
@@ -92,7 +92,7 @@ export class DiscordRPC {
 		await os.execCommand(`pkill -f "discordrpc_ablox"`);
 
 		const cmd = `${DiscordRPC.binaryPath} ${args.join(' ')}`;
-		console.log('Starting RPC with: ' + cmd);
+		console.log(`Starting RPC with: ${cmd}`);
 		DiscordRPC.process = await os.spawnProcess(cmd);
 		DiscordRPC.currentOptions = options;
 	}
@@ -239,7 +239,7 @@ export class DiscordRPC {
 }
 
 let discordRPC: DiscordRPC | null = null;
-const presets: {[key: string]: RPCOptions} = {
+const presets: { [key: string]: RPCOptions } = {
 	inRobloxApp: {
 		clientId: '1257650541677383721',
 		details: 'Currently browsing the menus',
@@ -253,7 +253,7 @@ const presets: {[key: string]: RPCOptions} = {
 export class RPCController {
 	public static preset(preset: string) {
 		if (presets[preset]) {
-			this.set(presets[preset])
+			RPCController.set(presets[preset]);
 		}
 	}
 

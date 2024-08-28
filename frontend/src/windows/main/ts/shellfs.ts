@@ -9,7 +9,7 @@ class shellFS {
 		try {
 			const cmd = await os.execCommand(`mkdir -p "${path}"`);
 			if (cmd.stdErr.length > 2) {
-				throw new Error(cmd.stdErr)
+				throw new Error(cmd.stdErr);
 			}
 		} catch (err) {
 			console.error("Couldn't create directory");
@@ -25,7 +25,7 @@ class shellFS {
 		try {
 			const cmd = await os.execCommand(`rm -rf "${path}"`);
 			if (cmd.stdErr.length > 2) {
-				throw new Error(cmd.stdErr)
+				throw new Error(cmd.stdErr);
 			}
 		} catch (err) {
 			console.error("Couldn't remove the file or folder");
@@ -43,7 +43,7 @@ class shellFS {
 			const escapedContent = content.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 			const cmd = await os.execCommand(`echo "${escapedContent}" > "${path}"`);
 			if (cmd.stdErr.length > 2) {
-				throw new Error(cmd.stdErr)
+				throw new Error(cmd.stdErr);
 			}
 		} catch (err) {
 			console.error("Couldn't write to the file");
@@ -60,7 +60,7 @@ class shellFS {
 		try {
 			const cmd = await os.execCommand(`cp ${recursive ? '-r ' : ''} "${source}" "${dest}"`);
 			if (cmd.stdErr.length > 2) {
-				throw new Error(cmd.stdErr)
+				throw new Error(cmd.stdErr);
 			}
 		} catch (err) {
 			console.error("Couldn't copy");

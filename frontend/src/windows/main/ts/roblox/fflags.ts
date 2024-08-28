@@ -1,9 +1,9 @@
-import { computer, filesystem } from '@neutralinojs/lib';
-import { pathExists } from '../utils';
-import path from 'path-browserify';
 import type { FFlag } from '@/types/settings';
-import { dataPath, loadSettings } from '../settings';
+import { computer, filesystem } from '@neutralinojs/lib';
+import path from 'path-browserify';
 import { showNotification } from '../notifications';
+import { dataPath, loadSettings } from '../settings';
+import { pathExists } from '../utils';
 
 export class RobloxFFlags {
 	/** Returns every saved FFlags */
@@ -11,7 +11,7 @@ export class RobloxFFlags {
 		// Read the saved fflags file inside Application Support
 		const filePath = path.join(await dataPath(), 'fflags.json');
 		if (!(await pathExists(filePath))) {
-			await this.setFlags([]);
+			await RobloxFFlags.setFlags([]);
 		}
 		const fileContent = await filesystem.readFile(filePath);
 		try {
@@ -48,45 +48,43 @@ export class RobloxFFlags {
 		}
 
 		// Load the fflags from the saved file || empty array
-		let fflags: FFlag[] = JSON.parse(await filesystem.readFile(filePath)) || [];
+		const fflags: FFlag[] = JSON.parse(await filesystem.readFile(filePath)) || [];
 		// Modify the flag if it exists or create a new one
 		if (fflags.find((f) => f.flag === flag)) {
 			fflags[fflags.findIndex((f) => f.flag === flag)] = { flag, enabled, value };
 		} else {
 			fflags.push({ flag, enabled, value });
 		}
-		await this.setFlags(fflags);
+		await RobloxFFlags.setFlags(fflags);
 	}
 
 	/** Append a flag to the config file. If the one provided already exists, then this will return false */
 	static async addFlag(flag: string, value: string): Promise<boolean> {
-		let flags: FFlag[] = (await this.getFlags()) || [];
+		const flags: FFlag[] = (await RobloxFFlags.getFlags()) || [];
 		if (flags.find((f) => f.flag === flag)) {
 			// The flag already exists
 			return false;
-		} else {
-			flags.push({ flag, enabled: true, value });
-			await this.setFlags(flags);
-			return true;
 		}
+		flags.push({ flag, enabled: true, value });
+		await RobloxFFlags.setFlags(flags);
+		return true;
 	}
 
 	/** Removes the provided flag. If it's doesn't exist, returns false */
 	static async removeFlag(flag: string): Promise<boolean> {
-		let flags: FFlag[] = (await this.getFlags()) || [];
+		const flags: FFlag[] = (await RobloxFFlags.getFlags()) || [];
 		if (flags.find((f) => f.flag === flag)) {
-			await this.setFlags(flags.filter((f) => f.flag !== flag));
+			await RobloxFFlags.setFlags(flags.filter((f) => f.flag !== flag));
 			return true;
-		} else {
-			// The flag doesn't exist
-			return false;
 		}
+		// The flag doesn't exist
+		return false;
 	}
 
 	static async parseFlags(preset = false): Promise<Object> {
 		// Get the path to Application Supoort
 		const appPath = await dataPath();
-		let fflagsJson: { [key: string]: string | number | boolean } = {};
+		const fflagsJson: { [key: string]: string | number | boolean } = {};
 		// utility function
 		const makeflag = (flags: { [key: string]: number | string | boolean }) => {
 			for (const [flag, value] of Object.entries(flags)) {
@@ -118,7 +116,7 @@ export class RobloxFFlags {
 								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
 								showNotification({
 									title: 'Renderer defaulted to Vulkan',
-									content: `Your monitor does not meet the requirements to use Metal at the selected fps cap.`,
+									content: 'Your monitor does not meet the requirements to use Metal at the selected fps cap.',
 									timeout: 10,
 								});
 							}
@@ -319,23 +317,22 @@ export class RobloxFFlags {
 			}
 
 			const integrationsFlags = await loadSettings('integrations');
-			if (integrationsFlags && integrationsFlags.sdk.enabled && integrationsFlags.sdk.window) {
+			if (integrationsFlags?.sdk.enabled && integrationsFlags.sdk.window) {
 				makeflag({ FFlagUserIsBloxstrap: true, FFlagUserAllowsWindowMovement: true });
 			}
 
 			return fflagsJson;
-		} else {
-			if (!(await pathExists(path.join(appPath, 'fflags.json')))) {
-				return {};
-			}
-			const neuPath = path.join(appPath, 'fflags.json');
-			const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(await filesystem.readFile(neuPath));
-			for (const flag of skibidiOhioFanumTax) {
-				if (flag.enabled) {
-					fflagsJson[flag.flag] = flag.value;
-				}
-			}
-			return fflagsJson;
 		}
+		if (!(await pathExists(path.join(appPath, 'fflags.json')))) {
+			return {};
+		}
+		const neuPath = path.join(appPath, 'fflags.json');
+		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(await filesystem.readFile(neuPath));
+		for (const flag of skibidiOhioFanumTax) {
+			if (flag.enabled) {
+				fflagsJson[flag.flag] = flag.value;
+			}
+		}
+		return fflagsJson;
 	}
 }

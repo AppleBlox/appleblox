@@ -1,18 +1,19 @@
-import { pathExists, curlGet } from '../utils';
-import shellFS from '../shellfs';
-import { GameEventInfo, RobloxInstance } from './instance';
-import { RPCController, RPCOptions } from '../rpc';
-import { computer, os } from '@neutralinojs/lib';
-import { loadSettings } from '../settings';
-import { toast } from 'svelte-sonner';
-import { sleep } from '../utils';
-import { showNotification } from '../notifications';
-import { getRobloxPath } from './path';
+import { os, computer } from '@neutralinojs/lib';
 import path from 'path-browserify';
+import { toast } from 'svelte-sonner';
 import Roblox from '.';
+import { showNotification } from '../notifications';
+import { RPCController, type RPCOptions } from '../rpc';
+import { loadSettings } from '../settings';
+import shellFS from '../shellfs';
+import { TrayController } from '../tray';
+import { curlGet, pathExists } from '../utils';
+import { sleep } from '../utils';
 import { focusWindow, setWindowVisibility } from '../window';
+import { type GameEventInfo, RobloxInstance } from './instance';
+import { getRobloxPath } from './path';
 
-interface RobloxGame {
+export interface RobloxGame {
 	id: number;
 	rootPlaceId: number;
 	name: string;
@@ -78,9 +79,9 @@ async function onGameEvent(data: GameEventInfo) {
 	const modSettings = await loadSettings('mods').catch(console.error);
 	try {
 		switch (data.event) {
-			case 'GameJoiningEntry':
+			case 'GameJoiningEntry': {
 				// Change the resolution to support mods
-				if (modSettings && modSettings.general.enable_mods) {
+				if (modSettings?.general.enable_mods) {
 					const maxRes = (await os.execCommand(`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`)).stdOut.trim().split(' ');
 					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 6);
 				}
@@ -111,7 +112,11 @@ async function onGameEvent(data: GameEventInfo) {
 				console.log('Game Image: ', gameImageReq);
 				const gameImage: GameImageRes = gameImageReq.data[0];
 
-				if (settings && settings.rpc.enable_rpc) {
+				const joinLink = `roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}`;
+
+				TrayController.setGameDetails(undefined, undefined, gameInfo, joinLink);
+
+				if (settings?.rpc.enable_rpc) {
 					rpcOptions = {
 						...rpcOptions,
 						details: `Playing ${gameInfo.name}`,
@@ -127,31 +132,36 @@ async function onGameEvent(data: GameEventInfo) {
 						rpcOptions = {
 							...rpcOptions,
 							buttonText2: 'Join server',
-							buttonUrl2: `"roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}"`,
+							buttonUrl2: `"${joinLink}"`,
 						};
 					} else {
-						delete rpcOptions.buttonText2;
-						delete rpcOptions.buttonUrl2;
+						rpcOptions.buttonText2 = undefined;
+						rpcOptions.buttonUrl2 = undefined;
 					}
 
 					await RPCController.set(rpcOptions);
 					console.log('Message Roblox Game RPC');
 				}
 				break;
+			}
 			case 'GameDisconnected':
 			case 'GameLeaving':
-				if (settings && settings.rpc.enable_rpc) {
+				if (settings?.rpc.enable_rpc) {
 					RPCController.preset('inRobloxApp');
 				}
+				TrayController.stopGame();
 				console.log('Disconnected/Left game');
 				break;
-			case 'GameJoinedEntry':
+			case 'GameJoinedEntry': {
 				// Add the join server button
 				const server = data.data.substring(10).split('|');
 				console.log(`Current server: ${server[0]}, Port: ${server[1]}`);
-				if (settings && settings.activity.notify_location) {
+				if (settings?.activity.notify_location) {
 					const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
 					console.log(`Server is located in "${ipReq.city}"`);
+
+					TrayController.setGameDetails(server[0], `${ipReq.city}, ${ipReq.region}, ${ipReq.country}`);
+
 					showNotification({
 						content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
 						title: 'Server Joined',
@@ -160,6 +170,7 @@ async function onGameEvent(data: GameEventInfo) {
 					});
 				}
 				break;
+			}
 			case 'GameMessageEntry':
 				if (settings && !settings.sdk.enabled) return;
 				try {
@@ -171,9 +182,9 @@ async function onGameEvent(data: GameEventInfo) {
 					const message = JSON.parse(json[0]);
 					const { data: inst, command } = message;
 					switch (command) {
-						case 'SetRichPresence':
+						case 'SetRichPresence': {
 							if (settings && !settings.sdk.sdk_rpc) return;
-							let options: RPCOptions = { clientId: '1257650541677383721', enableTime: settings ? settings.rpc.rpc_time : true };
+							const options: RPCOptions = { clientId: '1257650541677383721', enableTime: settings ? settings.rpc.rpc_time : true };
 							if (inst.details) options.details = inst.details;
 							if (inst.state) options.state = inst.state;
 							if (inst.smallImage) {
@@ -187,6 +198,7 @@ async function onGameEvent(data: GameEventInfo) {
 							console.log('GameMessageEntry RPC:', options);
 							RPCController.set(options);
 							break;
+						}
 						case 'SetWindow':
 							if (settings && !settings.sdk.window) return;
 							try {
@@ -259,6 +271,8 @@ export async function launchRoblox(
 			return;
 		}
 
+		const integrationsSettings = await loadSettings('integrations');
+
 		const modSettings = await loadSettings('mods');
 		if (modSettings) {
 			if (modSettings.general.enable_mods) {
@@ -291,7 +305,7 @@ export async function launchRoblox(
 		setLaunchProgress(60);
 		setTimeout(async () => {
 			try {
-				if (modSettings && modSettings.general.spoof_res) {
+				if (modSettings?.general.spoof_res) {
 					const maxRes = (await os.execCommand(`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`)).stdOut.trim().split(' ');
 					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);
 					showNotification({
@@ -306,8 +320,7 @@ export async function launchRoblox(
 				setRobloxConnected(true);
 				rbxInstance = robloxInstance;
 
-				const integrationsSettings = await loadSettings('integrations');
-				if (integrationsSettings && integrationsSettings.rpc.enable_rpc) {
+				if (integrationsSettings?.rpc.enable_rpc) {
 					RPCController.preset('inRobloxApp');
 				}
 
@@ -323,6 +336,7 @@ export async function launchRoblox(
 						}
 						await Roblox.Mods.removeCustomFont(modSettings);
 					}
+					TrayController.stopGame();
 					RPCController.stop();
 					setWindowVisibility(true);
 					focusWindow();
@@ -331,13 +345,16 @@ export async function launchRoblox(
 					console.log('Roblox exited');
 				});
 			} catch (err) {
-				if (modSettings && modSettings.general.enable_mods) {
-					await Roblox.Mods.restoreRobloxFolders()
-						.catch(console.error)
-						.then(() => {
-							console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
-						});
+				if (modSettings) {
+					if (modSettings.general.enable_mods) {
+						await Roblox.Mods.restoreRobloxFolders()
+							.catch(console.error)
+							.then(() => {
+								console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
+							});
+					}
 				}
+				TrayController.stopGame();
 				console.error(err);
 				setLaunchingRoblox(false);
 				toast.error('An error occured while starting Roblox.');

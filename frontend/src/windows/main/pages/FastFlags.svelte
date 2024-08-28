@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SettingsPanel } from '@/types/settings';
-	import Panel from './Settings/Panel.svelte';
 	import { saveSettings } from '../ts/settings';
+	import Panel from './Settings/Panel.svelte';
 
 	function settingsChanged(o: { [key: string]: any }) {
 		saveSettings('fastflags', o);
@@ -80,7 +80,7 @@
 						label: 'Graphics quality w/ render distance',
 						description: 'Choose a graphic value (slider in settings) to force. This lets you have a high render distance while keeping the same level of graphics.',
 						id: 'ff_display',
-						toggle: "ff_display_toggle",
+						toggle: 'ff_display_toggle',
 						options: {
 							type: 'number',
 							default: 5,

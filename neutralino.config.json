@@ -1,54 +1,46 @@
 {
-  "applicationId": "ch.origaming.appleblox",
-  "version": "0.1.0",
-  "defaultMode": "window",
-  "documentRoot": "/frontend/dist",
-  "url": "/",
-  "enableServer": true,
-  "enableNativeAPI": true,
-  "nativeAllowList": [
-    "events.on",
-    "app.exit",
-    "os.*",
-    "filesystem.*",
-    "window.*",
-    "clipboard.*",
-    "computer.*"
-  ],
-  "exportAuthInfo": false,
-  "logging": {
-    "writeToLogFile": false,
-    "enabled": true
-  },
-  "tokenSecurity": "none",
-  "modes": {
-    "window": {
-      "title": "AppleBlox",
-      "width": 1000,
-      "height": 600,
-      "minWidth": 400,
-      "minHeight": 200,
-      "icon": "/frontend/public/favicon.png",
-      "exitProcessOnClose": false,
-      "useSavedState": false,
-      "extendUserAgentWith": "AppleBlox",
-      "resizable": false,
-      "center": true
-    }
-  },
-  "cli": {
-    "binaryName": "appleblox",
-    "resourcesPath": "/frontend/dist",
-    "extensionsPath": "/extensions/",
-    "binaryVersion": "5.1.0",
-    "clientVersion": "3.12.0",
-    "frontendLibrary": {
-      "buildCommand": "npm run neu:empty",
-      "patchFile": "/frontend/index.html",
-      "devUrl": "http://localhost:5173",
-      "devCommand": "npm run neu:empty",
-      "projectPath": "/",
-      "initCommand": "npm install"
-    }
-  }
+	"applicationId": "ch.origaming.appleblox",
+	"version": "0.1.0",
+	"defaultMode": "window",
+	"documentRoot": "/frontend/dist",
+	"url": "/",
+	"enableServer": true,
+	"enableNativeAPI": true,
+	"nativeAllowList": ["events.*", "app.exit", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*"],
+	"exportAuthInfo": false,
+	"logging": {
+		"writeToLogFile": false,
+		"enabled": true
+	},
+	"tokenSecurity": "none",
+	"modes": {
+		"window": {
+			"title": "AppleBlox",
+			"width": 1000,
+			"height": 600,
+			"minWidth": 400,
+			"minHeight": 200,
+			"icon": "/frontend/public/favicon.png",
+			"exitProcessOnClose": false,
+			"useSavedState": false,
+			"extendUserAgentWith": "AppleBlox",
+			"resizable": false,
+			"center": true
+		}
+	},
+	"cli": {
+		"binaryName": "appleblox",
+		"resourcesPath": "/frontend/dist",
+		"extensionsPath": "/extensions/",
+		"binaryVersion": "5.1.0",
+		"clientVersion": "3.12.0",
+		"frontendLibrary": {
+			"buildCommand": "npm run neu:empty",
+			"patchFile": "/frontend/index.html",
+			"devUrl": "http://localhost:5173",
+			"devCommand": "npm run neu:empty",
+			"projectPath": "/",
+			"initCommand": "npm install"
+		}
+	}
 }

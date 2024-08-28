@@ -1,27 +1,24 @@
 <script lang="ts" type="module">
 	import type { SettingsPanel } from '@/types/settings';
-	import { os, filesystem } from '@neutralinojs/lib';
+	import { os } from '@neutralinojs/lib';
 	import path from 'path-browserify';
-	import shellFS from '../../ts/shellfs';
 	import { toast } from 'svelte-sonner';
 
-	import { Input } from '$lib/components/ui/input/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import Switch from '$lib/components/ui/switch/switch.svelte';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import { Slider } from '$lib/components/ui/slider/index.js';
-	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import { Input } from '$lib/components/ui/input/index.js';
+	import * as Select from '$lib/components/ui/select/index.js';
+	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import { Slider } from '$lib/components/ui/slider/index.js';
+	import Switch from '$lib/components/ui/switch/switch.svelte';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Trash2, Upload } from 'lucide-svelte';
 
-	import { createEventDispatcher } from 'svelte';
-	import LoadingSpinner from '../../util/LoadingSpinner.svelte';
-	import { loadSettings } from '../../ts/settings';
-	import FfButtonsCustom from './FFButtonsCustom.svelte';
-	import { haveSameKeys } from '../../ts/utils';
-	import ModsUi from './ModsUI.svelte';
 	import { cn } from '$lib/utils.js';
+	import { createEventDispatcher } from 'svelte';
+	import { loadSettings } from '../../ts/settings';
+	import LoadingSpinner from '../../util/LoadingSpinner.svelte';
+	import FfButtonsCustom from './FFButtonsCustom.svelte';
+	import ModsUi from './ModsUI.svelte';
 
 	export let panel: SettingsPanel;
 
@@ -34,35 +31,43 @@
 	}>();
 
 	let settingsLoaded = false;
-	let sections: any = {};
+	let sections: { [key: string]: any } = {};
 	for (const section of panel.sections || []) {
 		sections[section.id] = {};
 		for (const inter of section.interactables || []) {
 			// sections[section.id][inter.id] = undefined;
 			switch (inter.options.type) {
 				case 'boolean':
-					sections[section.id][inter.id] = inter.options.state;
+					sections[section.id][inter.id] = inter.options.value || inter.options.state;
 					break;
 				case 'string':
 				case 'dropdown':
-					sections[section.id][inter.id] = inter.options.default;
+					sections[section.id][inter.id] = inter.options.value || inter.options.default;
 					break;
 				case 'number':
-					sections[section.id][inter.id] = [inter.options.default];
+					sections[section.id][inter.id] = [inter.options.value] || [inter.options.default];
 					break;
 				case 'file':
-					sections[section.id][inter.id] = null;
+					sections[section.id][inter.id] = inter.options.value || null;
 			}
 		}
 	}
 	loadSettings(panel.id)
-		.then((s) => {
-			if (s) {
-				if (!haveSameKeys(sections, s)) {
-					dispatch('settingsChanged', sections);
-					return;
+		.then((loadedSettings) => {
+			if (loadedSettings) {
+				// Update settings between versions. If the category doesn't exist anymore, delete it. If the type of the loadedSettings value is different from the latest one, take the latest one.
+				const upToDateSettings = sections;
+				for (const category of Object.keys(loadedSettings)) {
+					if (!(category in upToDateSettings)) continue;
+					for (const [key, value] of Object.entries(loadedSettings[category])) {
+						if (key in sections[category] && typeof value === typeof sections[category][key]) {
+							upToDateSettings[category][key] = value;
+						} else {
+							console.warn(`Settings value not take into account: ${panel.id}.${category}.${key} = ${value}`);
+						}
+					}
 				}
-				sections = s;
+				sections = upToDateSettings;
 			}
 			settingsLoaded = true;
 		})
@@ -94,7 +99,7 @@
 					{/if}
 					<div class={`flex items-center ${inter.toggle ? (sections[section.id][inter.toggle] ? '' : 'grayscale cursor-not-allowed opacity-60 select-one pointer-events-none') : ''}`}>
 						{#if inter.options.type !== 'button' && inter.options.type !== 'ff_buttons_custom' && !inter.hideTitle}
-							<div class={inter.options.type === "number" ? 'w-[500px]': ''}>
+							<div class={inter.options.type === 'number' ? 'w-[500px]' : ''}>
 								<p class="font-semibold text-[#1f1717] dark:text-red-100">{inter.label}</p>
 								<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{@html inter.description}</p>
 							</div>

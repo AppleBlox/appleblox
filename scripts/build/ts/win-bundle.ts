@@ -1,11 +1,11 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import BuildConfig from '@root/build.config';
+import neuConfig from '@root/neutralino.config.json';
 // THIS FILE IS IN BETA. PLEASE TELL ME IF ANYTHING LOOKS STRANGE
 import packageJson from '@root/package.json';
-import neuConfig from '@root/neutralino.config.json';
-import BuildConfig from '@root/build.config';
-import fs from 'fs';
-import path from 'path';
-import {Signale} from 'signale';
-import {NtExecutable, NtExecutableResource, Data, Resource} from 'resedit';
+import { Data, NtExecutable, NtExecutableResource, Resource } from 'resedit';
+import { Signale } from 'signale';
 
 export async function winBuild() {
 	const logger = new Signale();
@@ -18,11 +18,11 @@ export async function winBuild() {
 
 	for (const app of BuildConfig.win.architecture) {
 		const appTime = performance.now();
-		const appDist = path.resolve(Dist, 'win_' + app);
+		const appDist = path.resolve(Dist, `win_${app}`);
 
-		fs.mkdirSync(appDist, {recursive: true});
+		fs.mkdirSync(appDist, { recursive: true });
 
-		const l = new Signale({scope: 'build-win-' + app, interactive: true});
+		const l = new Signale({ scope: `build-win-${app}`, interactive: true });
 		l.await(`Building win-${app}`);
 
 		const neuResources = path.resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
@@ -54,7 +54,7 @@ export async function winBuild() {
 		const vi = Resource.VersionInfo.createEmpty();
 		vi.setFileVersion(0, 0, Number(neuConfig.version), 0, 1033);
 		vi.setStringValues(
-			{lang: 1033, codepage: 1200},
+			{ lang: 1033, codepage: 1200 },
 			{
 				FileDescription: BuildConfig.description,
 				ProductName: BuildConfig.appName,
@@ -73,16 +73,12 @@ export async function winBuild() {
 				id: 1000,
 				lang: 1033,
 				bin: resourcesContent,
-			})
+			});
 		}
 
 		res.outputResource(exe);
 		fs.writeFileSync(path.resolve(appDist, `${BuildConfig.appName}.exe`), Buffer.from(exe.generate()));
-		l.complete(
-			`win_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s ${
-				BuildConfig.win.embedResources ? '(Embeded Resources)' : ''
-			}`
-		);
+		l.complete(`win_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s ${BuildConfig.win.embedResources ? '(Embeded Resources)' : ''}`);
 		console.log('');
 	}
 }

@@ -1,8 +1,8 @@
 <script>
-	import { os } from '@neutralinojs/lib';
+import { os } from '@neutralinojs/lib';
 
-	export let href = '';
-	export let title = undefined;
+export const href = '';
+export const title = undefined;
 </script>
 
 <a

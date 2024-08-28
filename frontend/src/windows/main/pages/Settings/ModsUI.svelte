@@ -1,48 +1,48 @@
 <script lang="ts">
-	import * as Card from "$lib/components/ui/card/index";
-	import Switch from "$lib/components/ui/switch/switch.svelte";
-	import * as Alert from "$lib/components/ui/alert/index";
-	import Separator from "$lib/components/ui/separator/separator.svelte";
-	import Button from "$lib/components/ui/button/button.svelte";
+import * as Alert from '$lib/components/ui/alert/index';
+import Button from '$lib/components/ui/button/button.svelte';
+import * as Card from '$lib/components/ui/card/index';
+import Separator from '$lib/components/ui/separator/separator.svelte';
+import Switch from '$lib/components/ui/switch/switch.svelte';
 
-	import ShrugIcon from "@/assets/panel/shrug.png";
-	import RefreshIcon from "@/assets/panel/refresh.png";
+import RefreshIcon from '@/assets/panel/refresh.png';
+import ShrugIcon from '@/assets/panel/shrug.png';
 
-	import Roblox from "../../ts/roblox";
-	import path from "path-browserify";
-	import { filesystem, os } from "@neutralinojs/lib";
-	import { toast } from "svelte-sonner";
+import { os } from '@neutralinojs/lib';
+import path from 'path-browserify';
+import { toast } from 'svelte-sonner';
+import Roblox from '../../ts/roblox';
 
-	let mods: { filename: string; path: string; state: boolean }[] = [];
-	Roblox.Mods.loadMods().then((m) => (mods = m));
+let mods: { filename: string; path: string; state: boolean }[] = [];
+Roblox.Mods.loadMods().then((m) => (mods = m));
 
-	async function onSwitchClick(filePath: string) {
-		try {
-			const modIndex = mods.findIndex((m) => m.path === filePath);
-			if (path.basename(filePath).endsWith(".disabled")) {
-				await os.execCommand(`mv "${filePath}" "${filePath.replace(/\.disabled$/, "")}"`)
-				if (modIndex >= 0) {
-					mods[modIndex] = {
-						...mods[modIndex],
-						state: true,
-						path: filePath.replace(/\.disabled$/, ""),
-					};
-				}
-			} else {
-				await os.execCommand(`mv "${filePath}" "${filePath}.disabled"`)
-				if (modIndex >= 0) {
-					mods[modIndex] = {
-						...mods[modIndex],
-						state: false,
-						path: `${filePath}.disabled`,
-					};
-				}
+async function onSwitchClick(filePath: string) {
+	try {
+		const modIndex = mods.findIndex((m) => m.path === filePath);
+		if (path.basename(filePath).endsWith('.disabled')) {
+			await os.execCommand(`mv "${filePath}" "${filePath.replace(/\.disabled$/, '')}"`);
+			if (modIndex >= 0) {
+				mods[modIndex] = {
+					...mods[modIndex],
+					state: true,
+					path: filePath.replace(/\.disabled$/, ''),
+				};
 			}
-		} catch (err) {
-			toast.error("An error occured while enabling/disabling mod: " + err);
-			console.error(err);
+		} else {
+			await os.execCommand(`mv "${filePath}" "${filePath}.disabled"`);
+			if (modIndex >= 0) {
+				mods[modIndex] = {
+					...mods[modIndex],
+					state: false,
+					path: `${filePath}.disabled`,
+				};
+			}
 		}
+	} catch (err) {
+		toast.error(`An error occured while enabling/disabling mod: ${err}`);
+		console.error(err);
 	}
+}
 </script>
 
 <Card.Root class="w-full">

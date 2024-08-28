@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { SettingsPanel } from '@/types/settings';
-	import Panel from './Settings/Panel.svelte';
-	import { filesystem, os } from '@neutralinojs/lib';
+	import { os, filesystem } from '@neutralinojs/lib';
 	import path from 'path-browserify';
-	import { sleep } from '../ts/utils';
 	import { toast } from 'svelte-sonner';
 	import { saveSettings } from '../ts/settings';
+	import { sleep } from '../ts/utils';
+	import Panel from './Settings/Panel.svelte';
 
 	import ApplebloxIcon from '@/assets/panel/appleblox.png';
 	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
-	import { Folder, Book } from 'lucide-svelte';
+	import { Book, Folder } from 'lucide-svelte';
 	import shellFS from '../ts/shellfs';
 
 	function settingsChanged(o: { [key: string]: any }) {
@@ -26,7 +26,7 @@
 					await sleep(10);
 					await os.execCommand(`open "${folderPath}"`);
 				} catch (err) {
-					toast.error('An error occured: ' + err);
+					toast.error(`An error occured: ${err}`);
 					console.error(err);
 				}
 				break;
@@ -45,11 +45,12 @@
 	async function onFileAdded(e: CustomEvent) {
 		const { id, filePath } = e.detail;
 		switch (id) {
-			case 'custom_font':
+			case 'custom_font': {
 				const cachePath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts');
 				await shellFS.createDirectory(cachePath);
 				await filesystem.copy(filePath, path.join(cachePath, `CustomFont${path.extname(filePath)}`));
 				break;
+			}
 		}
 	}
 

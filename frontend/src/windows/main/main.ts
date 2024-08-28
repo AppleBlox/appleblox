@@ -2,15 +2,27 @@ import './app.css';
 import './ts/window';
 import './ts/roblox/path';
 import './ts/debugging';
-import App from './App.svelte';
-import { events, init, os } from '@neutralinojs/lib';
+
+import { events, os, init, app as neuApp } from '@neutralinojs/lib';
+import path from 'path-browserify';
 import { version } from '../../../../package.json';
+import App from './App.svelte';
+import { libraryPath } from './ts/libraries';
 import { RPCController } from './ts/rpc';
 import { loadSettings } from './ts/settings';
+import { TrayController } from './ts/tray';
+import { getMode } from './ts/utils';
 import { AbloxWatchdog } from './ts/watchdog';
 
 // Initialize NeutralinoJS
 init();
+
+async function quit() {
+	console.log('Exiting app');
+	await RPCController.stop();
+	await TrayController.stop();
+	await neuApp.exit();
+}
 
 // When NeutralinoJS is ready:
 events.on('ready', async () => {
@@ -26,13 +38,22 @@ events.on('ready', async () => {
 		/** Launch the process manager */
 		const watchdog = new AbloxWatchdog();
 		watchdog.start().catch(console.error);
+
+		// Set the initial tray configuration
+		await TrayController.preset('normal');
+
+		// Listen for tray quit event
+		events.on('trayClick', (evt: any) => {
+			if (evt.detail.id === 'quit') {
+				quit();
+			}
+		});
 	}, 500);
 });
 
 // Cleanup when the application is closing
-events.on('windowClose', async () => {
-	await RPCController.stop();
-});
+events.on('windowClose', quit);
+events.on('exitApp', quit);
 
 const app = new App({
 	// @ts-expect-error

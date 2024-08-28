@@ -1,7 +1,7 @@
-import type {Plugin, ResolvedConfig} from 'vite';
+import type { Plugin, ResolvedConfig } from 'vite';
 // @ts-ignore
 import buildConfig from '../../build.config';
-const {devPort} = buildConfig;
+const { devPort } = buildConfig;
 
 export default (): Plugin => {
 	let config: ResolvedConfig;

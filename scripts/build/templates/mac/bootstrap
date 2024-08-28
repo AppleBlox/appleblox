@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 # Based on code by https://github.com/malipetek and https://github.com/hschneider/ - hey you did a brilliant job!
 
-#K ill running instances of Appleblox if --roblox
-for arg in "$@"; do
-  if [[ "$arg" == --roblox=* ]]; then
-    pkill -f AppleBlox
-    pkill -f discordrpc_ablox
-    break
-  fi
-done
+pkill -f AppleBlox
 
 MACOS="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 CONTENTS="$(dirname "$MACOS")"

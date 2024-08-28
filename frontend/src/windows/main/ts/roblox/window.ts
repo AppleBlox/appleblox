@@ -1,4 +1,4 @@
-import { computer, os } from '@neutralinojs/lib';
+import { os, computer } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
 
 const window_manager = libraryPath('window_manager');
@@ -46,7 +46,7 @@ export class RobloxWindow {
 	 * @param fullscreen If true, activates fullscreen mode; if false, deactivates it
 	 */
 	public static async setFullscreen(fullscreen: boolean): Promise<void> {
-		if ((await this.isFullscreen()) === fullscreen) return;
+		if ((await RobloxWindow.isFullscreen()) === fullscreen) return;
 		await os.execCommand(
 			`osascript -e 'tell application "Roblox" to activate' -e 'delay 0.5' -e 'tell application "System Events" to tell process "Roblox" to keystroke "f" using {command down}'`
 		);
@@ -54,9 +54,9 @@ export class RobloxWindow {
 
 	/** Maximizes the roblox window on the desktop */
 	public static async maximize() {
-		this.move(0, 0);
+		RobloxWindow.move(0, 0);
 		const screenSize = (await computer.getDisplays())[0].resolution;
-		this.resize(screenSize.width, screenSize.height - 100);
+		RobloxWindow.resize(screenSize.width, screenSize.height - 100);
 	}
 
 	/** Sets the desktop resolution */

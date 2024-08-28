@@ -1,13 +1,13 @@
 <script lang="ts">
-	export let label: string;
-	export let icon: string;
-	export let id: string;
-	import {createEventDispatcher} from 'svelte';
-	
-	export let currentPage: string;
-	
-	const dispatch = createEventDispatcher<{sidebarClick: string}>();
-	</script>
+export let label: string;
+export let icon: string;
+export let id: string;
+import { createEventDispatcher } from 'svelte';
+
+export let currentPage: string;
+
+const dispatch = createEventDispatcher<{ sidebarClick: string }>();
+</script>
 	
 	<button
 		class="flex items-center justify-center mb-2"
