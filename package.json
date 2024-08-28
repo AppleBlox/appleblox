@@ -8,6 +8,7 @@
 		"dev": "vite-node scripts/package/dev.ts",
 		"build": "vite-node scripts/build/ts/index.ts",
 		"build:release": "npm run build && vite-node scripts/build/ts/dmg.ts",
+		"format": "prettier --write ./",
 		"neu:empty": ""
 	},
 	"keywords": [
@@ -32,6 +33,7 @@
 		"await-exec-typescript": "github:artemhp/await-exec-typescript",
 		"fs-extra": "^11.2.0",
 		"postcss": "^8.4.38",
+		"prettier": "^3.3.3",
 		"resedit": "^2.0.0",
 		"signale": "^1.4.0",
 		"svelte": "^4.2.11",

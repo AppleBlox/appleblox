@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.tmp
+scripts
+.github
+.git
+bin
+frontend/src/lib/components
