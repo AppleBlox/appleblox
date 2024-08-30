@@ -10,7 +10,6 @@ import App from './App.svelte';
 import { libraryPath } from './ts/libraries';
 import { RPCController } from './ts/rpc';
 import { loadSettings } from './ts/settings';
-import { TrayController } from './ts/tray';
 import { getMode } from './ts/utils';
 import { AbloxWatchdog } from './ts/watchdog';
 
@@ -20,7 +19,6 @@ init();
 async function quit() {
 	console.log('Exiting app');
 	await RPCController.stop();
-	await TrayController.stop();
 	await neuApp.exit();
 }
 
@@ -38,16 +36,6 @@ events.on('ready', async () => {
 		/** Launch the process manager */
 		const watchdog = new AbloxWatchdog();
 		watchdog.start().catch(console.error);
-
-		// Set the initial tray configuration
-		await TrayController.preset('normal');
-
-		// Listen for tray quit event
-		events.on('trayClick', (evt: any) => {
-			if (evt.detail.id === 'quit') {
-				quit();
-			}
-		});
 	}, 500);
 });
 

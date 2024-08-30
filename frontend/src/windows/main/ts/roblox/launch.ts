@@ -6,7 +6,6 @@ import { showNotification } from '../notifications';
 import { RPCController, type RPCOptions } from '../rpc';
 import { loadSettings } from '../settings';
 import shellFS from '../shellfs';
-import { TrayController } from '../tray';
 import { curlGet, pathExists } from '../utils';
 import { sleep } from '../utils';
 import { focusWindow, setWindowVisibility } from '../window';
@@ -114,8 +113,6 @@ async function onGameEvent(data: GameEventInfo) {
 
 				const joinLink = `roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}`;
 
-				TrayController.setGameDetails(undefined, undefined, gameInfo, joinLink);
-
 				if (settings?.rpc.enable_rpc) {
 					rpcOptions = {
 						...rpcOptions,
@@ -149,7 +146,6 @@ async function onGameEvent(data: GameEventInfo) {
 				if (settings?.rpc.enable_rpc) {
 					RPCController.preset('inRobloxApp');
 				}
-				TrayController.stopGame();
 				console.log('Disconnected/Left game');
 				break;
 			case 'GameJoinedEntry': {
@@ -159,8 +155,6 @@ async function onGameEvent(data: GameEventInfo) {
 				if (settings?.activity.notify_location) {
 					const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
 					console.log(`Server is located in "${ipReq.city}"`);
-
-					TrayController.setGameDetails(server[0], `${ipReq.city}, ${ipReq.region}, ${ipReq.country}`);
 
 					showNotification({
 						content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
@@ -336,7 +330,6 @@ export async function launchRoblox(
 						}
 						await Roblox.Mods.removeCustomFont(modSettings);
 					}
-					TrayController.stopGame();
 					RPCController.stop();
 					setWindowVisibility(true);
 					focusWindow();
@@ -354,7 +347,6 @@ export async function launchRoblox(
 							});
 					}
 				}
-				TrayController.stopGame();
 				console.error(err);
 				setLaunchingRoblox(false);
 				toast.error('An error occured while starting Roblox.');

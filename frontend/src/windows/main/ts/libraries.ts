@@ -35,12 +35,6 @@ const LibPaths = {
 			dev: '/build/lib/MacOS/urlscheme',
 		},
 	},
-	traybuilder: {
-		darwin: {
-			prod: '/lib/tray_ablox',
-			dev: '/build/lib/MacOS/tray_ablox',
-		},
-	},
 } as const;
 
 type LibPathsType = typeof LibPaths;
