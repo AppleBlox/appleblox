@@ -34,7 +34,9 @@ export async function focusWindow() {
 	try {
 		if (getMode() === 'dev') {
 			// So the app can be focused in dev environnement
-			os.execCommand(`osascript -e 'tell application "System Events" to set frontmost of every process whose unix id is ${window.NL_PID} to true'`);
+			os.execCommand(
+				`osascript -e 'tell application "System Events" to set frontmost of every process whose unix id is ${window.NL_PID} to true'`
+			);
 		} else {
 			// Better way of focusing the app
 			os.execCommand(`open -a "AppleBlox"`);
@@ -46,7 +48,9 @@ export async function focusWindow() {
 
 export async function setWindowVisibility(state: boolean) {
 	try {
-		os.execCommand(`osascript -e 'tell application "System Events" to set visible of every process whose unix id is ${window.NL_PID} to ${state}'`);
+		os.execCommand(
+			`osascript -e 'tell application "System Events" to set visible of every process whose unix id is ${window.NL_PID} to ${state}'`
+		);
 	} catch (err) {
 		console.error(err);
 	}

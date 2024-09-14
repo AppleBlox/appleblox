@@ -4,7 +4,10 @@ import path from 'path-browserify';
 let robloxPath: null | string = null;
 
 async function getMostRecentRoblox() {
-	const knownPaths = ['/Applications/Roblox.app', path.join(await os.getEnv('HOME'), 'Applications/Roblox.app')];
+	const knownPaths = [
+		'/Applications/Roblox.app',
+		path.join(await os.getEnv('HOME'), 'Applications/Roblox.app'),
+	];
 	let mostRecentPath = '';
 	let date = 0;
 	for (const path of knownPaths) {

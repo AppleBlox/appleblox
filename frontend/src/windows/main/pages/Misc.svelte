@@ -5,7 +5,11 @@
 	import { Book, Braces, BugOff, List, PictureInPicture, Play, Trash2 } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
-	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
+	import {
+		clearLogs,
+		disableConsoleRedirection,
+		enableConsoleRedirection,
+	} from '../ts/debugging';
 	import Roblox from '../ts/roblox';
 	import { getRobloxPath } from '../ts/roblox/path';
 	import { dataPath, saveSettings } from '../ts/settings';
@@ -74,7 +78,8 @@
 					},
 					{
 						label: 'Redirect console.logs to file',
-						description: 'Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.',
+						description:
+							'Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.',
 						id: 'redirect_console',
 						options: {
 							type: 'boolean',
@@ -115,7 +120,9 @@
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description>This action cannot be undone. This will permanently delete your logs.</AlertDialog.Description>
+			<AlertDialog.Description
+				>This action cannot be undone. This will permanently delete your logs.</AlertDialog.Description
+			>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>

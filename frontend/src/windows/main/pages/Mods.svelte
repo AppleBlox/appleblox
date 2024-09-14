@@ -21,7 +21,12 @@
 		switch (buttonId) {
 			case 'open_mods_folder':
 				try {
-					const folderPath = path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/mods');
+					const folderPath = path.join(
+						await os.getEnv('HOME'),
+						'Library',
+						'Application Support',
+						'AppleBlox/mods'
+					);
 					await os.execCommand(`mkdir -p "${folderPath}"`);
 					await sleep(10);
 					await os.execCommand(`open "${folderPath}"`);
@@ -46,9 +51,15 @@
 		const { id, filePath } = e.detail;
 		switch (id) {
 			case 'custom_font': {
-				const cachePath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts');
+				const cachePath = path.join(
+					await os.getEnv('HOME'),
+					'Library/Application Support/AppleBlox/.cache/fonts'
+				);
 				await shellFS.createDirectory(cachePath);
-				await filesystem.copy(filePath, path.join(cachePath, `CustomFont${path.extname(filePath)}`));
+				await filesystem.copy(
+					filePath,
+					path.join(cachePath, `CustomFont${path.extname(filePath)}`)
+				);
 				break;
 			}
 		}
@@ -58,7 +69,9 @@
 		const { id, filePath } = e.detail;
 		switch (id) {
 			case 'custom_font':
-				await os.execCommand('rm -f ~/"Library/Application Support/AppleBlox/.cache/fonts/CustomFont".*');
+				await os.execCommand(
+					'rm -f ~/"Library/Application Support/AppleBlox/.cache/fonts/CustomFont".*'
+				);
 				break;
 		}
 	}
@@ -104,7 +117,8 @@
 					},
 					{
 						label: 'Read the Mods Guide',
-						description: 'Adding mods in AppleBlox is the same as Bloxstrap. You just have to put in the correct AppleBlox folders.',
+						description:
+							'Adding mods in AppleBlox is the same as Bloxstrap. You just have to put in the correct AppleBlox folders.',
 						id: 'mods_help',
 						options: {
 							type: 'button',
@@ -116,7 +130,8 @@
 					},
 					{
 						label: 'Join AppleBlox Discord server',
-						description: 'Opens the Discord server invitation link (go to the #mods channel)',
+						description:
+							'Opens the Discord server invitation link (go to the #mods channel)',
 						id: 'join_appleblox',
 						options: {
 							type: 'button',
@@ -128,7 +143,8 @@
 					},
 					{
 						label: 'Join Bloxstrap Discord server',
-						description: 'Opens the Discord server invitation link (go to the #mods channel)',
+						description:
+							'Opens the Discord server invitation link (go to the #mods channel)',
 						id: 'join_bloxstrap',
 						options: {
 							type: 'button',
@@ -149,7 +165,8 @@
 					},
 					{
 						label: 'Fix Resolution',
-						description: 'Maximizes the resolution when opening Roblox. This fixes some icons not showing in some cases.',
+						description:
+							'Maximizes the resolution when opening Roblox. This fixes some icons not showing in some cases.',
 						id: 'spoof_res',
 						options: {
 							type: 'boolean',

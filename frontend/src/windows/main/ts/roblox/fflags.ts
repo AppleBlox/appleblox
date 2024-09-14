@@ -109,11 +109,16 @@ export class RobloxFFlags {
 					case 'ff_fps':
 						if (categories.graphics.ff_engine.value.value !== 'vulkan') {
 							const displays = await computer.getDisplays();
-							const refreshRate = displays.reduce((max, current) => (current.refreshRate > max.refreshRate ? current : max)).refreshRate;
+							const refreshRate = displays.reduce((max, current) =>
+								current.refreshRate > max.refreshRate ? current : max
+							).refreshRate;
 							console.log(`Monitor Refresh rate: ${refreshRate}`);
 							if (data[0] > refreshRate) {
 								forceVulkan = true;
-								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
+								makeflag({
+									FFlagDebugGraphicsDisableMetal: true,
+									FFlagDebugGraphicsPreferVulkan: true,
+								});
 								showNotification({
 									title: 'Renderer defaulted to Vulkan',
 									content: 'Your monitor does not meet the requirements to use Metal at the selected fps cap.',
@@ -141,13 +146,19 @@ export class RobloxFFlags {
 						switch (data.value.value) {
 							// don't know if disabling Metal works, need testing. For now it uses OpenGL
 							case 'opengl':
-								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferOpenGL: true });
+								makeflag({
+									FFlagDebugGraphicsDisableMetal: true,
+									FFlagDebugGraphicsPreferOpenGL: true,
+								});
 								break;
 							case 'metal':
 								makeflag({ FFlagDebugGraphicsPreferMetal: true });
 								break;
 							case 'vulkan':
-								makeflag({ FFlagDebugGraphicsDisableMetal: true, FFlagDebugGraphicsPreferVulkan: true });
+								makeflag({
+									FFlagDebugGraphicsDisableMetal: true,
+									FFlagDebugGraphicsPreferVulkan: true,
+								});
 								break;
 						}
 						break;
@@ -159,10 +170,18 @@ export class RobloxFFlags {
 						makeflag({ DFIntDebugFRMQualityLevelOverride: data[0] });
 						break;
 					case 'ff_graphics':
-						makeflag({ FFlagCommitToGraphicsQualityFix: true, FFlagFixGraphicsQuality: true });
+						makeflag({
+							FFlagCommitToGraphicsQualityFix: true,
+							FFlagFixGraphicsQuality: true,
+						});
 						break;
 					case 'ff_grass':
-						makeflag({ FIntFRMMinGrassDistance: 0, FIntFRMMaxGrassDistance: 0, FIntRenderGrassDetailStrands: 0, FIntRenderGrassHeightScaler: 0 });
+						makeflag({
+							FIntFRMMinGrassDistance: 0,
+							FIntFRMMaxGrassDistance: 0,
+							FIntRenderGrassDetailStrands: 0,
+							FIntRenderGrassHeightScaler: 0,
+						});
 						break;
 					case 'ff_shadows':
 						makeflag({ FIntRenderShadowIntensity: 0 });
@@ -185,7 +204,10 @@ export class RobloxFFlags {
 						});
 						break;
 					case 'ff_light_updates':
-						makeflag({ FIntRenderLocalLightUpdatesMax: 1, FIntRenderLocalLightUpdatesMin: 1 });
+						makeflag({
+							FIntRenderLocalLightUpdatesMax: 1,
+							FIntRenderLocalLightUpdatesMin: 1,
+						});
 						break;
 				}
 			}
@@ -197,14 +219,19 @@ export class RobloxFFlags {
 				switch (name) {
 					case 'ff_textures':
 						makeflag({
-							FStringPartTexturePackTablePre2022: '{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
-							FStringPartTexturePackTable2022: '{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
+							FStringPartTexturePackTablePre2022:
+								'{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
+							FStringPartTexturePackTable2022:
+								'{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
 							FStringTerrainMaterialTablePre2022: '',
 							FStringTerrainMaterialTable2022: '',
 						});
 						break;
 					case 'ff_lowquality':
-						makeflag({ DFFlagTextureQualityOverrideEnabled: true, DFIntTextureQualityOverride: 0 });
+						makeflag({
+							DFFlagTextureQualityOverrideEnabled: true,
+							DFIntTextureQualityOverride: 0,
+						});
 						break;
 					case 'ff_players_textures':
 						makeflag({ DFIntTextureCompositorActiveJobs: 0 });
@@ -327,7 +354,9 @@ export class RobloxFFlags {
 			return {};
 		}
 		const neuPath = path.join(appPath, 'fflags.json');
-		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(await filesystem.readFile(neuPath));
+		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(
+			await filesystem.readFile(neuPath)
+		);
 		for (const flag of skibidiOhioFanumTax) {
 			if (flag.enabled) {
 				fflagsJson[flag.flag] = flag.value;

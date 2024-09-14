@@ -2,15 +2,12 @@ import './app.css';
 import './ts/window';
 import './ts/roblox/path';
 import './ts/debugging';
+import './components/settings';
 
 import { events, os, init, app as neuApp } from '@neutralinojs/lib';
-import path from 'path-browserify';
 import { version } from '../../../../package.json';
 import App from './App.svelte';
-import { libraryPath } from './ts/libraries';
 import { RPCController } from './ts/rpc';
-import { loadSettings } from './ts/settings';
-import { getMode } from './ts/utils';
 import { AbloxWatchdog } from './ts/watchdog';
 
 // Initialize NeutralinoJS

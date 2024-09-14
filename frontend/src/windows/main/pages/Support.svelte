@@ -89,7 +89,8 @@
 				interactables: [
 					{
 						label: 'NeutralinoJS - https://neutralino.js.org',
-						description: 'The framework used to access the filesystem, etc... and package html,js and css as an app.',
+						description:
+							'The framework used to access the filesystem, etc... and package html,js and css as an app.',
 						id: 'neutralino',
 						options: {
 							type: 'none',
@@ -120,7 +121,8 @@
 				interactables: [
 					{
 						label: 'Bloxstrap - https://github.com/pizzaboxer/bloxstrap',
-						description: 'A Roblox launcher for Windows. This was the main inspiration for this app. Made by <a href="https://github.com/pizzaboxer">@pizzaboxer</a>',
+						description:
+							'A Roblox launcher for Windows. This was the main inspiration for this app. Made by <a href="https://github.com/pizzaboxer">@pizzaboxer</a>',
 						id: 'devs_list',
 						options: {
 							type: 'none',

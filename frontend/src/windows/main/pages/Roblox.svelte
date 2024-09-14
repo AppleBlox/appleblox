@@ -21,7 +21,9 @@
 				await Roblox.Utils.enableMultiInstance();
 				break;
 			case 'open_instance_btn':
-				os.spawnProcess(`${path.join(getRobloxPath(), 'Contents/MacOS/RobloxPlayer')}; exit`);
+				os.spawnProcess(
+					`${path.join(getRobloxPath(), 'Contents/MacOS/RobloxPlayer')}; exit`
+				);
 				break;
 			case 'close_roblox_btn':
 				await Roblox.Utils.killAll();
@@ -32,18 +34,26 @@
 					await Roblox.Utils.createShortcut();
 				} catch (err) {
 					console.error(err);
-					toast.error('An error occured while trying to save the shortcut', { duration: 2000 });
+					toast.error('An error occured while trying to save the shortcut', {
+						duration: 2000,
+					});
 					return;
 				}
 				break;
 			case 'write_clientappsettings_btn':
 				try {
-					const filePath = path.join(getRobloxPath(), 'Contents/MacOS/ClientSettings/AppClientSettings.json');
+					const filePath = path.join(
+						getRobloxPath(),
+						'Contents/MacOS/ClientSettings/AppClientSettings.json'
+					);
 					if (await pathExists(filePath)) {
 						await filesystem.remove(filePath);
 					}
 					await filesystem.createDirectory(path.dirname(filePath));
-					const fflags = { ...(await Roblox.FFlags.parseFlags(false)), ...(await Roblox.FFlags.parseFlags(true)) };
+					const fflags = {
+						...(await Roblox.FFlags.parseFlags(false)),
+						...(await Roblox.FFlags.parseFlags(true)),
+					};
 					await filesystem.writeFile(filePath, JSON.stringify(fflags));
 					toast.success(`Wrote ClientAppSettings at "${filePath}"`);
 				} catch (err) {
@@ -89,7 +99,8 @@
 					},
 					{
 						label: 'Open Instance',
-						description: 'Opens an instance of the Roblox app. (Achieves the same goal as opening from the web)',
+						description:
+							'Opens an instance of the Roblox app. (Achieves the same goal as opening from the web)',
 						id: 'open_instance_btn',
 						options: {
 							type: 'button',
@@ -101,7 +112,8 @@
 					},
 					{
 						label: 'Terminate all instances',
-						description: 'Closes every open Roblox instances. (This acts as a force-kill, so be sure to use this appropriately)',
+						description:
+							'Closes every open Roblox instances. (This acts as a force-kill, so be sure to use this appropriately)',
 						id: 'close_roblox_btn',
 						options: {
 							type: 'button',
@@ -120,7 +132,8 @@
 				interactables: [
 					{
 						label: 'Redirect Roblox to AppleBlox',
-						description: 'AppleBlox will be opened first when playing Roblox. (Supports launching from the Website, and the Roblox app directly)',
+						description:
+							'AppleBlox will be opened first when playing Roblox. (Supports launching from the Website, and the Roblox app directly)',
 						id: 'redirect_appleblox',
 						options: {
 							type: 'boolean',
@@ -129,7 +142,8 @@
 					},
 					{
 						label: 'Create a launch shortcut',
-						description: 'Creates a shortcut that can be used to launch Roblox (with all the AppleBlox features) without having to open this app.',
+						description:
+							'Creates a shortcut that can be used to launch Roblox (with all the AppleBlox features) without having to open this app.',
 						id: 'create_shortcut_btn',
 						options: {
 							type: 'button',
@@ -141,7 +155,8 @@
 					},
 					{
 						label: 'Write ClientAppSettings.json',
-						description: "Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended.",
+						description:
+							"Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended.",
 						id: 'write_clientappsettings_btn',
 						options: {
 							type: 'button',
@@ -156,16 +171,24 @@
 		],
 	};
 
-	const robloxLaunchingIndex = panelOpts.sections?.findIndex((panel) => panel.id === 'roblox_launching');
+	const robloxLaunchingIndex = panelOpts.sections?.findIndex(
+		(panel) => panel.id === 'roblox_launching'
+	);
 	if (robloxLaunchingIndex) {
-		const redirectApplebloxIndex = panelOpts.sections[robloxLaunchingIndex].interactables?.findIndex((i) => i.id === 'redirect_appleblox');
+		const redirectApplebloxIndex = panelOpts.sections[
+			robloxLaunchingIndex
+		].interactables?.findIndex((i) => i.id === 'redirect_appleblox');
 		if (redirectApplebloxIndex) {
-			pathExists(path.join(getRobloxPath(),"Contents/MacOS/RobloxPlayer.bak")).then(exists => {
-				if (exists) {
-					// @ts-expect-error: This interactable is boolean
-					panelOpts.sections[robloxLaunchingIndex].interactables[redirectApplebloxIndex].options.value = true
+			pathExists(path.join(getRobloxPath(), 'Contents/MacOS/RobloxPlayer.bak')).then(
+				(exists) => {
+					if (exists) {
+						// @ts-expect-error: This interactable is boolean
+						panelOpts.sections[robloxLaunchingIndex].interactables[
+							redirectApplebloxIndex
+						].options.value = true;
+					}
 				}
-			})
+			);
 		}
 	}
 </script>

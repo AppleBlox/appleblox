@@ -10,12 +10,21 @@ import { getRobloxPath } from './path';
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
 	static async loadMods(): Promise<{ filename: string; path: string; state: boolean }[]> {
-		const modsFolder = path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/mods');
+		const modsFolder = path.join(
+			await os.getEnv('HOME'),
+			'Library',
+			'Application Support',
+			'AppleBlox/mods'
+		);
 		if (!(await pathExists(modsFolder))) return [];
 		const entries = await filesystem.readDirectory(modsFolder, { recursive: false });
 		const mods = entries.filter((entry) => entry.type === 'DIRECTORY');
 		return mods
-			.map((mod) => ({ filename: mod.entry.replace(/\.disabled$/, ''), path: mod.path, state: !path.basename(mod.path).endsWith('.disabled') }))
+			.map((mod) => ({
+				filename: mod.entry.replace(/\.disabled$/, ''),
+				path: mod.path,
+				state: !path.basename(mod.path).endsWith('.disabled'),
+			}))
 			.sort((a, b) => `${a}`.localeCompare(b.filename, undefined, { numeric: true }));
 	}
 
@@ -30,12 +39,18 @@ export class RobloxMods {
 		const resBackupFolder = path.join(await getRobloxPath(), 'Contents/.abloxk');
 		if (!(await pathExists(resBackupFolder))) {
 			console.log('Backing up Resources folder');
-			await shellFS.copy(resourcesFolder, path.join(await getRobloxPath(), 'Contents/.abloxk'), true);
+			await shellFS.copy(
+				resourcesFolder,
+				path.join(await getRobloxPath(), 'Contents/.abloxk'),
+				true
+			);
 		}
 
 		for (const mod of mods) {
 			console.log(`Adding mod "${mod.path}"`);
-			const subs = (await filesystem.readDirectory(mod.path, { recursive: false })).filter((s) => s.entry !== '.DS_Store');
+			const subs = (await filesystem.readDirectory(mod.path, { recursive: false })).filter(
+				(s) => s.entry !== '.DS_Store'
+			);
 			for (const sub of subs) {
 				// Merge mod subfolder with roblox files
 				await shellFS.merge(sub.path, resourcesFolder);
@@ -79,7 +94,10 @@ export class RobloxMods {
 		console.log('Applying custom font');
 
 		const fontExt = path.extname(modsSettings.builtin.custom_font);
-		const fontPath = path.join(await os.getEnv('HOME'), `Library/Application Support/AppleBlox/.cache/fonts/CustomFont${fontExt}`);
+		const fontPath = path.join(
+			await os.getEnv('HOME'),
+			`Library/Application Support/AppleBlox/.cache/fonts/CustomFont${fontExt}`
+		);
 		if (!(await pathExists(fontPath))) {
 			console.error('Could not find the path to the custom font file.');
 			return;
@@ -93,7 +111,10 @@ export class RobloxMods {
 
 		// Copy CustomFont.* file and make a backup
 		await shellFS.copy(fontPath, robloxFontsPath);
-		const cacheDir = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts/families');
+		const cacheDir = path.join(
+			await os.getEnv('HOME'),
+			'Library/Application Support/AppleBlox/.cache/fonts/families'
+		);
 		await shellFS.remove(cacheDir);
 		await shellFS.createDirectory(path.dirname(cacheDir));
 		if (!(await pathExists(cacheDir))) {
@@ -129,7 +150,10 @@ export class RobloxMods {
 		const fontsFolderPath = path.join(getRobloxPath(), 'Contents/Resources/content/fonts');
 		const customFontPath = path.join(getRobloxPath(), fontsFolderPath, `CustomFont${fontExt}`);
 		const familiesPath = path.join(getRobloxPath(), fontsFolderPath, 'families');
-		const cacheDir = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts/families');
+		const cacheDir = path.join(
+			await os.getEnv('HOME'),
+			'Library/Application Support/AppleBlox/.cache/fonts/families'
+		);
 
 		await shellFS.remove(customFontPath);
 		await shellFS.remove(familiesPath);

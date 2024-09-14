@@ -3,14 +3,17 @@ import { os, filesystem } from '@neutralinojs/lib';
 /** Checks if the path provided exists */
 export async function pathExists(path: string) {
 	try {
-		return (await os.execCommand(`[ -e "${path}" ] && echo "true" || echo "false"`)).stdOut.trim() === 'true';
+		return (
+			(
+				await os.execCommand(`[ -e "${path}" ] && echo "true" || echo "false"`)
+			).stdOut.trim() === 'true'
+		);
 	} catch (err) {
 		console.error(err);
 	}
 }
 
 export function getMode(): 'dev' | 'prod' {
-	// @ts-expect-error
 	return import.meta.env.MODE === 'development' ? 'dev' : 'prod';
 }
 
@@ -33,10 +36,18 @@ export function getStringDiff(oldStr: string, newStr: string): string {
 	const newChars = newStr.split('');
 	let startDiff = 0;
 	let endDiff = 0;
-	while (startDiff < oldChars.length && startDiff < newChars.length && oldChars[startDiff] === newChars[startDiff]) {
+	while (
+		startDiff < oldChars.length &&
+		startDiff < newChars.length &&
+		oldChars[startDiff] === newChars[startDiff]
+	) {
 		startDiff++;
 	}
-	while (endDiff < oldChars.length - startDiff && endDiff < newChars.length - startDiff && oldChars[oldChars.length - 1 - endDiff] === newChars[newChars.length - 1 - endDiff]) {
+	while (
+		endDiff < oldChars.length - startDiff &&
+		endDiff < newChars.length - startDiff &&
+		oldChars[oldChars.length - 1 - endDiff] === newChars[newChars.length - 1 - endDiff]
+	) {
 		endDiff++;
 	}
 	const diff = newChars.slice(startDiff, newChars.length - endDiff).join('');
@@ -74,23 +85,6 @@ export function compareVersions(v1: string, v2: string): number {
 
 	return 0;
 }
-
-// export function haveSameKeys(obj1: object, obj2: object): boolean {
-// 	const keys1 = Object.keys(obj1).sort();
-// 	const keys2 = Object.keys(obj2).sort();
-
-// 	if (keys1.length !== keys2.length) {
-// 		return false;
-// 	}
-
-// 	for (let i = 0; i < keys1.length; i++) {
-// 		if (keys1[i] !== keys2[i]) {
-// 			return false;
-// 		}
-// 	}
-
-// 	return true;
-// }
 
 export function sleep(ms = 0) {
 	return new Promise((resolve) => setTimeout(resolve, ms));

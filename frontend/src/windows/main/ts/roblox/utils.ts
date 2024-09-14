@@ -55,7 +55,9 @@ END`);
 
 			toast.info('Terminating all processes...', { duration: 1000 });
 			console.log('Terminating all Roblox processes');
-			const result = await os.execCommand("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs");
+			const result = await os.execCommand(
+				"ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs"
+			);
 			console.log(result);
 			const processes = result.stdOut.trim().split(' ');
 			for (const proc of processes) {
@@ -80,7 +82,11 @@ END`);
 
 	/** Creates a Launch shortcut where the user chooses */
 	static async createShortcut() {
-		const savePath = await os.showFolderDialog('Where should the shortcut be created?', { defaultPath: '/Applications/' }).catch(console.error);
+		const savePath = await os
+			.showFolderDialog('Where should the shortcut be created?', {
+				defaultPath: '/Applications/',
+			})
+			.catch(console.error);
 		if (!savePath) {
 			return;
 		}
@@ -88,7 +94,9 @@ END`);
 			await filesystem.remove(path.join(savePath, 'Launch Roblox.app'));
 		}
 		await filesystem.createDirectory(path.join(savePath, 'Launch Roblox.app/Contents/MacOS'));
-		await filesystem.createDirectory(path.join(savePath, 'Launch Roblox.app/Contents/Resources'));
+		await filesystem.createDirectory(
+			path.join(savePath, 'Launch Roblox.app/Contents/Resources')
+		);
 		await filesystem.writeFile(
 			path.join(savePath, 'Launch Roblox.app/Contents/Info.plist'),
 			`<?xml version="1.0" encoding="UTF-8"?>
@@ -112,15 +120,27 @@ END`);
 		);
 		const response = await fetch(AppIcon);
 		const blob = await response.blob();
-		await filesystem.writeBinaryFile(path.join(savePath, 'Launch Roblox.app/Contents/Resources/icon.icns'), await blob.arrayBuffer());
-		await filesystem.writeFile(path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'), `#!/bin/bash\n${path.join(path.dirname(window.NL_PATH), 'MacOS/bootstrap')} --launch`);
-		await os.execCommand(`chmod +x ${path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ ')}`);
+		await filesystem.writeBinaryFile(
+			path.join(savePath, 'Launch Roblox.app/Contents/Resources/icon.icns'),
+			await blob.arrayBuffer()
+		);
+		await filesystem.writeFile(
+			path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'),
+			`#!/bin/bash\n${path.join(path.dirname(window.NL_PATH), 'MacOS/bootstrap')} --launch`
+		);
+		await os.execCommand(
+			`chmod +x ${path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ ')}`
+		);
 		toast.success(`Created a shortcut at "${path.join(savePath, 'Launch Roblox.app')}"`);
 	}
 
 	/* Checks if the URI feature is enabled*/
 	static async isUriEnabled() {
-		return (await os.execCommand(`${libraryPath('urlscheme')} check roblox-player ch.origaming.appleblox.url`)).stdOut.includes('true');
+		return (
+			await os.execCommand(
+				`${libraryPath('urlscheme')} check roblox-player ch.origaming.appleblox.url`
+			)
+		).stdOut.includes('true');
 	}
 
 	/** Toggles wether or not opening roblox:// and roblox-player:// links should open AppleBlox */
@@ -142,12 +162,19 @@ END`);
 	}
 
 	static async killAll() {
-		await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
+		await os.execCommand(
+			`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`
+		);
 	}
 
 	static async quit() {
-		await os.execCommand(`osascript -e 'tell application "Roblox" to if it is running then quit'`);
-		while ((await os.execCommand('ps aux | grep RobloxPlayer | grep -v grep')).stdOut.trim().length > 2) {
+		await os.execCommand(
+			`osascript -e 'tell application "Roblox" to if it is running then quit'`
+		);
+		while (
+			(await os.execCommand('ps aux | grep RobloxPlayer | grep -v grep')).stdOut.trim()
+				.length > 2
+		) {
 			await sleep(500);
 		}
 		return;

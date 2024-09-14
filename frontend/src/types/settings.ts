@@ -1,5 +1,4 @@
-import type { ComponentType, SvelteComponent } from 'svelte';
-import { i } from 'vite/dist/node/types.d-aGj9QkWt';
+import { type ComponentType, SvelteComponent } from 'svelte';
 
 export type InteractableOptions = {
 	type: 'boolean';
@@ -77,7 +76,13 @@ export interface SettingsPanel {
 				  }
 				| {
 						type: 'button';
-						style: 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link' | 'default';
+						style:
+							| 'secondary'
+							| 'destructive'
+							| 'outline'
+							| 'ghost'
+							| 'link'
+							| 'default';
 						icon?: Icon;
 				  }
 				| {

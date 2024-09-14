@@ -1,315 +1,197 @@
 <script lang="ts">
-	import type { SettingsPanel } from '@/types/settings';
-	import { saveSettings } from '../ts/settings';
-	import Panel from './Settings/Panel.svelte';
+	import { SettingsPanelBuilder } from '../components/settings';
+	import Panel from '../components/settings/panel.svelte';
 
-	function settingsChanged(o: { [key: string]: any }) {
-		saveSettings('fastflags', o);
-	}
-
-	const panelOpts: SettingsPanel = {
-		name: 'Fast Flags',
-		description: 'Configure certain details of the Roblox engine',
-		id: 'fastflags',
-		sections: [
-			{
-				name: 'Graphics',
-				description: 'Flags about the graphics of Roblox',
-				id: 'graphics',
-				interactables: [
-					{
-						label: 'Framerate Limit',
-						description: 'Uncaps the FPS to the selected value (Vulkan required).',
-						id: 'ff_fps',
-						options: {
-							type: 'number',
-							default: 60,
-							min: 1,
-							max: 300,
-							step: 1,
-						},
-					},
-					{
-						label: 'Rendering Engine',
-						description: 'Select the prefered Roblox rendering engine',
-						id: 'ff_engine',
-						options: {
-							type: 'dropdown',
-							list: [
-								{ label: 'Metal', value: 'metal' },
-								{ label: 'Vulkan (MoltenVK)', value: 'vulkan' },
-								{ label: 'OpenGL (Intel)', value: 'opengl' },
-							],
-							default: { label: 'Metal', value: 'metal' },
-						},
-					},
-					{
-						label: 'Lightning Technology',
-						description: 'Force the selected lightning technology across all games',
+	const panel = new SettingsPanelBuilder()
+		.setName('Fast Flags')
+		.setDescription('Control and unlock specific parts and features of Roblox')
+		.setId('fastflags')
+		.addCategory((category) =>
+			category
+				.setName('Graphics')
+				.setDescription('Flags related to the Roblox engine')
+				.setId('graphics')
+				.addSlider({
+					label: 'Framerate Cap',
+					description: 'Sets the FPS cap to this value',
+					id: 'ff_fps',
+					default: [60],
+					min: 1,
+					max: 300,
+					step: 1,
+				})
+				.addSelect({
+					label: 'Rendering Engine',
+					description: 'Forces Roblox to use the selected rendering engine',
+					id: 'ff_engine',
+					default: 'default',
+					items: [
+						{ label: 'Default', value: 'default' },
+						{ label: 'Metal', value: 'metal' },
+						{ label: 'Vulkan (MoltenVK)', value: 'vulkan' },
+						{ label: 'OpenGL (Intel)', value: 'opengl' },
+					],
+				})
+				.addSelect({
+					label: 'Lightning Technology',
+					description: 'Forces the selected lightning technology across all games',
+					id: 'ff_lightning',
+					items: [
+						{ label: 'Chosen by game', value: 'default' },
+						{ label: 'Voxel', value: 'voxel' },
+						{ label: 'ShadowMap', value: 'shadowmap' },
+						{ label: 'Future', value: 'future' },
+					],
+					default: 'default',
+				})
+				.addSwitch({
+					label: 'Disable shadows (Voxel lightning required)',
+					description: 'Disables shadow when voxel lightning is active',
+					id: 'ff_voxel_shadows',
+					default: false,
+					toggleable: {
 						id: 'ff_lightning',
-						options: {
-							type: 'dropdown',
-							list: [
-								{ label: 'Chosen by game', value: 'default' },
-								{ label: 'Voxel', value: 'voxel' },
-								{ label: 'ShadowMap', value: 'shadowmap' },
-								{ label: 'Future', value: 'future' },
-							],
-							default: { label: 'Chosen by game', value: 'default' },
-						},
+						type: 'select',
+						value: 'voxel',
 					},
-					{
-						label: 'Disable shadows (Voxel lightning required)',
-						description: 'Voxel shadows will be broken (disabled)',
-						id: 'ff_voxel_shadows',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Force graphic value',
-						description: '(Enables the option below)',
+				})
+				.addSwitch({
+					label: 'Enable graphics quality w/ render distance',
+					description: '(Enables the option below)',
+					id: 'ff_display_toggle',
+					default: false,
+				})
+				.addSlider({
+					label: 'Graphics quality w/ render distance',
+					description:
+						'Forces the graphic setting to this value. The graphics slider in the Roblox settings will now only control the Render distance',
+					id: 'ff_display',
+					default: [5],
+					max: 10,
+					min: 1,
+					step: 1,
+					toggleable: {
 						id: 'ff_display_toggle',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
+						type: 'switch',
+						value: true,
 					},
-					{
-						label: 'Graphics quality w/ render distance',
-						description: 'Choose a graphic value (slider in settings) to force. This lets you have a high render distance while keeping the same level of graphics.',
-						id: 'ff_display',
-						toggle: 'ff_display_toggle',
-						options: {
-							type: 'number',
-							default: 5,
-							max: 10,
-							min: 1,
-							step: 1,
-						},
-					},
-					{
-						label: '1-21 steps graphics slider',
-						description: 'Instead of having only 1-11 steps, you will be able to more accurately change your graphics',
-						id: 'ff_graphics',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Disable terrain grass',
-						description: '3D rendered grass will be disabled',
-						id: 'ff_grass',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Disable shadows',
-						description: 'Most shadows will be disabled',
-						id: 'ff_shadows',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Disable player shadows',
-						description: 'Player shadows will be disabled',
-						id: 'ff_player_shadows',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Disable PostFX',
-						description: 'Disables some effects (like sunrays)',
-						id: 'ff_postfx',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Disable antialiasing',
-						description: 'Edges will look less sharp',
-						id: 'ff_antialiasing',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Lowers model polygons from far',
-						description: 'Far objects will look less detailed',
-						id: 'ff_polygons',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: "Don't update light often",
-						description: 'Limits light updates',
-						id: 'ff_light_updates',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-				],
-			},
-			{
-				name: 'Visual',
-				description: "Doesn't affect performance and is purely visual",
-				id: 'visual',
-				interactables: [
-					{
-						label: 'Disable textures',
-						description: 'Remove every base Roblox textures (parts will be a flat solid color)',
-						id: 'ff_textures',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Make textures low quality',
-						description: 'Will reduce the resolutions of most textures',
-						id: 'ff_lowquality',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Remove other players textures',
-						description: 'Removes most textures of other players',
-						id: 'ff_players_textures',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Enable debug sky',
-						description: 'Enables gray sky with no clouds',
-						id: 'ff_debug_sky',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-				],
-			},
-			{
-				name: 'User Interface',
-				description: 'Flags that modify the look of Roblox',
-				id: 'ui',
-				interactables: [
-					{
-						label: 'Menu version',
-						description: 'Choose the version of the Roblox menu',
-						id: 'ff_menu_version',
-						options: {
-							type: 'dropdown',
-							default: { label: 'Default', value: 'default' },
-							list: [
-								{ label: 'Version 1 (2015)', value: 'v1' },
-								{ label: 'Version 2 (2020)', value: 'v2' },
-								{ label: 'Version 4 (2023)', value: 'v4' },
-								{ label: 'Version 4 (Chrome)', value: 'v4chrome' },
-								{ label: 'Default', value: 'default' },
-							],
-						},
-					},
-					{
-						label: 'Custom font size',
-						description: 'Changes the font size',
-						id: 'ff_font_size',
-						options: {
-							type: 'number',
-							default: 1,
-							min: 1,
-							max: 100,
-							step: 1,
-						},
-					},
-					{
-						label: 'Use old font',
-						description: 'Revert BuilderFont',
-						id: 'ff_old_font',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-				],
-			},
-			{
-				name: 'Utility',
-				description: 'Useful features behind flags',
-				id: 'utility',
-				interactables: [
-					{
-						label: 'Hide GUI',
-						description: `Input the ID of any group you're in. Defaults to Ori's group Paper4win.
+				})
+				.addSwitch({ label: 'Terrain grass', description: 'Render 3D grass', id: 'ff_grass', default: true })
+				.addSwitch({ label: 'Shadows', description: 'Show (most) shadows', id: 'ff_shadows', default: true })
+				.addSwitch({
+					label: 'Player shadows',
+					description: 'Show player shadows',
+					id: 'ff_player_shadows',
+					default: true,
+				})
+				.addSwitch({ label: 'PostFX', description: 'Render effects (like sunrays)', id: 'ff_postfx', default: true })
+				.addSwitch({
+					label: 'Anti-aliasing',
+					description: 'Enables anti-aliasing to remove blurry edges',
+					id: 'ff_antialiasing',
+					default: true,
+				})
+				.addSwitch({
+					label: 'Level-of-detail',
+					description: 'Renders far objects with less polygons',
+					id: 'ff_polygons',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Limit light updates',
+					description: 'Lightning in games will update less often',
+					id: 'ff_light_updates',
+					default: false,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Visual')
+				.setDescription("Doesn't affect performance and is purely visual")
+				.setId('visual')
+				.addSelect({
+					label: 'Textures quality',
+					description: 'Changes the textures quality',
+					id: 'ff_textures_quality',
+					items: [
+						{ label: 'Default', value: 'default' },
+						{ label: 'Level 3', value: '3' },
+						{ label: 'Level 2', value: '2' },
+						{ label: 'Level 1', value: '1' },
+						{ label: 'Level 0', value: '0' },
+					],
+					default: 'default',
+				})
+				.addSwitch({
+					label: 'Flat textures',
+					description: 'Disables every default Roblox textures (parts will be a flat solid color)',
+					id: 'ff_textures',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Player textures',
+					description: 'Renders player textures',
+					id: 'ff_players_textures',
+					default: true,
+				})
+				.addSwitch({
+					label: 'Debug Sky',
+					description: 'Enables the debugging sky (gray w/ no clouds)',
+					id: 'ff_debug_sky',
+					default: false,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('User Interface')
+				.setDescription('Flags that modify the UI of Roblox')
+				.setId('ui')
+				.addSelect({
+					label: 'Menu version',
+					description: 'Selects which menu should be shown when pressing ESC in-game',
+					id: 'ff_menu_version',
+					items: [
+						{ label: 'Version 1 (2015)', value: 'v1' },
+						{ label: 'Version 2 (2020)', value: 'v2' },
+						{ label: 'Version 4 (2023)', value: 'v4' },
+						{ label: 'Version 4 (Chrome)', value: 'v4chrome' },
+						{ label: 'Default', value: 'default' },
+					],
+					default: 'default',
+				})
+				.addSlider({
+					label: 'Font size',
+					description: 'Defines a custom font size to apply in the app',
+					id: 'ff_font_size',
+					default: [1],
+					step: 1,
+					max: 100,
+					min: 1,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Utility')
+				.setDescription('Useful flags & others')
+				.setId('utility')
+				.addSwitch({
+					label: 'Hide GUI',
+					description: `Hides some part of the UI using keyboard shortcuts. You must join the <a href="https://www.roblox.com/groups/8699949/AppleBlox-enjoyers#!/about">Appleblox Roblox group.</a>
 						</br>&nbspCMD + Shift + B: Toggles GUIs in 3D space (BillboardGuis, etc)
 						</br>&nbspCMD + Shift + C: Toggles game-defined ScreenGuis
 						</br>&nbspCMD + Shift + G: Toggles Roblox CoreGuis
 						</br>&nbspCMD + Shift + N: Toggles player names, and other that shows...`,
-						id: 'ff_gui',
-						options: {
-							type: 'string',
-							default: '8699949',
-						},
-					},
-					{
-						label: 'Semi-fullbright',
-						description: 'Tries to make the dark places of the game as bright as possible (see in the dark)',
-						id: 'ff_fullbright',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Disable telemetry',
-						description: 'Tries to block all data about you that is sent to Roblox',
-						id: 'ff_telemetry',
-						options: {
-							type: 'boolean',
-							state: true,
-						},
-					},
-				],
-			},
-			{
-				name: 'Advanced',
-				description: 'Advanced editing of Roblox fast flags',
-				id: 'advanced',
-				interactables: [
-					{
-						label: 'FFlags Buttons',
-						description: 'Not shown',
-						id: 'fflags_btns',
-						options: {
-							type: 'ff_buttons_custom',
-						},
-					},
-				],
-			},
-		],
-	};
+					id: 'ff_gui',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Disable telemetry',
+					description: 'Prevent the app from sending your data to Roblox',
+					id: 'ff_telemetry',
+					default: false,
+				})
+		)
+		.build();
 </script>
 
-<Panel
-	panel={panelOpts}
-	on:settingsChanged={(e) => {
-		settingsChanged(e.detail);
-	}}
-/>
+<Panel {panel} />

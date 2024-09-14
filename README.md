@@ -3,6 +3,7 @@
 </div>
 
 ---
+
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/OrigamingWasTaken/appleblox/build.yml?color=%23F43F5E)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/OrigamingWasTaken/appleblox/total?color=%23F43F5E)
 ![GitHub License](https://img.shields.io/github/license/OrigamingWasTaken/appleblox?color=%23F43F5E)
@@ -22,34 +23,40 @@ For more recent builds, see the [nightly releases](https://nightly.link/Origamin
 # Features
 
 ### Mods
+
 You can add mods to tweak Roblox's UI via the `~Library/AppleBlox/Mods` folder (there is a button in the app to open it). To do so, simply drag a Mod folder into this location. Exemple:
 
 ![CleanShot 2024-07-17 at 22 46 42@2x](https://github.com/user-attachments/assets/587330fe-9f50-4349-9379-794853b28527)
 
-
 Then, from AppleBlox, you can choose to enable / disable mods globally or individually. Please note that mods are loaded in alphabetical order (123,abc).
 
 ### DiscordRPC
+
 Show which games you're playing, when you started, and supports buttons to join your server. If the Bloxstrap SDK settings has been enabled, games will be able to set custom rich presence.
 
 ### Bloxstrap SDK
+
 AppleBlox supports many features from Bloxstrap including [the sdk](https://github.com/pizzaboxer/bloxstrap/wiki/Integrating-Bloxstrap-functionality-into-your-game). This let's games set custom **discord rich presence**, and with our addons, much more like control the Roblox window ([see this exemple for a rythm game](https://streamable.com/jwidvp?t=55)).
 
 ### Server notifications
+
 When joining a server, you will be notified of its location. (Exemple: Paris, Île-de-France, FR)
 
 ### FastFlags
+
 Use a collection of presets to spice-up your gameplay & add your owns.
 
 ### Multi-instances
+
 Launch multiple windows of Roblox at the same time. Please note that AppleBlox only tracks data of **1** window, launched from the main menu.
 
 ## Pre-compiled Binaries
 
 AppleBlox contains pre-compiled binaries of some programs at `build/lib/MacOS` from:
-- https://github.com/vjeantet/alerter (Taken from the github releases)
-- https://github.com/Rayrsn/Discord-RPC-cli (Built from source on my machine)
-- https://github.com/OrigamingWasTaken/utility_cli (Built from source on my machine)
+
+-   https://github.com/vjeantet/alerter (Taken from the github releases)
+-   https://github.com/Rayrsn/Discord-RPC-cli (Built from source on my machine)
+-   https://github.com/OrigamingWasTaken/utility_cli (Built from source on my machine)
 
 I plan on modifying this to compile those binaries at build step, but that would mean having to install Rust and Xcode, so I'm not really sure...
 If you're worried that those could be modified by me or another contributor to include malicious code, you can look at the "VirusTotal Scan" GitHub workflow. This workflow scans the release assets for malicious code.

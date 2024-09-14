@@ -32,8 +32,16 @@
 	// Sidebar Buttons
 	const linksBtns: { label: string; icon: string; url: string }[] = [
 		{ label: 'Discord', icon: DiscordIcon, url: 'https://appleblox.com/discord' },
-		{ label: 'GitHub', icon: GithubIcon, url: 'https://github.com/OrigamingWasTaken/appleblox' },
-		{ label: 'Issues', icon: BugsIcon, url: 'https://github.com/OrigamingWasTaken/appleblox/issues' },
+		{
+			label: 'GitHub',
+			icon: GithubIcon,
+			url: 'https://github.com/OrigamingWasTaken/appleblox',
+		},
+		{
+			label: 'Issues',
+			icon: BugsIcon,
+			url: 'https://github.com/OrigamingWasTaken/appleblox/issues',
+		},
 	];
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
@@ -66,7 +74,8 @@
 	// Play button text and color
 	let isHovering = false;
 	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : 'Play';
-	$: buttonIcon = buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
+	$: buttonIcon =
+		buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
 
 	function handleMouseEnter() {
 		isHovering = true;
@@ -86,7 +95,10 @@
 	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
 </script>
 
-<div class="h-full bg-[#F3F4F6] dark:bg-[#1B1B1B] w-36 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col" {id}>
+<div
+	class="h-full bg-[#F3F4F6] dark:bg-[#1B1B1B] w-36 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col"
+	{id}
+>
 	<div class="flex-grow">
 		<a
 			href="https://github.com/OrigamingWasTaken/appleblox"
@@ -98,8 +110,8 @@
 			}}
 		>
 			<div class="mt-3 flex">
-				<img src={logo} class="h-6 mr-1 opacity-85 logo bg-[#dcdcdc] dark:bg-[#1B1B1B] rounded-lg" alt="Svelte Logo" />
-				<p class="text-black dark:text-white font-bold font-mono logo">AppleBlox</p>
+				<img src={logo} class="h-12 mr-1 opacity-85 logo rounded-lg" alt="Svelte Logo" />
+				<!-- <p class="text-black dark:text-white font-bold font-mono logo">AppleBlox</p> -->
 			</div>
 		</a>
 		<div class="m-4">
@@ -107,7 +119,13 @@
 		</div>
 		<div class="mt-3 grid grid-cols-1">
 			{#each sidebarBtns as { label, id, icon }}
-				<SidebarBtn bind:currentPage {label} {id} {icon} on:sidebarClick={sidebarItemClicked} />
+				<SidebarBtn
+					bind:currentPage
+					{label}
+					{id}
+					{icon}
+					on:sidebarClick={sidebarItemClicked}
+				/>
 			{/each}
 		</div>
 		<div class="m-4">
@@ -122,7 +140,12 @@
 	<div class="flex flex-col items-center mb-4">
 		<p class="text-sm text-gray-500 mb-2">v{version}</p>
 
-		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-[105px]">
+		<div
+			on:mouseenter={handleMouseEnter}
+			on:mouseleave={handleMouseLeave}
+			role="tooltip"
+			class="w-[105px]"
+		>
 			<Button
 				class={`${isLaunched ? 'bg-blue-400 hover:bg-red-500' : 'bg-green-600 hover:bg-green-800'} font-mono w-full`}
 				on:click={() => {
@@ -133,7 +156,11 @@
 					dispatch('launchRoblox', true);
 				}}
 			>
-				<img src={buttonIcon} alt="Button Icon" class="mr-1 mt-[1px] w-5 h-5 towhite-always" />
+				<img
+					src={buttonIcon}
+					alt="Button Icon"
+					class="mr-1 mt-[1px] w-5 h-5 towhite-always"
+				/>
 				<p class="font-mono transition duration-150">{buttonState}</p>
 			</Button>
 		</div>
