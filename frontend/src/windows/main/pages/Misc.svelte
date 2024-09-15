@@ -83,6 +83,12 @@
 					variant: 'destructive',
 					icon: { component: Trash2 },
 				})
+				.addButton({
+					label: "Open AppleBlox folder",
+					description: "Opens the AppleBlox folder in Finder",
+					id: "open_folder",
+					variant: "outline"
+				})
 		)
 		.build();
 </script>
