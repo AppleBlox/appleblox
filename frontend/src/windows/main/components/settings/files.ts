@@ -65,3 +65,31 @@ export async function loadSettings(panelId: string): Promise<{ [key: string]: an
 		console.error(err);
 	}
 }
+
+/** Set a specific value of a setting */
+export async function setValue(settingPath: `${string}.${string}.${string}`, value: any, createNew = false) {
+	const paths = settingPath.split('.');
+	const panelId = paths[0];
+	const categoryId = paths[1];
+	const widgetId = paths[2];
+	let settings = await loadSettings(panelId);
+	if (!settings) {
+		if (createNew) {
+			settings = {};
+		} else {
+			throw new Error(`The panel '${panelId}' doesn't exist.`);
+		}
+	}
+	if (!settings[categoryId]) {
+		if (createNew) {
+			settings[categoryId] = {};
+		} else {
+			throw new Error(`The category '${categoryId}' doesn't exist.`);
+		}
+	}
+	if (!settings[categoryId][widgetId] && !createNew) {
+		throw new Error(`The widget '${widgetId}' doesn't exist.`);
+	}
+	settings[categoryId][widgetId] = value;
+	await saveSettings(panelId, settings);
+}

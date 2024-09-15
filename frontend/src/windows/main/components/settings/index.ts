@@ -1,5 +1,5 @@
 import { type ComponentType, SvelteComponent } from 'svelte';
-import { loadSettings, saveSettings } from './files';
+import { loadSettings, saveSettings, setValue } from './files';
 
 /** Element to display inside a select */
 export interface SelectElement {
@@ -398,4 +398,4 @@ export interface SettingsOutput {
     };
 }
 
-export { loadSettings, saveSettings };
+export { loadSettings, saveSettings, setValue };

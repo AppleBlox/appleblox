@@ -12,8 +12,8 @@
 	import Mods from './pages/Mods.svelte';
 	import Support from './pages/Support.svelte';
 	import { launchRoblox } from './ts/roblox/launch';
-	import Onboarding from './util/Onboarding.svelte';
-	import Updater from './util/Updater.svelte';
+	import Onboarding from './components/Onboarding.svelte';
+	import Updater from './components/Updater.svelte';
 	import Roblox from './pages/Roblox.svelte';
 
 	let currentPage: string;

@@ -11,7 +11,7 @@
 
 	import * as Card from '$lib/components/ui/card/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import LoadingSpinner from '../../util/LoadingSpinner.svelte';
+	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	import ButtonWidget from './widgets/button.svelte';
@@ -22,6 +22,7 @@
 	import SwitchWidget from './widgets/switch.svelte';
 
 	import { fade } from 'svelte/transition';
+	import Button from '$lib/components/ui/button/button.svelte';
 
 	// Panel props
 	export let panel: SettingsPanel;
@@ -31,6 +32,27 @@
 	let settingsLoaded = false;
 	// Svelte doesn't support typescript in components so we can't use this type (no inferring)
 	let settings: { [key: string]: { [key: string]: any } } /* SettingsOutput*/ = {};
+
+	const dispatch = createEventDispatcher<{
+		/** Fires when the settings change */
+		changed: { settings: SettingsOutput };
+		/** Fires when the settings have looded */
+		loaded: { settings: SettingsOutput };
+		/** Fires when a button is clicked */
+		button: { id: string };
+		/** Fires when a switch is clicked */
+		switch: { id: string; state: boolean };
+		/** Fires when a file is chosen from a filepicker */
+		fileChosen: { id: string; file: string };
+		/** Fires when a file is removed from a filepicker */
+		fileRemoved: null;
+		/** Fires when an input changes */
+		input: { input: string };
+		/** Fires when a select item is chosen */
+		selected: { id: string; item: SelectElement };
+		/** Fires when a slider changes */
+		slider: { id: string; value: number[] };
+	}>();
 
 	// Set default values for the settings
 	for (const category of panel.categories) {
@@ -101,26 +123,8 @@
 		}
 		// Show the page
 		settingsLoaded = true;
+		dispatch('loaded', { settings });
 	})();
-
-	const dispatch = createEventDispatcher<{
-		/** Fires when the settings change */
-		changed: { settings: SettingsOutput };
-		/** Fires when a button is clicked */
-		button: { id: string };
-		/** Fires when a switch is clicked */
-		switch: { id: string; state: boolean };
-		/** Fires when a file is chosen from a filepicker */
-		fileChosen: { id: string; file: string };
-		/** Fires when a file is removed from a filepicker */
-		fileRemoved: null;
-		/** Fires when an input changes */
-		input: { input: string };
-		/** Fires when a select item is chosen */
-		selected: { id: string; item: SelectElement };
-		/** Fires when a slider changes */
-		slider: { id: string; value: number[] };
-	}>();
 
 	/** Saves the new settings */
 	async function updateSettings() {

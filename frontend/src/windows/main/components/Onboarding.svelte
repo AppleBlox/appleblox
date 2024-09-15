@@ -6,6 +6,7 @@
 	import Misc from '../pages/Misc.svelte';
 	import Roblox from '../ts/roblox';
 	import { loadSettings, saveSettings } from '../ts/settings';
+	import { setValue } from './settings';
 
 	let settings = null;
 	let show = false;
@@ -46,6 +47,8 @@
 					and join the
 					<a href="https://appleblox.com/discord">Discord Server</a>!
 				</p>
+				<br>
+				<i><h3>⚠️ AppleBlox is in beta, don't expect a bug-free experience</h3></i>
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
@@ -106,11 +109,9 @@
 				Create shortcut
 			</Button>
 			<Button
-				on:click={() => {
-					Roblox.Utils.toggleURI(true).catch((err) => {
-						toast.error('An error occured');
-						console.error(err);
-					});
+				on:click={async() => {
+					await setValue("roblox.roblox_launching.delegate_launching",true,true)
+					toast.info("Roblox will now open AppleBlox before starting")
 				}}
 				variant="secondary"
 				>Use Roblox URL
