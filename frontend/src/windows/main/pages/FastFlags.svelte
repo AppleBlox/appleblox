@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
+	import FfButtonsCustom from './Custom/FFButtonsCustom.svelte';
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Fast Flags')
@@ -190,6 +191,7 @@
 					id: 'ff_telemetry',
 					default: false,
 				})
+				.addCustom({label: "Flags editor", description: "Advanced editing of fast flags", component: FfButtonsCustom, id: "fflags_editor"})
 		)
 		.build();
 </script>

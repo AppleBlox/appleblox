@@ -4,7 +4,6 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
-	import { fly } from 'svelte/transition';
 	import Sidebar from './Sidebar/Sidebar.svelte';
 	import Dev from './pages/Dev.svelte';
 	import FastFlags from './pages/FastFlags.svelte';
@@ -59,6 +58,7 @@
 	// Sets the theme to the system's mode
 	setMode('system');
 
+	// Makes it so links are opened in the default browser and not Appleblox's webview.
 	document.addEventListener('click', (event) => {
 		if (!event.target) return;
 		// @ts-expect-error

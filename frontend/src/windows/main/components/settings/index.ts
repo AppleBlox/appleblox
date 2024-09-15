@@ -95,7 +95,7 @@ type WidgetOptions =
           /** Button Widget */
           type: 'button';
           /** The button variant */
-          variant: 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link' | 'default';
+          variant: 'secondary' | 'destructive' | 'outline' | 'ghost' | 'default';
           /** Icon to use for the button, can be an URL or Svelte Component */
           icon?: ButtonIcon;
       }

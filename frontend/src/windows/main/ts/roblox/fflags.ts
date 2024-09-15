@@ -4,6 +4,8 @@ import path from 'path-browserify';
 import { showNotification } from '../notifications';
 import { dataPath, loadSettings } from '../settings';
 import { pathExists } from '../utils';
+import { getRobloxPath } from './path';
+import { toast } from 'svelte-sonner';
 
 export class RobloxFFlags {
 	/** Returns every saved FFlags */
@@ -363,5 +365,18 @@ export class RobloxFFlags {
 			}
 		}
 		return fflagsJson;
+	}
+	static async writeClientAppSettings() {
+		const filePath = path.join(getRobloxPath(), 'Contents/MacOS/ClientSettings/AppClientSettings.json');
+		if (await pathExists(filePath)) {
+			await filesystem.remove(filePath);
+		}
+		await filesystem.createDirectory(path.dirname(filePath));
+		const fflags = {
+			...(await RobloxFFlags.parseFlags(false)),
+			...(await RobloxFFlags.parseFlags(true)),
+		};
+		await filesystem.writeFile(filePath, JSON.stringify(fflags));
+		toast.success(`Wrote ClientAppSettings at "${filePath}"`);
 	}
 }

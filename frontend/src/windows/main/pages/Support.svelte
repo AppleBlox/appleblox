@@ -1,11 +1,11 @@
 <script lang="ts">
-	import DiscordIcon from '@/assets/panel/discord.png';
-	import GithubIcon from '@/assets/panel/github.png';
-	import type { SettingsPanel } from '@/types/settings';
+	import { Github, MessageSquare } from 'lucide-svelte';
 	import { os } from '@neutralinojs/lib';
-	import Panel from './Settings/Panel.svelte';
+	import Panel from '../components/settings/panel.svelte';
+	import { SettingsPanelBuilder } from '../components/settings';
 
-	function onButtonClicked(id: string) {
+	function onButtonClicked(e: CustomEvent) {
+		const { id } = e.detail;
 		switch (id) {
 			case 'discord_btn':
 				os.open('https://appleblox.com/discord');
@@ -19,124 +19,69 @@
 	const devlist = `
 	<a href="https://github.com/OrigamingWasTaken">@OrigamingWasTaken</a> - Main Developper, currently the only one building AppleBlox.
 	`;
-	const testerlist = `
-	<a href="_blank">@KeyboardChampion, @YousufSSyed, @angrysausage</a> - People who have tested the app, and repported bugs.
+
+	const artistlist = `
+	<a href="_blank">@typeofnull</a> - Made the current app icon.<br>
+	<a href="https://github.com/PurvisiLOL">@typeofnull</a> - Made the first version of the app icon.
 	`;
 
-	const panelOpts: SettingsPanel = {
-		name: 'Support',
-		description: 'Useful resources, people that helped making the app and technologies used',
-		id: 'support',
-		sections: [
-			{
-				name: 'Useful resources & support',
-				description: 'Links and guides for AppleBlox',
-				id: 'resources',
-				interactables: [
-					{
-						label: 'Join Discord server',
-						description: 'appleblox.com/discord',
-						id: 'discord_btn',
-						options: {
-							type: 'button',
-							icon: {
-								src: DiscordIcon,
-							},
-							style: 'default',
-						},
-					},
-					{
-						label: 'GitHub Repo',
-						description: 'Takes you to the github repo',
-						id: 'github_btn',
-						options: {
-							type: 'button',
-							icon: {
-								src: GithubIcon,
-							},
-							style: 'secondary',
-						},
-					},
-				],
-			},
-			{
-				name: 'Contributors',
-				description: 'The ones who make AppleBlox',
-				id: 'contributors',
-				interactables: [
-					{
-						label: 'Developpers',
-						description: devlist,
-						id: 'devs_list',
-						options: {
-							type: 'none',
-						},
-					},
-					{
-						label: 'Testers',
-						description: testerlist,
-						id: 'testers',
-						options: {
-							type: 'none',
-						},
-					},
-				],
-			},
-			{
-				name: 'Technologies',
-				description: 'Technologies used',
-				id: 'technologies',
-				interactables: [
-					{
-						label: 'NeutralinoJS - https://neutralino.js.org',
-						description:
-							'The framework used to access the filesystem, etc... and package html,js and css as an app.',
-						id: 'neutralino',
-						options: {
-							type: 'none',
-						},
-					},
-					{
-						label: 'Svelte - https://svelte.dev',
-						description: 'Framework used for the UI and frontend.',
-						id: 'svelte',
-						options: {
-							type: 'none',
-						},
-					},
-					{
-						label: 'Icons - https://icons8.com',
-						description: 'All the icons used in the app.',
-						id: 'icons',
-						options: {
-							type: 'none',
-						},
-					},
-				],
-			},
-			{
-				name: 'Inspirations',
-				description: 'People or projects that gave ideas for AppleBlox',
-				id: 'inspirations',
-				interactables: [
-					{
-						label: 'Bloxstrap - https://github.com/pizzaboxer/bloxstrap',
-						description:
-							'A Roblox launcher for Windows. This was the main inspiration for this app. Made by <a href="https://github.com/pizzaboxer">@pizzaboxer</a>',
-						id: 'devs_list',
-						options: {
-							type: 'none',
-						},
-					},
-				],
-			},
-		],
-	};
-</script>
+	const testerlist = `
+	<a href="_blank">@KeyboardChampion, @YousufSSyed, @angrysausage, @allFiction</a> - People who have tested the app, and repported bugs.
+	`;
 
-<Panel
-	panel={panelOpts}
-	on:buttonClicked={(e) => {
-		onButtonClicked(e.detail);
-	}}
-/>
+	const panel = new SettingsPanelBuilder()
+		.setName('Info')
+		.setDescription('Useful resources, people that helped making the app and technologies used')
+		.setId('info')
+		.addCategory((category) =>
+			category
+				.setName('Useful resources & support')
+				.setDescription('Links and guides for AppleBlox')
+				.setId('resources')
+				.addButton({
+					label: 'Join Discord server',
+					description: 'Opens the Discord server invitation link',
+					id: 'discord_btn',
+					variant: 'default',
+					icon: { component: MessageSquare },
+				})
+				.addButton({
+					label: 'Github Repo',
+					description: 'Opens the Github repository',
+					id: 'github_btn',
+					variant: 'secondary',
+					icon: { component: Github },
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Contributors')
+				.setDescription('The ones who make AppleBlox')
+				.setId('contributors')
+				.addEmpty({ label: 'Developers', description: devlist, id: 'developers' })
+				.addEmpty({ label: 'Artists', description: artistlist, id: 'artists' })
+				.addEmpty({ label: 'Testers', description: testerlist, id: 'testers' })
+		)
+		.addCategory((category) =>
+			category
+				.setName('Technologies')
+				.setDescription('Technologies used in AppleBlox')
+				.setId('technologies')
+				.addEmpty({ label: 'Icons8 - https://icons8.com', description: 'A lot of icons in the app', id: 'icons8' })
+		)
+		.addCategory((category) =>
+			category
+				.setName('Inspirations')
+				.setDescription('People or projects that gave ideas for AppleBlox')
+				.setId('inspirations')
+				.addEmpty({
+					label: 'Bloxstrap - https://github.com/pizzaboxer/bloxstrap',
+					description:
+						'A Roblox launcher for Windows. This was the main inspiration for this app. Made by <a href="https://github.com/pizzaboxer">@pizzaboxer</a>',
+					id: 'bloxstrap',
+				})
+		)
+		.build();
+</script>
+	
+<Panel {panel} on:button={onButtonClicked} />

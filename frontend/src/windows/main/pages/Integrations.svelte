@@ -1,136 +1,80 @@
 <script lang="ts">
-	import type { SettingsPanel } from '@/types/settings';
-	import { RPCController } from '../ts/rpc';
-	import { loadSettings, saveSettings } from '../ts/settings';
-	import Panel from './Settings/Panel.svelte';
+	import { SettingsPanelBuilder } from '../components/settings';
+	import Panel from '../components/settings/panel.svelte';
 
-	async function loadRPC(settings?: { [key: string]: any }) {
-		if (settings == null) {
-			settings = await loadSettings('integrations');
-			if (settings == null) {
-				return;
-			}
-		}
-		if (!settings.rpc.enable_rpc) {
-			await RPCController.stop();
-		}
-	}
-
-	function settingsChanged(o: { [key: string]: any }) {
-		saveSettings('integrations', o);
-		loadRPC(o);
-	}
-
-	const panelOpts: SettingsPanel = {
-		name: 'Integrations',
-		description:
-			'Configure the integrations between AppleBlox and various apps like Discord with Roblox',
-		id: 'integrations',
-		sections: [
-			{
-				name: 'Activity Notifications',
-				description: "Notifications about the game you're playing & your server location",
-				id: 'activity',
-				interactables: [
-					{
-						label: 'See server location when joining a game',
-						description:
-							'You will be notified of your current server location (EU, US, etc..)',
-						id: 'notify_location',
-						options: {
-							type: 'boolean',
-							state: true,
-						},
-					},
-				],
-			},
-			{
-				name: 'Bloxstrap SDK',
-				description:
-					'Replica of the Bloxstrap SDK. Makes it so games can control certain aspect of your Roblox instance',
-				id: 'sdk',
-				interactables: [
-					{
-						label: 'Enable SDK',
-						description:
-							'Activate a compatibility layer which tries to support every functions of the Bloxstrap SDK',
-						id: 'enabled',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Control RPC',
-						description: 'Games can change your DiscordRPC',
-						id: 'sdk_rpc',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Control Roblox window',
-						description: 'Games can define the size of your Roblox window',
-						id: 'window',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-				],
-			},
-			{
-				name: 'Discord Rich Presence',
-				description: "Show information about what you're playing on Discord",
-				id: 'rpc',
-				interactables: [
-					{
-						label: 'Enable RPC',
-						description: 'Whether to enable or disable the Discord RPC',
-						id: 'enable_rpc',
-						options: {
-							type: 'boolean',
-							state: true,
-						},
-					},
-					{
-						label: 'Show game activity',
-						description: "Shows the game you're playing on your profile",
-						id: 'rpc_activity',
-						options: {
-							type: 'boolean',
-							state: true,
-						},
-					},
-					{
-						label: 'Show game time',
-						description: 'Show the time since you started playing Roblox',
-						id: 'rpc_time',
-						options: {
-							type: 'boolean',
-							state: true,
-						},
-					},
-					{
-						label: 'Allow joining',
-						description:
-							'Allow friends / everyone (depends on your roblox settings) to join you in-game',
-						id: 'rpc_join',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-				],
-			},
-		],
-	};
+	const panel = new SettingsPanelBuilder()
+		.setName('Integrations')
+		.setDescription('Configure various integrations between AppleBlox and apps like Discord or Roblox.')
+		.setId('integrations')
+		.addCategory((category) =>
+			category
+				.setName('Activity')
+				.setDescription('Features related to your in-game activity.')
+				.setId('activity')
+				.addSwitch({
+					label: 'Server details',
+					description: "Will show your server's details when joining a game",
+					id: 'notify_location',
+					default: true,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Bloxstrap SDK')
+				.setDescription('In-house implementation of the Bloxstrap SDK')
+				.setId('sdk')
+				.addSwitch({
+					label: 'Enable SDK',
+					description: 'Re-implements the features of the Bloxstrap SDK',
+					id: 'enabled',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Control RPC',
+					description: 'Games can change your discord RPC',
+					id: 'sdk_rpc',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Control Roblox window',
+					description: "Games can change your Roblox window's size, position, etc...",
+					id: 'window',
+					default: false,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Discord Riche Presence')
+				.setDescription("Show information about what you're playing on your Discord profile")
+				.setId('rpc')
+				.addSwitch({
+					label: 'Enable RPC',
+					description: 'Enables the custom Discord rich presence',
+					id: 'enable_rpc',
+					default: true,
+				})
+				.addSwitch({
+					label: 'Show game activity',
+					description: "Shows the game you're playing on your profile",
+					id: 'rpc_activity',
+					default: true,
+				})
+				.addSwitch({
+					label: 'Show game time',
+					description: 'Show the time since you started playing a game',
+					id: 'rpc_time',
+					default: true,
+				})
+				.addSwitch({
+					label: 'Allow joining',
+					description: `Adds a "join" button on your profile which let\'s people join your game'`,
+					id: 'rpc_join',
+					default: false,
+				})
+		)
+		.build();
 </script>
 
 <Panel
-	panel={panelOpts}
-	on:settingsChanged={(e) => {
-		settingsChanged(e.detail);
-	}}
+	{panel}
 />

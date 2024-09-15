@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { Separator } from '$lib/components/ui/separator/index.js';
-	import logo from '@/assets/favicon.png';
 	import { os } from '@neutralinojs/lib';
 	import { createEventDispatcher } from 'svelte';
 	import { version } from '../../../../../package.json';
 
-	import DiscordIcon from '@/assets/panel/discord.png';
-	import GithubIcon from '@/assets/panel/github.png';
+	import DiscordIcon from '@/assets/sidebar/discord.png';
+	import GithubIcon from '@/assets/sidebar/github.png';
 	import BugsIcon from '@/assets/sidebar/bugs.png';
 	import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
@@ -102,7 +101,7 @@
 	<div class="flex flex-col flex-grow">
 		<a
 			href="https://github.com/OrigamingWasTaken/appleblox"
-			class="flex items-center justify-center mt-2"
+			class="flex items-center justify-center mt-3"
 			target="_blank"
 			rel="noreferrer"
 			on:click={() => {
@@ -161,9 +160,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.logo {
-		filter: drop-shadow(0 0 2em #ff6464aa);
-	}
-</style>

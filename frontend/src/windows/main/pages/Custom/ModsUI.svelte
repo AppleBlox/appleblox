@@ -43,27 +43,34 @@
 			console.error(err);
 		}
 	}
+
+	let refreshSpin = false;
 </script>
 
-<Card.Root class="w-full">
+<Card.Root class="w-full bg-background">
 	<Card.Header>
 		<div class="flex">
 			<div>
-				<Card.Title class="text-rose-700">Mods Manager</Card.Title>
+				<Card.Title class="text-primary">Mods Manager</Card.Title>
 				<Card.Description
-					>Enable or disable certain mods. They are loaded in alphabetical order
-					(1,2,3,a,b,c)</Card.Description
+					>Enable or disable certain mods. They are loaded in alphabetical order (1,2,3,a,b,c)</Card.Description
 				>
 			</div>
 
 			<Button
 				class="ml-auto mb-3 w-10 p-0"
-				variant="outline"
+				variant="default"
 				on:click={() => {
-					Roblox.Mods.loadMods().then((m) => (mods = m));
+					refreshSpin = true;
+					setTimeout(() => {
+						refreshSpin = false;
+					}, 500);
+					Roblox.Mods.loadMods().then((m) => {
+						mods = m;
+					});
 				}}
 			>
-				<img src={RefreshIcon} alt="Refresh icon" class="towhite-always w-[50%]" />
+				<img src={RefreshIcon} alt="Refresh icon" class={`towhite-always w-[50%] ${refreshSpin ? 'animate-spin' : ''}`} />
 			</Button>
 		</div>
 
@@ -72,7 +79,7 @@
 				<Separator class="my-3" />
 				<div class="flex items-center">
 					<div>
-						<p class="font-semibold text-[#1f1717] dark:text-red-100">{mod.filename}</p>
+						<p class="font-semibold text-[#0a0808] dark:text-red-100">{mod.filename}</p>
 						<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{mod.path}</p>
 					</div>
 					<Switch

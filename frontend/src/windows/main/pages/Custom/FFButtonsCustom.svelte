@@ -9,7 +9,7 @@
 	import Help from '@/assets/panel/help.png';
 	import More from '@/assets/panel/more.png';
 	import type { FFlag } from '@/types/settings';
-	import { os, clipboard, debug, window as w } from '@neutralinojs/lib';
+	import { os, clipboard } from '@neutralinojs/lib';
 	import { toast } from 'svelte-sonner';
 	import Roblox from '../../ts/roblox';
 
@@ -61,14 +61,14 @@
 		}
 		for (const flag of Object.keys(flags)) {
 			fflags.push({ enabled: true, flag, value: flags[flag] });
-			// svelte reactivity, don't delete
+			// v Svelte reactivity, don't delete
 			fflags = fflags;
 		}
 		toast.success(`Pasted ${flags.length} flags.`, { duration: 500 });
 	}
 </script>
 
-<div class="flex gap-3 mt-3">
+<div class="flex gap-3 ml-auto">
 	<AlertDialog.Root>
 		<AlertDialog.Trigger asChild let:builder>
 			<Button variant="default" builders={[builder]}>
@@ -172,7 +172,7 @@
 			os.open('https://github.com/MaximumADHD/Roblox-FFlag-Tracker');
 		}}
 		variant={'secondary'}
-		class="bg-slate-900 text-slate-300 font-semibod grayscale"
+		class="bg-background font-semibod"
 	>
 		<img src={Help} alt="Two icon" class="towhite-always w-5 mr-2" />
 		About Fast Flags

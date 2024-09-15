@@ -1,29 +1,19 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import type { SettingsPanel } from '@/types/settings';
-	import { os, filesystem } from '@neutralinojs/lib';
-	import { Book, Braces, BugOff, List, PictureInPicture, Play, Trash2 } from 'lucide-svelte';
+	import { os } from '@neutralinojs/lib';
+	import { Trash2, List } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
-	import {
-		clearLogs,
-		disableConsoleRedirection,
-		enableConsoleRedirection,
-	} from '../ts/debugging';
-	import Roblox from '../ts/roblox';
-	import { getRobloxPath } from '../ts/roblox/path';
-	import { dataPath, saveSettings } from '../ts/settings';
+	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
+	import { dataPath } from '../ts/settings';
 	import { pathExists } from '../ts/utils';
-	import Panel from './Settings/Panel.svelte';
-
-	function settingsChanged(o: { [key: string]: any }) {
-		saveSettings('misc', o);
-	}
+	import { SettingsPanelBuilder } from '../components/settings';
+	import Panel from '../components/settings/panel.svelte';
 
 	let clearLogsPopup = false;
 
 	async function buttonClicked(e: CustomEvent) {
-		const id = e.detail;
+		const { id } = e.detail;
 		switch (id) {
 			case 'redirect_console':
 				enableConsoleRedirection();
@@ -35,7 +25,7 @@
 					toast.error("The logs file doesn't seem to exist.");
 					return;
 				}
-				os.execCommand(`open "${logPath}"`).catch(console.error);
+				os.execCommand(`open -R "${logPath}"`).catch(console.error);
 				break;
 			}
 			case 'clear_logs':
@@ -57,63 +47,44 @@
 		}
 	}
 
-	const panelOpts: SettingsPanel = {
-		name: 'Misc',
-		description: 'Various miscellaneous features and options',
-		id: 'misc',
-		sections: [
-			{
-				name: 'Other',
-				description: "Features that don't really have a category.",
-				id: 'advanced',
-				interactables: [
-					{
-						label: 'Enable sound for all notifications',
-						description: 'Will play a sound for every AppleBlox notification',
-						id: 'notify_all',
-						options: {
-							type: 'boolean',
-							state: false,
-						},
-					},
-					{
-						label: 'Redirect console.logs to file',
-						description:
-							'Redirects every console.log(), console.error(), etc... to the Neutralino logs. Useful for finding bugs and errors.',
-						id: 'redirect_console',
-						options: {
-							type: 'boolean',
-							state: true,
-						},
-					},
-					{
-						label: 'Open logs file',
-						description: 'Opens the logs file in the preffered text editor.',
-						id: 'open_logs',
-						options: {
-							type: 'button',
-							style: 'outline',
-							icon: {
-								component: List,
-							},
-						},
-					},
-					{
-						label: 'Clear logs',
-						description: 'Clears the logs file',
-						id: 'clear_logs',
-						options: {
-							type: 'button',
-							style: 'destructive',
-							icon: {
-								component: Trash2,
-							},
-						},
-					},
-				],
-			},
-		],
-	};
+	const panel = new SettingsPanelBuilder()
+		.setName('Miscellaneous')
+		.setDescription("Other features that don't have their own tab")
+		.setId('misc')
+		.addCategory((category) =>
+			category
+				.setName('Other')
+				.setDescription("Features that don't really have a category")
+				.setId('advanced')
+				.addSwitch({
+					label: 'Enable sound for all notifications',
+					description: 'Plays a sound for every AppleBlox notification',
+					id: 'notify_all',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Redirect logs to file',
+					description:
+						'Redirect every console.log(), etc... to the logs. Useful for finding bugs and errors (Recommended: ON)',
+					id: 'redirect_console',
+					default: true,
+				})
+				.addButton({
+					label: 'Open logs file',
+					description: 'Opens the logs file in finder',
+					id: 'open_logs',
+					variant: 'default',
+					icon: { component: List },
+				})
+				.addButton({
+					label: 'Clear logs',
+					description: 'Clears the logs file',
+					id: 'clear_logs',
+					variant: 'destructive',
+					icon: { component: Trash2 },
+				})
+		)
+		.build();
 </script>
 
 <AlertDialog.Root bind:open={clearLogsPopup}>
@@ -141,11 +112,4 @@
 	</AlertDialog.Content>
 </AlertDialog.Root>
 
-<Panel
-	panel={panelOpts}
-	on:buttonClicked={buttonClicked}
-	on:switchClicked={switchClicked}
-	on:settingsChanged={(e) => {
-		settingsChanged(e.detail);
-	}}
-/>
+<Panel {panel} on:button={buttonClicked} on:switch={switchClicked} />
