@@ -24,8 +24,8 @@
 	"modes": {
 		"window": {
 			"title": "AppleBlox",
-			"width": 1000,
-			"height": 600,
+			"width": 1150,
+			"height": 700,
 			"minWidth": 400,
 			"minHeight": 200,
 			"icon": "/build/assets/mac.png",

@@ -9,7 +9,7 @@
 		type SettingsPanel,
 	} from '.';
 
-	import * as Card from "$lib/components/ui/card/index.js";
+	import * as Card from '$lib/components/ui/card/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import LoadingSpinner from '../../util/LoadingSpinner.svelte';
 	import { createEventDispatcher } from 'svelte';
@@ -149,14 +149,14 @@
 </script>
 
 {#if settingsLoaded}
-	<div class="font-mono grid grid-cols-1 h-full text-start m-5">
+
+<Card.Root class="font-mono grid grid-cols-1 h-full text-start m-3 p-5">
+	<div>
 		<!-- Title + Description -->
-		<div class="bg-[#d7d7d7] dark:bg-gray-900 grayscale p-4 rounded-md">
-			<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
-			<p class="text-[13px] text-neutral-700 dark:text-neutral-300">
-				{@html panel.description}
-			</p>
-		</div>
+		<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
+		<p class="text-[13px] text-neutral-700 dark:text-neutral-300">
+			{@html panel.description}
+		</p>
 		<!-- Categories -->
 		{#each panel.categories || [] as category (category.id)}
 			<div class="mt-5">
@@ -170,7 +170,7 @@
 					{/if}
 					<!-- Disable the widget if the button it is linked to is disabled -->
 					<div
-						class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'grayscale cursor-not-allowed opacity-60 select-one pointer-events-none'}`}
+						class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-60 select-one pointer-events-none'}`}
 					>
 						<!-- Description of the widget (except button) -->
 						{#if widget.options.type !== 'button'}
@@ -272,8 +272,9 @@
 			</div>
 		{/each}
 	</div>
+	</Card.Root>
 {:else}
-	<div class="flex h-[100vh] w-full opacity-30 grayscale items-center justify-center">
+	<div class="flex h-[100vh] w-full opacity-30 items-center justify-center">
 		<LoadingSpinner />
 	</div>
 {/if}

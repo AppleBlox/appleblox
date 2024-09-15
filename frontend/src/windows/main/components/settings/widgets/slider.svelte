@@ -48,7 +48,7 @@
 			disabled={step !== 1}
 			type="number"
 			bind:value={value[0]}
-			class="w-32 text-center dark:bg-gray-900 bg-neutral-300 border-none grayscale ml-5 mr-4"
+			class="w-32 text-cente bg-input border-none ml-5 mr-4"
 			placeholder={placeholderValue.toString()}
 			on:keypress={handleKeypress}
 		/>
@@ -59,7 +59,7 @@
 					disabled={step !== 1}
 					type="number"
 					bind:value={value[0]}
-					class="w-32 text-center dark:bg-gray-900 bg-neutral-300 border-none grayscale ml-5 mr-4"
+					class="w-32 text-center bg-input ml-5 mr-4"
 					placeholder={placeholderValue.toString()}
 					on:keypress={handleKeypress}
 				/>

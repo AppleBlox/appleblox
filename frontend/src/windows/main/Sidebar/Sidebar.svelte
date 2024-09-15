@@ -47,7 +47,7 @@
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
 		{ label: 'Roblox', id: 'roblox', icon: RobloxIcon },
-		{ label: 'Fast Flags', id: 'fastflags', icon: FastFlagsIcon },
+		{ label: 'FastFlags', id: 'fastflags', icon: FastFlagsIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Support', id: 'support', icon: CreditsIcon },
@@ -96,28 +96,25 @@
 </script>
 
 <div
-	class="h-full bg-[#F3F4F6] dark:bg-[#1B1B1B] w-36 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col"
+	class="h-full bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col"
 	{id}
 >
-	<div class="flex-grow">
+	<div class="flex flex-col flex-grow">
 		<a
 			href="https://github.com/OrigamingWasTaken/appleblox"
-			class="flex justify-center"
+			class="flex items-center justify-center mt-2"
 			target="_blank"
 			rel="noreferrer"
 			on:click={() => {
 				os.open('https://github.com/OrigamingWasTaken/appleblox').catch(console.error);
 			}}
 		>
-			<div class="mt-3 flex">
-				<img src={logo} class="h-12 mr-1 opacity-85 logo rounded-lg" alt="Svelte Logo" />
-				<!-- <p class="text-black dark:text-white font-bold font-mono logo">AppleBlox</p> -->
-			</div>
+			<p class="text-primary font-bold font-mono text-2xl">AppleBlox</p>
 		</a>
-		<div class="m-4">
-			<Separator class="my-4 bg-gray-500" />
+		<div class="my-3 mx-3">
+			<Separator />
 		</div>
-		<div class="mt-3 grid grid-cols-1">
+		<div class="flex flex-col items-center flex-grow px-10">
 			{#each sidebarBtns as { label, id, icon }}
 				<SidebarBtn
 					bind:currentPage
@@ -128,23 +125,21 @@
 				/>
 			{/each}
 		</div>
-		<div class="m-4">
-			<Separator class="my-1 bg-gray-500" />
-		</div>
-		<div class="mt-3 grid grid-cols-1">
-			{#each linksBtns as { label, url, icon }}
-				<LinkBtn {label} {url} {icon} />
-			{/each}
-		</div>
+	</div>
+
+	<div class="mt-auto flex flex-col items-center px-10 mb-4">
+		{#each linksBtns as { label, url, icon }}
+			<LinkBtn {label} {url} {icon} />
+		{/each}
 	</div>
 	<div class="flex flex-col items-center mb-4">
-		<p class="text-sm text-gray-500 mb-2">v{version}</p>
+		<p class="text-sm text-muted-foreground mb-2">v{version}</p>
 
 		<div
 			on:mouseenter={handleMouseEnter}
 			on:mouseleave={handleMouseLeave}
 			role="tooltip"
-			class="w-[105px]"
+			class="w-full px-4"
 		>
 			<Button
 				class={`${isLaunched ? 'bg-blue-400 hover:bg-red-500' : 'bg-green-600 hover:bg-green-800'} font-mono w-full`}

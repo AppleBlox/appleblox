@@ -10,14 +10,14 @@
 </script>
 
 <button
-	class="flex items-center justify-center mb-2"
+	class={`${currentPage === id ? "bg-accent" : ''} flex items-center justify-center hover:bg-muted rounded-md py-1 px-4 mt-2`}
 	on:click={() => {
 		dispatch('sidebarClick', id);
 	}}
 >
-	<img src={icon} alt="Sidebar icon" class="w-[15px] towhite mr-1" />
+	<img src={icon} alt="Sidebar icon" class="w-[17px] towhite mr-2" />
 	<p
-		class={`${currentPage === id ? 'text-red-400 hover:text-red-300' : 'text-black hover:opacity-50 dark:text-gray-300 dark:hover:text-gray-50'} transition duration-100 font-mono text-[14px]`}
+		class={`${currentPage === id ? 'text-red-300' : 'text-card-foreground'} hover:text-red-400 transition duration-100 font-mono text-[14px]`}
 	>
 		{label}
 	</p>

@@ -42,7 +42,7 @@
 
 		const robloxArg = window.NL_ARGS.find((arg) => arg.includes('roblox='));
 		if (robloxArg) {
-			console.debug("Launching Roblox from '--roblox'");
+			console.info("Launching Roblox from '--roblox'");
 			const robloxUrl = robloxArg.slice(9);
 
 			await launchRoblox(
@@ -66,12 +66,10 @@
 			// Prevent default behavior (opening link)
 			event.preventDefault();
 
-			// Get the URL from the clicked link
 			// @ts-expect-error
 			const url = event.target.href;
 			console.log(`Opening link: ${url}`);
 
-			// Example: Open link in a new tab
 			// @ts-expect-error
 			if ((event.target.href as string).includes('localhost')) return;
 			os.open(url);
@@ -88,7 +86,7 @@
 	{#if launchInfo.launching}
 		<div class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col">
 			<p class="font-bold text-2xl">{launchInfo.text}</p>
-			<Progress max={100} value={launchInfo.progress} class="w-[60%] bg-neutral-700" />
+			<Progress max={100} value={launchInfo.progress} class="w-[60%] bg-primary" />
 		</div>
 	{:else}
 		<Sidebar
@@ -104,35 +102,21 @@
 			}}
 			id="sidebar"
 		/>
-		<div class="fixed overflow-y-scroll max-h-full top-0 left-36 w-[85%]">
+		<div class="fixed overflow-y-scroll max-h-full top-0 left-48 w-[83%]">
 			{#if currentPage == 'integrations'}
-				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Integrations />
-				</div>
 			{:else if currentPage === 'fastflags'}
-				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<FastFlags />
-				</div>
 			{:else if currentPage === 'misc'}
-				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Misc />
-				</div>
 			{:else if currentPage === 'support'}
-				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Support />
-				</div>
 			{:else if currentPage === 'mods'}
-				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Mods />
-				</div>
 			{:else if currentPage === 'dev'}
-				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Dev />
-				</div>
 			{:else if currentPage === 'roblox'}
-				<div in:fly={{ y: -750, duration: 1000 }} out:fly={{ y: 400, duration: 400 }}>
 					<Roblox />
-				</div>
 			{:else}
 				<div class="flex items-center m-32 space-x-4 opacity-30">
 					<Skeleton class="h-12 w-12 rounded-full" />

@@ -4,11 +4,13 @@
 
 /* For WebKit-based browsers */
 ::-webkit-scrollbar {
-	width: 12px; /* Width of the scrollbar */
+	width: 12px;
+	/* Width of the scrollbar */
 }
 
 ::-webkit-scrollbar-thumb {
-	background: #5d3b3b; /* Color of the scrollbar thumb (the draggable part) */
+	background: #5d3b3b;
+	/* Color of the scrollbar thumb (the draggable part) */
 	border-radius: 15px;
 }
 
@@ -23,61 +25,61 @@
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
 }
 
 @layer base {
-	:root {
-		--background: 360 11% 95%;
-		--foreground: 360 5% 10%;
-		--card: 360 11% 90%;
-		--card-foreground: 360 5% 15%;
-		--popover: 360 11% 95%;
-		--popover-foreground: 360 95% 10%;
-		--primary: 360 38% 56%;
-		--primary-foreground: 0 0% 100%;
-		--secondary: 360 11% 70%;
-		--secondary-foreground: 0 0% 0%;
-		--muted: 322 11% 85%;
-		--muted-foreground: 360 5% 35%;
-		--accent: 322 11% 80%;
-		--accent-foreground: 360 5% 15%;
-		--destructive: 0 50% 30%;
-		--destructive-foreground: 360 5% 90%;
-		--border: 360 20% 50%;
-		--input: 360 20% 23%;
-		--ring: 360 38% 56%;
-		--radius: 0.3rem;
-	}
-	.dark {
-		--background: 360 11% 10%;
-		--foreground: 360 5% 90%;
-		--card: 360 11% 10%;
-		--card-foreground: 360 5% 90%;
-		--popover: 360 11% 5%;
-		--popover-foreground: 360 5% 90%;
-		--primary: 360 38% 56%;
-		--primary-foreground: 0 0% 100%;
-		--secondary: 360 11% 20%;
-		--secondary-foreground: 0 0% 100%;
-		--muted: 322 11% 23%;
-		--muted-foreground: 360 5% 60%;
-		--accent: 322 11% 23%;
-		--accent-foreground: 360 5% 50%;
-		--destructive: 0 50% 30%;
-		--destructive-foreground: 360 5% 90%;
-		--border: 360 20% 23%;
-		--input: 360 20% 23%;
-		--ring: 360 38% 56%;
-		--radius: 0.3rem;
-	}
-}
+    :root {
+      --background: 0 0% 96%;
+      --foreground: 0 0% 9%;
+      --muted: 0 0% 85.66%;
+      --muted-foreground: 346.19 8.85% 37.97%;
+      --popover: 0 0% 93%;
+      --popover-foreground: 0 0% 0%;
+      --card: 0 0% 94%;
+      --card-foreground: 0 0% 4%;
+      --border: 0 0% 87.84%;
+      --input: 0 0% 88%;
+      --primary: 346.19 64.65% 42.16%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 0 0% 81.18%;
+      --secondary-foreground: 0 0% 15%;
+      --accent: 0 0.13% 86.49%;
+      --accent-foreground: 0 0% 21%;
+      --destructive: 6 92% 43%;
+      --destructive-foreground: 0 0% 100%;
+      --ring: 346.19 64.65% 42.16%;
+      --radius: 0.5rem;
+    }
+  
+    .dark {
+      --background: 0 0% 9%;
+      --foreground: 220 10% 90%;
+      --muted: 220 1.79% 17%;
+      --muted-foreground: 220 7.55% 42.56%;
+      --popover: 0 0% 14.9%;
+      --popover-foreground: 220 10% 90%;
+      --card: 0 0% 11.76%;
+      --card-foreground: 220 10% 90%;
+      --border: 220 5.56% 22.23%;
+      --input: 220 4.35% 22.48%;
+      --primary: 346.19 64.65% 42.16%;
+      --primary-foreground: 346.15 66.1% 90%;
+      --secondary: 344.15 19.06% 28.1%;
+      --secondary-foreground: 220 10% 90%;
+      --accent: 220 5.31% 23.01%;
+      --accent-foreground: 220 10% 90%;
+      --destructive: 360 60.56% 46.71%;
+      --destructive-foreground: 0 0% 100%;
+      --ring: 346.19 64.65% 42.16%;
+    }
+  }
 
 a {
 	font-weight: 500;
 	color: #646cff;
 	text-decoration: inherit;
 }
+
 a:hover {
 	color: #535bf2;
 }
@@ -86,9 +88,6 @@ body {
 	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
 	font-weight: 400;
-
-	color: rgba(255, 255, 255, 0.87);
-	background-color: light-dark(#fff, #242424);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -120,18 +119,20 @@ h1 {
 	* {
 		@apply border-border;
 	}
+
 	body {
 		@apply bg-background text-foreground;
 	}
 }
 
 .towhite-always {
-	-webkit-filter: grayscale(1) invert(1);
-	filter: grayscale(1) invert(1);
+	-webkit-filter: invert(1);
+	filter: invert(1);
 }
+
 @media (prefers-color-scheme: dark) {
 	.towhite {
-		-webkit-filter: grayscale(1) invert(1);
-		filter: grayscale(1) invert(1);
+		-webkit-filter: invert(1);
+		filter: invert(1);
 	}
 }
