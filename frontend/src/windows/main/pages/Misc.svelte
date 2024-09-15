@@ -31,6 +31,9 @@
 			case 'clear_logs':
 				clearLogsPopup = true;
 				break;
+			case 'open_folder':
+				os.execCommand('open -R ~/"Library/Application Support/AppleBlox"/');
+				break;
 		}
 	}
 
@@ -84,10 +87,10 @@
 					icon: { component: Trash2 },
 				})
 				.addButton({
-					label: "Open AppleBlox folder",
-					description: "Opens the AppleBlox folder in Finder",
-					id: "open_folder",
-					variant: "outline"
+					label: 'Open AppleBlox folder',
+					description: 'Opens the AppleBlox folder in Finder',
+					id: 'open_folder',
+					variant: 'outline',
 				})
 		)
 		.build();
