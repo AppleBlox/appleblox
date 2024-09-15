@@ -11,7 +11,7 @@
 				os.open('https://appleblox.com/discord');
 				break;
 			case 'github_btn':
-				os.open('https://github.com/OrigamingWasTaken/appleblox');
+				os.open('https://github.com/AppleBlox/appleblox');
 				break;
 		}
 	}
@@ -83,5 +83,5 @@
 		)
 		.build();
 </script>
-	
+
 <Panel {panel} on:button={onButtonClicked} />

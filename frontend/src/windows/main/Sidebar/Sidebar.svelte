@@ -34,12 +34,12 @@
 		{
 			label: 'GitHub',
 			icon: GithubIcon,
-			url: 'https://github.com/OrigamingWasTaken/appleblox',
+			url: 'https://github.com/AppleBlox/appleblox',
 		},
 		{
 			label: 'Issues',
 			icon: BugsIcon,
-			url: 'https://github.com/OrigamingWasTaken/appleblox/issues',
+			url: 'https://github.com/AppleBlox/appleblox/issues',
 		},
 	];
 
@@ -100,12 +100,12 @@
 >
 	<div class="flex flex-col flex-grow">
 		<a
-			href="https://github.com/OrigamingWasTaken/appleblox"
+			href="https://github.com/AppleBlox/appleblox"
 			class="flex items-center justify-center mt-3"
 			target="_blank"
 			rel="noreferrer"
 			on:click={() => {
-				os.open('https://github.com/OrigamingWasTaken/appleblox').catch(console.error);
+				os.open('https://github.com/AppleBlox/appleblox').catch(console.error);
 			}}
 		>
 			<p class="text-primary font-bold font-mono text-2xl">AppleBlox</p>

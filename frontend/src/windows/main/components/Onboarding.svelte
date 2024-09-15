@@ -26,7 +26,7 @@
 <AlertDialog.Root bind:open={show}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title class="dark:text-white text-black"
+			<AlertDialog.Title
 				>Welcome to AppleBlox</AlertDialog.Title
 			>
 			<AlertDialog.Description>
@@ -42,7 +42,7 @@
 				<br />
 				<p>
 					🌟 Don't forget to leave a <strong>Star</strong> on the
-					<a href="https://github.com/OrigamingWasTaken/appleblox">GitHub repo</a>
+					<a href="https://github.com/AppleBlox/appleblox">GitHub repo</a>
 					and join the
 					<a href="https://appleblox.com/discord">Discord Server</a>!
 				</p>
@@ -89,7 +89,7 @@
 				<br />
 				<p>
 					🌟 Don't forget to leave a <strong>Star</strong> on the
-					<a href="https://github.com/OrigamingWasTaken/appleblox">GitHub repo</a>
+					<a href="https://github.com/AppleBlox/appleblox">GitHub repo</a>
 					and join the
 					<a href="https://appleblox.com/discord">Discord Server</a>!
 				</p>

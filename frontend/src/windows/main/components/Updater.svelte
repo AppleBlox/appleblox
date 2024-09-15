@@ -20,7 +20,7 @@
 			return;
 		}
 		const releases = await curlGet(
-			'https://api.github.com/repos/OrigamingWasTaken/appleblox/releases'
+			'https://api.github.com/repos/AppleBlox/appleblox/releases'
 		).catch(console.error);
 		if (releases.message) return;
 		for (const re of releases) {
@@ -82,7 +82,7 @@
 			<AlertDialog.Action
 				on:click={() => {
 					os.open(
-						`https://github.com/OrigamingWasTaken/appleblox/releases/download/${updateVersion}/AppleBlox-${updateVersion}_${getArch()}.dmg`
+						`https://github.com/AppleBlox/appleblox/releases/download/${updateVersion}/AppleBlox-${updateVersion}_${getArch()}.dmg`
 					);
 				}}>Install</AlertDialog.Action
 			>
