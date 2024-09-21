@@ -1,11 +1,12 @@
-import fs from 'node:fs';
-import path from 'node:path';
+// THIS FILE IS IN BETA. PLEASE TELL ME IF ANYTHING LOOKS STRANGE
+import { resolve } from "node:path"
+import { existsSync } from "node:fs"
 import BuildConfig from '@root/build.config';
 import neuConfig from '@root/neutralino.config.json';
-// THIS FILE IS IN BETA. PLEASE TELL ME IF ANYTHING LOOKS STRANGE
 import packageJson from '@root/package.json';
 import { Data, NtExecutable, NtExecutableResource, Resource } from 'resedit';
 import { Signale } from 'signale';
+import { $ } from "bun";
 
 export async function winBuild() {
 	const logger = new Signale();
@@ -14,34 +15,34 @@ export async function winBuild() {
 		return;
 	}
 
-	const Dist = path.resolve('.tmpbuild');
+	const Dist = resolve('.tmpbuild');
 
 	for (const app of BuildConfig.win.architecture) {
 		const appTime = performance.now();
-		const appDist = path.resolve(Dist, `win_${app}`);
+		const appDist = resolve(Dist, `win_${app}`);
 
-		fs.mkdirSync(appDist, { recursive: true });
+		await $`mkdir -p "${appDist}"`;
 
 		const l = new Signale({ scope: `build-win-${app}`, interactive: true });
 		l.await(`Building win-${app}`);
 
-		const neuResources = path.resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
-		if (!fs.existsSync(neuResources)) {
+		const neuResources = resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
+		if (!existsSync(neuResources)) {
 			l.fatal("No 'resources.neu' file was not found in the ./dist directory");
 			return;
 		}
 
-		const executable = path.resolve('dist', neuConfig.cli.binaryName, `${neuConfig.cli.binaryName}-win_${app}.exe`);
-		if (!fs.existsSync(executable)) {
+		const executable = resolve('dist', neuConfig.cli.binaryName, `${neuConfig.cli.binaryName}-win_${app}.exe`);
+		if (!existsSync(executable)) {
 			l.fatal(`The '${neuConfig.cli.binaryName}-win_${app}.exe' executable was not found in the ./dist directory`);
 			return;
 		}
 
-		const data = fs.readFileSync(executable);
+		const data = await Bun.file(executable).bytes()
 		const exe = NtExecutable.from(data);
 		const res = NtExecutableResource.from(exe);
 
-		const iconData = fs.readFileSync(BuildConfig.win.appIcon);
+		const iconData = await Bun.file(BuildConfig.win.appIcon).bytes()
 		const iconFile = Data.IconFile.from(iconData);
 		Resource.IconGroupEntry.replaceIconsForResource(
 			res.entries,
@@ -66,7 +67,7 @@ export async function winBuild() {
 
 		// Embed Resources.neu and config
 		if (BuildConfig.win.embedResources) {
-			const resourcesContent = fs.readFileSync(neuResources);
+			const resourcesContent = await Bun.file(neuResources).arrayBuffer()
 			// @ts-expect-error
 			res.entries.push({
 				type: 10,
@@ -77,8 +78,10 @@ export async function winBuild() {
 		}
 
 		res.outputResource(exe);
-		fs.writeFileSync(path.resolve(appDist, `${BuildConfig.appName}.exe`), Buffer.from(exe.generate()));
-		l.complete(`win_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s ${BuildConfig.win.embedResources ? '(Embeded Resources)' : ''}`);
+		await Bun.write(resolve(appDist, `${BuildConfig.appName}.exe`),Buffer.from(exe.generate()))
+		l.complete(
+			`win_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s ${BuildConfig.win.embedResources ? '(Embeded Resources)' : ''}`
+		);
 		console.log('');
 	}
 }

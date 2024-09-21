@@ -10,7 +10,7 @@
 </script>
 
 <button
-	class={`${currentPage === id ? "bg-accent" : ''} flex items-center justify-center hover:bg-muted rounded-md py-1 px-4 mt-2`}
+	class={`${currentPage === id ? 'bg-accent' : ''} flex items-center justify-center hover:bg-muted rounded-md py-1 px-4 mt-2`}
 	on:click={() => {
 		dispatch('sidebarClick', id);
 	}}

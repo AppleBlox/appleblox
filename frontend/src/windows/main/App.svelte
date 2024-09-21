@@ -104,19 +104,19 @@
 		/>
 		<div class="fixed overflow-y-scroll max-h-full top-0 left-48 w-[83%]">
 			{#if currentPage == 'integrations'}
-					<Integrations />
+				<Integrations />
 			{:else if currentPage === 'fastflags'}
-					<FastFlags />
+				<FastFlags />
 			{:else if currentPage === 'misc'}
-					<Misc />
+				<Misc />
 			{:else if currentPage === 'support'}
-					<Support />
+				<Support />
 			{:else if currentPage === 'mods'}
-					<Mods />
+				<Mods />
 			{:else if currentPage === 'dev'}
-					<Dev />
+				<Dev />
 			{:else if currentPage === 'roblox'}
-					<Roblox />
+				<Roblox />
 			{:else}
 				<div class="flex items-center m-32 space-x-4 opacity-30">
 					<Skeleton class="h-12 w-12 rounded-full" />

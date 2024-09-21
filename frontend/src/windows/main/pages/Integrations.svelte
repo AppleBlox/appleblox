@@ -75,6 +75,4 @@
 		.build();
 </script>
 
-<Panel
-	{panel}
-/>
+<Panel {panel} />

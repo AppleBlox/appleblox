@@ -1,9 +1,10 @@
+// This code will watch appleblox's binaries and kill them if the app is closed
 import { os, filesystem } from '@neutralinojs/lib';
 import { libraryPath } from './libraries';
 
 export class AbloxWatchdog {
 	private watchdogProcess: os.SpawnedProcess | null = null;
-	private heartbeatInterval: NodeJS.Timeout | null = null;
+	private heartbeatInterval: Timer | null = null;
 
 	async start() {
 		try {

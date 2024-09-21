@@ -3,7 +3,6 @@ import path from 'path-browserify';
 import Roblox from '.';
 import { isProcessAlive, removeNonUTF8CharactersFromString } from '../utils';
 import { sleep } from '../utils';
-import { getRobloxPath } from './path';
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';
@@ -145,7 +144,7 @@ export class RobloxInstance {
 			await Roblox.Utils.toggleURI(false, false);
 			await os.execCommand(`open ${url}`);
 		} else {
-			await os.execCommand(`open "${getRobloxPath()}"`);
+			await os.execCommand(`open "${Roblox.path}"`);
 		}
 
 		await sleep(1000);
@@ -171,13 +170,9 @@ export class RobloxInstance {
 		let tries = 10;
 		while (this.latestLogPath == null) {
 			if (tries < 1) {
-				throw new Error(
-					`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}". Stopping.`
-				);
+				throw new Error(`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}". Stopping.`);
 			}
-			const latestFile = (
-				await os.execCommand(`cd "${logsDirectory}" && ls -t | head -1`)
-			).stdOut.trim();
+			const latestFile = (await os.execCommand(`cd "${logsDirectory}" && ls -t | head -1`)).stdOut.trim();
 			const latestFilePath = path.join(logsDirectory, latestFile);
 			const createdAt = (await filesystem.getStats(latestFilePath)).createdAt;
 			const timeDifference = (Date.now() - createdAt) / 1000;
@@ -194,14 +189,11 @@ export class RobloxInstance {
 		}
 
 		// Read the first content, to not miss anything
-		await os.execCommand(
-			`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`
-		);
+		await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
 		const content = (await os.execCommand('cat /tmp/roblox_ablox.log')).stdOut;
 		// Spawns the logs watcher, and be sure that it kills any previous one
 		await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
-		this.logsInstance =
-			await os.spawnProcess(`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done
+		this.logsInstance = await os.spawnProcess(`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done
 `);
 		console.log(`Logs watcher started with PID: ${this.logsInstance.pid}`);
 
@@ -213,20 +205,13 @@ export class RobloxInstance {
 
 			try {
 				// Check if the event comes from the logs watcher, and that it is stdOut
-				if (
-					!this.isWatching ||
-					!this.logsInstance ||
-					evt.detail.id !== this.logsInstance.id
-				)
-					return;
+				if (!this.isWatching || !this.logsInstance || evt.detail.id !== this.logsInstance.id) return;
 
 				if (evt.detail.action === 'exit') {
 					console.log('Logs watcher exited with output:', evt.detail.data);
 					console.log('Restarting logs watcher');
 
-					await os.execCommand(
-						`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`
-					);
+					await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
 					this.logsInstance = await os.spawnProcess(
 						`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done`
 					);
@@ -234,9 +219,7 @@ export class RobloxInstance {
 				}
 
 				// Convert the file to ensure proper encoding
-				await os.execCommand(
-					`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`
-				);
+				await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
 
 				// Read the content of the converted file
 				const content = (await os.execCommand('cat /tmp/roblox_ablox.log')).stdOut;

@@ -24,16 +24,9 @@
 			>
 				{#if icon}
 					{#if icon.component}
-						<svelte:component
-							this={icon.component}
-							class={cn(icon.props, 'h-5 w-5 mr-2')}
-						/>
+						<svelte:component this={icon.component} class={cn(icon.props, 'h-5 w-5 mr-2')} />
 					{:else if icon.src}
-						<img
-							src={icon.src}
-							alt="Button Icon"
-							class={cn(icon.props, 'h-5 w-5 mr-2')}
-						/>
+						<img src={icon.src} alt="Button Icon" class={cn(icon.props, 'h-5 w-5 mr-2')} />
 					{/if}
 				{/if}
 				{label}</Button

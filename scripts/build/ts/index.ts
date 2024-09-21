@@ -1,25 +1,27 @@
-import { exec } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
+import { resolve } from 'node:path';
 import BuildConfig from '@root/build.config';
 import { Signale } from 'signale';
 import { linuxBuild } from './linux-bundle';
 import { macBuild } from './mac-bundle';
-import { buildBinaries, copyFolderSync } from './utils';
+import { buildViteAndNeu } from './utils';
 import { winBuild } from './win-bundle';
+import { $ } from 'bun';
+import { buildBinaries } from './binaries';
 
 export async function build() {
+	$.cwd(process.cwd())
 	const initTime = performance.now();
 	const logger = new Signale();
-	fs.rmSync(path.resolve('dist'), { recursive: true, force: true });
-	fs.rmSync(path.resolve('.tmpbuild'), { recursive: true, force: true });
+	await $`rm -rf "${resolve('dist')}"`;
+	await $`rm -rf "${resolve('.tmpbuild')}"`;
 
 	if (!BuildConfig.mac && !BuildConfig.win && !BuildConfig.linux) {
 		console.log('Skipping build, no target set in build.config.ts.');
 		return;
 	}
 
-	await buildBinaries();
+	await buildBinaries()
+	await buildViteAndNeu();
 
 	if (BuildConfig.mac) {
 		await macBuild();
@@ -31,19 +33,20 @@ export async function build() {
 		await linuxBuild();
 	}
 
-	fs.rmSync(path.resolve('dist'), { recursive: true, force: true });
-	copyFolderSync(path.resolve('.tmpbuild'), path.resolve('./dist'));
-	fs.rmSync(path.resolve('.tmpbuild'), { recursive: true, force: true });
+	await $`rm -rf "${resolve('dist')}"`;
+	await $`cp -r "${resolve('.tmpbuild')}" "${resolve('dist')}"`;
+	await $`rm -rf "${resolve('.tmpbuild')}"`;
 	logger.success(`Built in ${((performance.now() - initTime) / 1000).toFixed(3)}s`);
 	switch (process.platform) {
 		case 'linux':
 		case 'darwin':
-			exec(`open ${path.resolve('./dist')}`);
+			await $`open ${resolve('./dist')}`;
 			break;
 		case 'win32':
-			exec(`start ${path.resolve('./dist')}`);
+			await $`start ${resolve('./dist')}`;
 			break;
 	}
+	process.exit(0)
 }
 
 build();

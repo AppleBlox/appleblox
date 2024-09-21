@@ -60,11 +60,7 @@ export class RobloxWindow {
 	}
 
 	/** Sets the desktop resolution */
-	public static async setDesktopRes(
-		width: number | string,
-		height: number | string,
-		duration = 1
-	) {
+	public static async setDesktopRes(width: number | string, height: number | string, duration = 1) {
 		os.execCommand(`${libraryPath('window_manager')} setres ${width} ${height} ${duration} 1`, {
 			background: true,
 		});

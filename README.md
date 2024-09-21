@@ -63,13 +63,13 @@ If you're worried that those could be modified by me or another contributor to i
 
 ## Developpement
 
-To setup the app on your machine, clone this repo and run `npm install`. You will also need to install some packages with the command: `brew install create-dmg`.
+To setup the app on your machine, clone this repo and run `bun install`. You will also need to install some packages with the command: `brew install create-dmg`.
 
-To start the **dev environnement**, run `npm run dev`.
+To start the **dev environnement**, run `bun run --bun dev`.
 
-To **build**, run `npm run build`. (If you don't want to create dmgs)
+To **package**, run `bun run --bun package`. (If you don't want to create dmgs)
 
-To **build and package the app**, run `npm run build:release`.
+To **package and create a dmg of the app**, run `bun run --bun package:release`.
 
 The app is made with [Svelte](https://svelte.dev) (Frontend) and [NeutralinoJS](https://neutralino.js.org) (Backend).
 If you haven't heard about NeutralinoJS, it is a lightweight alternative coded in **c++** to frameworks like Electron or NW.JS. It is still growing, but is stable enough to be used on one platform. You can learn more about it on https://neutralino.js.org/docs.
@@ -92,5 +92,6 @@ All contributions are welcome! Feel free to open issues and pull requests. For f
 
 ## Credits
 
-Logo found on https://macosicons.com (Sorry but I couldn't find the designer's name ^^').
-Features inspirations from BloxStrap.
+-   Logo by @typeofnull
+-   Inspired from @pizzaboxer's Bloxstrap
+-   Icons by lucide-svelte & icons8

@@ -1,13 +1,14 @@
+// Init imports
 import './app.css';
 import './ts/window';
-import './ts/roblox/path';
+import './ts/roblox';
 import './ts/debugging';
-import './components/settings';
 
+// Imports
 import { events, os, init, app as neuApp } from '@neutralinojs/lib';
 import { version } from '../../../../package.json';
 import App from './App.svelte';
-import { RPCController } from './ts/rpc';
+import { RPCController } from './ts/tools/rpc';
 import { AbloxWatchdog } from './ts/watchdog';
 
 // Initialize NeutralinoJS

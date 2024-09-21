@@ -8,12 +8,12 @@
 	import Edit from '@/assets/panel/edit.png';
 	import Help from '@/assets/panel/help.png';
 	import More from '@/assets/panel/more.png';
-	import type { FFlag } from '@/types/settings';
+	import type { EditorFlag } from '../../ts/roblox/fflags';
 	import { os, clipboard } from '@neutralinojs/lib';
 	import { toast } from 'svelte-sonner';
 	import Roblox from '../../ts/roblox';
 
-	let fflags: FFlag[] = [];
+	let fflags: EditorFlag[] = [];
 
 	function updateTable() {
 		Roblox.FFlags.getFlags()
@@ -80,23 +80,17 @@
 			<AlertDialog.Header>
 				<AlertDialog.Title>FastFlags Editor</AlertDialog.Title>
 				<AlertDialog.Description>
-					Here you can add, remove, enable or disable certain FFlags. Be careful when
-					modifying these as they can crash your game if you don't know what you're doing.
+					Here you can add, remove, enable or disable certain FFlags. Be careful when modifying these as they can crash
+					your game if you don't know what you're doing.
 				</AlertDialog.Description>
 			</AlertDialog.Header>
 
 			<Table.Root>
 				<Table.Caption>
 					<div class="flex bg-[#161515] my-2 rounded-md p-3 justify-center">
-						<Input
-							placeholder="Enter your flag"
-							class="mr-3 w-[300px]"
-							bind:value={addedFlag}
-						/>
+						<Input placeholder="Enter your flag" class="mr-3 w-[300px]" bind:value={addedFlag} />
 						<Button variant="default" on:click={btnAddFlag}>Add Flag</Button>
-						<Button class="ml-3" variant="secondary" on:click={pasteJson}
-							>Paste JSON</Button
-						>
+						<Button class="ml-3" variant="secondary" on:click={pasteJson}>Paste JSON</Button>
 					</div>
 				</Table.Caption>
 				<Table.Header>
@@ -115,10 +109,7 @@
 					{#each fflags as ff}
 						<Table.Row class="w-full">
 							<Table.Cell role="checkbox" class="font-medium"
-								><Checkbox
-									bind:checked={ff.enabled}
-									class="rounded-md mr-5"
-								/></Table.Cell
+								><Checkbox bind:checked={ff.enabled} class="rounded-md mr-5" /></Table.Cell
 							>
 							<Table.Cell class="w-2xl">{ff.flag}</Table.Cell>
 							<Table.Cell class="w-full">
@@ -133,11 +124,7 @@
 											class="ml-auto rounded-md border-none h-7 w-7"
 											builders={[builder]}
 										>
-											<img
-												src={More}
-												alt="more icon lol"
-												class="h-4 w-4 towhite"
-											/>
+											<img src={More} alt="more icon lol" class="h-4 w-4 towhite" />
 										</Button>
 									</DropdownMenu.Trigger>
 									<DropdownMenu.Content>
@@ -146,13 +133,8 @@
 												class="cursor-pointer"
 												on:click={() => {
 													Roblox.FFlags.removeFlag(ff.flag);
-													fflags = fflags.filter(
-														(f) => f.flag !== ff.flag
-													);
-												}}
-												><p class="text-red-600">
-													Remove
-												</p></DropdownMenu.Item
+													fflags = fflags.filter((f) => f.flag !== ff.flag);
+												}}><p class="text-red-600">Remove</p></DropdownMenu.Item
 											>
 										</DropdownMenu.Group>
 									</DropdownMenu.Content>

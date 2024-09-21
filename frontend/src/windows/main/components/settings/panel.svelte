@@ -22,7 +22,6 @@
 	import SwitchWidget from './widgets/switch.svelte';
 
 	import { fade } from 'svelte/transition';
-	import Button from '$lib/components/ui/button/button.svelte';
 
 	// Panel props
 	export let panel: SettingsPanel;

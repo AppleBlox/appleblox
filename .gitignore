@@ -1,4 +1,9 @@
-/bun.lockb
+# Pre-built binaries
+build/lib/MacOS/discordrpc_ablox
+build/lib/MacOS/urlscheme
+build/lib/MacOS/watchdog
+build/lib/MacOS/window_manager
+
 .tmp
 .tmpbuild
 window_state_config.json

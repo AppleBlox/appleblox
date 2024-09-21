@@ -4,14 +4,14 @@ import { os, filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import { libraryPath } from '../libraries';
-import { dataPath, loadSettings } from '../settings';
+import { getConfigPath, loadSettings } from '../../components/settings';
 import { pathExists } from '../utils';
-import { getRobloxPath } from './path';
+import Roblox from '.';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
 	static async hasRoblox(popup = true): Promise<boolean> {
-		if (await pathExists(path.join(getRobloxPath(), 'Contents/MacOS/RobloxPlayer'))) {
+		if (await pathExists(path.join(Roblox.path, 'Contents/MacOS/RobloxPlayer'))) {
 			return true;
 		}
 		if (!popup) return false;
@@ -49,15 +49,13 @@ END`);
 
 			toast.info('Opening Roblox...', { duration: 1000 });
 			console.log('Opening Roblox');
-			await os.execCommand(`open "${getRobloxPath()}"`, { background: true });
+			await os.execCommand(`open "${Roblox.path}"`, { background: true });
 
 			await sleep(1000);
 
 			toast.info('Terminating all processes...', { duration: 1000 });
 			console.log('Terminating all Roblox processes');
-			const result = await os.execCommand(
-				"ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs"
-			);
+			const result = await os.execCommand("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs");
 			console.log(result);
 			const processes = result.stdOut.trim().split(' ');
 			for (const proc of processes) {
@@ -94,9 +92,7 @@ END`);
 			await filesystem.remove(path.join(savePath, 'Launch Roblox.app'));
 		}
 		await filesystem.createDirectory(path.join(savePath, 'Launch Roblox.app/Contents/MacOS'));
-		await filesystem.createDirectory(
-			path.join(savePath, 'Launch Roblox.app/Contents/Resources')
-		);
+		await filesystem.createDirectory(path.join(savePath, 'Launch Roblox.app/Contents/Resources'));
 		await filesystem.writeFile(
 			path.join(savePath, 'Launch Roblox.app/Contents/Info.plist'),
 			`<?xml version="1.0" encoding="UTF-8"?>
@@ -128,18 +124,14 @@ END`);
 			path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'),
 			`#!/bin/bash\n${path.join(path.dirname(window.NL_PATH), 'MacOS/bootstrap')} --launch`
 		);
-		await os.execCommand(
-			`chmod +x ${path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ ')}`
-		);
+		await os.execCommand(`chmod +x ${path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ ')}`);
 		toast.success(`Created a shortcut at "${path.join(savePath, 'Launch Roblox.app')}"`);
 	}
 
 	/* Checks if the URI feature is enabled*/
 	static async isUriEnabled() {
 		return (
-			await os.execCommand(
-				`${libraryPath('urlscheme')} check roblox-player ch.origaming.appleblox.url`
-			)
+			await os.execCommand(`${libraryPath('urlscheme')} check roblox-player ch.origaming.appleblox.url`)
 		).stdOut.includes('true');
 	}
 
@@ -162,19 +154,12 @@ END`);
 	}
 
 	static async killAll() {
-		await os.execCommand(
-			`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`
-		);
+		await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
 	}
 
 	static async quit() {
-		await os.execCommand(
-			`osascript -e 'tell application "Roblox" to if it is running then quit'`
-		);
-		while (
-			(await os.execCommand('ps aux | grep RobloxPlayer | grep -v grep')).stdOut.trim()
-				.length > 2
-		) {
+		await os.execCommand(`osascript -e 'tell application "Roblox" to if it is running then quit'`);
+		while ((await os.execCommand('ps aux | grep RobloxPlayer | grep -v grep')).stdOut.trim().length > 2) {
 			await sleep(500);
 		}
 		return;

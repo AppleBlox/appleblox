@@ -6,15 +6,7 @@
 	"url": "/",
 	"enableServer": true,
 	"enableNativeAPI": true,
-	"nativeAllowList": [
-		"events.*",
-		"app.exit",
-		"os.*",
-		"filesystem.*",
-		"window.*",
-		"clipboard.*",
-		"computer.*"
-	],
+	"nativeAllowList": ["events.*", "app.exit", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*"],
 	"exportAuthInfo": false,
 	"logging": {
 		"writeToLogFile": false,
@@ -43,12 +35,12 @@
 		"binaryVersion": "5.1.0",
 		"clientVersion": "3.12.0",
 		"frontendLibrary": {
-			"buildCommand": "npm run neu:empty",
+			"buildCommand": "true",
 			"patchFile": "/frontend/index.html",
 			"devUrl": "http://localhost:5173",
-			"devCommand": "npm run neu:empty",
+			"devCommand": "true",
 			"projectPath": "/",
-			"initCommand": "npm install"
+			"initCommand": "bun install"
 		}
 	}
 }

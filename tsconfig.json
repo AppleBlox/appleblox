@@ -29,9 +29,6 @@
 		"frontend/src/**/*.ts",
 		"frontend/src/**/*.js",
 		"frontend/src/**/*.svelte",
-		"scripts/**/*.ts",
-		"scripts/build/mac-bundle.js",
-		"scripts/build/index.js"
 	],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

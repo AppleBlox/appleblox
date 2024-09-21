@@ -2,8 +2,7 @@
 // It will redirect the app's logs to the appleblox.log file while still logging in the web browser
 import { filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
-import * as StackTrace from 'stacktrace-js';
-import { dataPath, loadSettings } from './settings';
+import { getConfigPath, loadSettings } from '../components/settings';
 import { pathExists } from './utils';
 
 /** Tries to format every variable to a string */
@@ -55,7 +54,7 @@ function getCircularReplacer() {
 /** Clears the logs */
 export async function clearLogs() {
 	try {
-		const appleBloxDir = path.dirname(await dataPath());
+		const appleBloxDir = path.dirname(await getConfigPath());
 		await filesystem.writeFile(path.join(appleBloxDir, 'appleblox.log'), '');
 	} catch (err) {
 		console.error('Failed to clear the logs:');
@@ -66,7 +65,7 @@ export async function clearLogs() {
 /** Appends a message to the log file */
 async function appendLog(message: string) {
 	try {
-		const appleBloxDir = path.dirname(await dataPath());
+		const appleBloxDir = path.dirname(await getConfigPath());
 		await filesystem.appendFile(path.join(appleBloxDir, 'appleblox.log'), `${message}\n`);
 	} catch (err) {
 		console.error('Failed to write log to file', err);
@@ -128,7 +127,7 @@ function restoreConsoleFunctions() {
 }
 
 export async function enableConsoleRedirection() {
-	const appleBloxDir = path.dirname(await dataPath());
+	const appleBloxDir = path.dirname(await getConfigPath());
 	if (!pathExists(appleBloxDir)) {
 		await filesystem.createDirectory(appleBloxDir);
 	}

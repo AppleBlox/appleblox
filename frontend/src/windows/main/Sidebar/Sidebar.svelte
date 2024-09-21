@@ -73,8 +73,7 @@
 	// Play button text and color
 	let isHovering = false;
 	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : 'Play';
-	$: buttonIcon =
-		buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
+	$: buttonIcon = buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
 
 	function handleMouseEnter() {
 		isHovering = true;
@@ -94,10 +93,7 @@
 	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
 </script>
 
-<div
-	class="h-full bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col"
-	{id}
->
+<div class="h-full bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col" {id}>
 	<div class="flex flex-col flex-grow">
 		<a
 			href="https://github.com/AppleBlox/appleblox"
@@ -115,13 +111,7 @@
 		</div>
 		<div class="flex flex-col items-center flex-grow px-10">
 			{#each sidebarBtns as { label, id, icon }}
-				<SidebarBtn
-					bind:currentPage
-					{label}
-					{id}
-					{icon}
-					on:sidebarClick={sidebarItemClicked}
-				/>
+				<SidebarBtn bind:currentPage {label} {id} {icon} on:sidebarClick={sidebarItemClicked} />
 			{/each}
 		</div>
 	</div>
@@ -134,12 +124,7 @@
 	<div class="flex flex-col items-center mb-4">
 		<p class="text-sm text-muted-foreground mb-2">v{version}</p>
 
-		<div
-			on:mouseenter={handleMouseEnter}
-			on:mouseleave={handleMouseLeave}
-			role="tooltip"
-			class="w-full px-4"
-		>
+		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
 			<Button
 				class={`${isLaunched ? 'bg-blue-400 hover:bg-red-500' : 'bg-green-600 hover:bg-green-800'} font-mono w-full`}
 				on:click={() => {
@@ -150,11 +135,7 @@
 					dispatch('launchRoblox', true);
 				}}
 			>
-				<img
-					src={buttonIcon}
-					alt="Button Icon"
-					class="mr-1 mt-[1px] w-5 h-5 towhite-always"
-				/>
+				<img src={buttonIcon} alt="Button Icon" class="mr-1 mt-[1px] w-5 h-5 towhite-always" />
 				<p class="font-mono transition duration-150">{buttonState}</p>
 			</Button>
 		</div>

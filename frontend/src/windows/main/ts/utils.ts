@@ -1,13 +1,9 @@
-import { os, filesystem } from '@neutralinojs/lib';
+import { os } from '@neutralinojs/lib';
 
 /** Checks if the path provided exists */
 export async function pathExists(path: string) {
 	try {
-		return (
-			(
-				await os.execCommand(`[ -e "${path}" ] && echo "true" || echo "false"`)
-			).stdOut.trim() === 'true'
-		);
+		return (await os.execCommand(`[ -e "${path}" ] && echo "true" || echo "false"`)).stdOut.trim() === 'true';
 	} catch (err) {
 		console.error(err);
 	}
@@ -36,11 +32,7 @@ export function getStringDiff(oldStr: string, newStr: string): string {
 	const newChars = newStr.split('');
 	let startDiff = 0;
 	let endDiff = 0;
-	while (
-		startDiff < oldChars.length &&
-		startDiff < newChars.length &&
-		oldChars[startDiff] === newChars[startDiff]
-	) {
+	while (startDiff < oldChars.length && startDiff < newChars.length && oldChars[startDiff] === newChars[startDiff]) {
 		startDiff++;
 	}
 	while (

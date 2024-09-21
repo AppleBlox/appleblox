@@ -1,3 +1,4 @@
+// Set up keyboard shortcuts and add extra commands to neutralino
 import { events, os, app } from '@neutralinojs/lib';
 import { getMode } from './utils';
 

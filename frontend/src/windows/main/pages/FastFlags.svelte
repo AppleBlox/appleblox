@@ -18,7 +18,7 @@
 					id: 'ff_fps',
 					default: [60],
 					min: 1,
-					max: 300,
+					max: 240,
 					step: 1,
 				})
 				.addSelect({
@@ -191,7 +191,12 @@
 					id: 'ff_telemetry',
 					default: false,
 				})
-				.addCustom({label: "Flags editor", description: "Advanced editing of fast flags", component: FfButtonsCustom, id: "fflags_editor"})
+				.addCustom({
+					label: 'Flags editor',
+					description: 'Advanced editing of fast flags',
+					component: FfButtonsCustom,
+					id: 'fflags_editor',
+				})
 		)
 		.build();
 </script>

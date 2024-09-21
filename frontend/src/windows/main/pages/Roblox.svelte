@@ -3,7 +3,6 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { os } from '@neutralinojs/lib';
 	import path from 'path-browserify';
-	import { getRobloxPath } from '../ts/roblox/path';
 	import Roblox from '../ts/roblox';
 	import { toast } from 'svelte-sonner';
 	import Panel from '../components/settings/panel.svelte';
@@ -18,10 +17,10 @@
 				await Roblox.Utils.enableMultiInstance();
 				break;
 			case 'open_instance_btn':
-				os.spawnProcess(`${path.join(getRobloxPath(), 'Contents/MacOS/RobloxPlayer')}; exit`);
+				os.spawnProcess(`${path.join(Roblox.path, 'Contents/MacOS/RobloxPlayer')}; exit`);
 				break;
 			case 'close_roblox_btn':
-				closeRobloxPopup = true
+				closeRobloxPopup = true;
 				break;
 			case 'create_shortcut_btn':
 				try {
@@ -123,14 +122,12 @@
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description
-				>All unsaved progress will be lost.</AlertDialog.Description
-			>
+			<AlertDialog.Description>All unsaved progress will be lost.</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action
-				on:click={async() => {
+				on:click={async () => {
 					await Roblox.Utils.killAll();
 					toast.success('All Roblox Instances have been closed.');
 				}}>Continue</AlertDialog.Action

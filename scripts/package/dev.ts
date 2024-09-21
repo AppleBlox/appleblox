@@ -1,8 +1,15 @@
-import { chmodSync, existsSync, rmSync } from 'node:fs';
-import path from 'node:path';
-import spawn, { type SpawnPromise, type SpawnResult } from '@expo/spawn-async';
+import { chmodSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-async function main() {
+async function main(downloadNeuBinaries = false) {
+
+	if (downloadNeuBinaries) {
+		await Bun.spawn(['bunx', 'neu', 'update'], {
+			cwd: process.cwd(),
+			detached: false,
+		}).exited;
+	}
+
 	// Clear terminal
 	process.stdout.write('\x1b[2J');
 	process.stdout.write('\x1b[0f');
@@ -20,42 +27,45 @@ async function main() {
 			break;
 	}
 	// Start the vite dev server
-	const vite = spawn('vite', ['dev'], {
-		cwd: process.cwd(),
-		detached: false,
-		stdio: 'inherit',
-	});
+	const vite = Bun.spawn({
+		cmd: ['bunx', 'vite', 'dev'],
+		stdout: 'inherit',
+		stderr: 'inherit'
+	  });
 	// Delay to be sure vite was built
 	console.log('Waiting 2500ms...');
-	await new Promise((r) => setTimeout(r, 2500));
+	await Bun.sleep(2500)
 
-	const args = ['--window-enable-inspector=true', '--export-auth-info', '--load-dir-res', `--path=${path.resolve('.')}`, '--neu-dev-extension', '--url=http://localhost:5173', '--port=5174'];
+	const args = [
+		'--window-enable-inspector=true',
+		'--load-dir-res',
+		`--path=${resolve('.')}`,
+		'--neu-dev-extension',
+		'--url=http://localhost:5173',
+		'--port=5174',
+	];
 	// Chmod +x the binary to be able to run it
 	let bpath: string;
 	if (process.platform !== 'win32') {
-		bpath = path.resolve(`./bin/neutralino-${binaryOS}_${process.arch}`);
+		bpath = resolve(`./bin/neutralino-${binaryOS}_${process.arch}`);
 		chmodSync(bpath, '755');
 	} else {
-		bpath = `start ${path.resolve(`./bin/neutralino-${binaryOS}_x64.exe`)}`;
+		bpath = `start ${resolve(`./bin/neutralino-${binaryOS}_x64.exe`)}`;
 	}
 
-	await spawn(bpath, args, {
+	await Bun.spawn([bpath, ...args], {
 		cwd: process.cwd(),
 		detached: false,
-		stdio: 'inherit',
-	}).child.on('close', () => {
-		vite.child.kill();
-		process.exit();
-	});
+		onExit() {
+			vite.kill();
+			process.exit();
+		},
+	}).exited;
 }
 
 // If the binary folder doesn't exist, then we download it
-if (!existsSync(path.resolve('./bin'))) {
-	spawn('npx', ['neu', 'update'], {
-		cwd: process.cwd(),
-		detached: false,
-		stdio: 'inherit',
-	}).child.on('exit', main);
+if (!existsSync(resolve('./bin'))) {
+	main(true)
 } else {
 	main();
 }

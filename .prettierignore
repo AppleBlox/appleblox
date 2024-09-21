@@ -1,8 +1,7 @@
 node_modules
 dist
-build
+/build
 .tmp
-scripts
 .github
 .git
 bin

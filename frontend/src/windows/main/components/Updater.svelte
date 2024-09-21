@@ -5,7 +5,7 @@
 	import SvelteMarkdown from 'svelte-markdown';
 	import { toast } from 'svelte-sonner';
 	import { version } from '../../../../../package.json';
-	import { loadSettings, saveSettings } from '../ts/settings';
+	import { loadSettings, saveSettings } from './settings';
 	import { compareVersions, curlGet } from '../ts/utils';
 	import Link from './Link.svelte';
 
@@ -19,9 +19,7 @@
 			toast.error('Could not connect to internet');
 			return;
 		}
-		const releases = await curlGet(
-			'https://api.github.com/repos/AppleBlox/appleblox/releases'
-		).catch(console.error);
+		const releases = await curlGet('https://api.github.com/repos/AppleBlox/appleblox/releases').catch(console.error);
 		if (releases.message) return;
 		for (const re of releases) {
 			if (compareVersions(re.tag_name, updateVersion) > 0) {

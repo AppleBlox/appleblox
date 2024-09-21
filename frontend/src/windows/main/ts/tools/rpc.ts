@@ -1,5 +1,6 @@
-import { events, os, debug } from '@neutralinojs/lib';
-import { libraryPath } from './libraries';
+// Discord RPC wrapper & controller
+import { shell, spawn } from './shell';
+import { libraryPath } from '../libraries';
 
 /**
  * Options for configuring the Discord Rich Presence
@@ -55,18 +56,31 @@ export interface RPCOptions {
 	disableColor?: boolean;
 }
 
+/**
+ * Class representing a Discord Rich Presence client
+ */
 export class DiscordRPC {
+	/** Path to the Discord RPC binary */
 	private static binaryPath = `${libraryPath('discordrpc')}`;
-	private static process: any | null = null;
+	/** Set of all DiscordRPC instances */
 	private static instances: Set<DiscordRPC> = new Set();
+	/** Current RPC options being used */
 	private static currentOptions: RPCOptions | null = null;
 
+	/**
+	 * Creates a new DiscordRPC instance
+	 */
 	constructor() {
 		DiscordRPC.instances.add(this);
 	}
 
-	private async isRunning() {
-		return (await os.execCommand(`pgrep -f "discordrpc_ablox"`)).stdOut.split('\n').length > 2;
+	/**
+	 * Checks if the Discord RPC process is running
+	 * @returns A promise that resolves to a boolean indicating if the process is running
+	 */
+	private async isRunning(): Promise<boolean> {
+		const result = await shell('pgrep', ['-f', 'discordrpc_ablox']);
+		return result.stdout.split('\n').length > 2;
 	}
 
 	/**
@@ -89,11 +103,10 @@ export class DiscordRPC {
 		const args = DiscordRPC.buildArgs(rpcOptions);
 
 		// Kill any existing discordrpc processes
-		await os.execCommand(`pkill -f "discordrpc_ablox"`);
+		await shell('pkill', ['-f', 'discordrpc_ablox']);
 
-		const cmd = `${DiscordRPC.binaryPath} ${args.join(' ')}`;
-		console.log(`Starting RPC with: ${cmd}`);
-		DiscordRPC.process = await os.spawnProcess(cmd);
+		console.log(`Starting RPC with: ${DiscordRPC.binaryPath} ${args.join(' ')}`);
+		await spawn(DiscordRPC.binaryPath, args);
 		DiscordRPC.currentOptions = options;
 	}
 
@@ -103,8 +116,7 @@ export class DiscordRPC {
 	 */
 	async stop(): Promise<void> {
 		if (await this.isRunning()) {
-			await os.execCommand(`pkill -f "discordrpc_ablox"`);
-			DiscordRPC.process = null;
+			await shell('pkill', ['-f', 'discordrpc_ablox']);
 			DiscordRPC.currentOptions = null;
 		}
 	}
@@ -206,39 +218,47 @@ export class DiscordRPC {
 		}
 	}
 
+	/**
+	 * Builds command-line arguments from RPC options
+	 * @param options - The RPC options
+	 * @returns An array of command-line arguments
+	 */
 	private static buildArgs(options: RPCOptions): string[] {
 		const args: string[] = [];
 
-		if (options.clientId) args.push(`-c ${options.clientId}`);
-		if (options.details) args.push(`-d "${options.details}"`);
-		if (options.state) args.push(`-s "${options.state}"`);
-		if (options.largeImage) args.push(`-N ${options.largeImage}`);
-		if (options.largeImageText) args.push(`-I "${options.largeImageText}"`);
-		if (options.smallImage) args.push(`-n ${options.smallImage}`);
-		if (options.smallImageText) args.push(`-i "${options.smallImageText}"`);
-		if (options.buttonUrl1) args.push(`-U ${options.buttonUrl1}`);
-		if (options.buttonText1) args.push(`-B "${options.buttonText1}"`);
-		if (options.buttonUrl2) args.push(`-u ${options.buttonUrl2}`);
-		if (options.buttonText2) args.push(`-b "${options.buttonText2}"`);
-		if (options.startTime) args.push(`-S ${options.startTime}`);
-		if (options.endTime) args.push(`-E ${options.endTime}`);
-		if (options.partySize) args.push(`-P ${options.partySize[0]},${options.partySize[1]}`);
-		if (options.partyId) args.push(`-p ${options.partyId}`);
-		if (options.matchId) args.push(`-m ${options.matchId}`);
-		if (options.joinId) args.push(`-j ${options.joinId}`);
-		if (options.spectateId) args.push(`-y ${options.spectateId}`);
+		if (options.clientId) args.push('-c', options.clientId);
+		if (options.details) args.push('-d', options.details);
+		if (options.state) args.push('-s', options.state);
+		if (options.largeImage) args.push('-N', options.largeImage);
+		if (options.largeImageText) args.push('-I', options.largeImageText);
+		if (options.smallImage) args.push('-n', options.smallImage);
+		if (options.smallImageText) args.push('-i', options.smallImageText);
+		if (options.buttonUrl1) args.push('-U', options.buttonUrl1);
+		if (options.buttonText1) args.push('-B', options.buttonText1);
+		if (options.buttonUrl2) args.push('-u', options.buttonUrl2);
+		if (options.buttonText2) args.push('-b', options.buttonText2);
+		if (options.startTime) args.push('-S', options.startTime.toString());
+		if (options.endTime) args.push('-E', options.endTime.toString());
+		if (options.partySize) args.push('-P', `${options.partySize[0]},${options.partySize[1]}`);
+		if (options.partyId) args.push('-p', options.partyId);
+		if (options.matchId) args.push('-m', options.matchId);
+		if (options.joinId) args.push('-j', options.joinId);
+		if (options.spectateId) args.push('-y', options.spectateId);
 		if (options.enableTime) args.push('-t');
 		if (options.afk) args.push('-a');
-		if (options.afkAfter) args.push(`-f ${options.afkAfter}`);
-		if (options.afkUpdate) args.push(`-k ${options.afkUpdate}`);
-		if (options.exitAfter) args.push(`-e ${options.exitAfter}`);
+		if (options.afkAfter) args.push('-f', options.afkAfter.toString());
+		if (options.afkUpdate) args.push('-k', options.afkUpdate.toString());
+		if (options.exitAfter) args.push('-e', options.exitAfter.toString());
 		if (options.disableColor) args.push('-C');
 
 		return args;
 	}
 }
 
+/** Global instance of DiscordRPC */
 let discordRPC: DiscordRPC | null = null;
+
+/** Preset RPC options */
 const presets: { [key: string]: RPCOptions } = {
 	inRobloxApp: {
 		clientId: '1257650541677383721',
@@ -250,27 +270,43 @@ const presets: { [key: string]: RPCOptions } = {
 	},
 };
 
+/**
+ * Controller class for managing Discord RPC
+ */
 export class RPCController {
-	public static preset(preset: string) {
+	/**
+	 * Sets the RPC options to a preset configuration
+	 * @param preset - The name of the preset to use
+	 */
+	public static preset(preset: string): void {
 		if (presets[preset]) {
 			RPCController.set(presets[preset]);
 		}
 	}
 
-	public static async set(options: RPCOptions) {
+	/**
+	 * Sets the RPC options
+	 * @param options - The RPC options to set
+	 * @returns A promise that resolves when the RPC is set
+	 */
+	public static async set(options: RPCOptions): Promise<void> {
 		if (discordRPC) {
-			discordRPC.stop();
+			await discordRPC.stop();
 		} else {
-			await os.execCommand(`pkill -f "discordrpc_ablox"`);
+			await shell('pkill', ['-f', 'discordrpc_ablox']);
 		}
 		discordRPC = new DiscordRPC();
 		await discordRPC.start(options);
 	}
 
-	public static async stop() {
+	/**
+	 * Stops the RPC
+	 * @returns A promise that resolves when the RPC is stopped
+	 */
+	public static async stop(): Promise<void> {
 		if (discordRPC) {
-			discordRPC.destroy();
+			await discordRPC.destroy();
 		}
-		await os.execCommand(`pkill -f "discordrpc_ablox"`);
+		await shell('pkill', ['-f', 'discordrpc_ablox']);
 	}
 }

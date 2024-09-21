@@ -4,6 +4,7 @@ import { launchRoblox } from './launch';
 import { RobloxMods } from './mods';
 import { RobloxUtils } from './utils';
 import { RobloxWindow } from './window';
+import { robloxPath } from './path';
 
 // Simple export
 class Roblox {
@@ -13,6 +14,7 @@ class Roblox {
 	static Window = RobloxWindow;
 	static Mods = RobloxMods;
 	static launch = launchRoblox;
+	static path = robloxPath;
 }
 
 export default Roblox;

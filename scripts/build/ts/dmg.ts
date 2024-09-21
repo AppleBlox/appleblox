@@ -1,9 +1,9 @@
-import * as child_process from 'node:child_process';
-import * as path from 'node:path';
+import { join, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import BuildConfig from '@root/build.config';
-import * as fs from 'fs-extra';
 import { Signale } from 'signale';
 import { version } from '../../../package.json';
+import { $ } from 'bun';
 
 interface DmgOptions {
 	sourceFolder: string;
@@ -19,7 +19,18 @@ interface DmgOptions {
 }
 
 async function createCustomDMG(options: DmgOptions) {
-	const { sourceFolder, outputName, volumeName, backgroundPath, windowPos, windowSize, textSize, iconSize, iconPos, appDropLink } = options;
+	const {
+		sourceFolder,
+		outputName,
+		volumeName,
+		backgroundPath,
+		windowPos,
+		windowSize,
+		textSize,
+		iconSize,
+		iconPos,
+		appDropLink,
+	} = options;
 
 	// Prepare command arguments
 	const args = [
@@ -39,25 +50,13 @@ async function createCustomDMG(options: DmgOptions) {
 
 	console.log('Creating DMG...');
 	try {
-		await executeCommand(createDmgCommand);
+		await $`${createDmgCommand}`;
 		console.log('DMG created successfully');
 	} catch (error) {
 		console.error('Failed to create DMG:', error);
 		console.error(error);
 		throw new Error(`Failed to create dmg:\n${error}`);
 	}
-}
-
-async function executeCommand(command: string): Promise<void> {
-	return new Promise<void>((resolve, reject) => {
-		child_process.exec(command, (error, stdout, stderr) => {
-			if (error) {
-				reject(error);
-			} else {
-				resolve();
-			}
-		});
-	});
 }
 
 async function build() {
@@ -73,8 +72,8 @@ async function build() {
 		const l = new Signale({ scope: `build-mac-${app}`, interactive: true });
 		l.await(`Packaging mac-${app}`);
 
-		const appFolder = path.resolve(`./dist/mac_${app}/${BuildConfig.appName}.app`);
-		if (!fs.existsSync(appFolder)) {
+		const appFolder = resolve(`./dist/mac_${app}/${BuildConfig.appName}.app`);
+		if (!existsSync(appFolder)) {
 			l.fatal(`The '${appFolder}' app bundle was not found in the ./dist directory`);
 			return;
 		}
@@ -82,9 +81,9 @@ async function build() {
 		try {
 			await createCustomDMG({
 				sourceFolder: appFolder,
-				outputName: path.join(path.resolve('./dist'), `${BuildConfig.appName}-${version}_${app}`),
+				outputName: join(resolve('./dist'), `${BuildConfig.appName}-${version}_${app}`),
 				volumeName: BuildConfig.appName,
-				backgroundPath: path.resolve('./build/assets/bg.png'),
+				backgroundPath: resolve('./build/assets/bg.png'),
 				windowPos: '200 120',
 				windowSize: '600 360',
 				iconSize: 90,

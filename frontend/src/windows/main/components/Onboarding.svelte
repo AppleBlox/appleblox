@@ -1,12 +1,9 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { os } from '@neutralinojs/lib';
 	import { toast } from 'svelte-sonner';
-	import Misc from '../pages/Misc.svelte';
 	import Roblox from '../ts/roblox';
-	import { loadSettings, saveSettings } from '../ts/settings';
-	import { setValue } from './settings';
+	import { loadSettings, saveSettings, setValue } from './settings';
 
 	let settings = null;
 	let show = false;
@@ -27,9 +24,7 @@
 <AlertDialog.Root bind:open={show}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title
-				>Welcome to AppleBlox</AlertDialog.Title
-			>
+			<AlertDialog.Title>Welcome to AppleBlox</AlertDialog.Title>
 			<AlertDialog.Description>
 				<p>
 					We are thrilled to have you here! For starters, you should check out the <strong
@@ -37,8 +32,8 @@
 					</strong>tab.
 				</p>
 				<p>
-					If you want to add <strong>Mods</strong>, you should join the AppleBlox or
-					Bloxstrap Discord server from the support/mods tab.
+					If you want to add <strong>Mods</strong>, you should join the AppleBlox or Bloxstrap Discord server from the
+					support/mods tab.
 				</p>
 				<br />
 				<p>
@@ -47,7 +42,7 @@
 					and join the
 					<a href="https://appleblox.com/discord">Discord Server</a>!
 				</p>
-				<br>
+				<br />
 				<i><h3>⚠️ AppleBlox is in beta, don't expect a bug-free experience</h3></i>
 			</AlertDialog.Description>
 		</AlertDialog.Header>
@@ -71,23 +66,18 @@
 				<p>To unlock the true power of AppleBlox, you can follow these steps.</p>
 				<br />
 				<p>
-					If you want to make AppleBlox work when launching from the website, you can
-					click the "Use Roblox URL" button. If you want to disable that later, you can
-					always turn it off inside the "Misc" tab.
+					If you want to make AppleBlox work when launching from the website, you can click the "Use Roblox URL" button.
+					If you want to disable that later, you can always turn it off inside the "Misc" tab.
 				</p>
 				<br />
-				<p>
-					You should also create a launch shortcut from the button below (also possible in
-					the "Misc" tab)!
-				</p>
+				<p>You should also create a launch shortcut from the button below (also possible in the "Misc" tab)!</p>
 				<br />
 				<p>
-					If you want to use the <strong>Window Movement</strong> feature, we suggest you
-					go into <strong>System Settings → Privacy & Security → Accessibility</strong>
+					If you want to use the <strong>Window Movement</strong> feature, we suggest you go into
+					<strong>System Settings → Privacy & Security → Accessibility</strong>
 					and press the
-					<strong>+ icon</strong> to choose and add the AppleBlox app. (Note: Due to a bug,
-					you will need to remove and add the app in the permission settings every AppleBlox
-					update)
+					<strong>+ icon</strong> to choose and add the AppleBlox app. (Note: Due to a bug, you will need to remove and add
+					the app in the permission settings every AppleBlox update)
 				</p>
 				<br />
 				<p>
@@ -109,9 +99,9 @@
 				Create shortcut
 			</Button>
 			<Button
-				on:click={async() => {
-					await setValue("roblox.roblox_launching.delegate_launching",true,true)
-					toast.info("Roblox will now open AppleBlox before starting")
+				on:click={async () => {
+					await setValue('roblox.roblox_launching.delegate_launching', true, true);
+					toast.info('Roblox will now open AppleBlox before starting');
 				}}
 				variant="secondary"
 				>Use Roblox URL

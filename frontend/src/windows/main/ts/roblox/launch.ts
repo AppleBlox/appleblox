@@ -2,15 +2,14 @@ import { os, computer } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import Roblox from '.';
-import { showNotification } from '../notifications';
-import { RPCController, type RPCOptions } from '../rpc';
-import { loadSettings } from '../settings';
-import shellFS from '../shellfs';
+import { showNotification } from '../tools/notifications';
+import { RPCController, type RPCOptions } from '../tools/rpc';
+import { loadSettings } from '../../components/settings';
+import shellFS from '../tools/shellfs';
 import { curlGet, pathExists } from '../utils';
 import { sleep } from '../utils';
 import { focusWindow, setWindowVisibility } from '../window';
 import { type GameEventInfo, RobloxInstance } from './instance';
-import { getRobloxPath } from './path';
 
 export interface RobloxGame {
 	id: number;
@@ -82,9 +81,7 @@ async function onGameEvent(data: GameEventInfo) {
 				// Change the resolution to support mods
 				if (modSettings?.general.enable_mods) {
 					const maxRes = (
-						await os.execCommand(
-							`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`
-						)
+						await os.execCommand(`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`)
 					).stdOut
 						.trim()
 						.split(' ');
@@ -107,17 +104,11 @@ async function onGameEvent(data: GameEventInfo) {
 				const placeId = placeMatch[1];
 				const jobId = jobMatch ? jobMatch[0] : null;
 
-				const universeIdReq = await curlGet(
-					`https://apis.roblox.com/universes/v1/places/${placeId}/universe`
-				);
+				const universeIdReq = await curlGet(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
 				const universeId = universeIdReq.universeId;
-				console.log(
-					`Joining PlaceID: ${placeId}, UniverseID: ${universeId}, JobID: ${jobId}`
-				);
+				console.log(`Joining PlaceID: ${placeId}, UniverseID: ${universeId}, JobID: ${jobId}`);
 
-				const gameInfoReq = await curlGet(
-					`https://games.roblox.com/v1/games?universeIds=${universeId}`
-				);
+				const gameInfoReq = await curlGet(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
 				const gameInfo: RobloxGame = gameInfoReq.data[0];
 				console.log('Game Info:', gameInfo);
 
@@ -201,13 +192,11 @@ async function onGameEvent(data: GameEventInfo) {
 							if (inst.details) options.details = inst.details;
 							if (inst.state) options.state = inst.state;
 							if (inst.smallImage) {
-								if (inst.smallImage.hoverText)
-									options.smallImageText = inst.smallImage.hoverText;
+								if (inst.smallImage.hoverText) options.smallImageText = inst.smallImage.hoverText;
 								options.smallImage = `https://assetdelivery.roblox.com/v1/asset/?id=${inst.smallImage.assetId}`;
 							}
 							if (inst.largeImage) {
-								if (inst.largeImage.hoverText)
-									options.largeImage = inst.largeImage.hoverText;
+								if (inst.largeImage.hoverText) options.largeImage = inst.largeImage.hoverText;
 								options.largeImage = `https://assetdelivery.roblox.com/v1/asset/?id=${inst.largeImage.assetId}`;
 							}
 							console.log('GameMessageEntry RPC:', options);
@@ -236,10 +225,7 @@ async function onGameEvent(data: GameEventInfo) {
 											height: screenSize.height / inst.scaleHeight,
 										};
 									}
-									Roblox.Window.resize(
-										inst.width * scaling.width,
-										inst.height * scaling.height
-									);
+									Roblox.Window.resize(inst.width * scaling.width, inst.height * scaling.height);
 									break;
 								}
 								break;
@@ -276,9 +262,7 @@ export async function launchRoblox(
 	if (rbxInstance || (await os.execCommand('pgrep -f "RobloxPlayer"')).stdOut.trim().length > 2) {
 		setLaunchText('Roblox is already open');
 		setLaunchingRoblox(false);
-		toast.error(
-			'Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.'
-		);
+		toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
 		return;
 	}
 	// We use multiple functions as argument so things like launchProgress, the text to show in the UI, etc... can be read by App.svelte
@@ -304,14 +288,10 @@ export async function launchRoblox(
 			await Roblox.Mods.applyCustomFont(modSettings);
 		}
 
-		const robloxPath = getRobloxPath();
+		const robloxPath = Roblox.path
 
 		setLaunchProgress(30);
-		if (
-			await pathExists(
-				path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json')
-			)
-		) {
+		if (await pathExists(path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'))) {
 			console.log(
 				`Removing current ClientAppSettings.json file in ${path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json')}`
 			);
@@ -333,25 +313,20 @@ export async function launchRoblox(
 			path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'),
 			JSON.stringify(fflags)
 		);
-		console.log(
-			`Wrote FFlags to ${path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json')}`
-		);
+		console.log(`Wrote FFlags to ${path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json')}`);
 		setLaunchProgress(60);
 		setTimeout(async () => {
 			try {
 				if (modSettings?.general.spoof_res) {
 					const maxRes = (
-						await os.execCommand(
-							`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`
-						)
+						await os.execCommand(`system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'`)
 					).stdOut
 						.trim()
 						.split(' ');
 					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);
 					showNotification({
 						title: 'Resolution changed',
-						content:
-							"Your resolution was temporarily changed (5s) by the 'Fix Resolution' setting.",
+						content: "Your resolution was temporarily changed (5s) by the 'Fix Resolution' setting.",
 						timeout: 10,
 					});
 				}
@@ -372,9 +347,7 @@ export async function launchRoblox(
 							await Roblox.Mods.restoreRobloxFolders()
 								.catch(console.error)
 								.then(() => {
-									console.log(
-										`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`
-									);
+									console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
 								});
 						}
 						await Roblox.Mods.removeCustomFont(modSettings);
@@ -392,9 +365,7 @@ export async function launchRoblox(
 						await Roblox.Mods.restoreRobloxFolders()
 							.catch(console.error)
 							.then(() => {
-								console.log(
-									`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`
-								);
+								console.log(`Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
 							});
 					}
 				}

@@ -4,10 +4,10 @@
 	import { toast } from 'svelte-sonner';
 	import { sleep } from '../ts/utils';
 
-	import ApplebloxIcon from "@/assets/favicon.png";
+	import ApplebloxIcon from '@/assets/favicon.png';
 	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
 	import { Book, Folder } from 'lucide-svelte';
-	import shellFS from '../ts/shellfs';
+	import shellFS from '../ts/tools/shellfs';
 	import Panel from '../components/settings/panel.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import ModsUi from './Custom/ModsUI.svelte';
@@ -78,17 +78,48 @@
 		.addCategory((category) =>
 			category
 				.setName('General')
-				.setDescription('Options about Roblox mods. To install mods, simply drag the files and folder you downloaded into AppleBlox\'s mods folder. To find mods, join the Bloxstrap Discord server. DO NOT ask help about AppleBlox there')
+				.setDescription(
+					"Options about Roblox mods. To install mods, simply drag the files and folder you downloaded into AppleBlox's mods folder. To find mods, join the Bloxstrap Discord server. DO NOT ask help about AppleBlox there"
+				)
 				.setId('general')
-				.addButton({label: "Open mods folder", description: "Opens the mods folder in finder", id: "open_mods_folder", variant: "default", icon: {component: Folder}})
-				.addButton({label: "Read mods guide", description: "Adding mods in AppleBlox is the same as Bloxstrap. You just have to put in the correct AppleBlox folders", id: "mods_help", variant: "outline", icon: {component: Book}})
-				.addButton({label: "Join AppleBlox Discord server", description: "Opens the Discord server invitation link (go to the #mods channel)", id: "join_appleblox", variant: "outline", icon: {src: ApplebloxIcon}})
-				.addButton({label: "Join Bloxstrap Discord server", description: "Opens the Discord server invitation link (go to the #mods channel)", id: "join_bloxstrap", variant: "outline", icon: {src: BloxstrapIcon}})
-				.addSwitch({label: "Enable Mods", description: "Applies your mods", id: "enable_mods", default: false})
-				.addSwitch({label: "Fix resolution", description: "Maximizes the resolution when opening Roblox. This fixes some icons not appearing in some cases", id: "spoof_res", default: false})
-				.addCustom({label: "", description: "", component: ModsUi, id: "mods_ui"})
-
-
+				.addButton({
+					label: 'Open mods folder',
+					description: 'Opens the mods folder in finder',
+					id: 'open_mods_folder',
+					variant: 'default',
+					icon: { component: Folder },
+				})
+				.addButton({
+					label: 'Read mods guide',
+					description:
+						'Adding mods in AppleBlox is the same as Bloxstrap. You just have to put in the correct AppleBlox folders',
+					id: 'mods_help',
+					variant: 'outline',
+					icon: { component: Book },
+				})
+				.addButton({
+					label: 'Join AppleBlox Discord server',
+					description: 'Opens the Discord server invitation link (go to the #mods channel)',
+					id: 'join_appleblox',
+					variant: 'outline',
+					icon: { src: ApplebloxIcon },
+				})
+				.addButton({
+					label: 'Join Bloxstrap Discord server',
+					description: 'Opens the Discord server invitation link (go to the #mods channel)',
+					id: 'join_bloxstrap',
+					variant: 'outline',
+					icon: { src: BloxstrapIcon },
+				})
+				.addSwitch({ label: 'Enable Mods', description: 'Applies your mods', id: 'enable_mods', default: false })
+				.addSwitch({
+					label: 'Fix resolution',
+					description:
+						'Maximizes the resolution when opening Roblox. This fixes some icons not appearing in some cases',
+					id: 'spoof_res',
+					default: false,
+				})
+				.addCustom({ label: '', description: '', component: ModsUi, id: 'mods_ui' })
 		)
 		.build();
 

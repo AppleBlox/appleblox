@@ -88,8 +88,6 @@
 </script>
 
 <div>
-	<Panel
-		panel={devPanel}
-	/>
+	<Panel panel={devPanel} />
 	<h2>Args: "{window.NL_ARGS}"</h2>
 </div>
