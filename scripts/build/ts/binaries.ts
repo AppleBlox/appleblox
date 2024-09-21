@@ -1,7 +1,8 @@
 import { resolve } from 'node:path';
-import { createReadStream } from 'node:fs';
+import { chmodSync } from 'node:fs';
 import { Signale } from 'signale';
 import { $ } from 'bun';
+import { extract } from 'tar';
 
 const DRPC_RELEASE = 'https://github.com/AppleBlox/Discord-RPC-cli/releases/download/1.0.0/discord-rpc-cli';
 const ALERTER_RELEASE = 'https://github.com/vjeantet/alerter/releases/download/1.0.1/alerter_v1.0.1_darwin_amd64.zip';
@@ -31,14 +32,16 @@ export async function buildBinaries() {
 	await $`cp build/binaries/.temp/urlscheme build/lib/MacOS/urlscheme`;
 	await $`cp build/binaries/.temp/watchdog build/lib/MacOS/watchdog`;
 
-	if (!(await Bun.file(resolve('build/lib/MacOS/discordrpc_ablox')).exists())) {
+	const drpcPath = resolve('build/lib/MacOS/discordrpc_ablox');
+	if (!(await Bun.file(drpcPath).exists())) {
 		logger.info('Downloading DiscordRPC binary from repository releases...');
 		const file = await fetch(DRPC_RELEASE, {
 			method: 'GET',
 		})
 			.then((res) => res.blob())
 			.then((blob) => blob);
-		await Bun.write(resolve('build/lib/MacOS/discordrpc_ablox'), file);
+		await Bun.write(drpcPath, file);
+		chmodSync(drpcPath, 0o755);
 		logger.complete('Downloaded discordrpc_ablox.');
 	}
 
@@ -50,16 +53,16 @@ export async function buildBinaries() {
 			.then((res) => res.arrayBuffer())
 			.then((arrayBuffer) => Buffer.from(arrayBuffer));
 
-		const zipPath = resolve('build/binaries/.temp/alerter.zip');
+		const zipPath = resolve('build/binaries/.temp/alerter.tar.gz');
 		await Bun.write(zipPath, file);
-        await $`unzip "${zipPath}" build/lib/MacOS/`
-
-		await $`cp build/binaries/.temp/alerter build/binaries/alerter`;
+		await extract({
+			file: zipPath,
+			cwd: resolve('build/lib/MacOS/'),
+		});
+		await $`mv build/lib/MacOS/alerter build/lib/MacOS/alerter_ablox"`;
 
 		logger.complete('Downloaded alerter_ablox.');
 	}
 
 	await $`rm -rf build/binaries/.temp`;
 }
-
-buildBinaries();

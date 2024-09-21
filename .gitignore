@@ -1,5 +1,6 @@
 # Pre-built binaries
 build/lib/MacOS/discordrpc_ablox
+build/lib/MacOS/alerter
 build/lib/MacOS/urlscheme
 build/lib/MacOS/watchdog
 build/lib/MacOS/window_manager

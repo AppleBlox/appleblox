@@ -7,7 +7,7 @@
     "vite:dev": "vite",
     "dev": "bun run scripts/package/dev.ts",
     "package": "bun run scripts/build/ts/index.ts",
-    "package:release": "bun run package && bun run scripts/build/ts/dmg.ts",
+    "release": "bun run package && bun run scripts/build/ts/dmg.ts",
     "format": "prettier --write ./",
     "neu:empty": ""
   },

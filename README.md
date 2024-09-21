@@ -69,7 +69,7 @@ To start the **dev environnement**, run `bun run --bun dev`.
 
 To **package**, run `bun run --bun package`. (If you don't want to create dmgs)
 
-To **package and create a dmg of the app**, run `bun run --bun package:release`.
+To **package and create a dmg of the app**, run `bun run --bun release`.
 
 The app is made with [Svelte](https://svelte.dev) (Frontend) and [NeutralinoJS](https://neutralino.js.org) (Backend).
 If you haven't heard about NeutralinoJS, it is a lightweight alternative coded in **c++** to frameworks like Electron or NW.JS. It is still growing, but is stable enough to be used on one platform. You can learn more about it on https://neutralino.js.org/docs.
