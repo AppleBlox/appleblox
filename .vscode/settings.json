@@ -1,4 +1,3 @@
 {
 	"css.lint.unknownAtRules": "ignore",
-	"prettier.configPath": "./config/.prettierrc"
 }
