@@ -17,15 +17,9 @@ export interface EditorFlag {
 /** Function used to build the flags list */
 async function buildFlagsList(): Promise<FastFlagsList> {
 	let data = {
-		forceVulkan: ((await getValue('fastflags.graphics.fps_target')) as boolean) || 60 > 60 ? true : false,
+		forceVulkan: (await getValue<boolean>('fastflags.graphics.fps_target')) || 60 > 60,
 	};
 	const flags = new FastFlagsList()
-		.addFlag({
-			name: 'Balls',
-			flags: { aaaa: true },
-			path: 'fastflags.graphics.fps_target',
-			type: 'slider',
-		})
 		// FPS Target
 		.addFlag({
 			name: 'FPS Target',
@@ -87,11 +81,10 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'fastflags.graphics.disable_voxel_shadows',
 			type: 'switch',
 			value: async (settingValue) => {
-				return (
-					settingValue === true && ((await getValue('fastflags.graphics.lightning')) as SelectElement).value === 'voxel'
-				);
+				return settingValue === true && (await getValue<SelectElement>('fastflags.graphics.lightning')).value === 'voxel';
 			},
 		});
+		//
 
 	return flags;
 }

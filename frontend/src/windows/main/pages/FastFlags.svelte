@@ -59,8 +59,8 @@
 					},
 				})
 				.addSwitch({
-					label: 'Enable graphics quality w/ render distance',
-					description: '(Enables the option below)',
+					label: 'Enable quality w/ render distance (slider below)',
+					description: '',
 					id: 'quality_distance_toggle',
 					default: false,
 				})
