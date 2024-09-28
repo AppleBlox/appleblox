@@ -26,6 +26,10 @@
 			"extendUserAgentWith": "AppleBlox",
 			"resizable": false,
 			"center": true
+		},
+		"chrome": {
+			"width": 1150,
+			"height": 700
 		}
 	},
 	"cli": {
