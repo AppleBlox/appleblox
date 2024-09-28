@@ -107,10 +107,10 @@ let settingsCache: { [key: string]: CacheEntry } = {};
 const CACHE_LIFETIME = 10000; // Cache lifetime: 10 seconds
 
 /** Get the value of a setting */
-export async function getValue(
+export async function getValue<T>(
 	/** Path to the settings in panel.category.widget */
 	settingPath: `${string}.${string}.${string}`
-): Promise<boolean | number | string | [number] | null | SelectElement | undefined> {
+): Promise<T> {
 	const [panelId, categoryId, widgetId] = settingPath.split('.');
 
 	const now = Date.now();
@@ -133,5 +133,6 @@ export async function getValue(
 		throw new Error(`The widget '${widgetId}' doesn't exist in category '${categoryId}' of panel '${panelId}'.`);
 	}
 
-	return settings[categoryId][widgetId];
+	// Ensure the return type matches the specified generic type T
+	return settings[categoryId][widgetId] as T;
 }
