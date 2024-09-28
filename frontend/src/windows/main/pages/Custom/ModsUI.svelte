@@ -40,7 +40,7 @@
 			}
 		} catch (err) {
 			toast.error(`An error occured while enabling/disabling mod: ${err}`);
-			console.error(err);
+			console.error('[Panel.ModsUI] ', err);
 		}
 	}
 

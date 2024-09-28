@@ -1,18 +1,12 @@
 <script lang="ts">
-	import {
-		loadSettings,
-		saveSettings,
-		type Category,
-		type PanelWidget,
-		type SelectElement,
-		type SettingsOutput,
-		type SettingsPanel,
-	} from '.';
+	import { getConfigPath, loadSettings, saveSettings, type Category, type PanelWidget, type SettingsPanel } from '.';
+
+	import type { SelectElement, SettingsOutput } from './types';
 
 	import * as Card from '$lib/components/ui/card/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
 
 	import ButtonWidget from './widgets/button.svelte';
 	import FilepickerWidget from './widgets/filepicker.svelte';
@@ -21,11 +15,16 @@
 	import SliderWidget from './widgets/slider.svelte';
 	import SwitchWidget from './widgets/switch.svelte';
 
+	import path from 'path-browserify';
 	import { fade } from 'svelte/transition';
+	import ShellFS from '../../ts/tools/shellfs';
 
 	// Panel props
 	export let panel: SettingsPanel;
 	export let autosave = true;
+	export let fadeIn = true;
+	/** Don't render the panel. Only generate its settings. */
+	export let render = true;
 
 	// Load settings
 	let settingsLoaded = false;
@@ -123,6 +122,13 @@
 		// Show the page
 		settingsLoaded = true;
 		dispatch('loaded', { settings });
+
+		// Generate config files if the panel hasn't been generated yet and it's set to not render
+		const panelExists = await ShellFS.exists(path.join(await getConfigPath(), `${panel.id}.json`));
+		if (!render && !panelExists) {
+			console.info(`[Panel] Generated config file for "${panel.id}"`);
+			updateSettings();
+		}
 	})();
 
 	/** Saves the new settings */
@@ -152,137 +158,139 @@
 	}
 </script>
 
-{#if settingsLoaded}
-	<div transition:fade={{ duration: 200 }}>
-		<Card.Root class="font-mono grid grid-cols-1 h-full text-start m-3 p-5">
-			<div>
-				<!-- Title + Description -->
-				<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
-				<p class="text-[13px] text-neutral-700 dark:text-neutral-300">
-					{@html panel.description}
-				</p>
-				<!-- Categories -->
-				{#each panel.categories || [] as category (category.id)}
-					<div class="mt-5">
-						<!-- Category Description -->
-						<p class="text-xl font-bold text-red-600 dark:text-red-400">{category.name}</p>
-						<p class="text-[13px] text-black dark:text-neutral-50">{category.description}</p>
-						{#each category.widgets || [] as widget (widget.id)}
-							<!-- Separator for the widgets (except button) -->
-							{#if widget.options.type !== 'button'}
-								<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
-							{/if}
-							<!-- Disable the widget if the button it is linked to is disabled -->
-							<div
-								class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-60 select-one pointer-events-none'}`}
-							>
-								<!-- Description of the widget (except button) -->
+{#if render}
+	{#if settingsLoaded}
+		<div transition:fade={{ duration: fadeIn ? 200 : 0 }}>
+			<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-3 mt-3 p-5">
+				<div>
+					<!-- Title + Description -->
+					<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
+					<p class="text-[13px] text-neutral-700 dark:text-neutral-300">
+						{@html panel.description}
+					</p>
+					<!-- Categories -->
+					{#each panel.categories || [] as category (category.id)}
+						<div class="mt-5">
+							<!-- Category Description -->
+							<p class="text-xl font-bold text-red-600 dark:text-red-400">{category.name}</p>
+							<p class="text-[13px] text-primary-foreground font-semibold">{category.description}</p>
+							{#each category.widgets || [] as widget (widget.id)}
+								<!-- Separator for the widgets (except button) -->
 								{#if widget.options.type !== 'button'}
-									<div class={widget.options.type === 'slider' ? 'w-[500px]' : ''}>
-										<p class="font-semibold text-[#1f1717] dark:text-red-100">
-											{widget.label}
-										</p>
-										<p class="text-[13px] text-neutral-700 dark:text-neutral-200">
-											{@html widget.description}
-										</p>
-									</div>
+									<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
 								{/if}
+								<!-- Disable the widget if the button it is linked to is disabled -->
+								<div
+									class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-60 select-one pointer-events-none'}`}
+								>
+									<!-- Description of the widget (except button) -->
+									{#if widget.options.type !== 'button'}
+										<div class={widget.options.type === 'slider' ? 'w-[500px]' : ''}>
+											<p class="font-bold text-foreground">
+												{widget.label}
+											</p>
+											<p class="text-[13px] text-foreground opacity-85">
+												{@html widget.description}
+											</p>
+										</div>
+									{/if}
 
-								<!-- Button widget -->
-								{#if widget.options.type == 'button'}
-									<ButtonWidget
-										label={widget.label}
-										description={widget.description}
-										variant={widget.options.variant}
-										icon={widget.options.icon || null}
-										on:click={() => {
-											dispatch('button', { id: widget.id });
-										}}
-									/>
-									<!-- Switch Widget -->
-								{:else if widget.options.type === 'switch'}
-									<SwitchWidget
-										defaultValue={settings[category.id][widget.id]}
-										on:clicked={(e) => {
-											const { state } = e.detail;
-											settings[category.id][widget.id] = state;
-											dispatch('switch', { id: widget.id, state });
-											updateSettings();
-										}}
-									/>
-									<!-- Input widget -->
-								{:else if widget.options.type === 'input'}
-									<div class="flex flex-1 justify-end">
-										<InputWidget
+									<!-- Button widget -->
+									{#if widget.options.type == 'button'}
+										<ButtonWidget
+											label={widget.label}
+											description={widget.description}
+											variant={widget.options.variant}
+											icon={widget.options.icon || null}
+											on:click={() => {
+												dispatch('button', { id: widget.id });
+											}}
+										/>
+										<!-- Switch Widget -->
+									{:else if widget.options.type === 'switch'}
+										<SwitchWidget
 											defaultValue={settings[category.id][widget.id]}
-											placeholder={widget.options.default}
-											whitelist={widget.options.whitelist}
-											blacklist={widget.options.blacklist}
-											on:inputChanged={(e) => {
-												const { input } = e.detail;
-												settings[category.id][widget.id] = input;
-												dispatch('input', { input });
+											on:clicked={(e) => {
+												const { state } = e.detail;
+												settings[category.id][widget.id] = state;
+												dispatch('switch', { id: widget.id, state });
 												updateSettings();
 											}}
 										/>
-									</div>
-									<!-- Filepicker widget -->
-								{:else if widget.options.type === 'filepicker'}
-									<FilepickerWidget
-										file={settings[category.id][widget.id]}
-										extensions={widget.options.extensions || null}
-										on:fileChosen={(e) => {
-											const filePath = e.detail.path;
-											settings[category.id][widget.id] = filePath;
-											dispatch('fileChosen', { id: widget.id, file: filePath });
-											updateSettings();
-										}}
-										on:fileRemoved={() => {
-											settings[category.id][widget.id] = null;
-											dispatch('fileRemoved');
-											updateSettings();
-										}}
-									/>
-									<!-- Dropdown Widget -->
-								{:else if widget.options.type === 'select'}
-									<SelectWidget
-										items={widget.options.items}
-										defaultItem={settings[category.id][widget.id]}
-										on:itemSelected={(e) => {
-											const { item } = e.detail;
-											settings[category.id][widget.id] = item;
-											dispatch('selected', { id: widget.id, item });
-											updateSettings();
-										}}
-									/>
-									<!-- Slider widget -->
-								{:else if widget.options.type === 'slider'}
-									<SliderWidget
-										placeholderValue={widget.options.default}
-										defaultValue={settings[category.id][widget.id]}
-										max={widget.options.max}
-										min={widget.options.min}
-										step={widget.options.step}
-										on:changed={(e) => {
-											const { value } = e.detail;
-											settings[category.id][widget.id] = value;
-											dispatch('slider', { id: widget.id, value });
-											updateSettings();
-										}}
-									/>
-									<!-- Custom widgets (Double Buttons & ModsUI) -->
-								{:else if widget.options.type === 'custom'}
-									<svelte:component this={widget.options.component} />
-								{/if}
-							</div>
-						{/each}
-					</div>
-				{/each}
-			</div>
-		</Card.Root>
-	</div>
-{:else}
-	<div class="flex h-[100vh] w-full opacity-30 items-center justify-center">
-		<LoadingSpinner />
-	</div>
+										<!-- Input widget -->
+									{:else if widget.options.type === 'input'}
+										<div class="flex flex-1 justify-end">
+											<InputWidget
+												defaultValue={settings[category.id][widget.id]}
+												placeholder={widget.options.default}
+												whitelist={widget.options.whitelist}
+												blacklist={widget.options.blacklist}
+												on:inputChanged={(e) => {
+													const { input } = e.detail;
+													settings[category.id][widget.id] = input;
+													dispatch('input', { input });
+													updateSettings();
+												}}
+											/>
+										</div>
+										<!-- Filepicker widget -->
+									{:else if widget.options.type === 'filepicker'}
+										<FilepickerWidget
+											file={settings[category.id][widget.id]}
+											extensions={widget.options.extensions || null}
+											on:fileChosen={(e) => {
+												const filePath = e.detail.path;
+												settings[category.id][widget.id] = filePath;
+												dispatch('fileChosen', { id: widget.id, file: filePath });
+												updateSettings();
+											}}
+											on:fileRemoved={() => {
+												settings[category.id][widget.id] = null;
+												dispatch('fileRemoved');
+												updateSettings();
+											}}
+										/>
+										<!-- Dropdown Widget -->
+									{:else if widget.options.type === 'select'}
+										<SelectWidget
+											items={widget.options.items}
+											defaultItem={settings[category.id][widget.id]}
+											on:itemSelected={(e) => {
+												const { item } = e.detail;
+												settings[category.id][widget.id] = item;
+												dispatch('selected', { id: widget.id, item });
+												updateSettings();
+											}}
+										/>
+										<!-- Slider widget -->
+									{:else if widget.options.type === 'slider'}
+										<SliderWidget
+											placeholderValue={widget.options.default}
+											defaultValue={settings[category.id][widget.id]}
+											max={widget.options.max}
+											min={widget.options.min}
+											step={widget.options.step}
+											on:changed={(e) => {
+												const { value } = e.detail;
+												settings[category.id][widget.id] = value;
+												dispatch('slider', { id: widget.id, value });
+												updateSettings();
+											}}
+										/>
+										<!-- Custom widgets (Double Buttons & ModsUI) -->
+									{:else if widget.options.type === 'custom'}
+										<svelte:component this={widget.options.component} />
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/each}
+				</div>
+			</Card.Root>
+		</div>
+	{:else}
+		<div class="flex h-[100vh] w-full opacity-30 items-center justify-center">
+			<LoadingSpinner />
+		</div>
+	{/if}
 {/if}

@@ -1,12 +1,11 @@
 import AppIcon from '@/assets/play.icns';
 import { sleep } from '@/windows/main/ts/utils';
-import { os, filesystem } from '@neutralinojs/lib';
+import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
-import { libraryPath } from '../libraries';
-import { getConfigPath, loadSettings } from '../../components/settings';
-import { pathExists } from '../utils';
 import Roblox from '.';
+import { libraryPath } from '../libraries';
+import { pathExists } from '../utils';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
@@ -40,32 +39,29 @@ END`);
 			if (!(await RobloxUtils.hasRoblox())) return;
 			if (await RobloxUtils.isRobloxOpen()) {
 				toast.info('Closing Roblox...', { duration: 1000 });
-				console.log('Closing Roblox');
-				const robloxKill = await os.execCommand('pkill -9 Roblox');
-				console.log(robloxKill);
-
+				console.info('[Roblox.Utils] Closing Roblox...');
+				await os.execCommand('pkill -9 Roblox');
 				await sleep(2000);
 			}
 
 			toast.info('Opening Roblox...', { duration: 1000 });
-			console.log('Opening Roblox');
+			console.info('[Roblox.Utils] Opening Roblox...');
 			await os.execCommand(`open "${Roblox.path}"`, { background: true });
 
 			await sleep(1000);
 
 			toast.info('Terminating all processes...', { duration: 1000 });
-			console.log('Terminating all Roblox processes');
+			console.info('[Roblox.Utils] Terminating all Roblox processes...');
 			const result = await os.execCommand("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs");
-			console.log(result);
+			console.info('[Roblox.Utils] Termination result: ', result);
 			const processes = result.stdOut.trim().split(' ');
 			for (const proc of processes) {
-				console.log(`Terminating Roblox Process (PID: ${proc})`);
+				console.info(`[Roblox.Utils] Terminating Roblox Process (PID: ${proc})`);
 
 				try {
-					const cmd = await os.execCommand(`kill -9 ${proc}`);
-					console.log(cmd);
+					await os.execCommand(`kill -9 ${proc}`);
 				} catch (err) {
-					console.error(`Error terminating process ${proc}: ${err}`);
+					console.error(`[Roblox.Utils] Error terminating process ${proc}: ${err}`);
 					toast.error(`Error terminating process ${proc}: ${err}`);
 				}
 			}
@@ -73,7 +69,7 @@ END`);
 			toast.success('Multi-instance should now be working!');
 		} catch (err) {
 			toast.error('An error occured while enabling MultiInstance');
-			console.error('An error occured while enabling MultiInstance');
+			console.error('[Roblox.Utils] An error occured while enabling MultiInstance');
 			console.error(err);
 		}
 	}

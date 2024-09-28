@@ -25,10 +25,6 @@
 			"@root/*": ["./*"]
 		}
 	},
-	"include": [
-		"frontend/src/**/*.ts",
-		"frontend/src/**/*.js",
-		"frontend/src/**/*.svelte",
-	],
+	"include": ["frontend/src/**/*.ts", "frontend/src/**/*.js", "frontend/src/**/*.svelte"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

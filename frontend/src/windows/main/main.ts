@@ -1,11 +1,11 @@
 // Init imports
 import './app.css';
-import './ts/window';
-import './ts/roblox';
 import './ts/debugging';
+import './ts/roblox';
+import './ts/window';
 
 // Imports
-import { events, os, init, app as neuApp } from '@neutralinojs/lib';
+import { events, init, app as neuApp, os } from '@neutralinojs/lib';
 import { version } from '../../../../package.json';
 import App from './App.svelte';
 import { RPCController } from './ts/tools/rpc';
@@ -15,7 +15,7 @@ import { AbloxWatchdog } from './ts/watchdog';
 init();
 
 async function quit() {
-	console.log('Exiting app');
+	console.info('[Main] Exiting app');
 	await RPCController.stop();
 	await neuApp.exit();
 }
@@ -23,17 +23,16 @@ async function quit() {
 // When NeutralinoJS is ready:
 events.on('ready', async () => {
 	setTimeout(async () => {
-		console.log('\n');
-		console.log('===========');
-		console.log(`AppleBlox v${version}`);
-		console.log(`Current Time: ${new Date().toLocaleString()}`);
-		console.log(`NeutralinoJS Version: ${window.NL_VERSION}`);
-		console.log(`${(await os.execCommand('uname -a')).stdOut.trim()}`);
-		console.log('===========');
+		console.info(`[Main] AppleBlox v${version}`);
+		console.info(`[Main] Current Time: ${new Date().toLocaleString()}`);
+		console.info(`[Main] NeutralinoJS Version: ${window.NL_VERSION}`);
+		console.info(`[Main] ${(await os.execCommand('uname -a')).stdOut.trim()}`);
 
 		/** Launch the process manager */
 		const watchdog = new AbloxWatchdog();
-		watchdog.start().catch(console.error);
+		watchdog.start().catch((err) => {
+			console.error('[Watchdog] ', err);
+		});
 	}, 500);
 });
 

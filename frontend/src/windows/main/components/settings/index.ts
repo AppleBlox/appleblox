@@ -1,15 +1,8 @@
 import { type ComponentType, SvelteComponent } from 'svelte';
-import { loadSettings, saveSettings, setValue, getConfigPath } from './files';
+import { getConfigPath, getValue, loadSettings, saveSettings, setValue } from './files';
+import type { SelectElement } from './types';
 
-export { loadSettings, saveSettings, setValue, getConfigPath };
-
-/** Element to display inside a select */
-export interface SelectElement {
-	/** Label that shows as the element */
-	label: string;
-	/** Value set when choosing the element */
-	value: string;
-}
+export { getConfigPath, getValue, loadSettings, saveSettings, setValue };
 
 /** Icon to display inside the button */
 export type ButtonIcon =
@@ -259,7 +252,11 @@ class CategoryBuilder {
 			description: params.description,
 			id: params.id,
 			toggleable: params.toggleable,
-			options: { type: 'filepicker', extensions: params.accept, default: params.default },
+			options: {
+				type: 'filepicker',
+				extensions: params.accept,
+				default: params.default,
+			},
 		};
 		this.category.widgets.push(widget);
 		return this;
@@ -285,10 +282,12 @@ class CategoryBuilder {
 	}
 
 	addSlider(
-		params: { label: string; description: string; id: string; toggleable?: ToggleableOption } & Omit<
-			Extract<WidgetOptions, { type: 'slider' }>,
-			'type'
-		>
+		params: {
+			label: string;
+			description: string;
+			id: string;
+			toggleable?: ToggleableOption;
+		} & Omit<Extract<WidgetOptions, { type: 'slider' }>, 'type'>
 	) {
 		const widget: PanelWidget = {
 			label: params.label,
@@ -380,10 +379,4 @@ export class SettingsPanelBuilder {
 	build(): SettingsPanel {
 		return this.data;
 	}
-}
-
-export interface SettingsOutput {
-	[key: string]: {
-		[key: string]: number | string | boolean | [number] | null | { label: string; value: string };
-	};
 }

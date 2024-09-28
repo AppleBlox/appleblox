@@ -1,5 +1,5 @@
 // Set up keyboard shortcuts and add extra commands to neutralino
-import { events, os, app } from '@neutralinojs/lib';
+import { events, os } from '@neutralinojs/lib';
 import { getMode } from './utils';
 
 import hotkeys from 'hotkeys-js';

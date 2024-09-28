@@ -8,6 +8,8 @@
 	import Panel from '../components/settings/panel.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 
+	export let render = true;
+
 	let closeRobloxPopup = false;
 
 	async function buttonClicked(e: CustomEvent) {
@@ -26,7 +28,7 @@
 				try {
 					await Roblox.Utils.createShortcut();
 				} catch (err) {
-					console.error(err);
+					console.error('[RobloxPanel] ', err);
 					toast.error('An error occured while trying to save the shortcut', {
 						duration: 2000,
 					});
@@ -37,7 +39,7 @@
 				try {
 					await Roblox.FFlags.writeClientAppSettings();
 				} catch (err) {
-					console.error(err);
+					console.error('[RobloxPanel] ', err);
 					toast.error('An error occured while writing ClientAppSettings.json');
 				}
 				break;
@@ -50,7 +52,7 @@
 			case 'redirect_appleblox':
 				Roblox.Utils.toggleURI(state).catch((err) => {
 					toast.error('An error occured');
-					console.error(err);
+					console.error('[RobloxPanel] ', err);
 				});
 		}
 	}
@@ -91,13 +93,6 @@
 				.setName('Launching')
 				.setDescription('Launching phase settings')
 				.setId('roblox_launching')
-				.addSwitch({
-					label: 'Delegate launching to AppleBlox',
-					description:
-						'When you launch Roblox, AppleBlox will open first in the background and apply the chosen settings',
-					id: 'delegate_launching',
-					default: false,
-				})
 				.addButton({
 					label: 'Create a launch shortcut',
 					description:
@@ -113,6 +108,13 @@
 					id: 'write_clientappsettings_btn',
 					variant: 'outline',
 					icon: { component: Braces },
+				})
+				.addSwitch({
+					label: 'Delegate launching to AppleBlox',
+					description:
+						'When you launch Roblox, AppleBlox will open first in the background and apply the chosen settings',
+					id: 'delegate_launching',
+					default: false,
 				})
 		)
 		.build();
@@ -136,4 +138,4 @@
 	</AlertDialog.Content>
 </AlertDialog.Root>
 
-<Panel {panel} on:switch={switchClicked} on:button={buttonClicked} />
+<Panel {panel} on:switch={switchClicked} on:button={buttonClicked} {render} />

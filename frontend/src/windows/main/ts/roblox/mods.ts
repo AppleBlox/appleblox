@@ -1,17 +1,20 @@
-import { os, filesystem } from '@neutralinojs/lib';
+import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
+import Roblox from '.';
+import { getValue } from '../../components/settings';
 import { showNotification } from '../tools/notifications';
 import shellFS from '../tools/shellfs';
 import { pathExists, sleep } from '../utils';
-import Roblox from '.';
 
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
 	static async loadMods(): Promise<{ filename: string; path: string; state: boolean }[]> {
 		const modsFolder = path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/mods');
 		if (!(await pathExists(modsFolder))) return [];
-		const entries = await filesystem.readDirectory(modsFolder, { recursive: false });
+		const entries = await filesystem.readDirectory(modsFolder, {
+			recursive: false,
+		});
 		const mods = entries.filter((entry) => entry.type === 'DIRECTORY');
 		return mods
 			.map((mod) => ({
@@ -32,12 +35,12 @@ export class RobloxMods {
 		// Backup, and don't overwrite previous backups (if the previous backup is still here, that means AppleBlox didn't have the chance to restore it last run)
 		const resBackupFolder = path.join(Roblox.path, 'Contents/.abloxk');
 		if (!(await pathExists(resBackupFolder))) {
-			console.log('Backing up Resources folder');
+			console.info('[Mods] Backing up Resources folder');
 			await shellFS.copy(resourcesFolder, path.join(Roblox.path, 'Contents/.abloxk'), true);
 		}
 
 		for (const mod of mods) {
-			console.log(`Adding mod "${mod.path}"`);
+			console.info(`[Mods] Adding mod "${mod.path}"`);
 			const subs = (await filesystem.readDirectory(mod.path, { recursive: false })).filter((s) => s.entry !== '.DS_Store');
 			for (const sub of subs) {
 				// Merge mod subfolder with roblox files
@@ -75,24 +78,25 @@ export class RobloxMods {
 	}
 
 	/** Applies the custom font */
-	static async applyCustomFont(modsSettings: { [key: string]: any }) {
+	static async applyCustomFont() {
 		// Exit if set to null
-		if (!modsSettings.builtin.custom_font) return;
+		const fontValue = (await getValue('mods.builtin.custom_font')) as string | null;
+		if (!fontValue) return;
 
-		console.log('Applying custom font');
+		console.info('[Mods] Applying custom font...');
 
-		const fontExt = path.extname(modsSettings.builtin.custom_font);
+		const fontExt = path.extname(fontValue);
 		const fontPath = path.join(
 			await os.getEnv('HOME'),
 			`Library/Application Support/AppleBlox/.cache/fonts/CustomFont${fontExt}`
 		);
 		if (!(await pathExists(fontPath))) {
-			console.error('Could not find the path to the custom font file.');
+			console.error('[Mods] Could not find the path to the custom font file.');
 			return;
 		}
 		const robloxFontsPath = path.join(Roblox.path, 'Contents/Resources/content/fonts');
 		if (!(await pathExists(robloxFontsPath))) {
-			console.error('Could not find the roblox fonts folder.');
+			console.error('[Mods] Could not find the roblox fonts folder.');
 			return;
 		}
 		const fontFamiliesPath = path.join(robloxFontsPath, 'families');
@@ -117,21 +121,20 @@ export class RobloxMods {
 				}
 				await filesystem.writeFile(file.path, JSON.stringify(jsonContent));
 			} catch (err) {
-				console.error(`Error when applying custom font to: "${file.path}"`);
+				console.error(`[Mods] Error when applying custom font to: "${file.path}"`);
 			}
 		}
 
-		console.log('Added custom font');
+		console.info('[Mods] Added custom font');
 	}
 
 	/** Removes the custom font */
-	static async removeCustomFont(modsSettings: { [key: string]: any }) {
+	static async removeCustomFont() {
 		// Exit if set to null
-		if (!modsSettings.builtin.custom_font) return;
+		const fontValue = (await getValue('mods.builtin.custom_font')) as string | null;
+		if (!fontValue) return;
 
-		console.log('Removing custom font');
-
-		const fontExt = path.extname(modsSettings.builtin.custom_font);
+		const fontExt = path.extname(fontValue);
 		const fontsFolderPath = path.join(Roblox.path, 'Contents/Resources/content/fonts');
 		const customFontPath = path.join(Roblox.path, fontsFolderPath, `CustomFont${fontExt}`);
 		const familiesPath = path.join(Roblox.path, fontsFolderPath, 'families');
@@ -141,6 +144,6 @@ export class RobloxMods {
 		await shellFS.remove(familiesPath);
 		await shellFS.copy(cacheDir, fontsFolderPath, true);
 
-		console.log('Removed custom font');
+		console.info('[Mods] Removed custom font');
 	}
 }

@@ -1,5 +1,5 @@
 // This code will watch appleblox's binaries and kill them if the app is closed
-import { os, filesystem } from '@neutralinojs/lib';
+import { filesystem, os } from '@neutralinojs/lib';
 import { libraryPath } from './libraries';
 
 export class AbloxWatchdog {
@@ -19,16 +19,16 @@ export class AbloxWatchdog {
 				.then(() => true)
 				.catch(() => false);
 			if (!pidFileExists) {
-				console.log('Watchdog was already running. Using existing instance.');
+				console.info('[Watchdog] Watchdog was already running. Using existing instance.');
 				this.watchdogProcess = null;
 			} else {
-				console.log('Watchdog started with PID:', this.watchdogProcess.pid);
+				console.info('[Watchdog] Watchdog started with PID:', this.watchdogProcess.pid);
 			}
 
 			// Start sending heartbeats
 			this.startHeartbeat();
 		} catch (error) {
-			console.error('Failed to start watchdog:', error);
+			console.error('[Watchdog] Failed to start watchdog:', error);
 		}
 	}
 
@@ -44,7 +44,7 @@ export class AbloxWatchdog {
 			const currentTime = Date.now().toString();
 			await filesystem.writeFile('/tmp/ablox_heartbeat', currentTime);
 		} catch (error) {
-			console.error('Failed to send heartbeat:', error);
+			console.error('[Watchdog] Failed to send heartbeat:', error);
 		}
 	}
 
@@ -56,7 +56,7 @@ export class AbloxWatchdog {
 
 		// The watchdog script will exit on its own after not receiving heartbeats
 		this.watchdogProcess = null;
-		console.log('Watchdog stopped');
+		console.info('[Watchdog] Watchdog stopped');
 	}
 
 	async restart() {

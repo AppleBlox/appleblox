@@ -24,7 +24,7 @@
 	import LinkBtn from './LinkBtn.svelte';
 	import SidebarBtn from './SidebarBtn.svelte';
 
-	export const isLaunched: boolean = false;
+	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
 	export let id: string;
 
@@ -49,7 +49,7 @@
 		{ label: 'FastFlags', id: 'fastflags', icon: FastFlagsIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
-		{ label: 'Support', id: 'support', icon: CreditsIcon },
+		{ label: 'Info', id: 'info', icon: CreditsIcon },
 	];
 
 	// App mode check (add 'Dev' sidebar button)
@@ -60,13 +60,13 @@
 	}
 	(async () => {
 		if (await pathExists(path.join(await os.getEnv('HOME'), 'adevmode'))) {
-			console.log('App is in developpement mode.');
+			console.debug('[App] Running in "development" mode');
 			if (!isDevBtnAdded) {
 				sidebarBtns.push({ label: 'Dev', id: 'dev', icon: '' });
 				isDevBtnAdded = true;
 			}
 		} else {
-			console.log('App is in production mode.');
+			console.debug('[App] Running in "production" mode');
 		}
 	})();
 
@@ -94,14 +94,16 @@
 </script>
 
 <div class="h-full bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col" {id}>
-	<div class="flex flex-col flex-grow">
+	<div class="flex flex-col">
 		<a
 			href="https://github.com/AppleBlox/appleblox"
 			class="flex items-center justify-center mt-3"
 			target="_blank"
 			rel="noreferrer"
 			on:click={() => {
-				os.open('https://github.com/AppleBlox/appleblox').catch(console.error);
+				os.open('https://github.com/AppleBlox/appleblox').catch((err) => {
+					console.error('[UI.Sidebar] ', err);
+				});
 			}}
 		>
 			<p class="text-primary font-bold font-mono text-2xl">AppleBlox</p>
@@ -109,9 +111,16 @@
 		<div class="my-3 mx-3">
 			<Separator />
 		</div>
-		<div class="flex flex-col items-center flex-grow px-10">
-			{#each sidebarBtns as { label, id, icon }}
-				<SidebarBtn bind:currentPage {label} {id} {icon} on:sidebarClick={sidebarItemClicked} />
+		<div class="flex flex-col justify-start items-start flex-grow w-full">
+			{#each sidebarBtns as { label, id, icon }, index}
+				<SidebarBtn
+					position={{ total: sidebarBtns.length, index }}
+					bind:currentPage
+					{label}
+					{id}
+					{icon}
+					on:sidebarClick={sidebarItemClicked}
+				/>
 			{/each}
 		</div>
 	</div>

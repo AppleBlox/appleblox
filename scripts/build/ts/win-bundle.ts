@@ -1,12 +1,12 @@
 // THIS FILE IS IN BETA. PLEASE TELL ME IF ANYTHING LOOKS STRANGE
-import { resolve } from "node:path"
-import { existsSync } from "node:fs"
 import BuildConfig from '@root/build.config';
 import neuConfig from '@root/neutralino.config.json';
 import packageJson from '@root/package.json';
+import { $ } from 'bun';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Data, NtExecutable, NtExecutableResource, Resource } from 'resedit';
 import { Signale } from 'signale';
-import { $ } from "bun";
 
 export async function winBuild() {
 	const logger = new Signale();
@@ -38,11 +38,11 @@ export async function winBuild() {
 			return;
 		}
 
-		const data = await Bun.file(executable).bytes()
+		const data = await Bun.file(executable).bytes();
 		const exe = NtExecutable.from(data);
 		const res = NtExecutableResource.from(exe);
 
-		const iconData = await Bun.file(BuildConfig.win.appIcon).bytes()
+		const iconData = await Bun.file(BuildConfig.win.appIcon).bytes();
 		const iconFile = Data.IconFile.from(iconData);
 		Resource.IconGroupEntry.replaceIconsForResource(
 			res.entries,
@@ -67,7 +67,7 @@ export async function winBuild() {
 
 		// Embed Resources.neu and config
 		if (BuildConfig.win.embedResources) {
-			const resourcesContent = await Bun.file(neuResources).arrayBuffer()
+			const resourcesContent = await Bun.file(neuResources).arrayBuffer();
 			// @ts-expect-error
 			res.entries.push({
 				type: 10,
@@ -78,7 +78,7 @@ export async function winBuild() {
 		}
 
 		res.outputResource(exe);
-		await Bun.write(resolve(appDist, `${BuildConfig.appName}.exe`),Buffer.from(exe.generate()))
+		await Bun.write(resolve(appDist, `${BuildConfig.appName}.exe`), Buffer.from(exe.generate()));
 		l.complete(
 			`win_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s ${BuildConfig.win.embedResources ? '(Embeded Resources)' : ''}`
 		);

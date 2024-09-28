@@ -1,11 +1,11 @@
 // THIS FILE IS IN BETA. PLEASE TELL ME IF ANYTHING LOOKS STRANGE
-import { resolve, join } from 'node:path';
-import { existsSync } from 'node:fs';
 import BuildConfig from '@root/build.config';
 import neuConfig from '@root/neutralino.config.json';
+import { $ } from 'bun';
+import { existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 import { c } from 'tar';
-import { $ } from 'bun';
 
 export async function linuxBuild() {
 	const logger = new Signale();
@@ -55,25 +55,32 @@ export async function linuxBuild() {
 			.replaceAll('{APP_PATH}', BuildConfig.linux.appPath)
 			.replaceAll('{APP_ICON_PATH}', join(BuildConfig.linux.appPath, 'appIcon.png'))
 			.replaceAll('{APP_EXEC}', join(BuildConfig.linux.appPath, 'neu_main'));
-		await Bun.write(DesktopFile,DesktopTemplate)
+		await Bun.write(DesktopFile, DesktopTemplate);
 
 		// Resources
-		await $`cp "${neuResources}" "${resolve(zipDir, 'resources.neu')}"`
-		await $`cp "${BuildConfig.linux.appIcon}" "${resolve(zipDir, 'appIcon.png')}"`
-		await $`cp "${resolve('./neutralino.config.json')}" "${resolve(zipDir, 'neutralino.config.json')}"`
+		await $`cp "${neuResources}" "${resolve(zipDir, 'resources.neu')}"`;
+		await $`cp "${BuildConfig.linux.appIcon}" "${resolve(zipDir, 'appIcon.png')}"`;
+		await $`cp "${resolve('./neutralino.config.json')}" "${resolve(zipDir, 'neutralino.config.json')}"`;
 
 		// Libraries
 		if (existsSync(Libraries)) {
-			await $`cp -r "${Libraries}" "${zipDir}"`
+			await $`cp -r "${Libraries}" "${zipDir}"`;
 		}
 
 		// Executables
 
-		await $`cp "${executable}" "${resolve(zipDir, 'neu_main')}"`
+		await $`cp "${executable}" "${resolve(zipDir, 'neu_main')}"`;
 
 		// Zip
-		await c({ gzip: true, file: join(appDist, `${BuildConfig.appName}.tgz`), cwd: zipDir }, ['.']);
-		await $`rm -rf "${zipDir}"`
+		await c(
+			{
+				gzip: true,
+				file: join(appDist, `${BuildConfig.appName}.tgz`),
+				cwd: zipDir,
+			},
+			['.']
+		);
+		await $`rm -rf "${zipDir}"`;
 
 		l.complete(`linux_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 		console.log('');

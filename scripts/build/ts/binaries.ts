@@ -1,7 +1,7 @@
-import { resolve } from 'node:path';
-import { chmodSync } from 'node:fs';
-import { Signale } from 'signale';
 import { $ } from 'bun';
+import { chmodSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { Signale } from 'signale';
 import { extract } from 'tar';
 
 const DRPC_RELEASE = 'https://github.com/AppleBlox/Discord-RPC-cli/releases/download/1.0.0/discord-rpc-cli';

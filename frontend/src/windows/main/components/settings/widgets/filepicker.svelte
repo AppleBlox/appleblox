@@ -29,7 +29,7 @@
 				dispatch('fileChosen', { path: entries[0] });
 			}
 		} catch (err) {
-			console.error(err);
+			console.error('[Panel.filepicker] ', err);
 			toast.error(String(err));
 		}
 	}

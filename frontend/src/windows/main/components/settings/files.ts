@@ -1,6 +1,7 @@
-import { os, filesystem } from '@neutralinojs/lib';
+import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { pathExists } from '../../ts/utils';
+import type { SelectElement, SettingsOutput } from './types';
 
 export async function getConfigPath(): Promise<string> {
 	return path.join(await os.getPath('data'), 'AppleBlox', 'config');
@@ -13,7 +14,9 @@ if (!hasInterval) {
 	hasInterval = true;
 	setInterval(() => {
 		for (const [path, data] of Object.entries(saveQueue)) {
-			filesystem.writeFile(path, data).catch(console.error);
+			filesystem.writeFile(path, data).catch((err) => {
+				console.error('[Settings] ', err);
+			});
 			delete saveQueue[path];
 		}
 	}, 1000);
@@ -46,7 +49,7 @@ export async function saveSettings(panelId: string, data: Object): Promise<void>
 			}
 			saveQueue[`${savePath}/${panelId}.json`] = JSON.stringify(data);
 		} catch (err) {
-			console.error(err);
+			console.error('[Settings] ', err);
 		}
 	} catch (err) {
 		throw err;
@@ -62,11 +65,11 @@ export async function loadSettings(panelId: string): Promise<{ [key: string]: an
 		}
 		return JSON.parse(await filesystem.readFile(filepath));
 	} catch (err) {
-		console.error(err);
+		console.error('[Settings] ', err);
 	}
 }
 
-/** Set a specific value of a setting */
+/** Set the value of a setting */
 export async function setValue(settingPath: `${string}.${string}.${string}`, value: any, createNew = false) {
 	const paths = settingPath.split('.');
 	const panelId = paths[0];
@@ -92,4 +95,43 @@ export async function setValue(settingPath: `${string}.${string}.${string}`, val
 	}
 	settings[categoryId][widgetId] = value;
 	await saveSettings(panelId, settings);
+}
+
+interface CacheEntry {
+	data: SettingsOutput;
+	timestamp: number;
+}
+
+let settingsCache: { [key: string]: CacheEntry } = {};
+
+const CACHE_LIFETIME = 10000; // Cache lifetime: 10 seconds
+
+/** Get the value of a setting */
+export async function getValue(
+	/** Path to the settings in panel.category.widget */
+	settingPath: `${string}.${string}.${string}`
+): Promise<boolean | number | string | [number] | null | SelectElement | undefined> {
+	const [panelId, categoryId, widgetId] = settingPath.split('.');
+
+	const now = Date.now();
+	if (!settingsCache[panelId] || now - settingsCache[panelId].timestamp > CACHE_LIFETIME) {
+		const loadedSettings = await loadSettings(panelId);
+		if (loadedSettings) {
+			settingsCache[panelId] = { data: loadedSettings, timestamp: now };
+		} else {
+			throw new Error(`Failed to load settings for panel '${panelId}'.`);
+		}
+	}
+
+	const settings = settingsCache[panelId].data;
+
+	if (!settings[categoryId]) {
+		throw new Error(`The category '${categoryId}' doesn't exist in panel '${panelId}'.`);
+	}
+
+	if (!(widgetId in settings[categoryId])) {
+		throw new Error(`The widget '${widgetId}' doesn't exist in category '${categoryId}' of panel '${panelId}'.`);
+	}
+
+	return settings[categoryId][widgetId];
 }

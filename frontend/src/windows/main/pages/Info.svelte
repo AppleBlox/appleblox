@@ -4,6 +4,8 @@
 	import Panel from '../components/settings/panel.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 
+	export let render = true;
+
 	function onButtonClicked(e: CustomEvent) {
 		const { id } = e.detail;
 		switch (id) {
@@ -22,7 +24,7 @@
 
 	const artistlist = `
 	<a href="_blank">@typeofnull</a> - Made the current app icon.<br>
-	<a href="https://github.com/PurvisiLOL">@typeofnull</a> - Made the first version of the app icon.
+	<a href="https://github.com/PurvisiLOL">@abyzal.</a> - Made the first version of the app icon.
 	`;
 
 	const testerlist = `
@@ -84,4 +86,4 @@
 		.build();
 </script>
 
-<Panel {panel} on:button={onButtonClicked} />
+<Panel {panel} on:button={onButtonClicked} {render} />

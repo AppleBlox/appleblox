@@ -1,17 +1,99 @@
 import { filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
-import { getConfigPath, loadSettings } from '../../components/settings';
-import { curlGet, pathExists } from '../utils';
 import { toast } from 'svelte-sonner';
-import type { SettingsOutput } from '../../components/settings';
 import Roblox from '.';
+import { getConfigPath, getValue, loadSettings } from '../../components/settings';
+import type { SelectElement, SettingsOutput } from '../../components/settings/types';
+import { pathExists } from '../utils';
 
-type FastFlag = string | boolean | null | number;
-type FFs = { [key: string]: FastFlag };
+export type FastFlag = string | boolean | null | number;
+export type FFs = { [key: string]: FastFlag };
 export interface EditorFlag {
 	flag: string;
 	enabled: boolean;
 	value: string;
+}
+
+/** Function used to build the flags list */
+async function buildFlagsList(): Promise<FastFlagsList> {
+	let data = {
+		forceVulkan: ((await getValue('fastflags.graphics.fps_target')) as boolean) || 60 > 60 ? true : false,
+	};
+	const flags = new FastFlagsList()
+		.addFlag({
+			name: 'Balls',
+			flags: { aaaa: true },
+			path: 'fastflags.graphics.fps_target',
+			type: 'slider',
+		})
+		// FPS Target
+		.addFlag({
+			name: 'FPS Target',
+			flags: { DFIntTaskSchedulerTargetFps: '%s' },
+			path: 'fastflags.graphics.fps_target',
+			type: 'slider',
+		})
+		// Rendering Engine
+		.addFlag({
+			name: 'Rendering Engine (OpenGL)',
+			flags: {
+				FFlagDebugGraphicsDisableMetal: true,
+				FFlagDebugGraphicsPreferOpenGL: true,
+			},
+			path: 'fastflags.graphics.engine',
+			type: 'select',
+			value: 'opengl',
+		})
+		.addFlag({
+			name: 'Rendering Engine (Metal)',
+			flags: { FFlagDebugGraphicsPreferMetal: true },
+			path: 'fastflags.graphics.engine',
+			type: 'select',
+			value: 'metal',
+		})
+		.addFlag({
+			name: 'Rendering Engine (Vulkan)',
+			flags: { FFlagDebugGraphicsPreferVulkan: true },
+			path: 'fastflags.graphics.engine',
+			type: 'select',
+			value: 'vulkan',
+		})
+		// Lightning
+		.addFlag({
+			name: 'Lightning Technology (Voxel)',
+			flags: { DFFlagDebugRenderForceTechnologyVoxel: true },
+			path: 'fastflags.graphics.lightning',
+			type: 'select',
+			value: 'voxel',
+		})
+		.addFlag({
+			name: 'Lightning Technology (Shadowmap)',
+			flags: { FFlagDebugForceFutureIsBrightPhase2: true },
+			path: 'fastflags.graphics.lightning',
+			type: 'select',
+			value: 'shadowmap',
+		})
+		.addFlag({
+			name: 'Lightning Technology (Future)',
+			flags: { FFlagDebugForceFutureIsBrightPhase3: true },
+			path: 'fastflags.graphics.lightning',
+			type: 'select',
+			value: 'future',
+		})
+		// Voxel shadow
+		.addFlag({
+			name: 'Disable Voxel shadows',
+			flags: { DFFlagDebugPauseVoxelizer: true },
+			path: 'fastflags.graphics.disable_voxel_shadows',
+			type: 'switch',
+			value: async (settingValue) => {
+				return (
+					settingValue === true && ((await getValue('fastflags.graphics.lightning')) as SelectElement).value === 'voxel'
+				);
+			},
+		});
+
+	return flags;
 }
 
 export class RobloxFFlags {
@@ -60,7 +142,11 @@ export class RobloxFFlags {
 		const fflags: EditorFlag[] = JSON.parse(await filesystem.readFile(filePath)) || [];
 		// Modify the flag if it exists or create a new one
 		if (fflags.find((f) => f.flag === flag)) {
-			fflags[fflags.findIndex((f) => f.flag === flag)] = { flag, enabled, value };
+			fflags[fflags.findIndex((f) => f.flag === flag)] = {
+				flag,
+				enabled,
+				value,
+			};
 		} else {
 			fflags.push({ flag, enabled, value });
 		}
@@ -90,28 +176,48 @@ export class RobloxFFlags {
 		return false;
 	}
 
-	static async parseFlags(preset = false): Promise<Object> {
+	static async parseFlags(preset = false): Promise<{ validFlags: FFs; invalidFlags: FFs; nameMap: string[] }> {
 		// Get the path to Application Supoort
 		const configPath = await getConfigPath();
-		const fflagsJson: FFs = {};
+		let flagsList = new FastFlagsList();
 
+		// If the function needs to parse the presets
 		if (preset) {
-			const FlagsList = new FastFlagsList().build();
+			flagsList = await buildFlagsList();
+
+			const { validFlags, invalidFlags, nameMap } = await flagsList.build();
+			return { validFlags, invalidFlags, nameMap };
 		}
 
-		if (!(await pathExists(path.join(configPath, 'fflags.json')))) {
-			return {};
+		// If the editor flags config doesn't exist
+		const editorConfigPath = path.join(configPath, 'fflags.json');
+		if (!(await pathExists(editorConfigPath))) {
+			return { validFlags: {}, invalidFlags: {}, nameMap: [] };
 		}
-		const neuPath = path.join(configPath, 'fflags.json');
-		const skibidiOhioFanumTax: { flag: string; enabled: boolean; value: string | number }[] = JSON.parse(
-			await filesystem.readFile(neuPath)
+
+		// Read and parse the file. Not using loadSettings() because this file has a custom format
+		let editorFlags: { flag: string; enabled: boolean; value: FastFlag }[] = JSON.parse(
+			(await filesystem.readFile(editorConfigPath)) || '[]'
 		);
-		for (const flag of skibidiOhioFanumTax) {
-			if (flag.enabled) {
-				fflagsJson[flag.flag] = flag.value;
+		editorFlags = editorFlags.filter((flag) => flag.enabled);
+		// Get all the valid, enabled flags
+		const validFlags = await flagsList.validate(
+			editorFlags.reduce((transformed: FFs, item) => {
+				if (!item.enabled) return transformed;
+				transformed[item.flag] = item.value;
+				return transformed;
+			}, {})
+		);
+
+		// Make a list of the invalid flags
+		let invalidFlags: FFs = {};
+		for (const { flag, value } of editorFlags) {
+			if (!(flag in validFlags)) {
+				invalidFlags[flag] = value;
 			}
 		}
-		return fflagsJson;
+
+		return { validFlags, invalidFlags, nameMap: [] };
 	}
 	static async writeClientAppSettings() {
 		const filePath = path.join(Roblox.path, 'Contents/MacOS/ClientSettings/AppClientSettings.json');
@@ -120,8 +226,8 @@ export class RobloxFFlags {
 		}
 		await filesystem.createDirectory(path.dirname(filePath));
 		const fflags = {
-			...(await RobloxFFlags.parseFlags(false)),
-			...(await RobloxFFlags.parseFlags(true)),
+			...(await RobloxFFlags.parseFlags(false)).validFlags,
+			...(await RobloxFFlags.parseFlags(true)).validFlags,
 		};
 		await filesystem.writeFile(filePath, JSON.stringify(fflags));
 		toast.success(`Wrote ClientAppSettings at "${filePath}"`);
@@ -131,40 +237,48 @@ export class RobloxFFlags {
 interface AddFlagOpts {
 	/** The path in 'panel.category.setting' to the setting */
 	path: `${string}.${string}.${string}`;
+	/** Name to display if needed */
+	name: string;
 	/** The type of the setting */
 	type: 'switch' | 'slider' | 'select' | 'input' | 'always';
 	/** The value it should be for the flag to be added */
-	value?: string | boolean | number[] | null;
+	value?:
+		| string
+		| boolean
+		| number[]
+		| null
+		| ((settingValue: string | number | true | [number] | { label: string; value: string }) => Promise<boolean>);
 	/** The flags added if the setting === the value */
 	flags: FFs;
 }
 
 export class FastFlagsList {
-	/** List of accepted flags */
-	private flags: FFs;
 	/** List of all flags to parse and verify */
 	private toParseFlags: AddFlagOpts[];
 	/** Panels that are empty and need to be skipped */
 	private skipPanels: string[];
 	/** All cached settings panels */
 	private settings: { [key: string]: SettingsOutput };
-	/** Cache of flag tracker GitHub repository */
-	private trackerCache: { windows: string[] | null; mac: string[] | null };
+	/** Cache of flag tracker GitHub repository and other links */
+	private trackerCache: {
+		windows: string[] | null;
+		mac: string[] | null;
+		client: string[] | null;
+	};
 
 	constructor() {
-		this.flags = {};
 		this.toParseFlags = [];
 		this.skipPanels = [];
 		this.settings = {};
-		this.trackerCache = { windows: null, mac: null };
+		this.trackerCache = { windows: null, mac: null, client: null };
 	}
 
 	/** Fetch the FastFlags Tracker list */
 	private async fetchTracker() {
 		if (!this.trackerCache.mac) {
-			await curlGet('https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/main/MacDesktopClient.json')
-				.then((res) => {
-					const flags = Object.keys(res as FFs);
+			await fetch('https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/main/MacDesktopClient.json')
+				.then(async (res) => {
+					const flags = Object.keys(await res.json());
 					this.trackerCache.mac = flags.length > 0 ? flags : null;
 				})
 				.catch((err) => {
@@ -173,14 +287,35 @@ export class FastFlagsList {
 				});
 		}
 		if (!this.trackerCache.windows) {
-			await curlGet('https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/main/PCDesktopClient.json')
-				.then((res) => {
-					const flags = Object.keys(res as FFs);
+			await fetch('https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/main/PCDesktopClient.json')
+				.then(async (res) => {
+					const flags = Object.keys(await res.json());
 					this.trackerCache.windows = flags.length > 0 ? flags : null;
 				})
 				.catch((err) => {
 					console.warn(err);
 					this.trackerCache.windows = null;
+				});
+		}
+		if (!this.trackerCache.client) {
+			await fetch('https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/FVariables.txt')
+				.then(async (res) => {
+					const input = await res.text();
+					const lines = input.split('\n');
+					const flagRegex = /\[(?:C\+\+|Lua)\]\s+(\w+)/;
+
+					const flags = lines
+						.map((line) => {
+							const match = line.match(flagRegex);
+							return match ? match[1] : null;
+						})
+						.filter((flag): flag is string => flag !== null);
+
+					this.trackerCache.client = flags.length > 0 ? flags : null;
+				})
+				.catch((err) => {
+					console.warn(err);
+					this.trackerCache.client = null;
 				});
 		}
 	}
@@ -192,8 +327,15 @@ export class FastFlagsList {
 	}
 
 	/** Parse all flags added via addFlag() and returns them */
-	public async build(): Promise<{ validFlags: FFs; invalidFlags: FFs }> {
+	public async build(): Promise<{
+		validFlags: FFs;
+		invalidFlags: FFs;
+		/** A list of all the invalid option names */
+		nameMap: string[];
+	}> {
 		let invalidFlags: FFs = {};
+		let validFlags: FFs = {};
+		let nameMap = [];
 		for (const opts of this.toParseFlags) {
 			const [panelId, categoryId, widgetId] = opts.path.split('.');
 			// Skip panel because it is empty
@@ -214,19 +356,31 @@ export class FastFlagsList {
 			}
 			// Add the flags if the value is the same specified
 			const settingValue = settings[categoryId][widgetId];
-			let addFlag = false;
-			switch (opts.type) {
-				case 'switch':
-				case 'input':
-				case 'slider':
-					addFlag = settingValue === opts.value;
-					break;
-				case 'select':
-					addFlag = (settingValue as { label: string; value: string }).value === settingValue;
-					break;
-				case 'always':
-					addFlag = true;
+			if (!settingValue) {
+				console.warn(`The setting "${opts.path}" doesn't exist. Skipping.`);
+				continue;
 			}
+			let addFlag = false;
+			if (typeof opts.value === 'function') {
+				addFlag = await opts.value(settingValue).catch((err) => {
+					console.error('[FastFlags] Error while calling flags value callback: ', err);
+					return false;
+				});
+			} else {
+				switch (opts.type) {
+					case 'switch':
+					case 'input':
+					case 'slider':
+						addFlag = settingValue === opts.value;
+						break;
+					case 'select':
+						addFlag = (settingValue as { label: string; value: string }).value === opts.value;
+						break;
+					case 'always':
+						addFlag = true;
+				}
+			}
+
 			if (!addFlag && opts.value) continue;
 
 			// Check if the flag is valid from the flag tracker repository
@@ -242,6 +396,8 @@ export class FastFlagsList {
 			}
 
 			// Check if the flags exists and add them with their placeholder
+			// True if atleast one flag is added
+			let containsValidFlags = false;
 			for (const [flag, value] of Object.entries(opts.flags)) {
 				if (!Object.keys(await this.validate({ [flag]: value })).includes(flag)) {
 					console.warn(`The flag "${flag}" is invalid. Skipping.`);
@@ -269,19 +425,27 @@ export class FastFlagsList {
 				const filledValue = typeof value === 'string' ? value.replaceAll('%s', svalue) : value;
 
 				// Add the flag to the list
-				this.flags[flag] = filledValue;
+				validFlags[flag] = filledValue;
+				containsValidFlags = true;
 			}
+			// Add name to invalid option names list
+			if (!containsValidFlags) nameMap.push(opts.name);
 		}
 
-		return { validFlags: this.flags, invalidFlags };
+		return { validFlags: validFlags, invalidFlags, nameMap };
 	}
 
 	/** Validate given flags and returns the correct ones */
 	public async validate(flags: FFs): Promise<FFs> {
 		await this.fetchTracker();
-		const validFlags = Object.entries(flags).filter(
-			(flag) => this.trackerCache.mac?.includes(flag[0]) || this.trackerCache.windows?.includes(flag[0])
-		);
+		const validFlags = Object.entries(flags).filter((flag) => {
+			const flagName = flag[0].replace(/_PlaceFilter$/, '');
+			return (
+				this.trackerCache.mac?.includes(flagName) ||
+				this.trackerCache.windows?.includes(flagName) ||
+				this.trackerCache.client?.includes(flagName)
+			);
+		});
 		let result: FFs = {};
 		for (const validFlag of validFlags) {
 			result[validFlag[0]] = validFlag[1];

@@ -3,6 +3,8 @@
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 
+	export let render = true;
+
 	const devPanel = new SettingsPanelBuilder()
 		.setName('Dev Panel')
 		.setDescription('A panel to test dev things.')
@@ -88,6 +90,6 @@
 </script>
 
 <div>
-	<Panel panel={devPanel} />
+	<Panel panel={devPanel} {render} />
 	<h2>Args: "{window.NL_ARGS}"</h2>
 </div>

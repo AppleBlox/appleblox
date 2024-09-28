@@ -1,12 +1,15 @@
-import { join, resolve } from 'node:path';
-import { readdir, exists } from 'fs/promises';
-import { Signale } from 'signale';
 import { $, sleep } from 'bun';
+import { exists, readdir } from 'fs/promises';
+import { join, resolve } from 'node:path';
+import { Signale } from 'signale';
 
 export async function buildViteAndNeu() {
-	const frontBuildLog = new Signale({ interactive: true, scope: 'vite-neutralino' });
+	const frontBuildLog = new Signale({
+		interactive: true,
+		scope: 'vite-neutralino',
+	});
 	frontBuildLog.await('Building with Vite');
-	await $`rm -rf "${resolve("frontend/dist")}"`
+	await $`rm -rf "${resolve('frontend/dist')}"`;
 	$`bunx vite build'`.catch(async (err) => {
 		await Bun.sleep(1000);
 		frontBuildLog.fatal('A vite error occured:');
@@ -21,7 +24,7 @@ export async function buildViteAndNeu() {
 	process.stdout.write('\x1b[0f');
 
 	frontBuildLog.await('Building with Neutralino');
-	await sleep(500)
+	await sleep(500);
 	await $`bunx neu build`;
 
 	process.stdout.write('\x1b[2J');

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
-	import FfButtonsCustom from './Custom/FFButtonsCustom.svelte';
+	import FlagEditor from '../components/flag-editor/flag-editor.svelte';
+
+	export let render = true;
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Fast Flags')
@@ -15,7 +17,7 @@
 				.addSlider({
 					label: 'Framerate Cap',
 					description: 'Sets the FPS cap to this value',
-					id: 'ff_fps',
+					id: 'fps_target',
 					default: [60],
 					min: 1,
 					max: 240,
@@ -24,7 +26,7 @@
 				.addSelect({
 					label: 'Rendering Engine',
 					description: 'Forces Roblox to use the selected rendering engine',
-					id: 'ff_engine',
+					id: 'engine',
 					default: 'default',
 					items: [
 						{ label: 'Default', value: 'default' },
@@ -36,7 +38,7 @@
 				.addSelect({
 					label: 'Lightning Technology',
 					description: 'Forces the selected lightning technology across all games',
-					id: 'ff_lightning',
+					id: 'lightning',
 					items: [
 						{ label: 'Chosen by game', value: 'default' },
 						{ label: 'Voxel', value: 'voxel' },
@@ -48,10 +50,10 @@
 				.addSwitch({
 					label: 'Disable shadows (Voxel lightning required)',
 					description: 'Disables shadow when voxel lightning is active',
-					id: 'ff_voxel_shadows',
+					id: 'disable_voxel_shadows',
 					default: false,
 					toggleable: {
-						id: 'ff_lightning',
+						id: 'lightning',
 						type: 'select',
 						value: 'voxel',
 					},
@@ -59,49 +61,49 @@
 				.addSwitch({
 					label: 'Enable graphics quality w/ render distance',
 					description: '(Enables the option below)',
-					id: 'ff_display_toggle',
+					id: 'quality_distance_toggle',
 					default: false,
 				})
 				.addSlider({
 					label: 'Graphics quality w/ render distance',
 					description:
 						'Forces the graphic setting to this value. The graphics slider in the Roblox settings will now only control the Render distance',
-					id: 'ff_display',
+					id: 'quality_distance',
 					default: [5],
 					max: 10,
 					min: 1,
 					step: 1,
 					toggleable: {
-						id: 'ff_display_toggle',
+						id: 'quality_distance_toggle',
 						type: 'switch',
 						value: true,
 					},
 				})
-				.addSwitch({ label: 'Terrain grass', description: 'Render 3D grass', id: 'ff_grass', default: true })
-				.addSwitch({ label: 'Shadows', description: 'Show (most) shadows', id: 'ff_shadows', default: true })
+				.addSwitch({ label: 'Terrain grass', description: 'Render 3D grass', id: 'grass', default: true })
+				.addSwitch({ label: 'Shadows', description: 'Show (most) shadows', id: 'shadows', default: true })
 				.addSwitch({
 					label: 'Player shadows',
 					description: 'Show player shadows',
-					id: 'ff_player_shadows',
+					id: 'player_shadows',
 					default: true,
 				})
-				.addSwitch({ label: 'PostFX', description: 'Render effects (like sunrays)', id: 'ff_postfx', default: true })
+				.addSwitch({ label: 'PostFX', description: 'Render effects (like sunrays)', id: 'postfx', default: true })
 				.addSwitch({
 					label: 'Anti-aliasing',
 					description: 'Enables anti-aliasing to remove blurry edges',
-					id: 'ff_antialiasing',
+					id: 'antialiasing',
 					default: true,
 				})
 				.addSwitch({
 					label: 'Level-of-detail',
 					description: 'Renders far objects with less polygons',
-					id: 'ff_polygons',
+					id: 'polygons',
 					default: false,
 				})
 				.addSwitch({
 					label: 'Limit light updates',
 					description: 'Lightning in games will update less often',
-					id: 'ff_light_updates',
+					id: 'light_updates',
 					default: false,
 				})
 		)
@@ -113,7 +115,7 @@
 				.addSelect({
 					label: 'Textures quality',
 					description: 'Changes the textures quality',
-					id: 'ff_textures_quality',
+					id: 'textures_quality',
 					items: [
 						{ label: 'Default', value: 'default' },
 						{ label: 'Level 3', value: '3' },
@@ -126,19 +128,19 @@
 				.addSwitch({
 					label: 'Flat textures',
 					description: 'Disables every default Roblox textures (parts will be a flat solid color)',
-					id: 'ff_textures',
+					id: 'textures',
 					default: false,
 				})
 				.addSwitch({
 					label: 'Player textures',
 					description: 'Renders player textures',
-					id: 'ff_players_textures',
+					id: 'players_textures',
 					default: true,
 				})
 				.addSwitch({
 					label: 'Debug Sky',
 					description: 'Enables the debugging sky (gray w/ no clouds)',
-					id: 'ff_debug_sky',
+					id: 'debug_sky',
 					default: false,
 				})
 		)
@@ -150,7 +152,7 @@
 				.addSelect({
 					label: 'Menu version',
 					description: 'Selects which menu should be shown when pressing ESC in-game',
-					id: 'ff_menu_version',
+					id: 'menu_version',
 					items: [
 						{ label: 'Version 1 (2015)', value: 'v1' },
 						{ label: 'Version 2 (2020)', value: 'v2' },
@@ -163,7 +165,7 @@
 				.addSlider({
 					label: 'Font size',
 					description: 'Defines a custom font size to apply in the app',
-					id: 'ff_font_size',
+					id: 'font_size',
 					default: [1],
 					step: 1,
 					max: 100,
@@ -182,23 +184,35 @@
 						</br>&nbspCMD + Shift + C: Toggles game-defined ScreenGuis
 						</br>&nbspCMD + Shift + G: Toggles Roblox CoreGuis
 						</br>&nbspCMD + Shift + N: Toggles player names, and other that shows...`,
-					id: 'ff_gui',
+					id: 'gui',
 					default: false,
 				})
 				.addSwitch({
 					label: 'Disable telemetry',
 					description: 'Prevent the app from sending your data to Roblox',
-					id: 'ff_telemetry',
+					id: 'telemetry',
 					default: false,
 				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Advanced')
+				.setDescription("You should only use these features if you know what you're doing!")
+				.setId('advanced')
 				.addCustom({
-					label: 'Flags editor',
-					description: 'Advanced editing of fast flags',
-					component: FfButtonsCustom,
+					label: '',
+					description: '',
+					component: FlagEditor,
 					id: 'fflags_editor',
+				})
+				.addSwitch({
+					label: 'Ignore invalid flags warning',
+					description: "Don't show a warning when launching with flags that do not exist",
+					id: 'ignore_flags_warning',
+					default: false,
 				})
 		)
 		.build();
 </script>
 
-<Panel {panel} />
+<Panel {panel} {render} />

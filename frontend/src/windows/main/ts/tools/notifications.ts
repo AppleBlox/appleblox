@@ -1,7 +1,7 @@
 // Handles notifications in the app using the alerter binary
 import { events, os } from '@neutralinojs/lib';
+import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
-import { loadSettings } from '../../components/settings';
 import { focusWindow } from '../window';
 
 /**
@@ -43,9 +43,7 @@ export interface NotificationOptions {
  */
 export async function showNotification(options: NotificationOptions): Promise<void> {
 	try {
-		const miscSettings = await loadSettings('misc');
-
-		if (miscSettings?.advanced.notify_all) {
+		if ((await getValue('misc.advanced.notify_all')) === true) {
 			options.sound = true;
 		}
 

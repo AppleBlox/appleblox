@@ -6,7 +6,7 @@ import { getConfigPath, loadSettings } from '../components/settings';
 import { pathExists } from './utils';
 
 /** Tries to format every variable to a string */
-function formatConsoleLog(...args: any[]): string {
+export function formatConsoleLog(...args: any[]): string {
 	return `[${new Date().toLocaleTimeString()}] ${args
 		.map((arg) => {
 			if (arg === null) {
@@ -133,11 +133,11 @@ export async function enableConsoleRedirection() {
 	}
 	isRedirectionEnabled = true;
 	overrideConsoleFunctions();
-	console.log('Enabled console redirection');
+	console.info('[Debugging] Enabled console redirection');
 }
 
 export function disableConsoleRedirection() {
 	isRedirectionEnabled = false;
 	restoreConsoleFunctions();
-	console.log('Disabled console redirection');
+	console.info('[Debugging] Disabled console redirection');
 }

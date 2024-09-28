@@ -1,13 +1,10 @@
+import { $ } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 async function main(downloadNeuBinaries = false) {
-
 	if (downloadNeuBinaries) {
-		await Bun.spawn(['bunx', 'neu', 'update'], {
-			cwd: process.cwd(),
-			detached: false,
-		}).exited;
+		await $`bunx neu update`;
 	}
 
 	// Clear terminal
@@ -30,11 +27,11 @@ async function main(downloadNeuBinaries = false) {
 	const vite = Bun.spawn({
 		cmd: ['bunx', 'vite', 'dev'],
 		stdout: 'inherit',
-		stderr: 'inherit'
-	  });
+		stderr: 'inherit',
+	});
 	// Delay to be sure vite was built
 	console.log('Waiting 2500ms...');
-	await Bun.sleep(2500)
+	await Bun.sleep(2500);
 
 	const args = [
 		'--window-enable-inspector=true',
@@ -53,19 +50,18 @@ async function main(downloadNeuBinaries = false) {
 		bpath = `start ${resolve(`./bin/neutralino-${binaryOS}_x64.exe`)}`;
 	}
 
-	await Bun.spawn([bpath, ...args], {
+	Bun.spawn([bpath, ...args], {
 		cwd: process.cwd(),
-		detached: false,
 		onExit() {
-			vite.kill();
+			process.kill(vite.pid);
 			process.exit();
 		},
-	}).exited;
+	});
 }
 
 // If the binary folder doesn't exist, then we download it
 if (!existsSync(resolve('./bin'))) {
-	main(true)
+	main(true);
 } else {
 	main();
 }

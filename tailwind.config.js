@@ -32,9 +32,14 @@ const config = {
 					DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
 					foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
 				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning) / <alpha-value>)',
+					foreground: 'hsl(var(--warning-foreground) / <alpha-value>)',
+				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted) / <alpha-value>)',
 					foreground: 'hsl(var(--muted-foreground) / <alpha-value>)',
+					'foreground-light': 'color-mix(in srgb, var(--muted-foreground) 80%, white 20%)',
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent) / <alpha-value>)',

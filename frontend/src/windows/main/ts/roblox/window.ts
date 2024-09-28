@@ -1,4 +1,4 @@
-import { os, computer } from '@neutralinojs/lib';
+import { computer, os } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
 
 const window_manager = libraryPath('window_manager');
@@ -13,7 +13,7 @@ export class RobloxWindow {
 	 */
 	public static async move(x: number | string, y: number | string) {
 		os.execCommand(`${window_manager} move "Roblox" ${x} ${y}`);
-		console.log(`Moved Roblox window to "${x},${y}"`);
+		console.info(`[Roblox.Window] Moved Roblox window to "${x},${y}"`);
 	}
 	/**
 	 * Resize the Roblox window smoothly
@@ -22,7 +22,7 @@ export class RobloxWindow {
 	 */
 	public static async resize(width: number | string, height: number | string) {
 		os.execCommand(`${window_manager} resize "Roblox" ${width} ${height}`);
-		console.log(`Resized Roblox window to "${width},${height}"`);
+		console.info(`[Roblox.Window] Resized Roblox window to "${width},${height}"`);
 	}
 
 	public static async isFullscreen(): Promise<boolean> {

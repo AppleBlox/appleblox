@@ -1,15 +1,15 @@
-import { resolve } from 'node:path';
 import BuildConfig from '@root/build.config';
+import { $ } from 'bun';
+import { resolve } from 'node:path';
 import { Signale } from 'signale';
+import { buildBinaries } from './binaries';
 import { linuxBuild } from './linux-bundle';
 import { macBuild } from './mac-bundle';
 import { buildViteAndNeu } from './utils';
 import { winBuild } from './win-bundle';
-import { $ } from 'bun';
-import { buildBinaries } from './binaries';
 
 export async function build() {
-	$.cwd(process.cwd())
+	$.cwd(process.cwd());
 	const initTime = performance.now();
 	const logger = new Signale();
 	await $`rm -rf "${resolve('dist')}"`;
@@ -20,7 +20,7 @@ export async function build() {
 		return;
 	}
 
-	await buildBinaries()
+	await buildBinaries();
 	await buildViteAndNeu();
 
 	if (BuildConfig.mac) {
@@ -46,7 +46,7 @@ export async function build() {
 			await $`start ${resolve('./dist')}`;
 			break;
 	}
-	process.exit(0)
+	process.exit(0);
 }
 
 build();

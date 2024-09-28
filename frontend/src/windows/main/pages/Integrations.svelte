@@ -2,6 +2,8 @@
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 
+	export let render = true;
+
 	const panel = new SettingsPanelBuilder()
 		.setName('Integrations')
 		.setDescription('Configure various integrations between AppleBlox and apps like Discord or Roblox.')
@@ -32,7 +34,7 @@
 				.addSwitch({
 					label: 'Control RPC',
 					description: 'Games can change your discord RPC',
-					id: 'sdk_rpc',
+					id: 'rpc',
 					default: false,
 				})
 				.addSwitch({
@@ -50,29 +52,29 @@
 				.addSwitch({
 					label: 'Enable RPC',
 					description: 'Enables the custom Discord rich presence',
-					id: 'enable_rpc',
+					id: 'enabled',
 					default: true,
 				})
 				.addSwitch({
 					label: 'Show game activity',
 					description: "Shows the game you're playing on your profile",
-					id: 'rpc_activity',
+					id: 'activity',
 					default: true,
 				})
 				.addSwitch({
 					label: 'Show game time',
 					description: 'Show the time since you started playing a game',
-					id: 'rpc_time',
+					id: 'time',
 					default: true,
 				})
 				.addSwitch({
 					label: 'Allow joining',
 					description: `Adds a "join" button on your profile which let\'s people join your game'`,
-					id: 'rpc_join',
+					id: 'joining',
 					default: false,
 				})
 		)
 		.build();
 </script>
 
-<Panel {panel} />
+<Panel {panel} {render} />

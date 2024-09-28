@@ -1,10 +1,10 @@
-import { resolve } from "node:path"
-import { existsSync, chmodSync } from "node:fs";
 import BuildConfig from '@root/build.config';
 import neuConfig from '@root/neutralino.config.json';
 import { version } from '@root/package.json';
+import { $ } from 'bun';
+import { chmodSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Signale } from 'signale';
-import { $ } from "bun";
 
 export async function macBuild() {
 	const logger = new Signale();
@@ -37,11 +37,11 @@ export async function macBuild() {
 
 		// Directory Structure
 		const Contents = resolve(appDist, `${BuildConfig.appName}.app/Contents`);
-		await $`mkdir -p "${Contents}"`
+		await $`mkdir -p "${Contents}"`;
 		const MacOS = resolve(Contents, 'MacOS');
-		await $`mkdir -p "${MacOS}"`
+		await $`mkdir -p "${MacOS}"`;
 		const Resources = resolve(Contents, 'Resources');
-		await $`mkdir -p "${Resources}"`
+		await $`mkdir -p "${Resources}"`;
 
 		// Plist
 		const InfoPlist = resolve(Contents, 'Info.plist');
@@ -51,23 +51,23 @@ export async function macBuild() {
 			.replaceAll('{APP_BUNDLE}', BuildConfig.appBundleName)
 			.replaceAll('{APP_MIN_OS}', BuildConfig.mac.minimumOS)
 			.replaceAll('{APP_VERSION}', version);
-		await Bun.write(InfoPlist,InfoPlistTemplate)
+		await Bun.write(InfoPlist, InfoPlistTemplate);
 
 		// Executables
-		await $`cp "${executable}" "${resolve(MacOS, 'main')}"`
+		await $`cp "${executable}" "${resolve(MacOS, 'main')}"`;
 		chmodSync(resolve(MacOS, 'main'), '755');
-		await $`cp "${resolve(__dirname, '../templates/mac/bootstrap')}" "${resolve(MacOS, 'bootstrap')}"`
+		await $`cp "${resolve(__dirname, '../templates/mac/bootstrap')}" "${resolve(MacOS, 'bootstrap')}"`;
 		chmodSync(resolve(MacOS, 'bootstrap'), '755');
 
 		// Resources
-		await $`cp "${neuResources}" "${resolve(Resources, 'resources.neu')}"`
+		await $`cp "${neuResources}" "${resolve(Resources, 'resources.neu')}"`;
 
 		// Assets
-		await $`cp "${BuildConfig.mac.appIcon}" "${resolve(Resources, 'icon.icns')}"`
+		await $`cp "${BuildConfig.mac.appIcon}" "${resolve(Resources, 'icon.icns')}"`;
 
 		// Libraries
 		if (existsSync(Libraries)) {
-			await $`cp -r "${Libraries}" "${resolve(Resources, 'lib')}"`
+			await $`cp -r "${Libraries}" "${resolve(Resources, 'lib')}"`;
 		}
 		l.complete(`mac_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 		console.log('');

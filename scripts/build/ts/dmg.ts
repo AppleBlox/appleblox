@@ -1,9 +1,9 @@
-import { join, resolve } from 'node:path';
-import { existsSync } from 'node:fs';
 import BuildConfig from '@root/build.config';
+import child_process from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 import { version } from '../../../package.json';
-import { $ } from 'bun';
 
 interface DmgOptions {
 	sourceFolder: string;
@@ -34,6 +34,7 @@ async function createCustomDMG(options: DmgOptions) {
 
 	// Prepare command arguments
 	const args = [
+		'create-dmg',
 		`--volname "${volumeName || outputName}"`,
 		`--background "${backgroundPath}"`,
 		`--window-pos ${windowPos || '200 120'}`, // Default to '200 120' if not provided
@@ -46,11 +47,17 @@ async function createCustomDMG(options: DmgOptions) {
 		`"${sourceFolder}"`,
 	];
 
-	const createDmgCommand = `create-dmg ${args.join(' ')}`;
-
 	console.log('Creating DMG...');
 	try {
-		await $`${createDmgCommand}`;
+		await new Promise<void>((resolve, reject) => {
+			child_process.exec(args.join(' '), (error, stdout, stderr) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve();
+				}
+			});
+		});
 		console.log('DMG created successfully');
 	} catch (error) {
 		console.error('Failed to create DMG:', error);

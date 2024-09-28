@@ -1,6 +1,7 @@
 // Discord RPC wrapper & controller
-import { shell, spawn } from './shell';
+import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
+import { shell, spawn } from './shell';
 
 /**
  * Options for configuring the Discord Rich Presence
@@ -79,8 +80,12 @@ export class DiscordRPC {
 	 * @returns A promise that resolves to a boolean indicating if the process is running
 	 */
 	private async isRunning(): Promise<boolean> {
-		const result = await shell('pgrep', ['-f', 'discordrpc_ablox']);
-		return result.stdout.split('\n').length > 2;
+		try {
+			const result = await shell('pgrep', ['-f', 'discordrpc_ablox']);
+			return result.stdout.split('\n').length > 2;
+		} catch (err) {
+			return false;
+		}
 	}
 
 	/**
@@ -89,13 +94,14 @@ export class DiscordRPC {
 	 * @returns A promise that resolves when the process is started
 	 */
 	async start(options: RPCOptions): Promise<void> {
+		if (!(await getValue('integrations.rpc.enabled'))) return;
 		const rpcOptions = {
 			...options,
 			state: options.state || '',
 		};
 
 		if (await this.isRunning()) {
-			console.log('RPC already running. Updating options.');
+			console.info('[RPC] Already running. Updating options.');
 			await this.update(options);
 			return;
 		}
@@ -103,10 +109,12 @@ export class DiscordRPC {
 		const args = DiscordRPC.buildArgs(rpcOptions);
 
 		// Kill any existing discordrpc processes
-		await shell('pkill', ['-f', 'discordrpc_ablox']);
+		await shell('pkill', ['-f', 'discordrpc_ablox'], {
+			skipStderrCheck: true,
+		}).catch(console.error);
 
-		console.log(`Starting RPC with: ${DiscordRPC.binaryPath} ${args.join(' ')}`);
-		await spawn(DiscordRPC.binaryPath, args);
+		console.info(`[RPC] Starting with command: '${DiscordRPC.binaryPath} ${args.join(' ')}'`);
+		await spawn(DiscordRPC.binaryPath, args).catch(console.error);
 		DiscordRPC.currentOptions = options;
 	}
 
@@ -116,7 +124,9 @@ export class DiscordRPC {
 	 */
 	async stop(): Promise<void> {
 		if (await this.isRunning()) {
-			await shell('pkill', ['-f', 'discordrpc_ablox']);
+			await shell('pkill', ['-f', 'discordrpc_ablox'], {
+				skipStderrCheck: true,
+			});
 			DiscordRPC.currentOptions = null;
 		}
 	}
@@ -128,7 +138,10 @@ export class DiscordRPC {
 	 */
 	async update(options: Partial<RPCOptions>): Promise<void> {
 		await this.stop();
-		await this.start({ ...DiscordRPC.currentOptions, ...options } as RPCOptions);
+		await this.start({
+			...DiscordRPC.currentOptions,
+			...options,
+		} as RPCOptions);
 	}
 
 	/**
@@ -262,7 +275,7 @@ let discordRPC: DiscordRPC | null = null;
 const presets: { [key: string]: RPCOptions } = {
 	inRobloxApp: {
 		clientId: '1257650541677383721',
-		details: 'Currently browsing the menus',
+		details: 'Currently browsing the app',
 		state: 'In the launcher',
 		largeImage: 'roblox',
 		largeImageText: 'Roblox',
@@ -293,7 +306,9 @@ export class RPCController {
 		if (discordRPC) {
 			await discordRPC.stop();
 		} else {
-			await shell('pkill', ['-f', 'discordrpc_ablox']);
+			await shell('pkill', ['-f', 'discordrpc_ablox'], {
+				skipStderrCheck: true,
+			});
 		}
 		discordRPC = new DiscordRPC();
 		await discordRPC.start(options);
@@ -307,6 +322,8 @@ export class RPCController {
 		if (discordRPC) {
 			await discordRPC.destroy();
 		}
-		await shell('pkill', ['-f', 'discordrpc_ablox']);
+		const kill = await shell('pkill', ['-f', 'discordrpc_ablox'], {
+			skipStderrCheck: true,
+		});
 	}
 }

@@ -19,24 +19,24 @@
 			toast.error('Could not connect to internet');
 			return;
 		}
-		const releases = await curlGet('https://api.github.com/repos/AppleBlox/appleblox/releases').catch(console.error);
+		const releases = await curlGet('https://api.github.com/repos/AppleBlox/appleblox/releases').catch((err) => {
+			console.error('[Updater] ', err);
+		});
 		if (releases.message) return;
 		for (const re of releases) {
 			if (compareVersions(re.tag_name, updateVersion) > 0) {
 				updateVersion = re.tag_name;
 				body = re.body;
-				console.log(body.replace);
 			}
 		}
 		if (updateVersion === version) return;
 		const compare = compareVersions(updateVersion, version);
 		if (compare > 0) {
-			console.log(`A release is available: ${updateVersion}`);
+			console.info(`[Updater] A new release is available: ${updateVersion}`);
 			const settings = await loadSettings('updating');
 			if (settings) {
 				// Last asked date is newer than 7 days
 				const timeDiff = Math.round((Date.now() - settings.date) / (1000 * 3600 * 24));
-				console.log(timeDiff);
 				if (timeDiff <= 7) return;
 				showUpdatePopup = true;
 			} else {

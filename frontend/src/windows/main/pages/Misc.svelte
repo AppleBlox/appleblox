@@ -9,6 +9,8 @@
 	import { SettingsPanelBuilder, getConfigPath } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 
+	export let render = true;
+
 	let clearLogsPopup = false;
 
 	async function buttonClicked(e: CustomEvent) {
@@ -24,7 +26,9 @@
 					toast.error("The logs file doesn't seem to exist.");
 					return;
 				}
-				os.execCommand(`open -R "${logPath}"`).catch(console.error);
+				os.execCommand(`open -R "${logPath}"`).catch((err) => {
+					console.error('[MiscPanel] ', err);
+				});
 				break;
 			}
 			case 'clear_logs':
@@ -120,4 +124,4 @@
 	</AlertDialog.Content>
 </AlertDialog.Root>
 
-<Panel {panel} on:button={buttonClicked} on:switch={switchClicked} />
+<Panel {panel} on:button={buttonClicked} on:switch={switchClicked} {render} />

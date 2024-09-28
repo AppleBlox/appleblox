@@ -1,5 +1,5 @@
 // Safe shell executer & spawn children
-import { os, events } from '@neutralinojs/lib';
+import { events, os } from '@neutralinojs/lib';
 
 /**
  * Represents the result of a shell command execution.
@@ -64,7 +64,7 @@ export async function shell(command: string, args: string[] = [], options: Execu
 					exitCode: result.exitCode,
 				};
 
-				if (!options.skipStderrCheck && result.stdErr.trim().length > 0) {
+				if (!options.skipStderrCheck && (result.stdErr.trim().length > 0 || result.exitCode === 1)) {
 					reject(new Error(`Command produced stderr output: ${result.stdErr}`));
 				} else {
 					resolve(executionResult);

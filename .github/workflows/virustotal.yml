@@ -12,8 +12,7 @@ jobs:
       packages: read
     runs-on: ubuntu-latest
     steps:
-      -
-        name: VirusTotal Scan
+      - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v4
         with:
           update_release_body: true

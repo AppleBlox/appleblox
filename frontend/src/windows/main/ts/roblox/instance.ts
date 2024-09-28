@@ -1,8 +1,7 @@
-import { events, os, filesystem } from '@neutralinojs/lib';
+import { events, filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import Roblox from '.';
-import { isProcessAlive, removeNonUTF8CharactersFromString } from '../utils';
-import { sleep } from '../utils';
+import { isProcessAlive, sleep } from '../utils';
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';
@@ -136,11 +135,11 @@ export class RobloxInstance {
 	public async start(url?: string) {
 		if (this.gameInstance) throw new Error('An instance is already running');
 
-		console.log('Opening Roblox instance');
+		console.info('[Roblox.Instance] Opening Roblox instance');
 
 		// Launch Roblox
 		if (url) {
-			console.log(`Opening from URL: ${url}`);
+			console.info(`[Roblox.Instance] Opening from URL: ${url}`);
 			await Roblox.Utils.toggleURI(false, false);
 			await os.execCommand(`open ${url}`);
 		} else {
@@ -177,12 +176,12 @@ export class RobloxInstance {
 			const createdAt = (await filesystem.getStats(latestFilePath)).createdAt;
 			const timeDifference = (Date.now() - createdAt) / 1000;
 			if (timeDifference < 15) {
-				console.log(`Found latest log: "${latestFilePath}"`);
+				console.info(`[Roblox.Instance] Found latest log file: "${latestFilePath}"`);
 				this.latestLogPath = latestFilePath;
 			} else {
 				tries--;
-				console.log(
-					`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}" (${tries}). Retrying in 1 second.`
+				console.info(
+					`[Roblox.Instance] Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}" (${tries}). Retrying in 1 second.`
 				);
 				await sleep(1000);
 			}
@@ -195,7 +194,7 @@ export class RobloxInstance {
 		await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
 		this.logsInstance = await os.spawnProcess(`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done
 `);
-		console.log(`Logs watcher started with PID: ${this.logsInstance.pid}`);
+		console.info(`[Roblox.Instance] Logs watcher started with PID: ${this.logsInstance.pid}`);
 
 		let isProcessing = false;
 		const handler = async (evt: CustomEvent) => {
@@ -208,8 +207,8 @@ export class RobloxInstance {
 				if (!this.isWatching || !this.logsInstance || evt.detail.id !== this.logsInstance.id) return;
 
 				if (evt.detail.action === 'exit') {
-					console.log('Logs watcher exited with output:', evt.detail.data);
-					console.log('Restarting logs watcher');
+					console.warn('[Roblox.Instance] Logs watcher exited with output:', evt.detail.data);
+					console.info('[Roblox.Instance] Restarting logs watcher');
 
 					await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
 					this.logsInstance = await os.spawnProcess(
@@ -233,7 +232,7 @@ export class RobloxInstance {
 					this.lastLogs = content;
 				}
 			} catch (error) {
-				console.error('Error processing log file:', error);
+				console.error('[Roblox.Instance] Error processing log file:', error);
 			} finally {
 				isProcessing = false;
 			}
@@ -252,7 +251,7 @@ export class RobloxInstance {
 				events.off('spawnedProcess', handler);
 				this.emit('exit');
 				await this.cleanup();
-				console.log('Instance is null, stopping.');
+				console.info('[Roblox.Instance] Instance is null, stopping.');
 				clearInterval(intervalId);
 			}
 		}, 500);
@@ -288,7 +287,7 @@ export class RobloxInstance {
 	public async quit() {
 		if (this.gameInstance == null) throw new Error("The instance hasn't be started yet");
 		await this.cleanup();
-		console.log('Quitting Roblox');
+		console.info('[Roblox.Instance] Quitting Roblox');
 		await os.execCommand(`kill -9 ${this.gameInstance}`);
 	}
 }

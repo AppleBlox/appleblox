@@ -1,29 +1,30 @@
 <script lang="ts">
-	import { os, filesystem } from '@neutralinojs/lib';
-	import path from 'path-browserify';
-	import { toast } from 'svelte-sonner';
-	import { sleep } from '../ts/utils';
-
 	import ApplebloxIcon from '@/assets/favicon.png';
 	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
+	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book, Folder } from 'lucide-svelte';
-	import shellFS from '../ts/tools/shellfs';
+	import path from 'path-browserify';
+	import { toast } from 'svelte-sonner';
+	import { getConfigPath, SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
-	import { SettingsPanelBuilder } from '../components/settings';
+	import shellFS from '../ts/tools/shellfs';
+	import { sleep } from '../ts/utils';
 	import ModsUi from './Custom/ModsUI.svelte';
 
+	export let render = true;
+
 	async function onButtonClicked(e: CustomEvent) {
-		const buttonId = e.detail;
-		switch (buttonId) {
+		const { id } = e.detail;
+		switch (id) {
 			case 'open_mods_folder':
 				try {
-					const folderPath = path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/mods');
-					await os.execCommand(`mkdir -p "${folderPath}"`);
+					const folderPath = path.join(path.dirname(await getConfigPath()), 'mods');
+					await shellFS.createDirectory(folderPath);
 					await sleep(10);
-					await os.execCommand(`open "${folderPath}"`);
+					await shellFS.open(folderPath);
 				} catch (err) {
 					toast.error(`An error occured: ${err}`);
-					console.error(err);
+					console.error('[ModsPanel]', err);
 				}
 				break;
 			case 'join_bloxstrap':
@@ -111,12 +112,12 @@
 					variant: 'outline',
 					icon: { src: BloxstrapIcon },
 				})
-				.addSwitch({ label: 'Enable Mods', description: 'Applies your mods', id: 'enable_mods', default: false })
+				.addSwitch({ label: 'Enable Mods', description: 'Applies your mods', id: 'enabled', default: false })
 				.addSwitch({
 					label: 'Fix resolution',
 					description:
 						'Maximizes the resolution when opening Roblox. This fixes some icons not appearing in some cases',
-					id: 'spoof_res',
+					id: 'fix_res',
 					default: false,
 				})
 				.addCustom({ label: '', description: '', component: ModsUi, id: 'mods_ui' })
@@ -149,4 +150,4 @@
 	};
 </script>
 
-<Panel {panel} on:button={onButtonClicked} on:fileChosen={onFileAdded} on:fileRemoved={onFileRemoved} />
+<Panel {panel} on:button={onButtonClicked} on:fileChosen={onFileAdded} on:fileRemoved={onFileRemoved} {render} />
