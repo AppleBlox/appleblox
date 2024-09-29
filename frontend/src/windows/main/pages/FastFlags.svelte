@@ -97,7 +97,7 @@
 				.addSwitch({
 					label: 'Level-of-detail',
 					description: 'Renders far objects with less polygons',
-					id: 'polygons',
+					id: 'lod',
 					default: false,
 				})
 				.addSwitch({
@@ -126,16 +126,16 @@
 					default: 'default',
 				})
 				.addSwitch({
-					label: 'Flat textures',
-					description: 'Disables every default Roblox textures (parts will be a flat solid color)',
-					id: 'textures',
-					default: false,
-				})
-				.addSwitch({
 					label: 'Player textures',
 					description: 'Renders player textures',
-					id: 'players_textures',
+					id: 'player_textures',
 					default: true,
+				})
+				.addSwitch({
+					label: 'Flat textures',
+					description: 'Disables every default Roblox textures (parts will be a flat solid color)',
+					id: 'flat_textures',
+					default: false,
 				})
 				.addSwitch({
 					label: 'Debug Sky',

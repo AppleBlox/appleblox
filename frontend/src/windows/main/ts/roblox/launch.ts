@@ -55,6 +55,7 @@ export async function launchRoblox(
 		await shellFS.createDirectory(path.join(Roblox.path, 'Contents/MacOS/ClientSettings'));
 		console.info('[Launch] Parsing saved FFlags...');
 		const presetFlags = await Roblox.FFlags.parseFlags(true);
+		// Invalid presets
 		if (
 			Object.keys(presetFlags.invalidFlags).length > 0 &&
 			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
@@ -71,14 +72,34 @@ export async function launchRoblox(
 			}
 		}
 		const editorFlags = await Roblox.FFlags.parseFlags(false);
+		// Invalid selected profile flags
 		if (
 			Object.keys(editorFlags.invalidFlags).length > 0 &&
 			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
 		) {
 			const isIgnored = await showFlagErrorPopup(
-				'Invalid custom flags',
-				"You have one or several flags that don't exist in your FastFlags editor:",
+				'Invalid selected profile flags',
+				"You have one or several flags that don't exist in your selected profile:",
 				beautify(editorFlags.invalidFlags, null, 2, 100)
+			);
+			if (!isIgnored) {
+				setLaunchingRoblox(false);
+				setRobloxConnected(false);
+				return;
+			}
+		}
+		// Invalid game profile flags
+		if (
+			editorFlags.invalidProfileFlags &&
+			editorFlags.invalidProfileFlags.length > 0 &&
+			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
+		) {
+			const isIgnored = await showFlagErrorPopup(
+				'Invalid game profiles flags',
+				"You have one or several flags that don't exist in the following profiles:",
+				editorFlags.invalidProfileFlags
+					.map((profile) => `${profile.name.toUpperCase()}:\n ${beautify(profile.flags, null, 2, 100)}`)
+					.join('<br><br>')
 			);
 			if (!isIgnored) {
 				setLaunchingRoblox(false);
@@ -90,6 +111,7 @@ export async function launchRoblox(
 			...editorFlags.validFlags,
 			...editorFlags.invalidFlags,
 			...presetFlags.validFlags,
+			...presetFlags.invalidFlags,
 		};
 		console.info('[Launch] FastFlags: ', fflags);
 		await shellFS.writeFile(
