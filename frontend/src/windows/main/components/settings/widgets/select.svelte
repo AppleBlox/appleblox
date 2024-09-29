@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Select from '$lib/components/ui/select/index.js';
 	import { createEventDispatcher } from 'svelte';
-	import { type SelectElement } from '..';
+	import type { SelectElement } from '../types';
 
 	export let items: SelectElement[];
 	export let defaultItem: SelectElement;

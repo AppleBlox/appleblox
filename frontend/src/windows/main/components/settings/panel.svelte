@@ -253,7 +253,7 @@
 										<!-- Dropdown Widget -->
 									{:else if widget.options.type === 'select'}
 										<SelectWidget
-											items={widget.options.items}
+											items={widget.options.items.sort((a, b) => (a.value === "default" ? -1 : b.value === "default" ? 1 : 0))}
 											defaultItem={settings[category.id][widget.id]}
 											on:itemSelected={(e) => {
 												const { item } = e.detail;
