@@ -66,3 +66,7 @@ export async function buildBinaries() {
 
 	await $`rm -rf build/binaries/.temp`;
 }
+
+if (import.meta.main) {
+	buildBinaries();
+}
