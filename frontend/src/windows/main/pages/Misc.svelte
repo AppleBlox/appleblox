@@ -5,9 +5,9 @@
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
-	import { pathExists } from '../ts/utils';
 	import { SettingsPanelBuilder, getConfigPath } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
+	import shellFS from '../ts/tools/shellfs';
 
 	export let render = true;
 
@@ -22,7 +22,7 @@
 				break;
 			case 'open_logs': {
 				const logPath = path.join(path.dirname(await getConfigPath()), 'appleblox.log');
-				if (!(await pathExists(logPath))) {
+				if (!(await shellFS.exists(logPath))) {
 					toast.error("The logs file doesn't seem to exist.");
 					return;
 				}

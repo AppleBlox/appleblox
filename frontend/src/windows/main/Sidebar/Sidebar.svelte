@@ -20,9 +20,10 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import path from 'path-browserify';
 	import Roblox from '../ts/roblox';
-	import { getMode, pathExists } from '../ts/utils';
+	import { getMode } from '../ts/utils';
 	import LinkBtn from './LinkBtn.svelte';
 	import SidebarBtn from './SidebarBtn.svelte';
+	import shellFS from '../ts/tools/shellfs';
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
@@ -59,7 +60,7 @@
 		isDevBtnAdded = true;
 	}
 	(async () => {
-		if (await pathExists(path.join(await os.getEnv('HOME'), 'adevmode'))) {
+		if (await shellFS.exists(path.join(await os.getEnv('HOME'), 'adevmode'))) {
 			console.debug('[App] Running in "development" mode');
 			if (!isDevBtnAdded) {
 				sidebarBtns.push({ label: 'Dev', id: 'dev', icon: '' });

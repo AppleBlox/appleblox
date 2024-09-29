@@ -1,14 +1,5 @@
 import { os } from '@neutralinojs/lib';
 
-/** Checks if the path provided exists */
-export async function pathExists(path: string) {
-	try {
-		return (await os.execCommand(`[ -e "${path}" ] && echo "true" || echo "false"`)).stdOut.trim() === 'true';
-	} catch (err) {
-		console.error(err);
-	}
-}
-
 export function getMode(): 'dev' | 'prod' {
 	return import.meta.env.MODE === 'development' ? 'dev' : 'prod';
 }

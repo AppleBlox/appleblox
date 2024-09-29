@@ -1,7 +1,7 @@
 import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
-import { pathExists } from '../../ts/utils';
-import type { SelectElement, SettingsOutput } from './types';
+import type { SettingsOutput } from './types';
+import shellFS from '../../ts/tools/shellfs';
 
 export async function getConfigPath(): Promise<string> {
 	return path.join(await os.getPath('data'), 'AppleBlox', 'config');
@@ -39,12 +39,12 @@ export async function saveSettings(panelId: string, data: Object): Promise<void>
 
 	try {
 		const savePath = await getConfigPath();
-		if (!(await pathExists(savePath))) {
+		if (!(await shellFS.exists(savePath))) {
 			await filesystem.createDirectory(savePath);
 		}
 		try {
 			const filepath = `${savePath}/${panelId}.json`;
-			if (await pathExists(filepath)) {
+			if (await shellFS.exists(filepath)) {
 				await filesystem.remove(filepath);
 			}
 			saveQueue[`${savePath}/${panelId}.json`] = JSON.stringify(data);
@@ -60,7 +60,7 @@ export async function saveSettings(panelId: string, data: Object): Promise<void>
 export async function loadSettings(panelId: string): Promise<{ [key: string]: any } | undefined> {
 	try {
 		const filepath = `${await getConfigPath()}/${panelId}.json`;
-		if (!(await pathExists(filepath))) {
+		if (!(await shellFS.exists(filepath))) {
 			return undefined;
 		}
 		return JSON.parse(await filesystem.readFile(filepath));

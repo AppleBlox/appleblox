@@ -3,7 +3,7 @@
 import { filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { getConfigPath, loadSettings } from '../components/settings';
-import { pathExists } from './utils';
+import shellFS from './tools/shellfs';
 
 /** Tries to format every variable to a string */
 export function formatConsoleLog(...args: any[]): string {
@@ -128,7 +128,7 @@ function restoreConsoleFunctions() {
 
 export async function enableConsoleRedirection() {
 	const appleBloxDir = path.dirname(await getConfigPath());
-	if (!pathExists(appleBloxDir)) {
+	if (!shellFS.exists(appleBloxDir)) {
 		await filesystem.createDirectory(appleBloxDir);
 	}
 	isRedirectionEnabled = true;

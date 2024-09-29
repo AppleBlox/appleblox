@@ -5,12 +5,12 @@ import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import Roblox from '.';
 import { libraryPath } from '../libraries';
-import { pathExists } from '../utils';
+import shellFS from '../tools/shellfs';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
 	static async hasRoblox(popup = true): Promise<boolean> {
-		if (await pathExists(path.join(Roblox.path, 'Contents/MacOS/RobloxPlayer'))) {
+		if (await shellFS.exists(path.join(Roblox.path, 'Contents/MacOS/RobloxPlayer'))) {
 			return true;
 		}
 		if (!popup) return false;
@@ -84,7 +84,7 @@ END`);
 		if (!savePath) {
 			return;
 		}
-		if (await pathExists(path.join(savePath, 'Launch Roblox.app'))) {
+		if (await shellFS.exists(path.join(savePath, 'Launch Roblox.app'))) {
 			await filesystem.remove(path.join(savePath, 'Launch Roblox.app'));
 		}
 		await filesystem.createDirectory(path.join(savePath, 'Launch Roblox.app/Contents/MacOS'));
