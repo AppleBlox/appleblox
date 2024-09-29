@@ -17,7 +17,7 @@ Supports DiscordRPC, Fast-flags & more to come.
 
 You can get a demo of the app from the [Releases](https://github.com/OrigamingWasTaken/appleblox/releases/latest)
 
-For more recent builds, see the [nightly releases](https://nightly.link/OrigamingWasTaken/appleblox/workflows/build/main?preview)
+For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview)
 
 # Features
 
