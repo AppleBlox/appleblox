@@ -11,7 +11,7 @@
 </script>
 
 <button
-	class={`${currentPage === id ? 'bg-background' : 'rounded-md bg-card'} flex items-center hover:bg-opacity-95 hover:bg-muted justify-start p-2 w-full mr-auto group`}
+	class={`${currentPage === id ? 'bg-background' : 'rounded-md bg-card'} hover:rounded-none flex items-center hover:bg-opacity-95 hover:bg-muted justify-start p-2 w-full mr-auto group`}
 	on:click={() => {
 		dispatch('sidebarClick', id);
 	}}
