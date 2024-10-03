@@ -23,7 +23,7 @@
 	{/if}
 	<img src={icon} alt="Sidebar icon" class="w-[17px] towhite mx-4" />
 	<p
-		class={`${currentPage === id ? 'text-red-300' : 'text-foreground'} transition duration-100 font-mono text-[14px] group-hover:text-red-400`}
+		class={`${currentPage === id ? 'text-primary' : 'text-foreground'} transition duration-100 font-mono text-[14px] group-hover:saturate-150 group-hover:text-primary`}
 	>
 		{label}
 	</p>

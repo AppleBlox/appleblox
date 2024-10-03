@@ -14,7 +14,7 @@
 	}}
 >
 	<img src={icon} alt="Linkicon icon" class="w-[17px] towhite mr-2" />
-	<p class={'hover:text-red-400 transition duration-100 font-mono text-[14px]'}>
+	<p class={'hover:text-primary transition duration-100 font-mono text-[14px]'}>
 		{label}
 	</p>
 </button>

@@ -15,10 +15,11 @@
 	import Integrations from './pages/Integrations.svelte';
 	import Misc from './pages/Misc.svelte';
 	import Mods from './pages/Mods.svelte';
-	import Roblox from './pages/Roblox.svelte';
-	import { launchRoblox } from './ts/roblox/launch';
+	import RobloxPage from './pages/Roblox.svelte';
+	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils';
 	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
+	import { focusWindow } from './ts/window';
 
 	let currentPage: string;
 
@@ -53,8 +54,9 @@
 		if (window.NL_ARGS.includes('--launch')) {
 			console.info("[App] Launching Roblox from '--launch'");
 
+			await focusWindow()
 			// Defines which values should be modified during the launch phase (the loading progress, text, etc...)
-			await launchRoblox(
+			await Roblox.launch(
 				(value) => (launchInfo.isConnected = value),
 				(value) => (launchInfo.launching = value),
 				(value) => (launchInfo.progress = value),
@@ -63,24 +65,25 @@
 			);
 		}
 
-		const robloxArg = window.NL_ARGS.find((arg) => arg.includes('roblox='));
-		if (robloxArg) {
-			console.info("[App] Launching Roblox from '--roblox'");
-			const robloxUrl = robloxArg.slice(9);
-
-			await launchRoblox(
+		const urlArgument = window.NL_ARGS.find((arg) => arg.includes('--deeplink='));
+		if (urlArgument) {
+			const url = urlArgument.slice(11)
+			console.info('[App] Launching AppleBlox with Roblox URI:',url);
+			await focusWindow()
+			await Roblox.launch(
 				(value) => (launchInfo.isConnected = value),
 				(value) => (launchInfo.launching = value),
 				(value) => (launchInfo.progress = value),
 				(value) => (launchInfo.text = value),
-				flagErrorPopup
+				flagErrorPopup,
+				url
 			);
 		}
 	}
 	checkArgs();
 
 	// Sets the theme to the system's mode
-	setMode('system');
+	setMode("system");
 
 	// Makes it so links are opened in the default browser and not Appleblox's webview.
 	document.addEventListener('click', (event) => {
@@ -112,7 +115,7 @@
 		<FastFlags render={false} />
 		<Misc render={false} />
 		<Mods render={false} />
-		<Roblox render={false} />
+		<RobloxPage render={false} />
 	</div>
 	<Onboarding />
 	<Updater />
@@ -129,7 +132,7 @@
 			bind:currentPage
 			bind:isLaunched={launchInfo.isConnected}
 			on:launchRoblox={async () => {
-				await launchRoblox(
+				await Roblox.launch(
 					(value) => (launchInfo.isConnected = value),
 					(value) => (launchInfo.launching = value),
 					(value) => (launchInfo.progress = value),
@@ -153,7 +156,7 @@
 			{:else if currentPage === 'dev'}
 				<Dev />
 			{:else if currentPage === 'roblox'}
-				<Roblox />
+				<RobloxPage />
 			{:else if currentPage === 'flags_editor'}
 				<FlagEditorPage />
 			{:else}
