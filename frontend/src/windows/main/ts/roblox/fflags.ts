@@ -256,9 +256,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			name: 'Menu version (Version 4 Chrome)',
 			flags: {
 				FFlagEnableInGameMenuChrome: true,
-				FFlagEnableReportAbuseMenuRoactABTest2: true,
 				FFlagChromeBetaFeature: true,
-				FFlagEnableInGameMenuChromeABTest2: true,
 			},
 			path: 'fastflags.ui.menu_version',
 			type: 'select',
@@ -391,7 +389,6 @@ export class RobloxFFlags {
 		if (preset) {
 			flagsList = await buildFlagsList();
 			const data = await flagsList.build();
-			console.log(data)
 
 			const { validFlags, invalidFlags, nameMap } = data;
 			return { validFlags, invalidFlags, nameMap };
@@ -619,7 +616,6 @@ export class FastFlagsList {
 			}
 
 			if (!addFlag && opts.value != null) continue;
-			// console.log(opts,addFlag)
 
 			// Check if the flag is valid from the flag tracker repository
 			await this.fetchTracker();

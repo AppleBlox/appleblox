@@ -25,6 +25,7 @@
 	export let fadeIn = true;
 	/** Don't render the panel. Only generate its settings. */
 	export let render = true;
+	export let overrides: SettingsOutput = {};
 
 	// Load settings
 	let settingsLoaded = false;
@@ -119,6 +120,17 @@
 				updateSettings();
 			}
 		}
+
+		// Apply overrides
+		if (Object.keys(overrides).length > 0) {
+			for (const [category, widgets] of Object.entries(overrides)) {
+				for (const [widget, value] of Object.entries(widgets)) {
+					settings[category][widget] = value;
+				}
+			}
+			await saveSettings(panel.id, settings);
+		}
+
 		// Show the page
 		settingsLoaded = true;
 		dispatch('loaded', { settings });
@@ -172,8 +184,8 @@
 					{#each panel.categories || [] as category (category.id)}
 						<div class="mt-5">
 							<!-- Category Description -->
-							<p class="text-xl font-bold text-red-600 dark:text-red-400">{category.name}</p>
-							<p class="text-[13px] text-primary-foreground font-semibold">{category.description}</p>
+							<p class="text-xl font-bold text-primary">{category.name}</p>
+							<p class="text-[13px] text-primary saturate-[20%] brightness-200 font-semibold">{category.description}</p>
 							{#each category.widgets || [] as widget (widget.id)}
 								<!-- Separator for the widgets (except button) -->
 								{#if widget.options.type !== 'button'}
@@ -253,7 +265,9 @@
 										<!-- Dropdown Widget -->
 									{:else if widget.options.type === 'select'}
 										<SelectWidget
-											items={widget.options.items.sort((a, b) => (a.value === "default" ? -1 : b.value === "default" ? 1 : 0))}
+											items={widget.options.items.sort((a, b) =>
+												a.value === 'default' ? -1 : b.value === 'default' ? 1 : 0
+											)}
 											defaultItem={settings[category.id][widget.id]}
 											on:itemSelected={(e) => {
 												const { item } = e.detail;
@@ -289,7 +303,7 @@
 			</Card.Root>
 		</div>
 	{:else}
-		<div class="flex h-[100vh] w-full opacity-30 items-center justify-center">
+		<div class="flex h-[100vh] w-full items-center justify-center">
 			<LoadingSpinner />
 		</div>
 	{/if}

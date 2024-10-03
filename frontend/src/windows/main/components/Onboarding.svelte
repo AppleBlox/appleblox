@@ -100,7 +100,7 @@
 			</Button>
 			<Button
 				on:click={async () => {
-					await setValue('roblox.roblox_launching.delegate_launching', true, true);
+					await setValue('roblox.launching.delegate', true, true);
 					toast.info('Roblox will now open AppleBlox before starting');
 				}}
 				variant="secondary"

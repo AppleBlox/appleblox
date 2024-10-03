@@ -43,10 +43,6 @@ export async function saveSettings(panelId: string, data: Object): Promise<void>
 			await filesystem.createDirectory(savePath);
 		}
 		try {
-			const filepath = `${savePath}/${panelId}.json`;
-			if (await shellFS.exists(filepath)) {
-				await filesystem.remove(filepath);
-			}
 			saveQueue[`${savePath}/${panelId}.json`] = JSON.stringify(data);
 		} catch (err) {
 			console.error('[Settings] ', err);
@@ -104,7 +100,7 @@ interface CacheEntry {
 
 let settingsCache: { [key: string]: CacheEntry } = {};
 
-const CACHE_LIFETIME = 10000; // Cache lifetime: 10 seconds
+const CACHE_LIFETIME = 500; // Cache lifetime: 0.5 seconds
 
 /** Get the value of a setting */
 export async function getValue<T>(

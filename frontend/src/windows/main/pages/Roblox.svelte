@@ -7,6 +7,8 @@
 	import { toast } from 'svelte-sonner';
 	import Panel from '../components/settings/panel.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
+	import type { SettingsOutput } from '../components/settings/types';
+	import LoadingSpinner from '../components/LoadingSpinner.svelte';
 
 	export let render = true;
 
@@ -49,11 +51,9 @@
 	async function switchClicked(e: CustomEvent) {
 		const { id, state } = e.detail;
 		switch (id) {
-			case 'redirect_appleblox':
-				Roblox.Utils.toggleURI(state).catch((err) => {
-					toast.error('An error occured');
-					console.error('[RobloxPanel] ', err);
-				});
+			case 'delegate':
+				await Roblox.Delegate.toggle(state);
+				break;
 		}
 	}
 
@@ -92,7 +92,7 @@
 			category
 				.setName('Launching')
 				.setDescription('Launching phase settings')
-				.setId('roblox_launching')
+				.setId('launching')
 				.addButton({
 					label: 'Create a launch shortcut',
 					description:
@@ -113,11 +113,20 @@
 					label: 'Delegate launching to AppleBlox',
 					description:
 						'When you launch Roblox, AppleBlox will open first in the background and apply the chosen settings',
-					id: 'delegate_launching',
+					id: 'delegate',
 					default: false,
 				})
 		)
 		.build();
+
+	let overrides: SettingsOutput = {};
+	async function loadOverrides() {
+		overrides = {
+			launching: {
+				delegate: await Roblox.Delegate.check(true),
+			},
+		};
+	}
 </script>
 
 <AlertDialog.Root bind:open={closeRobloxPopup}>
@@ -138,4 +147,13 @@
 	</AlertDialog.Content>
 </AlertDialog.Root>
 
-<Panel {panel} on:switch={switchClicked} on:button={buttonClicked} {render} />
+{#await loadOverrides()}
+	{#if render}
+		<LoadingSpinner />
+	{/if}
+{:then}
+	<Panel {panel} on:switch={switchClicked} on:button={buttonClicked} {render} {overrides} />
+{:catch error}
+	<h2 class="text-red-500">An error occured while loading settings overrides</h2>
+	<p class="text-red-300">{error}</p>
+{/await}

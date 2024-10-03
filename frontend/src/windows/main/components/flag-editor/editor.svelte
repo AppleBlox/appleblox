@@ -21,7 +21,6 @@
 		type EditorFlag,
 		type Profile,
 	} from '.';
-	import CatGif from '@/assets/panel/cat.gif';
 	import SillyCat from '@/assets/panel/silly.webp';
 	import { formatConsoleLog } from '../../ts/debugging';
 	import SmallButton from './small-button.svelte';
@@ -33,6 +32,7 @@
 	import Combox from '../Combox.svelte';
 	import FlagTable from './flag-table.svelte';
 	import { cn } from '$lib/utils';
+	import LoadingSpinner from '../LoadingSpinner.svelte';
 
 	type SelectElement = Selected<string>;
 
@@ -300,7 +300,7 @@
 	</div>
 	<div class="w-full flex flex-col items-center justify-center mt-10">
 		{#await loadProfiles()}
-			<img src={CatGif} alt="cat walkin :3" class="w-20 h-20" />
+			<LoadingSpinner class="w-20 h-20" />
 			<h2>Loading profile...</h2>
 		{:then}
 			{#if currentProfile}

@@ -124,31 +124,6 @@ END`);
 		toast.success(`Created a shortcut at "${path.join(savePath, 'Launch Roblox.app')}"`);
 	}
 
-	/* Checks if the URI feature is enabled*/
-	static async isUriEnabled() {
-		return (
-			await os.execCommand(`${libraryPath('urlscheme')} check roblox-player ch.origaming.appleblox.url`)
-		).stdOut.includes('true');
-	}
-
-	/** Toggles wether or not opening roblox:// and roblox-player:// links should open AppleBlox */
-	static async toggleURI(state: boolean, notif = true) {
-		const urlscheme = `${libraryPath('urlscheme')}`;
-		if (state) {
-			await os.execCommand(`${urlscheme} set roblox ch.origaming.appleblox.url`);
-			await os.execCommand(`${urlscheme} set roblox-player ch.origaming.appleblox.url`);
-			if (notif) {
-				toast.success('Replaced roblox URI');
-			}
-		} else {
-			await os.execCommand(`${urlscheme} set roblox com.roblox.RobloxPlayer`);
-			await os.execCommand(`${urlscheme} set roblox-player com.roblox.RobloxPlayer`);
-			if (notif) {
-				toast.success('Restored roblox URI');
-			}
-		}
-	}
-
 	static async killAll() {
 		await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
 	}

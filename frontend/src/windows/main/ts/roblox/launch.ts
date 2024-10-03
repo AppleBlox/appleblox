@@ -16,6 +16,7 @@ let rbxInstance: RobloxInstance | null = null;
 
 /** Launches a Roblox instance */
 export async function launchRoblox(
+	// We use multiple functions as argument so things like launchProgress, the text to show in the UI, etc... can be read by App.svelte
 	setRobloxConnected: (value: boolean) => void,
 	setLaunchingRoblox: (value: boolean) => void,
 	setLaunchProgress: (value: number) => void,
@@ -29,7 +30,6 @@ export async function launchRoblox(
 		toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
 		return;
 	}
-	// We use multiple functions as argument so things like launchProgress, the text to show in the UI, etc... can be read by App.svelte
 	try {
 		console.info('[Launch] Launching Roblox');
 		setLaunchingRoblox(true);

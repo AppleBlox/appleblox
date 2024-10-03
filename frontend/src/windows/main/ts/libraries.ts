@@ -8,31 +8,31 @@ const LibPaths = {
 	notifications: {
 		darwin: {
 			prod: '/lib/alerter_ablox',
-			dev: '/build/lib/MacOS/alerter_ablox',
+			dev: '/bin/alerter_ablox',
 		},
 	},
 	discordrpc: {
 		darwin: {
 			prod: '/lib/discordrpc_ablox',
-			dev: '/build/lib/MacOS/discordrpc_ablox',
+			dev: '/bin/discordrpc_ablox',
 		},
 	},
 	watchdog: {
 		darwin: {
 			prod: '/lib/watchdog',
-			dev: '/build/lib/MacOS/watchdog',
+			dev: '/bin/watchdog',
 		},
 	},
 	window_manager: {
 		darwin: {
 			prod: '/lib/window_manager',
-			dev: '/build/lib/MacOS/window_manager',
+			dev: '/bin/window_manager',
 		},
 	},
 	urlscheme: {
 		darwin: {
 			prod: '/lib/urlscheme',
-			dev: '/build/lib/MacOS/urlscheme',
+			dev: '/bin/urlscheme',
 		},
 	},
 } as const;

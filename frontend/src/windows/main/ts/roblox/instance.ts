@@ -1,7 +1,9 @@
-import { events, filesystem, os } from '@neutralinojs/lib';
+import { clipboard, events, filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import Roblox from '.';
 import { isProcessAlive, sleep } from '../utils';
+import { getValue } from '../../components/settings';
+import { shell } from '../tools/shell';
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';
@@ -122,7 +124,7 @@ export class RobloxInstance {
 	}
 
 	watchLogs: boolean;
-	constructor(watch: boolean, url?: string) {
+	constructor(watch: boolean) {
 		this.watchLogs = watch;
 	}
 
@@ -140,17 +142,21 @@ export class RobloxInstance {
 		// Launch Roblox
 		if (url) {
 			console.info(`[Roblox.Instance] Opening from URL: ${url}`);
-			await Roblox.Utils.toggleURI(false, false);
-			await os.execCommand(`open ${url}`);
+			await Roblox.Delegate.toggle(false);
+			await clipboard.writeText(url)
+			await shell("open",[url]);
 		} else {
-			await os.execCommand(`open "${Roblox.path}"`);
+			await shell("open",[Roblox.path]);
 		}
 
 		await sleep(1000);
-		await Roblox.Utils.toggleURI(true, false);
+		// If block because settings can be edited and maybe it will not be boolean
+		if ((await getValue<boolean>('roblox.launching.delegate')) === true) {
+			await Roblox.Delegate.toggle(true);
+		}
 
 		// We find every roblox processes and get the RobloxPlayer one
-		const robloxProcess = await (await os.execCommand('pgrep -f "Roblox"')).stdOut.split('\n');
+		const robloxProcess = (await os.execCommand('pgrep -f "Roblox"')).stdOut.split('\n');
 		for (const pid of robloxProcess) {
 			const info = (await os.execCommand(`ps -p ${pid} -o command=`)).stdOut.trim();
 			if (info.length < 2) continue;
