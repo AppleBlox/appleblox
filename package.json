@@ -8,7 +8,6 @@
 		"dev": "bun run scripts/package/dev.ts",
 		"package": "bun run scripts/build/ts/index.ts",
 		"release": "bun run package && bun run scripts/build/ts/dmg.ts",
-		"binaries": "bun run scripts/build/ts/binaries.ts",
 		"format": "prettier --write ./",
 		"neu:empty": ""
 	},

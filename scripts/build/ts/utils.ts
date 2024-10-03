@@ -4,6 +4,10 @@ import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 
 export async function buildViteAndNeu() {
+	if (!(await checkNeutralino())) {
+		await $`bunx neu update`;
+	}
+
 	const frontBuildLog = new Signale({
 		interactive: true,
 		scope: 'vite-neutralino',
@@ -30,7 +34,7 @@ export async function buildViteAndNeu() {
 	process.stdout.write('\x1b[2J');
 	process.stdout.write('\x1b[0f');
 
-	frontBuildLog.complete('App binaries were built!');
+	frontBuildLog.complete('Downloaded Neutralino binaries');
 }
 
 export async function getAllFilesInFolder(folderPath: string): Promise<string[]> {
@@ -57,4 +61,11 @@ export async function getAllFilesInFolder(folderPath: string): Promise<string[]>
 		console.error(`Error reading directory: ${folderPath}`, error);
 		throw error;
 	}
+}
+
+export async function checkNeutralino(): Promise<boolean> {
+	await $`mkdir -p bin`;
+	const list = await $`ls bin`.text();
+	if (!list.includes('neutralino')) return false;
+	return true;
 }

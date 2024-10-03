@@ -10,7 +10,7 @@ const BuildConfig: Config = {
 	appBundleName: 'AppleBlox',
 	mac: {
 		architecture: ['universal', 'arm64', 'x64'],
-		appIcon: path('./build/assets/mac.icns'),
+		appIcon: path('./scripts/build/assets/mac.icns'),
 		minimumOS: '10.13.0',
 	},
 	// May sometimes test some things

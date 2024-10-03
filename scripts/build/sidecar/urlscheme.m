@@ -1,5 +1,6 @@
+// Change the handler for an URI
 #import <Foundation/Foundation.h>
-#import <CoreServices/CoreServices.h>
+#import <ApplicationServices/ApplicationServices.h>
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
@@ -13,7 +14,7 @@ int main(int argc, const char * argv[]) {
         NSString *bundleIdentifier = [NSString stringWithUTF8String:argv[3]];
         
         if ([command isEqualToString:@"set"]) {
-            OSStatus status = LSSetDefaultHandlerForURLScheme((__bridge CFStringRef)urlScheme, (__bridge CFStringRef)bundleIdentifier);
+            OSStatus status = LSSetDefaultHandlerForURLScheme((CFStringRef)urlScheme, (CFStringRef)bundleIdentifier);
             
             if (status == noErr) {
                 NSLog(@"Successfully set %@ as the default handler for %@://", bundleIdentifier, urlScheme);
@@ -23,19 +24,14 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
         } else if ([command isEqualToString:@"check"]) {
-            CFStringRef currentHandler = LSCopyDefaultHandlerForURLScheme((__bridge CFStringRef)urlScheme);
+            CFStringRef currentHandler = LSCopyDefaultHandlerForURLScheme((CFStringRef)urlScheme);
             
             if (currentHandler) {
-                BOOL isDefault = [(__bridge NSString *)currentHandler isEqualToString:bundleIdentifier];
+                BOOL isDefault = [(NSString *)currentHandler isEqualToString:bundleIdentifier];
                 CFRelease(currentHandler);
                 
-                if (isDefault) {
-                    NSLog(@"true");
-                    return 0;
-                } else {
-                    NSLog(@"false");
-                    return 1;
-                }
+                NSLog(@"%@", isDefault ? @"true" : @"false");
+                return isDefault ? 0 : 1;
             } else {
                 NSLog(@"No default handler found for %@://", urlScheme);
                 return 1;

@@ -3,7 +3,7 @@ import neuConfig from '@root/neutralino.config.json';
 import { version } from '@root/package.json';
 import { $ } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 import { Signale } from 'signale';
 
 export async function macBuild() {
@@ -14,7 +14,8 @@ export async function macBuild() {
 	}
 
 	const Dist = resolve('.tmpbuild');
-	const Libraries = resolve('build/lib/MacOS');
+	const Libraries = resolve('bin');
+	const LibrariesBlacklist = ['bootstrap', 'neutralino'];
 
 	for (const app of BuildConfig.mac.architecture) {
 		const appTime = performance.now();
@@ -56,7 +57,7 @@ export async function macBuild() {
 		// Executables
 		await $`cp "${executable}" "${resolve(MacOS, 'main')}"`;
 		chmodSync(resolve(MacOS, 'main'), '755');
-		await $`cp "${resolve(__dirname, '../templates/mac/bootstrap')}" "${resolve(MacOS, 'bootstrap')}"`;
+		await $`cp "${resolve('bin/bootstrap')}" "${resolve(MacOS, 'bootstrap')}"`;
 		chmodSync(resolve(MacOS, 'bootstrap'), '755');
 
 		// Resources
@@ -67,7 +68,12 @@ export async function macBuild() {
 
 		// Libraries
 		if (existsSync(Libraries)) {
+			const files = (await $`ls ./bin | grep -E '${LibrariesBlacklist.join('|')}'`.text()).split('\n');
+			files.pop();
 			await $`cp -r "${Libraries}" "${resolve(Resources, 'lib')}"`;
+			for (const file of files) {
+				await $`rm -rf "${join(Resources, "lib", file)}"`;
+			}
 		}
 		l.complete(`mac_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 		console.log('');

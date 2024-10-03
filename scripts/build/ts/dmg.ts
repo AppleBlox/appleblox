@@ -90,7 +90,7 @@ async function build() {
 				sourceFolder: appFolder,
 				outputName: join(resolve('./dist'), `${BuildConfig.appName}-${version}_${app}`),
 				volumeName: BuildConfig.appName,
-				backgroundPath: resolve('./build/assets/bg.png'),
+				backgroundPath: resolve('./scripts/build/assets/bg.png'),
 				windowPos: '200 120',
 				windowSize: '600 360',
 				iconSize: 90,

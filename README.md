@@ -91,3 +91,4 @@ All contributions are welcome! Feel free to open issues and pull requests. For f
 -   Logo by @typeofnull
 -   Inspired from @pizzaboxer's Bloxstrap
 -   Icons by lucide-svelte & icons8
+-   Due to a massive skill issue (OrigamingWasTaken), the Objective-C sidecar is built by ClaudeAI and ChatGPT. I will replace this code if I find contributors.

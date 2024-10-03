@@ -6,7 +6,7 @@
 	"url": "/",
 	"enableServer": true,
 	"enableNativeAPI": true,
-	"nativeAllowList": ["events.*", "app.exit", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*"],
+	"nativeAllowList": ["events.*", "app.exit", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*","app.*"],
 	"exportAuthInfo": false,
 	"logging": {
 		"writeToLogFile": false,
@@ -20,7 +20,7 @@
 			"height": 700,
 			"minWidth": 400,
 			"minHeight": 200,
-			"icon": "/build/assets/mac.png",
+			"icon": "/scripts/build/assets/mac.png",
 			"exitProcessOnClose": false,
 			"useSavedState": false,
 			"extendUserAgentWith": "AppleBlox",

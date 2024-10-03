@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-# Based on code by https://github.com/malipetek and https://github.com/hschneider/ - hey you did a brilliant job!
-
-pkill -f AppleBlox
-
-MACOS="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-CONTENTS="$(dirname "$MACOS")"
-exec "${MACOS}/main" --path="${CONTENTS}/Resources" --enable-extensions=true "$@"

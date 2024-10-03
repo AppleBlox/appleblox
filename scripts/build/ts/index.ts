@@ -2,7 +2,7 @@ import BuildConfig from '@root/build.config';
 import { $ } from 'bun';
 import { resolve } from 'node:path';
 import { Signale } from 'signale';
-import { buildBinaries } from './binaries';
+import { buildSidecar } from './sidecar';
 import { linuxBuild } from './linux-bundle';
 import { macBuild } from './mac-bundle';
 import { buildViteAndNeu } from './utils';
@@ -20,7 +20,7 @@ export async function build() {
 		return;
 	}
 
-	await buildBinaries();
+	await buildSidecar();
 	await buildViteAndNeu();
 
 	if (BuildConfig.mac) {

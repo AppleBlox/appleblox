@@ -1,13 +1,15 @@
 import { $ } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
+import { buildSidecar } from '../build/ts/sidecar';
+import { checkNeutralino } from '../build/ts/utils';
 
 async function main(downloadNeuBinaries = false, createBinaries = false) {
 	if (downloadNeuBinaries) {
 		await $`bunx neu update`;
 	}
 	if (createBinaries) {
-		await $`bun run --bun binaries`;
+		await buildSidecar()
 	}
 
 	// Clear terminal
@@ -62,14 +64,16 @@ async function main(downloadNeuBinaries = false, createBinaries = false) {
 	});
 }
 
-function checkBinaries(): boolean {
-	const files = ['alerter_ablox', 'discordrpc_ablox', 'urlscheme', 'watchdog', 'window_manager'];
+function checkSidecar(): boolean {
+	const files = ['alerter_ablox', 'discordrpc_ablox', 'urlscheme', 'window_manager', 'bootstrap'];
 	for (const file of files) {
-		const filePath = resolve(join('build/lib/MacOS', file));
+		const filePath = resolve(join('bin', file));
 		if (!existsSync(filePath)) return false;
 	}
 	return true;
 }
 
 // If the binary folder doesn't exist, then we download it
-main(!existsSync(resolve("./bin")),!checkBinaries())
+checkNeutralino().then(async (exists) => {
+	main(!exists, !checkSidecar());
+});
