@@ -46,8 +46,6 @@ async function createCustomDMG(options: DmgOptions) {
 		`"${outputName}.dmg"`,
 		`"${sourceFolder}"`,
 	];
-
-	console.log('Creating DMG...');
 	try {
 		await new Promise<void>((resolve, reject) => {
 			child_process.exec(args.join(' '), (error, stdout, stderr) => {
