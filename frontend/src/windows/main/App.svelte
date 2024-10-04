@@ -68,7 +68,7 @@
 		const urlArgument = window.NL_ARGS.find((arg) => arg.includes('--deeplink='));
 		if (urlArgument) {
 			const url = urlArgument.slice(11)
-			console.info('[App] Launching AppleBlox with Roblox URI:',url);
+			console.info('[App] Launching AppleBlox with Roblox URI.');
 			await focusWindow()
 			await Roblox.launch(
 				(value) => (launchInfo.isConnected = value),

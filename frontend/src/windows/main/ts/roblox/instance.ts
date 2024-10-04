@@ -141,12 +141,10 @@ export class RobloxInstance {
 
 		// Launch Roblox
 		if (url) {
-			console.info(`[Roblox.Instance] Opening from URL: ${url}`);
 			await Roblox.Delegate.toggle(false);
-			await clipboard.writeText(url)
-			await shell("open",[url]);
+			await shell('open', [url]);
 		} else {
-			await shell("open",[Roblox.path]);
+			await shell('open', [Roblox.path]);
 		}
 
 		await sleep(1000);
