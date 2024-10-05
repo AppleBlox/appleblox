@@ -28,7 +28,7 @@
 	`;
 
 	const testerlist = `
-	<a href="_blank">@KeyboardChampion, @YousufSSyed, @angrysausage, @allFiction</a> - People who have tested the app, and repported bugs.
+	<a href="_blank">@allFiction</a> - People who have tested the app, and repported bugs.
 	`;
 
 	const panel = new SettingsPanelBuilder()
