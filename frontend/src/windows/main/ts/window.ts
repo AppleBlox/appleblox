@@ -5,30 +5,41 @@ import hotkeys from 'hotkeys-js';
 import { shell } from './tools/shell';
 
 // Shortcuts like copy, paste, quit, etc... (they are unimplemented by default in NeuJS)
-hotkeys('ctrl+c,cmd+c', (e) => {
-	e.preventDefault();
+hotkeys.filter = () => true;
+hotkeys('ctrl+a,cmd+a', () => {
+	document.execCommand('selectAll');
+	return false;
+});
+
+hotkeys('ctrl+c,cmd+c', () => {
 	document.execCommand('copy');
+	return false;
 });
 
-hotkeys('ctrl+v,cmd+v', (e) => {
-	e.preventDefault();
+hotkeys('ctrl+v,cmd+v', () => {
 	document.execCommand('paste');
+	return false;
 });
 
-hotkeys('ctrl+x,cmd+x', (e) => {
-	e.preventDefault();
+hotkeys('ctrl+x,cmd+x', () => {
 	document.execCommand('copy');
 	document.execCommand('cut');
+	return false;
 });
 
-hotkeys('ctrl+z,cmd+z', (e) => {
-	e.preventDefault();
+hotkeys('ctrl+z,cmd+z', () => {
 	document.execCommand('undo');
+	return false
 });
 
-hotkeys('cmd+q,cmd+w', (e) => {
-	e.preventDefault();
+hotkeys('ctrl+shift+z,cmd+shift+z', () => {
+	document.execCommand('redo');
+	return false
+});
+
+hotkeys('cmd+q,cmd+w', () => {
 	events.broadcast('exitApp');
+	return false
 });
 
 export async function focusWindow() {
