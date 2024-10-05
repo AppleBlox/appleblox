@@ -35,16 +35,11 @@ hotkeys('cmd+q,cmd+w', (e) => {
 
 export async function focusWindow() {
 	try {
-		if (getMode() === 'dev') {
-			// So the app can be focused in dev environnement
-			shell(
-				`osascript -e 'tell application "System Events" to set frontmost of every process whose unix id is ${window.NL_PID} to true'`
-			,[],{skipStderrCheck: true, completeCommand: true});
-		} else {
-			// Better way of focusing the app
-			shellFS.open("",{application: "AppleBlox"})
-			// <os.ececCommand>(`open -a "AppleBlox"`);
-		}
+		shell(
+			`osascript -e 'tell application "System Events" to set frontmost of every process whose unix id is ${window.NL_PID} to true'`,
+			[],
+			{ skipStderrCheck: true, completeCommand: true }
+		);
 	} catch (err) {
 		console.error(err);
 	}
@@ -53,8 +48,10 @@ export async function focusWindow() {
 export async function setWindowVisibility(state: boolean) {
 	try {
 		shell(
-			`osascript -e 'tell application "System Events" to set visible of every process whose unix id is ${window.NL_PID} to ${state}'`
-		,[],{skipStderrCheck: true, completeCommand: true});
+			`osascript -e 'tell application "System Events" to set visible of every process whose unix id is ${window.NL_PID} to ${state}'`,
+			[],
+			{ skipStderrCheck: true, completeCommand: true }
+		);
 	} catch (err) {
 		console.error(err);
 	}
