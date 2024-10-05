@@ -59,33 +59,27 @@
 </AlertDialog.Root>
 
 <AlertDialog.Root bind:open={shortcutAndUrl}>
-	<AlertDialog.Content>
+	<AlertDialog.Content class="min-w-[700px]">
 		<AlertDialog.Header>
 			<AlertDialog.Title class="dark:text-white text-black">Quick setup</AlertDialog.Title>
 			<AlertDialog.Description>
-				<p>To unlock the true power of AppleBlox, you can follow these steps.</p>
+				<p>To maximize your experience with AppleBlox, consider the following setup options:</p>
 				<br />
 				<p>
-					If you want to make AppleBlox work when launching from the website, you can click the "Use Roblox URL" button.
-					If you want to disable that later, you can always turn it off inside the "Misc" tab.
+					For seamless integration with Roblox's website, activate the "Use Roblox URL" feature. This setting can be
+					toggled on or off at any time through the "Misc" tab.
 				</p>
-				<br />
-				<p>You should also create a launch shortcut from the button below (also possible in the "Misc" tab)!</p>
-				<br />
 				<p>
-					If you want to use the <strong>Window Movement</strong> feature, we suggest you go into
-					<strong>System Settings → Privacy & Security → Accessibility</strong>
-					and press the
-					<strong>+ icon</strong> to choose and add the AppleBlox app. (Note: Due to a bug, you will need to remove and add
-					the app in the permission settings every AppleBlox update)
+					To streamline your access to AppleBlox, create a launch shortcut using the button below. This option is also
+					available in the "Misc" tab for future reference.
 				</p>
 				<br />
 				<p>
-					🌟 Don't forget to leave a <strong>Star</strong> on the
-					<a href="https://github.com/AppleBlox/appleblox">GitHub repo</a>
-					and join the
-					<a href="https://appleblox.com/discord">Discord Server</a>!
+					🌟 If you find AppleBlox useful, consider supporting us by:
+					<br />• Starring our <a href="https://github.com/AppleBlox/appleblox">GitHub repository</a>
+					<br />• Joining our <a href="https://appleblox.com/discord">Discord community</a> for updates and support
 				</p>
+				<p>Thank you for choosing AppleBlox!</p>
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer class="flex items-center justify-center">
@@ -94,7 +88,7 @@
 				on:click={() => {
 					Roblox.Utils.createShortcut();
 				}}
-				variant="secondary"
+				variant="outline"
 			>
 				Create shortcut
 			</Button>
@@ -103,7 +97,7 @@
 					await setValue('roblox.launching.delegate', true, true);
 					toast.info('Roblox will now open AppleBlox before starting');
 				}}
-				variant="secondary"
+				variant="outline"
 				>Use Roblox URL
 			</Button>
 			<AlertDialog.Action
