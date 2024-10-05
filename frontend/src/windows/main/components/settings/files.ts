@@ -1,7 +1,7 @@
 import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
-import type { SettingsOutput } from './types';
 import shellFS from '../../ts/tools/shellfs';
+import type { SettingsOutput } from './types';
 
 export async function getConfigPath(): Promise<string> {
 	return path.join(await os.getPath('data'), 'AppleBlox', 'config');

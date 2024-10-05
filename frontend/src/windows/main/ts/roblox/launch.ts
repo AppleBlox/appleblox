@@ -1,4 +1,3 @@
-import { os } from '@neutralinojs/lib';
 import beautify from 'json-beautify';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';

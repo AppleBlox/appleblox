@@ -1,9 +1,9 @@
-import { clipboard, events, filesystem, os } from '@neutralinojs/lib';
+import { events, filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import Roblox from '.';
-import { isProcessAlive, sleep } from '../utils';
 import { getValue } from '../../components/settings';
 import { shell } from '../tools/shell';
+import { isProcessAlive, sleep } from '../utils';
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';

@@ -20,9 +20,8 @@ type TextareaEvents = {
 };
 
 export {
-	Root,
-	//
-	Root as Textarea,
-	type TextareaEvents,
-	type FormTextareaEvent,
+    Root,
+    //
+    Root as Textarea, type FormTextareaEvent, type TextareaEvents
 };
+

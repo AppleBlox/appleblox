@@ -3,7 +3,7 @@ import neuConfig from '@root/neutralino.config.json';
 import { version } from '@root/package.json';
 import { $ } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 
 export async function macBuild() {

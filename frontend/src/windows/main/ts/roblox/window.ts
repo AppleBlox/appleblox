@@ -1,4 +1,4 @@
-import { computer, os } from '@neutralinojs/lib';
+import { computer } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
 import { shell } from '../tools/shell';
 

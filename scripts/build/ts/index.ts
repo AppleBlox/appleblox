@@ -2,9 +2,9 @@ import BuildConfig from '@root/build.config';
 import { $ } from 'bun';
 import { resolve } from 'node:path';
 import { Signale } from 'signale';
-import { buildSidecar } from './sidecar';
 import { linuxBuild } from './linux-bundle';
 import { macBuild } from './mac-bundle';
+import { buildSidecar } from './sidecar';
 import { buildViteAndNeu } from './utils';
 import { winBuild } from './win-bundle';
 

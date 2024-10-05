@@ -1,4 +1,3 @@
-import { os } from '@neutralinojs/lib';
 import { shell } from './tools/shell';
 
 export function getMode(): 'dev' | 'prod' {

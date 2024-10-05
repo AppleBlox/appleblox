@@ -1,3 +1,4 @@
+import { RobloxDelegate } from './delegate';
 import { RobloxFFlags } from './fflags';
 import { RobloxInstance } from './instance';
 import { launchRoblox } from './launch';
@@ -5,7 +6,6 @@ import { RobloxMods } from './mods';
 import { robloxPath } from './path';
 import { RobloxUtils } from './utils';
 import { RobloxWindow } from './window';
-import { RobloxDelegate } from './delegate';
 
 // Simple export
 class Roblox {

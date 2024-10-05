@@ -1,6 +1,6 @@
 import { $ } from 'bun';
 import { chmodSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 import { extract } from 'tar';
 

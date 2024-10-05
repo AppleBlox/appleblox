@@ -1,10 +1,8 @@
 // Set up keyboard shortcuts and add extra commands to neutralino
-import { events, os } from '@neutralinojs/lib';
-import { getMode } from './utils';
+import { events } from '@neutralinojs/lib';
 
 import hotkeys from 'hotkeys-js';
 import { shell } from './tools/shell';
-import shellFS from './tools/shellfs';
 
 // Shortcuts like copy, paste, quit, etc... (they are unimplemented by default in NeuJS)
 hotkeys('ctrl+c,cmd+c', (e) => {

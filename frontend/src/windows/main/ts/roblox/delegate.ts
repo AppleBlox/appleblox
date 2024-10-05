@@ -1,7 +1,7 @@
-import { shell } from '../tools/shell';
+import { toast } from 'svelte-sonner';
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
-import { toast } from 'svelte-sonner';
+import { shell } from '../tools/shell';
 
 const urlscheme = libraryPath('urlscheme');
 

@@ -4,9 +4,8 @@ import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import Roblox from '.';
-import { libraryPath } from '../libraries';
-import shellFS from '../tools/shellfs';
 import { shell } from '../tools/shell';
+import shellFS from '../tools/shellfs';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
