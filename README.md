@@ -1,3 +1,5 @@
+# AppleBlox
+
 <div align="center">
     <img src=".github/assets/logo.png" style="width:30%;">
 </div>
@@ -11,68 +13,44 @@
 ![Static Badge](https://img.shields.io/badge/built_with_apples-%23F43F5E)
 [![Discord](https://img.shields.io/discord/1263512148450082837?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.gg/MWHgn8VNZT)
 
-# AppleBlox
+AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap). It includes features such as DiscordRPC and Fast-flags, with ongoing development for additional functionality.
 
-AppleBlox is a simple Roblox launcher for **MacOS**, heavily inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap).
-Supports DiscordRPC, Fast-flags & more to come.
+The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview).
 
-You can get a demo of the app from the [Releases](https://github.com/AppleBlox/appleblox/releases/latest)
+## Features
 
-For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview)
+- Server Notifications: Displays the hosting region of the game server.
+- Discord Rich Presence: Integrates with Discord to show gaming activity.
+- FFlags Presets: Provides pre-configured Fast flags settings.
+- Custom Flags: Allows creation of custom FastFlags profiles, including game-specific configurations.
+- Multi-instance (Experimental): Enables running multiple Roblox windows simultaneously.
+- Mods: Supports UI customization through community-created mods.
 
-# Features
+## Development
 
-### Mods
+Setting up the AppleBlox development environment:
 
-You can add mods to tweak Roblox's UI via the `~Library/AppleBlox/Mods` folder (there is a button in the app to open it). To do so, simply drag a Mod folder into this location. Exemple:
+1. Clone the repository
+2. Execute `bun install`
+3. Install additional dependencies: `brew install create-dmg`
 
-![CleanShot 2024-07-17 at 22 46 42@2x](https://github.com/user-attachments/assets/587330fe-9f50-4349-9379-794853b28527)
+Development commands:
+- `bun run --bun dev`: Start the development environment
+- `bun run --bun package`: Package the application (excluding DMG creation)
+- `bun run --bun release`: Package and create a DMG
 
-Then, from AppleBlox, you can choose to enable / disable mods globally or individually. Please note that mods are loaded in alphabetical order (123,abc).
-
-### DiscordRPC
-
-Show which games you're playing, when you started, and supports buttons to join your server. If the Bloxstrap SDK settings has been enabled, games will be able to set custom rich presence.
-
-### Bloxstrap SDK
-
-AppleBlox supports many features from Bloxstrap including [the sdk](https://github.com/pizzaboxer/bloxstrap/wiki/Integrating-Bloxstrap-functionality-into-your-game). This let's games set custom **discord rich presence**, and with our addons, much more like control the Roblox window ([see this exemple for a rythm game](https://streamable.com/jwidvp?t=55)).
-
-### Server notifications
-
-When joining a server, you will be notified of its location. (Exemple: Paris, Île-de-France, FR)
-
-### FastFlags
-
-Use a collection of presets to spice-up your gameplay & add your owns.
-
-### Multi-instances
-
-Launch multiple windows of Roblox at the same time. Please note that AppleBlox only tracks data of **1** window, launched from the main menu.
+AppleBlox is built using [Svelte](https://svelte.dev) for the frontend and [NeutralinoJS](https://neutralino.js.org) for the backend. NeutralinoJS is a lightweight C++ alternative to Electron or NW.JS, suitable for single-platform applications. More information is available at [neutralino.js.org/docs](https://neutralino.js.org/docs).
 
 ## Pre-compiled Binaries
 
-To save the hassle of installing rust, and setting up an Xcode project to build the app, the build script will download the `alerter` and `discord-rpc-cli` libs from those repository's releases:
+The build script utilizes pre-compiled binaries for `alerter` and `discord-rpc-cli` to simplify the build process:
 
--   https://github.com/vjeantet/alerter (Taken from the github releases)
--   https://github.com/AppleBlox/Discord-RPC-cli (Built from source on my machine)
-
-## Developpement
-
-To setup the app on your machine, clone this repo and run `bun install`. You will also need to install some packages with the command: `brew install create-dmg`.
-
-To start the **dev environnement**, run `bun run --bun dev`.
-
-To **package**, run `bun run --bun package`. (If you don't want to create dmgs)
-
-To **package and create a dmg of the app**, run `bun run --bun release`.
-
-The app is made with [Svelte](https://svelte.dev) (Frontend) and [NeutralinoJS](https://neutralino.js.org) (Backend).
-If you haven't heard about NeutralinoJS, it is a lightweight alternative coded in **c++** to frameworks like Electron or NW.JS. It is still growing, but is stable enough to be used on one platform. You can learn more about it on https://neutralino.js.org/docs.
+- `alerter`: Sourced from [vjeantet/alerter](https://github.com/vjeantet/alerter) releases
+- `discord-rpc-cli`: Built from [AppleBlox/Discord-RPC-cli](https://github.com/AppleBlox/Discord-RPC-cli)
 
 ## Contributing
 
-All contributions are welcome! Feel free to open issues and pull requests. For further discussion, contact me at `contact@origaming.ch` or on discord `@Origaming`.
+Contributions are welcome. Please feel free to submit issues, pull requests, or discuss ideas. For further discussion, contact `contact@origaming.ch` or reach out on Discord `@Origaming`.
 
 ## Gallery
 
@@ -88,7 +66,7 @@ All contributions are welcome! Feel free to open issues and pull requests. For f
 
 ## Credits
 
--   Logo by @typeofnull
--   Inspired from @pizzaboxer's Bloxstrap
--   Icons by lucide-svelte & icons8
--   Due to a massive skill issue (OrigamingWasTaken), the Objective-C sidecar is built by ClaudeAI and ChatGPT. I will replace this code if I find contributors.
+- Logo: @typeofnull
+- Inspiration: @pizzaboxer's Bloxstrap
+- Icons: lucide-svelte & icons8
+- Objective-C sidecar: Generated with assistance from ClaudeAI and ChatGPT. Contributors are sought to replace this code.
