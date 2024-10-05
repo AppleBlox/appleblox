@@ -44,7 +44,7 @@
 		/** Fires when a file is chosen from a filepicker */
 		fileChosen: { id: string; file: string };
 		/** Fires when a file is removed from a filepicker */
-		fileRemoved: null;
+		fileRemoved: { id: string };
 		/** Fires when an input changes */
 		input: { input: string };
 		/** Fires when a select item is chosen */
@@ -185,7 +185,9 @@
 						<div class="mt-5">
 							<!-- Category Description -->
 							<p class="text-xl font-bold text-primary">{category.name}</p>
-							<p class="text-[13px] text-primary saturate-[20%] brightness-200 font-semibold">{category.description}</p>
+							<p class="text-[13px] text-primary saturate-[20%] brightness-200 font-semibold">
+								{category.description}
+							</p>
 							{#each category.widgets || [] as widget (widget.id)}
 								<!-- Separator for the widgets (except button) -->
 								{#if widget.options.type !== 'button'}
@@ -258,7 +260,7 @@
 											}}
 											on:fileRemoved={() => {
 												settings[category.id][widget.id] = null;
-												dispatch('fileRemoved');
+												dispatch('fileRemoved', { id: widget.id });
 												updateSettings();
 											}}
 										/>
