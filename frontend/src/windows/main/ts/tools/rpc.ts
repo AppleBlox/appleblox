@@ -82,7 +82,7 @@ export class DiscordRPC {
 	private async isRunning(): Promise<boolean> {
 		try {
 			const result = await shell('pgrep', ['-f', 'discordrpc_ablox']);
-			return result.stdout.split('\n').length > 2;
+			return result.stdOut.split('\n').length > 2;
 		} catch (err) {
 			return false;
 		}

@@ -8,19 +8,21 @@
 	import { loadSettings, saveSettings } from './settings';
 	import { compareVersions, curlGet } from '../ts/utils';
 	import Link from './Link.svelte';
+	import { shell } from '../ts/tools/shell';
 
 	let showUpdatePopup = false;
 	let updateVersion = version;
 	let body = '';
 
 	async function checkForUpdate() {
-		const checkWifi = await os.execCommand('ping -c 1 google.com');
-		if (checkWifi.stdOut.includes('Unknown host')) {
+		const checkWifi = await shell(`if [[ "$(networksetup -getairportnetwork en0 | grep -o 'Current Wi-Fi Network:')" != "" ]]; then echo "true"; else echo "false"; fi`,[],{completeCommand: true});
+		if (!checkWifi.stdOut.includes('true')) {
 			toast.error('Could not connect to internet');
 			return;
 		}
 		const releases = await curlGet('https://api.github.com/repos/AppleBlox/appleblox/releases').catch((err) => {
 			console.error('[Updater] ', err);
+			return;
 		});
 		if (releases.message) return;
 		for (const re of releases) {

@@ -1,19 +1,12 @@
 import { os } from '@neutralinojs/lib';
+import { shell } from './tools/shell';
 
 export function getMode(): 'dev' | 'prod' {
 	return import.meta.env.MODE === 'development' ? 'dev' : 'prod';
 }
 
-/**
- * Removes non-UTF-8 characters from a string using iconv-lite.
- * @param {string} str - The input string potentially containing non-UTF-8 characters.
- */
-export async function removeNonUTF8CharactersFromString(str: string) {
-	return (await os.execCommand(`echo "${str}" | iconv -c -f utf-8 -t utf-8`)).stdOut.trim();
-}
-
 export async function isProcessAlive(pid: number | string) {
-	const cmd = await os.execCommand(`ps -p ${pid}`);
+	const cmd = await shell('ps', ['-p', pid.toString()],{skipStderrCheck: true});
 	return cmd.stdOut.includes(String(pid));
 }
 
@@ -38,8 +31,7 @@ export function getStringDiff(oldStr: string, newStr: string): string {
 }
 
 export async function curlGet(url: string): Promise<any> {
-	const cmd = `curl -X GET -H "Content-Type: application/json" "${url}"`;
-	const res = JSON.parse(await (await os.execCommand(cmd)).stdOut.trim());
+	const res = JSON.parse((await shell('curl', ['-X', 'GET', '-H', 'Content-Type: application/json', url], {skipStderrCheck: true})).stdOut);
 	return res;
 }
 

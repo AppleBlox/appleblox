@@ -68,7 +68,7 @@ export async function merge(source: string, dest: string, options: ExecuteOption
  */
 export async function readFile(path: string, options: ExecuteOptions = {}): Promise<string> {
 	const result = await shell('cat', [path], options);
-	return result.stdout.trim();
+	return result.stdOut.trim();
 }
 
 /**
@@ -79,7 +79,7 @@ export async function readFile(path: string, options: ExecuteOptions = {}): Prom
  */
 export async function listDirectory(path: string, options: ExecuteOptions = {}): Promise<string[]> {
 	const result = await shell('ls', ['-1', path], options);
-	return result.stdout.trim().split('\n');
+	return result.stdOut.trim().split('\n');
 }
 
 /**
@@ -108,12 +108,12 @@ export async function getInfo(path: string, options: ExecuteOptions = {}): Promi
 		...options,
 		skipStderrCheck: true,
 	});
-	if (result.exitCode === 1 || result.stderr.trim().includes('No such file or directory')) {
+	if (result.exitCode === 1 || result.stdErr.trim().includes('No such file or directory')) {
 		return null;
-	} else if (result.stderr.length > 0) {
-		console.error('Error while getting path info:', result.stderr);
+	} else if (result.stdErr.length > 0) {
+		console.error('Error while getting path info:', result.stdErr);
 	}
-	const [name, size, mode, uid, gid, permissions, modTime] = result.stdout.trim().split(',');
+	const [name, size, mode, uid, gid, permissions, modTime] = result.stdOut.trim().split(',');
 	return { name, size, mode, uid, gid, permissions, modTime };
 }
 
@@ -224,6 +224,87 @@ export async function open(path: string, options: OpenOptions = {}): Promise<voi
 	await shell('open', args, options);
 }
 
+type PermissionTarget = 'u' | 'g' | 'o' | 'a';
+export interface ChmodOptions extends ExecuteOptions {
+	/** Apply changes recursively to directories and their contents (-R) */
+	recursive?: boolean;
+	/** Use the numeric mode specification */
+	numeric?: boolean;
+	/** Change the file mode bits of the symbolic link itself, not the file it points to (-h) */
+	modifySymlink?: boolean;
+	/** Use silent mode; suppress most error messages (-f) */
+	silent?: boolean;
+	/** Display information about the changes made (-v) */
+	verbose?: boolean;
+	/** Don't change any file modes; useful for testing (-n) */
+	dryRun?: boolean;
+	/** Change the user ID of the file (-u) */
+	setUserId?: boolean;
+	/** Change the group ID of the file (-g) */
+	setGroupId?: boolean;
+	/** Set the sticky bit (-t) */
+	setSticky?: boolean;
+	/** Remove read permission (u-r, g-r, o-r, a-r) */
+	removeRead?: PermissionTarget;
+	/** Remove write permission (u-w, g-w, o-w, a-w) */
+	removeWrite?: PermissionTarget;
+	/** Remove execute permission (u-x, g-x, o-x, a-x) */
+	removeExecute?: PermissionTarget;
+	/** Add read permission (u+r, g+r, o+r, a+r) */
+	addRead?: PermissionTarget;
+	/** Add write permission (u+w, g+w, o+w, a+w) */
+	addWrite?: PermissionTarget;
+	/** Add execute permission (u+x, g+x, o+x, a+x) */
+	addExecute?: PermissionTarget;
+}
+
+/**
+ * Change the mode of a file or directory.
+ * @param path - The path of the file or directory to modify.
+ * @param mode - The mode to set. Can be a numeric string (e.g., "755") or a symbolic string (e.g., "u+x").
+ * @param options - Options for the chmod command and execution.
+ */
+export async function chmod(path: string, mode: string, options: ChmodOptions = {}): Promise<void> {
+	const args: string[] = [];
+
+	if (options.recursive) args.push('-R');
+	if (options.modifySymlink) args.push('-h');
+	if (options.silent) args.push('-f');
+	if (options.verbose) args.push('-v');
+	if (options.dryRun) args.push('-n');
+
+	if (options.numeric) {
+		args.push(mode);
+	} else {
+		let symbolicMode = '';
+
+		const applyPermission = (type: PermissionTarget, action: '+' | '-', permission: 'r' | 'w' | 'x') => {
+			symbolicMode += `${type}${action}${permission},`;
+		};
+
+		if (options.setUserId) symbolicMode += 'u+s,';
+		if (options.setGroupId) symbolicMode += 'g+s,';
+		if (options.setSticky) symbolicMode += '+t,';
+
+		if (options.removeRead) applyPermission(options.removeRead, '-', 'r');
+		if (options.removeWrite) applyPermission(options.removeWrite, '-', 'w');
+		if (options.removeExecute) applyPermission(options.removeExecute, '-', 'x');
+		if (options.addRead) applyPermission(options.addRead, '+', 'r');
+		if (options.addWrite) applyPermission(options.addWrite, '+', 'w');
+		if (options.addExecute) applyPermission(options.addExecute, '+', 'x');
+
+		if (symbolicMode) {
+			args.push(symbolicMode.slice(0, -1)); // Remove trailing comma
+		} else {
+			args.push(mode);
+		}
+	}
+
+	args.push(path);
+
+	await shell('chmod', args, options);
+}
+
 // Default export containing all functions
 const shellFS = {
 	createDirectory,
@@ -237,6 +318,7 @@ const shellFS = {
 	exists,
 	getInfo,
 	open,
+	chmod
 };
 
 export default shellFS;

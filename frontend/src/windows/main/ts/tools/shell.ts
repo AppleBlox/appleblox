@@ -6,9 +6,9 @@ import { events, os } from '@neutralinojs/lib';
  */
 interface ExecutionResult {
 	/** The standard output of the command. */
-	stdout: string;
+	stdOut: string;
 	/** The standard error output of the command. */
-	stderr: string;
+	stdErr: string;
 	/** The exit code of the command. */
 	exitCode: number;
 }
@@ -21,6 +21,10 @@ export interface ExecuteOptions {
 	skipStderrCheck?: boolean;
 	/** The timeout in milliseconds. If provided, the command will be terminated after this time. */
 	timeoutMs?: number;
+	/** If true, the command will be treated as a "whole" command and args will be ignored */
+	completeCommand?: boolean;
+	/** Pass this argument to neutralino's os.execCommand function */
+	background?: boolean;
 }
 
 /**
@@ -28,8 +32,8 @@ export interface ExecuteOptions {
  * @param arg - The argument to escape.
  * @returns The escaped argument.
  */
-function escapeShellArg(arg: string): string {
-	return `'${arg.replace(/'/g, "'\\''")}'`;
+function escapeShellArg(arg: string | number): string {
+	return `'${arg.toString().replace(/'/g, "'\\''")}'`;
 }
 
 /**
@@ -38,7 +42,7 @@ function escapeShellArg(arg: string): string {
  * @param args - An array of arguments for the command.
  * @returns A properly escaped command string.
  */
-export function buildCommand(command: string, args: string[]): string {
+export function buildCommand(command: string, args: (string | number)[]): string {
 	const escapedCommand = escapeShellArg(command);
 	const escapedArgs = args.map(escapeShellArg).join(' ');
 	return `${escapedCommand} ${escapedArgs}`;
@@ -52,20 +56,24 @@ export function buildCommand(command: string, args: string[]): string {
  * @returns A promise that resolves with the ExecutionResult.
  * @throws Will throw an error if the command execution fails, times out, or if stderr is not empty (unless skipStderrCheck is true).
  */
-export async function shell(command: string, args: string[] = [], options: ExecuteOptions = {}): Promise<ExecutionResult> {
-	const fullCommand = buildCommand(command, args);
+export async function shell(
+	command: string,
+	args: (string | number)[] = [],
+	options: ExecuteOptions = {}
+): Promise<ExecutionResult> {
+	const fullCommand = options.completeCommand ? command : buildCommand(command, args);
 
 	const executePromise = new Promise<ExecutionResult>((resolve, reject) => {
-		os.execCommand(fullCommand)
+		os.execCommand(fullCommand, { background: options.background === true })
 			.then((result) => {
 				const executionResult: ExecutionResult = {
-					stdout: result.stdOut,
-					stderr: result.stdErr,
+					stdOut: result.stdOut,
+					stdErr: result.stdErr,
 					exitCode: result.exitCode,
 				};
 
 				if (!options.skipStderrCheck && (result.stdErr.trim().length > 0 || result.exitCode === 1)) {
-					reject(new Error(`Command produced stderr output: ${result.stdErr}`));
+					reject(new Error(`${fullCommand}\nCommand produced stderr output: ${result.stdErr}`));
 				} else {
 					resolve(executionResult);
 				}

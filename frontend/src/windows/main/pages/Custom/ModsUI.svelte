@@ -12,6 +12,7 @@
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import Roblox from '../../ts/roblox';
+	import shellFS from '../../ts/tools/shellfs';
 
 	let mods: { filename: string; path: string; state: boolean }[] = [];
 	Roblox.Mods.loadMods().then((m) => (mods = m));
@@ -20,7 +21,7 @@
 		try {
 			const modIndex = mods.findIndex((m) => m.path === filePath);
 			if (path.basename(filePath).endsWith('.disabled')) {
-				await os.execCommand(`mv "${filePath}" "${filePath.replace(/\.disabled$/, '')}"`);
+				await shellFS.move(filePath,filePath.replace(/\.disabled$/, ''))
 				if (modIndex >= 0) {
 					mods[modIndex] = {
 						...mods[modIndex],
@@ -29,7 +30,7 @@
 					};
 				}
 			} else {
-				await os.execCommand(`mv "${filePath}" "${filePath}.disabled"`);
+				await shellFS.move(filePath,`${filePath}.disabled`)
 				if (modIndex >= 0) {
 					mods[modIndex] = {
 						...mods[modIndex],

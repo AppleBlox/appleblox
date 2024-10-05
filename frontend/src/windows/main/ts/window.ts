@@ -3,6 +3,8 @@ import { events, os } from '@neutralinojs/lib';
 import { getMode } from './utils';
 
 import hotkeys from 'hotkeys-js';
+import { shell } from './tools/shell';
+import shellFS from './tools/shellfs';
 
 // Shortcuts like copy, paste, quit, etc... (they are unimplemented by default in NeuJS)
 hotkeys('ctrl+c,cmd+c', (e) => {
@@ -35,12 +37,13 @@ export async function focusWindow() {
 	try {
 		if (getMode() === 'dev') {
 			// So the app can be focused in dev environnement
-			os.execCommand(
+			shell(
 				`osascript -e 'tell application "System Events" to set frontmost of every process whose unix id is ${window.NL_PID} to true'`
-			);
+			,[],{skipStderrCheck: true, completeCommand: true});
 		} else {
 			// Better way of focusing the app
-			os.execCommand(`open -a "AppleBlox"`);
+			shellFS.open("",{application: "AppleBlox"})
+			// <os.ececCommand>(`open -a "AppleBlox"`);
 		}
 	} catch (err) {
 		console.error(err);
@@ -49,9 +52,9 @@ export async function focusWindow() {
 
 export async function setWindowVisibility(state: boolean) {
 	try {
-		os.execCommand(
+		shell(
 			`osascript -e 'tell application "System Events" to set visible of every process whose unix id is ${window.NL_PID} to ${state}'`
-		);
+		,[],{skipStderrCheck: true, completeCommand: true});
 	} catch (err) {
 		console.error(err);
 	}

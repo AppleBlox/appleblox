@@ -154,9 +154,9 @@ export class RobloxInstance {
 		}
 
 		// We find every roblox processes and get the RobloxPlayer one
-		const robloxProcess = (await os.execCommand('pgrep -f "Roblox"')).stdOut.split('\n');
+		const robloxProcess = (await shell('pgrep', ['-f', 'Roblox'])).stdOut.trim().split('\n');
 		for (const pid of robloxProcess) {
-			const info = (await os.execCommand(`ps -p ${pid} -o command=`)).stdOut.trim();
+			const info = (await shell(`ps -p ${pid} -o command=`, [], { completeCommand: true, skipStderrCheck: true })).stdOut.trim();
 			if (info.length < 2) continue;
 			const processFileName = path.basename(info);
 			if (processFileName === 'RobloxPlayer') {
@@ -175,7 +175,9 @@ export class RobloxInstance {
 			if (tries < 1) {
 				throw new Error(`Couldn't find a .log file created less than 15 seconds ago in "${logsDirectory}". Stopping.`);
 			}
-			const latestFile = (await os.execCommand(`cd "${logsDirectory}" && ls -t | head -1`)).stdOut.trim();
+			const latestFile = (
+				await shell(`cd "${logsDirectory}" && ls -t | head -1`, [], { completeCommand: true })
+			).stdOut.trim();
 			const latestFilePath = path.join(logsDirectory, latestFile);
 			const createdAt = (await filesystem.getStats(latestFilePath)).createdAt;
 			const timeDifference = (Date.now() - createdAt) / 1000;
@@ -192,10 +194,13 @@ export class RobloxInstance {
 		}
 
 		// Read the first content, to not miss anything
-		await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
-		const content = (await os.execCommand('cat /tmp/roblox_ablox.log')).stdOut;
+		await shell(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`, [], { completeCommand: true });
+		const content = (await shell('cat', ['/tmp/roblox_ablox.log'])).stdOut;
 		// Spawns the logs watcher, and be sure that it kills any previous one
-		await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
+		await shell(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`, [], {
+			completeCommand: true,
+			skipStderrCheck: true,
+		});
 		this.logsInstance = await os.spawnProcess(`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done
 `);
 		console.info(`[Roblox.Instance] Logs watcher started with PID: ${this.logsInstance.pid}`);
@@ -214,7 +219,10 @@ export class RobloxInstance {
 					console.warn('[Roblox.Instance] Logs watcher exited with output:', evt.detail.data);
 					console.info('[Roblox.Instance] Restarting logs watcher');
 
-					await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
+					await shell(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`, [], {
+						completeCommand: true,
+						skipStderrCheck: true,
+					});
 					this.logsInstance = await os.spawnProcess(
 						`tail -f "${this.latestLogPath}" | while read line; do echo "Change"; done`
 					);
@@ -222,10 +230,12 @@ export class RobloxInstance {
 				}
 
 				// Convert the file to ensure proper encoding
-				await os.execCommand(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`);
+				await shell(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`, [], {
+					completeCommand: true,
+				});
 
 				// Read the content of the converted file
-				const content = (await os.execCommand('cat /tmp/roblox_ablox.log')).stdOut;
+				const content = (await shell('cat', ['/tmp/roblox_ablox.log'])).stdOut;
 
 				// Process only new lines
 				const contentLines = content.split('\n');
@@ -284,7 +294,7 @@ export class RobloxInstance {
 		this.isWatching = false;
 		this.onEvent = null;
 		// Kill logs watcher
-		await os.execCommand(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`);
+		shell(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`, [], { completeCommand: true, skipStderrCheck: true });
 	}
 
 	/** Quits Roblox */
@@ -292,6 +302,6 @@ export class RobloxInstance {
 		if (this.gameInstance == null) throw new Error("The instance hasn't be started yet");
 		await this.cleanup();
 		console.info('[Roblox.Instance] Quitting Roblox');
-		await os.execCommand(`kill -9 ${this.gameInstance}`);
+		await shell('kill -9', ['-9', this.gameInstance.toString()]);
 	}
 }

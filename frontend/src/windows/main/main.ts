@@ -10,6 +10,7 @@ import { version } from '../../../../package.json';
 import App from './App.svelte';
 import { RPCController } from './ts/tools/rpc';
 import { AbloxWatchdog } from './ts/watchdog';
+import { shell } from './ts/tools/shell';
 
 // Initialize NeutralinoJS
 init();
@@ -26,7 +27,7 @@ events.on('ready', async () => {
 		console.info(`[Main] AppleBlox v${version}`);
 		console.info(`[Main] Current Time: ${new Date().toLocaleString()}`);
 		console.info(`[Main] NeutralinoJS Version: ${window.NL_VERSION}`);
-		console.info(`[Main] ${(await os.execCommand('uname -a')).stdOut.trim()}`);
+		console.info(`[Main] ${(await shell('uname',["-a"])).stdOut.trim()}`);
 
 		/** Launch the process manager */
 		const watchdog = new AbloxWatchdog();

@@ -24,7 +24,7 @@ export async function launchRoblox(
 	showFlagErrorPopup: (title: string, description: string, code: string) => Promise<boolean>,
 	robloxUrl?: string
 ) {
-	if (rbxInstance || (await os.execCommand('pgrep -f "RobloxPlayer"')).stdOut.trim().length > 2) {
+	if (rbxInstance || (await shell('pgrep', ['-f', 'RobloxPlayer'], {skipStderrCheck: true})).stdOut.trim().length > 2) {
 		setLaunchText('Roblox is already open');
 		setLaunchingRoblox(false);
 		toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
@@ -136,8 +136,10 @@ export async function launchRoblox(
 			try {
 				if ((await getValue('mods.general.fix_res')) === true) {
 					const maxRes = (
-						await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'")
-					).stdout
+						await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'", [], {
+							completeCommand: true,
+						})
+					).stdOut
 						.trim()
 						.split(' ');
 					await Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);

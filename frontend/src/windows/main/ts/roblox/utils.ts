@@ -6,6 +6,7 @@ import { toast } from 'svelte-sonner';
 import Roblox from '.';
 import { libraryPath } from '../libraries';
 import shellFS from '../tools/shellfs';
+import { shell } from '../tools/shell';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
@@ -14,7 +15,8 @@ export class RobloxUtils {
 			return true;
 		}
 		if (!popup) return false;
-		os.execCommand(`osascript <<'END'
+		shell(
+			`osascript <<'END'
     set theAlertText to "Roblox is not installed"
     set theAlertMessage to "To use AppleBlox, you first need to install Roblox. Would you like to open the download page?"
     display alert theAlertText message theAlertMessage as critical buttons {"Cancel", "Open link"} default button "Open link" cancel button "Cancel" giving up after 60
@@ -22,13 +24,16 @@ export class RobloxUtils {
     if the button_pressed is "Open link" then
         open location "https://roblox.com/download"
     end if
-END`);
+END`,
+			[],
+			{ completeCommand: true }
+		);
 		return false;
 	}
 
 	/** Uses cli to check if any instance of roblox is open */
 	static async isRobloxOpen() {
-		const cmd = await os.execCommand('ps aux | grep "Roblox" | grep -v "grep"');
+		const cmd = await shell('ps aux | grep "Roblox" | grep -v "grep"', [], { completeCommand: true, skipStderrCheck: true });
 		return cmd.stdOut.includes('Roblox');
 	}
 
@@ -40,26 +45,29 @@ END`);
 			if (await RobloxUtils.isRobloxOpen()) {
 				toast.info('Closing Roblox...', { duration: 1000 });
 				console.info('[Roblox.Utils] Closing Roblox...');
-				await os.execCommand('pkill -9 Roblox');
+				await shell('pkill', ['-9', 'Roblox'],{skipStderrCheck: true});
 				await sleep(2000);
 			}
 
 			toast.info('Opening Roblox...', { duration: 1000 });
 			console.info('[Roblox.Utils] Opening Roblox...');
-			await os.execCommand(`open "${Roblox.path}"`, { background: true });
+			await shellFS.open(Roblox.path);
 
 			await sleep(1000);
 
 			toast.info('Terminating all processes...', { duration: 1000 });
 			console.info('[Roblox.Utils] Terminating all Roblox processes...');
-			const result = await os.execCommand("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs");
+			const result = await shell("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs", [], {
+				completeCommand: true,
+				skipStderrCheck: true
+			});
 			console.info('[Roblox.Utils] Termination result: ', result);
 			const processes = result.stdOut.trim().split(' ');
 			for (const proc of processes) {
 				console.info(`[Roblox.Utils] Terminating Roblox Process (PID: ${proc})`);
 
 				try {
-					await os.execCommand(`kill -9 ${proc}`);
+					await shell("kill",["-9",proc],{skipStderrCheck: true})
 				} catch (err) {
 					console.error(`[Roblox.Utils] Error terminating process ${proc}: ${err}`);
 					toast.error(`Error terminating process ${proc}: ${err}`);
@@ -120,17 +128,17 @@ END`);
 			path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'),
 			`#!/bin/bash\n${path.join(path.dirname(window.NL_PATH), 'MacOS/bootstrap')} --launch`
 		);
-		await os.execCommand(`chmod +x ${path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ ')}`);
+		await shellFS.chmod(path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ '),"+x")
 		toast.success(`Created a shortcut at "${path.join(savePath, 'Launch Roblox.app')}"`);
 	}
 
 	static async killAll() {
-		await os.execCommand(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`);
+		await shell(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`,[],{completeCommand: true, skipStderrCheck: true});
 	}
 
 	static async quit() {
-		await os.execCommand(`osascript -e 'tell application "Roblox" to if it is running then quit'`);
-		while ((await os.execCommand('ps aux | grep RobloxPlayer | grep -v grep')).stdOut.trim().length > 2) {
+		await shell(`osascript -e 'tell application "Roblox" to if it is running then quit'`,[],{completeCommand: true, skipStderrCheck: true});
+		while ((await shell('ps aux | grep RobloxPlayer | grep -v grep',[],{completeCommand: true})).stdOut.trim().length > 2) {
 			await sleep(500);
 		}
 		return;

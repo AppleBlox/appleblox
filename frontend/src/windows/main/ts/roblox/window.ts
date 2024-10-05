@@ -1,5 +1,6 @@
 import { computer, os } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
+import { shell } from '../tools/shell';
 
 const window_manager = libraryPath('window_manager');
 
@@ -12,7 +13,7 @@ export class RobloxWindow {
 	 * @param y The target y-coordinate
 	 */
 	public static async move(x: number | string, y: number | string) {
-		os.execCommand(`${window_manager} move "Roblox" ${x} ${y}`);
+		await shell(`${window_manager}`, ['move', 'Roblox', x, y]);
 		console.info(`[Roblox.Window] Moved Roblox window to "${x},${y}"`);
 	}
 	/**
@@ -21,12 +22,13 @@ export class RobloxWindow {
 	 * @param height The target height
 	 */
 	public static async resize(width: number | string, height: number | string) {
-		os.execCommand(`${window_manager} resize "Roblox" ${width} ${height}`);
+		shell(`${window_manager}`, ['resize', 'Roblox', width, height]);
 		console.info(`[Roblox.Window] Resized Roblox window to "${width},${height}"`);
 	}
 
 	public static async isFullscreen(): Promise<boolean> {
-		const getInfoCmd = await os.execCommand(`osascript -e 'tell application "System Events"
+		const getInfoCmd = await shell(
+			`osascript -e 'tell application "System Events"
             tell application "Roblox" to activate
             try
                 tell process "Roblox"
@@ -37,7 +39,10 @@ export class RobloxWindow {
                 return "true"
             end try
         end tell'
-        `);
+        `,
+			[],
+			{ completeCommand: true }
+		);
 		return getInfoCmd.stdOut.trim() === 'true';
 	}
 
@@ -47,8 +52,10 @@ export class RobloxWindow {
 	 */
 	public static async setFullscreen(fullscreen: boolean): Promise<void> {
 		if ((await RobloxWindow.isFullscreen()) === fullscreen) return;
-		await os.execCommand(
-			`osascript -e 'tell application "Roblox" to activate' -e 'delay 0.5' -e 'tell application "System Events" to tell process "Roblox" to keystroke "f" using {command down}'`
+		await shell(
+			`osascript -e 'tell application "Roblox" to activate' -e 'delay 0.5' -e 'tell application "System Events" to tell process "Roblox" to keystroke "f" using {command down}'`,
+			[],
+			{ skipStderrCheck: true, completeCommand: true }
 		);
 	}
 
@@ -61,8 +68,6 @@ export class RobloxWindow {
 
 	/** Sets the desktop resolution */
 	public static async setDesktopRes(width: number | string, height: number | string, duration = 1) {
-		os.execCommand(`${libraryPath('window_manager')} setres ${width} ${height} ${duration} 1`, {
-			background: true,
-		});
+		shell(`${window_manager}`, ['setres', width, height, duration, 1], { background: true });
 	}
 }

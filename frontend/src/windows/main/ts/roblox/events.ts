@@ -74,8 +74,10 @@ export default async function onGameEvent(data: GameEventInfo) {
 				// Resolution fix for mods
 				if ((await getValue('mods.general.fix_res')) === true) {
 					const maxRes = (
-						await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'")
-					).stdout
+						await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'", [], {
+							completeCommand: true,
+						})
+					).stdOut
 						.trim()
 						.split(' ');
 					await Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 6);

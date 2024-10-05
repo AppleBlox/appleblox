@@ -26,16 +26,14 @@
 					toast.error("The logs file doesn't seem to exist.");
 					return;
 				}
-				os.execCommand(`open -R "${logPath}"`).catch((err) => {
-					console.error('[MiscPanel] ', err);
-				});
+				shellFS.open(logPath,{reveal: true})
 				break;
 			}
 			case 'clear_logs':
 				clearLogsPopup = true;
 				break;
 			case 'open_folder':
-				os.execCommand('open -R ~/"Library/Application Support/AppleBlox"/');
+			shellFS.open(path.join(await os.getEnv("HOME"),"Library","Application Support","AppleBlox"),{reveal: true})
 				break;
 		}
 	}
