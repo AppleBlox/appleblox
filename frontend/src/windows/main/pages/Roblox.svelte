@@ -154,6 +154,8 @@
 {:then}
 	<Panel {panel} on:switch={switchClicked} on:button={buttonClicked} {render} {overrides} />
 {:catch error}
-	<h2 class="text-red-500">An error occured while loading settings overrides</h2>
-	<p class="text-red-300">{error}</p>
+	{#if render}
+		<h2 class="text-red-500">An error occured while loading settings overrides</h2>
+		<p class="text-red-300">{error}</p>
+	{/if}
 {/await}
