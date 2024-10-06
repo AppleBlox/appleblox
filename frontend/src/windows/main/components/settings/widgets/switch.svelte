@@ -13,5 +13,5 @@
 	onCheckedChange={(state) => {
 		dispatch('clicked', { state });
 	}}
-	class="ml-auto mr-4"
+	class="ml-auto mr-4 group-hover:cursor-not-allowed"
 />
