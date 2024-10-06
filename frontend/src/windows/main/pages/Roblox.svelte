@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CopyCheck, Braces, BugOff, PictureInPicture, Play } from 'lucide-svelte';
+	import { CopyCheck, BugOff, PictureInPicture, Play } from 'lucide-svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { os } from '@neutralinojs/lib';
 	import path from 'path-browserify';
@@ -105,11 +105,15 @@
 
 	let overrides: SettingsOutput = {};
 	async function loadOverrides() {
-		overrides = {
-			launching: {
-				delegate: await Roblox.Delegate.check(true),
-			},
-		};
+		try {
+			overrides = {
+				launching: {
+					delegate: await Roblox.Delegate.check(true),
+				},
+			};
+		} catch (err) {
+			console.warn("Couldn't load overrides:", err);
+		}
 	}
 </script>
 

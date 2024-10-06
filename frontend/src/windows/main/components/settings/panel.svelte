@@ -26,7 +26,7 @@
 	export let fadeIn = true;
 	/** Don't render the panel. Only generate its settings. */
 	export let render = true;
-	export let overrides: SettingsOutput = {};
+	export let overrides: SettingsOutput | null = null;
 
 	// Load settings
 	let settingsLoaded = false;
@@ -123,7 +123,7 @@
 		}
 
 		// Apply overrides
-		if (Object.keys(overrides).length > 0) {
+		if (overrides) {
 			for (const [category, widgets] of Object.entries(overrides)) {
 				for (const [widget, value] of Object.entries(widgets)) {
 					settings[category][widget] = value;
