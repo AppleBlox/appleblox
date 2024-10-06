@@ -6,6 +6,7 @@ import { getAllProfiles, getSelectedProfile, type Profile } from '../../componen
 import { getConfigPath, getValue, loadSettings } from '../../components/settings';
 import type { SelectElement, SettingsOutput } from '../../components/settings/types';
 import shellFS from '../tools/shellfs';
+import { showNotification } from '../tools/notifications';
 
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
@@ -294,6 +295,15 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			type: 'switch',
 			value: true,
 		});
+
+	// Actions
+	if (data.forceVulkan) {
+		showNotification({
+			title: 'Renderer defaulted to Vulkan',
+			content: "Vulkan has been automatically enabled because you set a higher FPS cap than your monitor's refresh rate.",
+			timeout: 7,
+		});
+	}
 
 	return flags;
 }
