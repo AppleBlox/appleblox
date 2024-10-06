@@ -19,7 +19,7 @@ export interface EditorFlag {
 /** Function used to build the flags list */
 async function buildFlagsList(): Promise<FastFlagsList> {
 	let data = {
-		forceVulkan: (await getValue<boolean>('fastflags.graphics.fps_target')) || 60 > 60,
+		forceVulkan: ((await getValue<number[]>('fastflags.graphics.fps_target'))[0] || 60) > 60,
 	};
 	const flags = new FastFlagsList()
 		// GRAPHICS
@@ -297,7 +297,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		});
 
 	// Actions
-	if (data.forceVulkan) {
+	if (data.forceVulkan === true) {
 		showNotification({
 			title: 'Renderer defaulted to Vulkan',
 			content: "Vulkan has been automatically enabled because you set a higher FPS cap than your monitor's refresh rate.",
