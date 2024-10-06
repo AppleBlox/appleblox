@@ -228,6 +228,7 @@
 					id: 'ignore_flags_warning',
 					default: false,
 				})
+				.addSeparator({ orientation: 'horizontal' })
 				.addButton({
 					label: 'Write ClientAppSettings.json',
 					description:

@@ -99,6 +99,13 @@ type WidgetOptions =
 			type: 'custom';
 			/** Svelte component used to render the widget */
 			component: ComponentType<SvelteComponent>;
+	  }
+	| {
+			/** Custom Widget */
+			type: 'separator';
+			/** Svelte component used to render the widget */
+			orientation: 'vertical' | 'horizontal';
+			class?: string;
 	  };
 
 type ToggleableOption =
@@ -314,6 +321,18 @@ class CategoryBuilder {
 			id: params.id,
 			toggleable: params.toggleable,
 			options: { type: 'button', variant: params.variant, icon: params.icon },
+		};
+		this.category.widgets.push(widget);
+		return this;
+	}
+
+	addSeparator(params: { orientation: 'vertical' | 'horizontal'; class?: string; toggleable?: ToggleableOption }) {
+		const widget: PanelWidget = {
+			id: '',
+			label: '',
+			description: '',
+			toggleable: params.toggleable,
+			options: { type: 'separator', orientation: params.orientation, class: params.class },
 		};
 		this.category.widgets.push(widget);
 		return this;

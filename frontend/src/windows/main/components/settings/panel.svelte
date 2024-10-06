@@ -4,7 +4,7 @@
 	import type { SelectElement, SettingsOutput } from './types';
 
 	import * as Card from '$lib/components/ui/card/index.js';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { createEventDispatcher } from 'svelte';
 	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
 
@@ -18,6 +18,7 @@
 	import path from 'path-browserify';
 	import { fade } from 'svelte/transition';
 	import ShellFS from '../../ts/tools/shellfs';
+	import { cn } from '$lib/utils';
 
 	// Panel props
 	export let panel: SettingsPanel;
@@ -190,7 +191,7 @@
 							</p>
 							{#each category.widgets || [] as widget (widget.id)}
 								<!-- Separator for the widgets (except button) -->
-								{#if widget.options.type !== 'button'}
+								{#if widget.options.type !== 'button' && widget.options.type !== 'separator'}
 									<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
 								{/if}
 								<!-- Disable the widget if the button it is linked to is disabled -->
@@ -230,6 +231,11 @@
 												dispatch('switch', { id: widget.id, state });
 												updateSettings();
 											}}
+										/>
+									{:else if widget.options.type === 'separator'}
+										<Separator
+											orientation={widget.options.orientation}
+											class={cn('mt-3 mb-2 bg-gray-300 opacity-25', widget.options.class)}
 										/>
 										<!-- Input widget -->
 									{:else if widget.options.type === 'input'}
