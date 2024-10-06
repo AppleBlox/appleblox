@@ -10,6 +10,7 @@ import shellFS from '../tools/shellfs';
 import { focusWindow, setWindowVisibility } from '../window';
 import onGameEvent from './events';
 import { RobloxInstance } from './instance';
+import { sleep } from '../utils';
 
 let rbxInstance: RobloxInstance | null = null;
 
@@ -23,11 +24,16 @@ export async function launchRoblox(
 	showFlagErrorPopup: (title: string, description: string, code: string) => Promise<boolean>,
 	robloxUrl?: string
 ) {
-	if (rbxInstance || (await shell('pgrep', ['-f', 'RobloxPlayer'], {skipStderrCheck: true})).stdOut.trim().length > 2) {
-		setLaunchText('Roblox is already open');
-		setLaunchingRoblox(false);
-		toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
-		return;
+	if (rbxInstance || (await shell('pgrep', ['-f', 'RobloxPlayer'], { skipStderrCheck: true })).stdOut.trim().length > 2) {
+		if (robloxUrl) {
+			await shell('pkill', ['-f', 'RobloxPlayer']);
+			await sleep(300);
+		} else {
+			setLaunchText('Roblox is already open');
+			setLaunchingRoblox(false);
+			toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
+			return;
+		}
 	}
 	try {
 		console.info('[Launch] Launching Roblox');

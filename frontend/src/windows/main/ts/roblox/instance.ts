@@ -97,7 +97,6 @@ export class RobloxInstance {
 	private logsInstance: os.SpawnedProcess | null = null;
 	private lastLogs = '';
 	private isWatching = false;
-	private onEvent: Promise<events.Response> | null = null;
 
 	/** Adds a handler to an event */
 	public on(event: Event, handler: EventHandler) {
@@ -135,7 +134,14 @@ export class RobloxInstance {
 
 	/** Starts the Roblox Instance */
 	public async start(url?: string) {
-		if (this.gameInstance) throw new Error('An instance is already running');
+		if (this.gameInstance) {
+			if (url) {
+				await this.quit();
+				await sleep(1000); // Precaution delay
+			} else {
+				throw new Error('An instance is already running');
+			}
+		}
 
 		console.info('[Roblox.Instance] Opening Roblox instance');
 
@@ -147,8 +153,8 @@ export class RobloxInstance {
 			await shell('open', [Roblox.path]);
 		}
 
-		await sleep(1000);
-		// If block because settings can be edited and maybe it will not be boolean
+		await sleep(1000); // Give time for Roblox to open
+		// "If block" because settings can be edited and maybe it will not be boolean
 		if ((await getValue<boolean>('roblox.launching.delegate')) === true) {
 			await Roblox.Delegate.toggle(true);
 		}
@@ -156,7 +162,9 @@ export class RobloxInstance {
 		// We find every roblox processes and get the RobloxPlayer one
 		const robloxProcess = (await shell('pgrep', ['-f', 'Roblox'])).stdOut.trim().split('\n');
 		for (const pid of robloxProcess) {
-			const info = (await shell(`ps -p ${pid} -o command=`, [], { completeCommand: true, skipStderrCheck: true })).stdOut.trim();
+			const info = (
+				await shell(`ps -p ${pid} -o command=`, [], { completeCommand: true, skipStderrCheck: true })
+			).stdOut.trim();
 			if (info.length < 2) continue;
 			const processFileName = path.basename(info);
 			if (processFileName === 'RobloxPlayer') {
@@ -292,7 +300,6 @@ export class RobloxInstance {
 
 	public async cleanup() {
 		this.isWatching = false;
-		this.onEvent = null;
 		// Kill logs watcher
 		shell(`pkill -f "tail -f /Users/$(whoami)/Library/Logs/Roblox/"`, [], { completeCommand: true, skipStderrCheck: true });
 	}
