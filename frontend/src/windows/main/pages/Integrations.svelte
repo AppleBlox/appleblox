@@ -60,18 +60,33 @@
 					description: "Shows the game you're playing on your profile",
 					id: 'activity',
 					default: true,
+					toggleable: {
+						id: 'enabled',
+						type: 'switch',
+						value: true,
+					},
 				})
 				.addSwitch({
 					label: 'Show game time',
 					description: 'Show the time since you started playing a game',
 					id: 'time',
 					default: true,
+					toggleable: {
+						id: 'enabled',
+						type: 'switch',
+						value: true,
+					},
 				})
 				.addSwitch({
 					label: 'Allow joining',
 					description: `Adds a "join" button on your profile which let\'s people join your game'`,
 					id: 'joining',
 					default: false,
+					toggleable: {
+						id: 'enabled',
+						type: 'switch',
+						value: true,
+					},
 				})
 		)
 		.build();

@@ -8,6 +8,7 @@
 	import { SettingsPanelBuilder, getConfigPath } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import shellFS from '../ts/tools/shellfs';
+	import Roblox from '../ts/roblox';
 
 	export let render = true;
 
@@ -26,14 +27,17 @@
 					toast.error("The logs file doesn't seem to exist.");
 					return;
 				}
-				shellFS.open(logPath,{reveal: true})
+				shellFS.open(logPath, { reveal: true });
 				break;
 			}
 			case 'clear_logs':
 				clearLogsPopup = true;
 				break;
 			case 'open_folder':
-			shellFS.open(path.join(await os.getEnv("HOME"),"Library","Application Support","AppleBlox"),{reveal: true})
+				shellFS.open(path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox'), { reveal: true });
+				break;
+			case 'open_roblox_folder':
+				shellFS.open(path.join(Roblox.path, 'Contents'), { reveal: true });
 				break;
 		}
 	}
@@ -91,6 +95,12 @@
 					label: 'Open AppleBlox folder',
 					description: 'Opens the AppleBlox folder in Finder',
 					id: 'open_folder',
+					variant: 'outline',
+				})
+				.addButton({
+					label: 'Open Roblox app folder',
+					description: 'Opens the Roblox.app folder in Finder',
+					id: 'open_roblox_folder',
 					variant: 'outline',
 				})
 		)
