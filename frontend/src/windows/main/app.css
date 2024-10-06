@@ -29,11 +29,11 @@
 
 @layer base {
 	:root {
-		--background: 0 0% 96%;
+		--background: 0 0% 90%;
 		--foreground: 0 0% 9%;
 		--muted: 0 0% 85.66%;
 		--muted-foreground: 346.19 8.85% 37.97%;
-		--popover: 0 0% 93%;
+		--popover: 0 0% 86%;
 		--popover-foreground: 0 0% 0%;
 		--card: 0 0% 94%;
 		--card-foreground: 0 0% 4%;
