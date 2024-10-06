@@ -37,14 +37,6 @@
 					return;
 				}
 				break;
-			case 'write_clientappsettings_btn':
-				try {
-					await Roblox.FFlags.writeClientAppSettings();
-				} catch (err) {
-					console.error('[RobloxPanel] ', err);
-					toast.error('An error occured while writing ClientAppSettings.json');
-				}
-				break;
 		}
 	}
 
@@ -100,14 +92,6 @@
 					id: 'create_shortcut_btn',
 					variant: 'default',
 					icon: { component: Play },
-				})
-				.addButton({
-					label: 'Write ClientAppSettings.json',
-					description:
-						"Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended",
-					id: 'write_clientappsettings_btn',
-					variant: 'outline',
-					icon: { component: Braces },
 				})
 				.addSwitch({
 					label: 'Delegate launching to AppleBlox',

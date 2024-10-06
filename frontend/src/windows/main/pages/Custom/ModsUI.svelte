@@ -6,7 +6,7 @@
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 
 	import RefreshIcon from '@/assets/panel/refresh.png';
-	import ShrugIcon from '@/assets/panel/shrug.png';
+	import SillyCat from '@/assets/panel/silly.webp';
 
 	import { os } from '@neutralinojs/lib';
 	import path from 'path-browserify';
@@ -21,7 +21,7 @@
 		try {
 			const modIndex = mods.findIndex((m) => m.path === filePath);
 			if (path.basename(filePath).endsWith('.disabled')) {
-				await shellFS.move(filePath,filePath.replace(/\.disabled$/, ''))
+				await shellFS.move(filePath, filePath.replace(/\.disabled$/, ''));
 				if (modIndex >= 0) {
 					mods[modIndex] = {
 						...mods[modIndex],
@@ -30,7 +30,7 @@
 					};
 				}
 			} else {
-				await shellFS.move(filePath,`${filePath}.disabled`)
+				await shellFS.move(filePath, `${filePath}.disabled`);
 				if (modIndex >= 0) {
 					mods[modIndex] = {
 						...mods[modIndex],
@@ -93,11 +93,13 @@
 				</div>
 			{/each}
 		{:else}
-			<img src={ShrugIcon} alt="No mods found icnon" class="towhite w-16" />
-			<Alert.Root>
-				<Alert.Title>No mods found</Alert.Title>
-				<Alert.Description>You haven't downloaded any mods.</Alert.Description>
-			</Alert.Root>
+			<div class="flex flex-col justify-center items-center gap-3">
+				<img src={SillyCat} alt="No mods found icnon" class="w-16 rounded-sm" />
+				<Alert.Root>
+					<Alert.Title>No mods found</Alert.Title>
+					<Alert.Description>You haven't downloaded any mods.</Alert.Description>
+				</Alert.Root>
+			</div>
 		{/if}
 	</Card.Header>
 	<Card.Footer class="flex justify-between"></Card.Footer>

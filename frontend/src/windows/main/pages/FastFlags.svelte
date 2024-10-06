@@ -2,8 +2,25 @@
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import FlagEditor from '../components/flag-editor/flag-editor.svelte';
+	import { Braces } from 'lucide-svelte';
+	import Roblox from '../ts/roblox';
+	import { toast } from 'svelte-sonner';
 
 	export let render = true;
+
+	async function onButtonClicked(e: CustomEvent) {
+		const { id } = e.detail;
+		switch (id) {
+			case 'write_clientappsettings_btn':
+				try {
+					await Roblox.FFlags.writeClientAppSettings();
+				} catch (err) {
+					console.error('[FastFlagsPanel] ', err);
+					toast.error('An error occured while writing ClientAppSettings.json');
+				}
+				break;
+		}
+	}
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Fast Flags')
@@ -211,8 +228,16 @@
 					id: 'ignore_flags_warning',
 					default: false,
 				})
+				.addButton({
+					label: 'Write ClientAppSettings.json',
+					description:
+						"Saves the FastFlags to Roblox directly for them to be used without using AppleBlox. This isn't recommended",
+					id: 'write_clientappsettings_btn',
+					variant: 'outline',
+					icon: { component: Braces },
+				})
 		)
 		.build();
 </script>
 
-<Panel {panel} {render} />
+<Panel {panel} {render} on:button={onButtonClicked} />
