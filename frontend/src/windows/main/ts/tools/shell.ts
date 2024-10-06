@@ -25,6 +25,8 @@ export interface ExecuteOptions {
 	completeCommand?: boolean;
 	/** Pass this argument to neutralino's os.execCommand function */
 	background?: boolean;
+	/** Directory from which to execute the command */
+	cwd?: string;
 }
 
 /**
@@ -64,7 +66,7 @@ export async function shell(
 	const fullCommand = options.completeCommand ? command : buildCommand(command, args);
 
 	const executePromise = new Promise<ExecutionResult>((resolve, reject) => {
-		os.execCommand(fullCommand, { background: options.background === true })
+		os.execCommand(fullCommand, { background: options.background === true, cwd: options.cwd })
 			.then((result) => {
 				const executionResult: ExecutionResult = {
 					stdOut: result.stdOut,
