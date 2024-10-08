@@ -34,32 +34,6 @@ export async function curlGet(url: string): Promise<any> {
 	return res;
 }
 
-/**
- * Compare two semantic version strings.
- *
- * @param {string} v1 - The first version string.
- * @param {string} v2 - The second version string.
- * @returns {number} -1 if v1 < v2, 1 if v1 > v2, 0 if they are equal.
- */
-export function compareVersions(v1: string, v2: string): number {
-	const v1Parts: number[] = v1.split('.').map(Number);
-	const v2Parts: number[] = v2.split('.').map(Number);
-
-	for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-		const v1Part: number = v1Parts[i] || 0;
-		const v2Part: number = v2Parts[i] || 0;
-
-		if (v1Part > v2Part) {
-			return 1;
-		}
-		if (v1Part < v2Part) {
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
 export function sleep(ms = 0) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }

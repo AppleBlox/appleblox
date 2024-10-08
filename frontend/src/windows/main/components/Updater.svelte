@@ -6,16 +6,17 @@
 	import { toast } from 'svelte-sonner';
 	import { version } from '../../../../../package.json';
 	import { loadSettings, saveSettings } from './settings';
-	import { compareVersions, curlGet } from '../ts/utils';
+	import { curlGet } from '../ts/utils';
 	import Link from './Link.svelte';
 	import { shell } from '../ts/tools/shell';
+	import compare from 'semver-compare';
 
 	let showUpdatePopup = false;
 	let updateVersion = version;
 	let body = '';
 
 	async function checkForUpdate() {
-		const checkWifi = await shell(`if [[ "$(networksetup -getairportnetwork en0 | grep -o 'Current Wi-Fi Network:')" != "" ]]; then echo "true"; else echo "false"; fi`,[],{completeCommand: true});
+		const checkWifi = await shell(`if ping -c 1 -W 1 8.8.8.8 &> /dev/null; then echo "true"; else echo "false"; fi`,[],{completeCommand: true});
 		if (!checkWifi.stdOut.includes('true')) {
 			toast.error('Could not connect to internet');
 			return;
@@ -26,14 +27,13 @@
 		});
 		if (releases.message) return;
 		for (const re of releases) {
-			if (compareVersions(re.tag_name, updateVersion) > 0) {
+			if (compare(re.tag_name, updateVersion) === 1) {
 				updateVersion = re.tag_name;
 				body = re.body;
 			}
 		}
 		if (updateVersion === version) return;
-		const compare = compareVersions(updateVersion, version);
-		if (compare > 0) {
+		if (compare(updateVersion, version) === 1) {
 			console.info(`[Updater] A new release is available: ${updateVersion}`);
 			const settings = await loadSettings('updating');
 			if (settings) {
