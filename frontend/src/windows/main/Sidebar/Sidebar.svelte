@@ -136,7 +136,7 @@
 
 		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
 			<Button
-				class={`${isLaunched ? 'bg-blue-400 hover:bg-red-500' : 'bg-green-600 hover:bg-green-800'} font-mono w-full`}
+				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-kill-red hover:hue-rotate-0' : 'bg-play-green/85 hover:bg-play-green/60'} font-mono w-full transition-all duration-200 group`}
 				on:click={() => {
 					if (isLaunched) {
 						Roblox.Utils.killAll();

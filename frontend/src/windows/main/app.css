@@ -51,6 +51,8 @@
 		--destructive-foreground: 0 0% 100%;
 		--ring: 346.19 64.65% 42.16%;
 		--radius: 0.5rem;
+		--play-green: 142.09 71% 45%;
+		--kill-red: 0 72% 51%;
 	}
 
 	.dark {
@@ -75,6 +77,8 @@
 		--destructive: 360 60.56% 46.71%;
 		--destructive-foreground: 0 0% 100%;
 		--ring: 346.19 64.65% 42.16%;
+		--play-green: 142.09 71% 45%;
+		--kill-red: 0 72% 51%;
 	}
 }
 
