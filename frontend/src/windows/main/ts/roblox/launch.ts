@@ -7,10 +7,10 @@ import { Notification } from '../tools/notifications';
 import { RPCController } from '../tools/rpc';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
+import { sleep } from '../utils';
 import { focusWindow, setWindowVisibility } from '../window';
 import onGameEvent from './events';
 import { RobloxInstance } from './instance';
-import { sleep } from '../utils';
 
 let rbxInstance: RobloxInstance | null = null;
 

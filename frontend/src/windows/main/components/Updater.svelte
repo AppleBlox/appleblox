@@ -2,14 +2,14 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { os } from '@neutralinojs/lib';
+	import compare from 'semver-compare';
 	import SvelteMarkdown from 'svelte-markdown';
 	import { toast } from 'svelte-sonner';
 	import { version } from '../../../../../package.json';
-	import { loadSettings, saveSettings } from './settings';
+	import { shell } from '../ts/tools/shell';
 	import { curlGet } from '../ts/utils';
 	import Link from './Link.svelte';
-	import { shell } from '../ts/tools/shell';
-	import compare from 'semver-compare';
+	import { loadSettings, saveSettings } from './settings';
 
 	let showUpdatePopup = false;
 	let updateVersion = version;

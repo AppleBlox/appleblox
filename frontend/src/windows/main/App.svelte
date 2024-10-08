@@ -3,12 +3,13 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import { os, events } from '@neutralinojs/lib';
+	import { events, os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
 	import Sidebar from './Sidebar/Sidebar.svelte';
 	import Code from './components/Code.svelte';
 	import Onboarding from './components/Onboarding.svelte';
 	import Updater from './components/Updater.svelte';
+	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
 	import Dev from './pages/Dev.svelte';
 	import FastFlags from './pages/FastFlags.svelte';
 	import Support from './pages/Info.svelte';
@@ -18,7 +19,6 @@
 	import RobloxPage from './pages/Roblox.svelte';
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils';
-	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
 	import { focusWindow } from './ts/window';
 
 	let currentPage: string;

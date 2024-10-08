@@ -1,6 +1,6 @@
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
-import { buildCommand, spawn, type SpawnEventEmitter } from './shell';
+import { spawn, type SpawnEventEmitter } from './shell';
 
 /**
  * Represents an action that can be associated with a notification.

@@ -5,8 +5,8 @@ import Roblox from '.';
 import { getAllProfiles, getSelectedProfile, type Profile } from '../../components/flag-editor';
 import { getConfigPath, getValue, loadSettings } from '../../components/settings';
 import type { SelectElement, SettingsOutput } from '../../components/settings/types';
-import shellFS from '../tools/shellfs';
 import { Notification } from '../tools/notifications';
+import shellFS from '../tools/shellfs';
 
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
