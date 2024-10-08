@@ -3,7 +3,7 @@ import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import Roblox from '.';
 import { getValue } from '../../components/settings';
-import { showNotification } from '../tools/notifications';
+import { Notification } from '../tools/notifications';
 import { RPCController } from '../tools/rpc';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
@@ -148,11 +148,11 @@ export async function launchRoblox(
 						.trim()
 						.split(' ');
 					await Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);
-					showNotification({
+					new Notification({
 						title: 'Resolution changed',
 						content: "Your resolution was temporarily changed (5s) by the 'Fix Resolution' setting.",
 						timeout: 10,
-					});
+					}).show();
 				}
 				const robloxInstance = new RobloxInstance(true);
 				await robloxInstance.init();

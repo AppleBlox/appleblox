@@ -35,7 +35,6 @@ async function main(downloadNeuBinaries = false, createBinaries = false) {
 		stderr: 'inherit',
 	});
 	// Delay to be sure vite was built
-	console.log('Waiting 2500ms...');
 	await Bun.sleep(2500);
 
 	const args = [

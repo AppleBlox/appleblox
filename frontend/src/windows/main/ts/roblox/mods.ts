@@ -3,7 +3,7 @@ import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import Roblox from '.';
 import { getValue } from '../../components/settings';
-import { showNotification } from '../tools/notifications';
+import { Notification } from '../tools/notifications';
 import shellFS from '../tools/shellfs';
 import { sleep } from '../utils';
 
@@ -56,12 +56,12 @@ export class RobloxMods {
 
 		if (!(await shellFS.exists(resBackupFolder))) {
 			toast.error("The 'Resources' backup hasn't been found. Mods will not be removed.");
-			showNotification({
+			new Notification({
 				title: 'Error while removing mods',
 				content: "The 'Resources' backup hasn't been found. Mods will not be removed.",
 				sound: true,
 				timeout: 6,
-			});
+			}).show();
 			return;
 		}
 
@@ -69,11 +69,11 @@ export class RobloxMods {
 		await shellFS.copy(resBackupFolder, resourcesFolder, true);
 		await shellFS.remove(resBackupFolder);
 
-		showNotification({
+		new Notification({
 			title: 'Resources restored',
 			content: 'Roblox has been cleaned of any Mods remnants..',
 			timeout: 5,
-		});
+		}).show();
 		await sleep(100);
 	}
 

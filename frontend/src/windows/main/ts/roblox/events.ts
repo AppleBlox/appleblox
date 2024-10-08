@@ -1,7 +1,7 @@
 import { computer } from '@neutralinojs/lib';
 import Roblox from '.';
 import { getValue } from '../../components/settings';
-import { showNotification } from '../tools/notifications';
+import { Notification } from '../tools/notifications';
 import { RPCController, type RPCOptions } from '../tools/rpc';
 import { shell } from '../tools/shell';
 import { curlGet, sleep } from '../utils';
@@ -153,12 +153,12 @@ export default async function onGameEvent(data: GameEventInfo) {
 					const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
 					console.info(`[Activity] Server is located in "${ipReq.city}"`);
 
-					showNotification({
+					new Notification({
 						content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
 						title: 'Server Joined',
 						timeout: 5,
 						sound: false,
-					});
+					}).show();
 				}
 				break;
 			}

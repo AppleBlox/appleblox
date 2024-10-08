@@ -6,7 +6,7 @@ import { getAllProfiles, getSelectedProfile, type Profile } from '../../componen
 import { getConfigPath, getValue, loadSettings } from '../../components/settings';
 import type { SelectElement, SettingsOutput } from '../../components/settings/types';
 import shellFS from '../tools/shellfs';
-import { showNotification } from '../tools/notifications';
+import { Notification } from '../tools/notifications';
 
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
@@ -225,6 +225,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 				/* v2 */ FFlagDisableNewIGMinDUA: false,
 				FFlagEnableInGameMenuModernization: false,
 				/* Chrome */ FFlagEnableInGameMenuChrome: false,
+				FFlagFixReportButtonCutOff: false,
 			},
 			path: 'fastflags.ui.menu_version',
 			type: 'select',
@@ -286,11 +287,11 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 
 	// Actions
 	if (data.forceVulkan === true) {
-		showNotification({
+		new Notification({
 			title: 'Renderer defaulted to Vulkan',
 			content: "Vulkan has been automatically enabled because you set a higher FPS cap than your monitor's refresh rate.",
 			timeout: 7,
-		});
+		}).show();
 	}
 
 	return flags;
