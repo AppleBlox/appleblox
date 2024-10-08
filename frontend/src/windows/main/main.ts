@@ -5,12 +5,11 @@ import './ts/roblox';
 import './ts/window';
 
 // Imports
-import { events, init, app as neuApp } from '@neutralinojs/lib';
+import { events, init, app as neuApp, os } from '@neutralinojs/lib';
 import { version } from '../../../../package.json';
 import App from './App.svelte';
 import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
-import { AbloxWatchdog } from './ts/watchdog';
 
 // Initialize NeutralinoJS
 init();
@@ -27,13 +26,7 @@ events.on('ready', async () => {
 		console.info(`[Main] AppleBlox v${version}`);
 		console.info(`[Main] Current Time: ${new Date().toLocaleString()}`);
 		console.info(`[Main] NeutralinoJS Version: ${window.NL_VERSION}`);
-		console.info(`[Main] ${(await shell('uname',["-a"])).stdOut.trim()}`);
-
-		/** Launch the process manager */
-		const watchdog = new AbloxWatchdog();
-		watchdog.start().catch((err) => {
-			console.error('[Watchdog] ', err);
-		});
+		console.info(`[Main] ${(await shell('uname', ['-a'])).stdOut.trim()}`);
 	}, 500);
 });
 
