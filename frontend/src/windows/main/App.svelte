@@ -20,6 +20,7 @@
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils';
 	import { focusWindow } from './ts/window';
+	import { fade, blur } from 'svelte/transition';
 
 	let currentPage: string;
 
@@ -102,6 +103,7 @@
 		}
 	});
 
+	// Listen for this dispatch event and change page accordingly.
 	events.on('ui:change_page', (evt: CustomEvent) => {
 		const { id } = evt.detail;
 		currentPage = id || currentPage;
@@ -123,9 +125,9 @@
 	<Toaster richColors />
 	<!-- Content div -->
 	{#if launchInfo.launching}
-		<div class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col">
+		<div class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col" transition:blur={{ duration: 300 }}>
 			<p class="font-bold text-2xl">{launchInfo.text}</p>
-			<Progress max={100} value={launchInfo.progress} class="w-[60%] bg-primary" />
+			<Progress max={100} bind:value={launchInfo.progress} class="w-[60%]" />
 		</div>
 	{:else}
 		<Sidebar
