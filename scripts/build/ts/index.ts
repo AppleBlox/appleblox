@@ -8,6 +8,8 @@ import { buildSidecar } from './sidecar';
 import { buildViteAndNeu } from './utils';
 import { winBuild } from './win-bundle';
 
+const { argv } = process;
+
 export async function build() {
 	$.cwd(process.cwd());
 	const initTime = performance.now();
@@ -21,7 +23,7 @@ export async function build() {
 	}
 
 	await buildSidecar();
-	await buildViteAndNeu();
+	await buildViteAndNeu(!argv.includes("--no-vite"));
 
 	if (BuildConfig.mac) {
 		await macBuild();
