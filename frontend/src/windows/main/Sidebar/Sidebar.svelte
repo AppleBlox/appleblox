@@ -14,7 +14,7 @@
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
 
-	import CreditsIcon from '@/assets/sidebar/credits.png';
+	import CreditsIcon from '@/assets/sidebar/info.png';
 	import MiscIcon from '@/assets/sidebar/misc.png';
 
 	import Button from '$lib/components/ui/button/button.svelte';
