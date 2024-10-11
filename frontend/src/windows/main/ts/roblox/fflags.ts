@@ -7,6 +7,7 @@ import { getConfigPath, getValue, loadSettings } from '../../components/settings
 import type { SelectElement, SettingsOutput } from '../../components/settings/types';
 import { Notification } from '../tools/notifications';
 import shellFS from '../tools/shellfs';
+import { curlGet } from '../utils';
 
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
@@ -496,13 +497,14 @@ export class FastFlagsList {
 		windows: string[] | null;
 		mac: string[] | null;
 		client: string[] | null;
+		beta: string[] | null;
 	};
 
 	constructor() {
 		this.toParseFlags = [];
 		this.skipPanels = [];
 		this.settings = {};
-		this.trackerCache = { windows: null, mac: null, client: null };
+		this.trackerCache = { windows: null, mac: null, client: null, beta: null };
 	}
 
 	/** Fetch the FastFlags Tracker list */
@@ -548,6 +550,17 @@ export class FastFlagsList {
 				.catch((err) => {
 					console.warn(err);
 					this.trackerCache.client = null;
+				});
+		}
+		if (!this.trackerCache.beta) {
+			await curlGet('https://clientsettings.roblox.com/v2/settings/application/PCDesktopClient/bucket/ZBeta')
+				.then(async (data) => {
+					const flags = Object.keys(data.applicationSettings);
+					this.trackerCache.beta = flags.length > 0 ? flags : null;
+				})
+				.catch((err) => {
+					console.warn(err);
+					this.trackerCache.beta = null;
 				});
 		}
 	}
