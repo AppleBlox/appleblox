@@ -8,11 +8,14 @@
 	import RefreshIcon from '@/assets/panel/refresh.png';
 	import SillyCat from '@/assets/panel/silly.webp';
 
-	import { os } from '@neutralinojs/lib';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import Roblox from '../../ts/roblox';
 	import shellFS from '../../ts/tools/shellfs';
+	import { FolderOpen } from 'lucide-svelte';
+	import { getConfigPath } from '../../components/settings';
+	import { sleep } from '../../ts/utils';
+	import { fade } from 'svelte/transition';
 
 	let mods: { filename: string; path: string; state: boolean }[] = [];
 	Roblox.Mods.loadMods().then((m) => (mods = m));
@@ -57,7 +60,17 @@
 					>Enable or disable certain mods. They are loaded in alphabetical order (1,2,3,a,b,c)</Card.Description
 				>
 			</div>
-
+			<Button variant="outline" class="mr-3" on:click={async()=>{
+				try {
+					const folderPath = path.join(path.dirname(await getConfigPath()), 'mods');
+					await shellFS.createDirectory(folderPath);
+					await sleep(10);
+					await shellFS.open(folderPath);
+				} catch (err) {
+					toast.error(`An error occured: ${err}`);
+					console.error('[ModsPanel]', err);
+				}
+			}}><FolderOpen class="mr-3"/>Open folder</Button>
 			<Button
 				class="ml-auto mb-3 w-10 p-0"
 				variant="default"
@@ -78,7 +91,7 @@
 		{#if mods.length > 0}
 			{#each mods as mod (mod.filename)}
 				<Separator class="my-3" />
-				<div class="flex items-center">
+				<div class="flex items-center" transition:fade={{duration: 100}}>
 					<div>
 						<p class="font-semibold text-[#0a0808] dark:text-red-100">{mod.filename}</p>
 						<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{mod.path}</p>
@@ -94,10 +107,9 @@
 			{/each}
 		{:else}
 			<div class="flex flex-col justify-center items-center gap-3">
-				<img src={SillyCat} alt="No mods found icnon" class="w-16 rounded-sm" />
 				<Alert.Root>
 					<Alert.Title>No mods found</Alert.Title>
-					<Alert.Description>You haven't downloaded any mods.</Alert.Description>
+					<Alert.Description class="flex gap-3 items-center justify-start"><p>You haven't downloaded any mods.</p><img src={SillyCat} alt="No mods found icnon" class="w-16 h-10 rounded-sm" /></Alert.Description>
 				</Alert.Root>
 			</div>
 		{/if}

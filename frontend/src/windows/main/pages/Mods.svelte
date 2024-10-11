@@ -4,11 +4,9 @@
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book, Folder } from 'lucide-svelte';
 	import path from 'path-browserify';
-	import { toast } from 'svelte-sonner';
-	import { getConfigPath, SettingsPanelBuilder } from '../components/settings';
+	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import shellFS from '../ts/tools/shellfs';
-	import { sleep } from '../ts/utils';
 	import ModsUi from './Custom/ModsUI.svelte';
 
 	export let render = true;
@@ -16,17 +14,6 @@
 	async function onButtonClicked(e: CustomEvent) {
 		const { id } = e.detail;
 		switch (id) {
-			case 'open_mods_folder':
-				try {
-					const folderPath = path.join(path.dirname(await getConfigPath()), 'mods');
-					await shellFS.createDirectory(folderPath);
-					await sleep(10);
-					await shellFS.open(folderPath);
-				} catch (err) {
-					toast.error(`An error occured: ${err}`);
-					console.error('[ModsPanel]', err);
-				}
-				break;
 			case 'join_bloxstrap':
 				os.open('https://discord.gg/nKjV3mGq6R');
 				break;
@@ -85,13 +72,6 @@
 					"Options about Roblox mods. To install mods, simply drag the files and folder you downloaded into AppleBlox's mods folder. To find mods, join the Bloxstrap Discord server. DO NOT ask help about AppleBlox there"
 				)
 				.setId('general')
-				.addButton({
-					label: 'Open mods folder',
-					description: 'Opens the mods folder in finder',
-					id: 'open_mods_folder',
-					variant: 'default',
-					icon: { component: Folder },
-				})
 				.addButton({
 					label: 'Read mods guide',
 					description:
