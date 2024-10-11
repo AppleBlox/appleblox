@@ -3,7 +3,6 @@ import * as path from 'node:path';
 import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
 import neutralino from './scripts/package/vite-plugin';
-import legacy from '@vitejs/plugin-legacy';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,9 +10,6 @@ export default defineConfig({
 	plugins: [
 		svelte(),
 		checker({ typescript: true }),
-		legacy({
-			targets: ['safari 14'],
-		}),
 		neutralino(),
 	],
 	build: {
