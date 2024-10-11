@@ -24,6 +24,11 @@ export async function launchRoblox(
 	showFlagErrorPopup: (title: string, description: string, code: string) => Promise<boolean>,
 	robloxUrl?: string
 ) {
+	// Constant settings
+	const constSettings = {
+		areModsEnabled: (await getValue<boolean>('mods.general.enabled')) === true,
+	};
+
 	if (rbxInstance || (await shell('pgrep', ['-f', 'RobloxPlayer'], { skipStderrCheck: true })).stdOut.trim().length > 2) {
 		if (robloxUrl) {
 			await shell('pkill', ['-f', 'RobloxPlayer']);
@@ -128,7 +133,7 @@ export async function launchRoblox(
 		);
 
 		// Mods
-		if ((await getValue('mods.general.enabled')) === true) {
+		if (constSettings.areModsEnabled) {
 			setLaunchProgress(40);
 			setLaunchText('Copying Mods...');
 
@@ -139,7 +144,7 @@ export async function launchRoblox(
 		setLaunchProgress(60);
 		setTimeout(async () => {
 			try {
-				if ((await getValue('mods.general.fix_res')) === true) {
+				if (constSettings.areModsEnabled && (await getValue<boolean>('mods.general.fix_res')) === true) {
 					const maxRes = (
 						await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'", [], {
 							completeCommand: true,
@@ -147,7 +152,7 @@ export async function launchRoblox(
 					).stdOut
 						.trim()
 						.split(' ');
-					await Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);
+					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);
 					new Notification({
 						title: 'Resolution changed',
 						content: "Your resolution was temporarily changed (5s) by the 'Fix Resolution' setting.",
@@ -167,7 +172,7 @@ export async function launchRoblox(
 				robloxInstance.on('gameEvent', onGameEvent);
 				robloxInstance.on('exit', async () => {
 					console.info('[Launch] Roblox exited');
-					if ((await getValue('mods.general.enabled')) === true) {
+					if (constSettings.areModsEnabled) {
 						await Roblox.Mods.restoreRobloxFolders()
 							.catch(console.error)
 							.then(() => {
@@ -184,7 +189,7 @@ export async function launchRoblox(
 					rbxInstance = null;
 				});
 			} catch (err) {
-				if ((await getValue('mods.general.enabled')) === true) {
+				if (constSettings.areModsEnabled) {
 					await Roblox.Mods.restoreRobloxFolders()
 						.catch(console.error)
 						.then(() => {

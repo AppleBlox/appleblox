@@ -1,10 +1,10 @@
-// Move, resize, etc... the Roblox window
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
 
 @interface WindowManager : NSObject
 + (BOOL)moveWindowToX:(int)x y:(int)y;
 + (BOOL)resizeWindowToWidth:(int)width height:(int)height;
++ (BOOL)setResolutionToWidth:(int)width height:(int)height duration:(int)duration;
 @end
 
 @implementation WindowManager
@@ -64,12 +64,68 @@
     return (error == kAXErrorSuccess);
 }
 
++ (BOOL)setResolutionToWidth:(int)width height:(int)height duration:(int)duration {
+    CGDirectDisplayID display = CGMainDisplayID();
+    
+    // Get current display mode
+    CGDisplayModeRef originalMode = CGDisplayCopyDisplayMode(display);
+    if (originalMode == NULL) {
+        NSLog(@"Failed to get current display mode");
+        return NO;
+    }
+    
+    // Find and set new display mode
+    CFArrayRef modes = CGDisplayCopyAllDisplayModes(display, NULL);
+    CFIndex count = CFArrayGetCount(modes);
+    BOOL modeFound = NO;
+    
+    for (CFIndex i = 0; i < count; ++i) {
+        CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modes, i);
+        int modeWidth = (int)CGDisplayModeGetWidth(mode);
+        int modeHeight = (int)CGDisplayModeGetHeight(mode);
+        
+        if (modeWidth == width && modeHeight == height) {
+            CGError err = CGDisplaySetDisplayMode(display, mode, NULL);
+            if (err == kCGErrorSuccess) {
+                NSLog(@"Resolution changed to %dx%d for %d seconds", width, height, duration);
+                modeFound = YES;
+                break;
+            } else {
+                NSLog(@"Failed to set display mode: %d", err);
+            }
+        }
+    }
+    
+    CFRelease(modes);
+    
+    if (!modeFound) {
+        NSLog(@"Failed to find matching resolution: %dx%d", width, height);
+        CGDisplayModeRelease(originalMode);
+        return NO;
+    }
+    
+    // Wait for the specified duration
+    [NSThread sleepForTimeInterval:duration];
+    
+    // Restore original resolution
+    CGError err = CGDisplaySetDisplayMode(display, originalMode, NULL);
+    CGDisplayModeRelease(originalMode);
+    
+    if (err == kCGErrorSuccess) {
+        NSLog(@"Resolution restored to original setting");
+        return YES;
+    } else {
+        NSLog(@"Failed to restore original resolution: %d", err);
+        return NO;
+    }
+}
+
 @end
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        if (argc != 4) {
-            NSLog(@"Usage: %s move|resize <param1> <param2>", argv[0]);
+        if (argc < 3) {
+            NSLog(@"Usage: %s move|resize|setres <param1> <param2> [<param3>]", argv[0]);
             return 1;
         }
 
@@ -83,6 +139,15 @@ int main(int argc, const char * argv[]) {
             int width = atoi(argv[2]);
             int height = atoi(argv[3]);
             return [WindowManager resizeWindowToWidth:width height:height] ? 0 : 1;
+        } else if ([command isEqualToString:@"setres"]) {
+            if (argc != 5) {
+                NSLog(@"Usage: %s setres <width> <height> <duration>", argv[0]);
+                return 1;
+            }
+            int width = atoi(argv[2]);
+            int height = atoi(argv[3]);
+            int duration = atoi(argv[4]);
+            return [WindowManager setResolutionToWidth:width height:height duration:duration] ? 0 : 1;
         } else {
             NSLog(@"Invalid command");
             return 1;

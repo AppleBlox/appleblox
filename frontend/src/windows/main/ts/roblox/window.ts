@@ -1,8 +1,9 @@
 import { computer } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
-import { shell } from '../tools/shell';
+import { shell, spawn } from '../tools/shell';
 
 const window_manager = libraryPath('window_manager');
+let cachedRes: { res: computer.Resolution; createdAt: number } | null = null;
 
 export class RobloxWindow {
 	private readonly windowId: number = 1;
@@ -61,13 +62,38 @@ export class RobloxWindow {
 
 	/** Maximizes the roblox window on the desktop */
 	public static async maximize() {
-		RobloxWindow.move(0, 0);
-		const screenSize = (await computer.getDisplays())[0].resolution;
+		await RobloxWindow.move(0, 0);
+		let screenSize;
+		// If cache exists && it is not older than 5 minutes
+		if (cachedRes && Date.now() - cachedRes.createdAt < 5 * 60 * 1000) {
+		} else {
+			cachedRes = {res: (await computer.getDisplays())[0].resolution, createdAt: Date.now()}
+		}
+		screenSize = cachedRes.res
 		RobloxWindow.resize(screenSize.width, screenSize.height - 100);
 	}
 
 	/** Sets the desktop resolution */
-	public static async setDesktopRes(width: number | string, height: number | string, duration = 1) {
-		shell(`${window_manager}`, ['setres', width, height, duration, 1], { background: true });
+	public static async setDesktopRes(
+		/** Width of the desktop */
+		width: number | string,
+		/** Height of the desktop */
+		height: number | string,
+		/** Duration in ms */
+		duration = 1000
+	): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			const wmanager = spawn(`${window_manager}`, ['setres', width, height, duration]);
+			wmanager.on('stdErr', (data) => {
+				if (data.includes('NO')) reject(`Impossible resolution (${width}, ${height})`);
+			});
+			wmanager.on('exit', (code) => {
+				if (code === 0) {
+					resolve();
+				} else {
+					reject(`Window Manager exited with non-zero code (${code})`);
+				}
+			});
+		});
 	}
 }
