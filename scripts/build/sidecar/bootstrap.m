@@ -164,7 +164,7 @@
 
 @end
 
-int main(int argc, const char * argv[]) {
+int main() {
     @autoreleasepool {
         NSApplication *application = [NSApplication sharedApplication];
         AppDelegate *delegate = [[AppDelegate alloc] init];

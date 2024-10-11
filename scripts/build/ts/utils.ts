@@ -3,7 +3,7 @@ import { exists, readdir } from 'fs/promises';
 import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 
-export async function buildViteAndNeu() {
+export async function buildViteAndNeu(buildVite = false) {
 	if (!(await checkNeutralino())) {
 		await $`bunx neu update`;
 	}
@@ -12,16 +12,18 @@ export async function buildViteAndNeu() {
 		interactive: true,
 		scope: 'vite-neutralino',
 	});
-	frontBuildLog.await('Building with Vite');
-	await $`rm -rf "${resolve('frontend/dist')}"`;
-	$`bunx vite build'`.catch(async (err) => {
-		await Bun.sleep(1000);
-		frontBuildLog.fatal('A vite error occured:');
-		frontBuildLog.fatal(err);
-		process.exit();
-	});
-	while (!(await exists(resolve('./frontend/dist')))) {
-		await sleep(1000);
+	if (buildVite) {
+		frontBuildLog.await('Building with Vite');
+		await $`rm -rf "${resolve('frontend/dist')}"`;
+		$`bunx vite build'`.catch(async (err) => {
+			await Bun.sleep(1000);
+			frontBuildLog.fatal('A vite error occured:');
+			frontBuildLog.fatal(err);
+			process.exit();
+		});
+		while (!(await exists(resolve('./frontend/dist')))) {
+			await sleep(1000);
+		}
 	}
 
 	process.stdout.write('\x1b[2J');

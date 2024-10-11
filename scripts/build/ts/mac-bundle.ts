@@ -1,7 +1,7 @@
 import BuildConfig from '@root/build.config';
 import neuConfig from '@root/neutralino.config.json';
 import { version } from '@root/package.json';
-import { $ } from 'bun';
+import { $, sleep } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
@@ -13,6 +13,7 @@ export async function macBuild() {
 		return;
 	}
 
+	await sleep(1000);
 	const Dist = resolve('.tmpbuild');
 	const Libraries = resolve('bin');
 	const LibrariesBlacklist = ['bootstrap', 'neutralino'];
@@ -72,7 +73,7 @@ export async function macBuild() {
 			files.pop();
 			await $`cp -r "${Libraries}" "${resolve(Resources, 'lib')}"`;
 			for (const file of files) {
-				await $`rm -rf "${join(Resources, "lib", file)}"`;
+				await $`rm -rf "${join(Resources, 'lib', file)}"`;
 			}
 		}
 		l.complete(`mac_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);

@@ -28,13 +28,29 @@ export async function buildSidecar() {
 		},
 	];
 
-	await $`mkdir -p bin`
+	await $`mkdir -p bin`;
 	for (const file of sidecarFiles) {
 		logger.await(`Compiling "${file.name}"`);
 		const perf = performance.now();
 		const outPath = resolve(join('bin', file.filename.split('.')[0]));
 		const filePath = resolve(join('scripts/build/sidecar', file.filename));
-		const args = ['gcc', ...file.args, '-Wno-deprecated-declarations', filePath, '-o', outPath];
+		const args = [
+			'gcc',
+			'-Wno-deprecated-declarations',
+			'-Wall',
+			'-Wextra',
+			'-mmacosx-version-min=10.13',
+			'-arch',
+			'x86_64',
+			'-arch',
+			'arm64',
+			'-isysroot',
+			'/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk',
+			...file.args,
+			filePath,
+			'-o',
+			outPath,
+		];
 		await Bun.spawn(args).exited;
 		logger.complete(`Compiled "${file.name} in ${((performance.now() - perf) / 1000).toFixed(3)}s`);
 	}
