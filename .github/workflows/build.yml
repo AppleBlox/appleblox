@@ -31,16 +31,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AppleBlox-${{ env.VERSION }}_x64
-          path: dist/mac_x64/AppleBlox.app
+          path: dist/mac_x64
 
       - name: Upload (mac_universal)
         uses: actions/upload-artifact@v4
         with:
           name: AppleBlox-${{ env.VERSION }}_universal
-          path: dist/mac_universal/AppleBlox.app
+          path: dist/mac_universal
 
       - name: Upload (mac_arm64)
         uses: actions/upload-artifact@v4
         with:
           name: AppleBlox-${{ env.VERSION }}_arm64
-          path: dist/mac_arm64/AppleBlox.app
+          path: dist/mac_arm64
