@@ -1,6 +1,6 @@
 {
   "name": "appleblox",
-  "version": "0.8.0-dev.3",
+  "version": "0.8.0-dev.4",
   "description": "MacOS roblox launcher",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {
@@ -29,7 +29,6 @@
     "@types/semver-compare": "^1.0.3",
     "@types/signale": "^1.4.7",
     "@types/tar": "^6.1.11",
-    "@vitejs/plugin-legacy": "^5.4.2",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "prettier": "^3.3.3",
