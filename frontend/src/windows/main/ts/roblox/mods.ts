@@ -68,7 +68,6 @@ export class RobloxMods {
 		await shellFS.remove(resourcesFolder);
 		await shellFS.copy(resBackupFolder, resourcesFolder, true);
 		await shellFS.remove(resBackupFolder);
-
 		new Notification({
 			title: 'Resources restored',
 			content: 'Roblox has been cleaned of any Mods remnants..',

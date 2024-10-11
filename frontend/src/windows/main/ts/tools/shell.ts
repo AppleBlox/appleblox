@@ -5,28 +5,28 @@ import { events, os } from '@neutralinojs/lib';
  * Represents the result of a shell command execution.
  */
 interface ExecutionResult {
-    /** The standard output of the command. */
-    stdOut: string;
-    /** The standard error output of the command. */
-    stdErr: string;
-    /** The exit code of the command. */
-    exitCode: number;
+	/** The standard output of the command. */
+	stdOut: string;
+	/** The standard error output of the command. */
+	stdErr: string;
+	/** The exit code of the command. */
+	exitCode: number;
 }
 
 /**
  * Options for executing shell commands.
  */
 export interface ExecuteOptions {
-    /** If true, don't throw an error when stderr is not empty. Default is false. */
-    skipStderrCheck?: boolean;
-    /** The timeout in milliseconds. If provided, the command will be terminated after this time. */
-    timeoutMs?: number;
-    /** If true, the command will be treated as a "whole" command and args will be ignored */
-    completeCommand?: boolean;
-    /** Pass this argument to neutralino's os.execCommand function */
-    background?: boolean;
-    /** Directory from which to execute the command */
-    cwd?: string;
+	/** If true, don't throw an error when stderr is not empty. Default is false. */
+	skipStderrCheck?: boolean;
+	/** The timeout in milliseconds. If provided, the command will be terminated after this time. */
+	timeoutMs?: number;
+	/** If true, the command will be treated as a "whole" command and args will be ignored */
+	completeCommand?: boolean;
+	/** Pass this argument to neutralino's os.execCommand function */
+	background?: boolean;
+	/** Directory from which to execute the command */
+	cwd?: string;
 }
 
 /**
@@ -106,46 +106,54 @@ export async function shell(
  * Options for spawning processes.
  */
 export interface SpawnOptions {
-    /** If true, don't throw an error when stderr is not empty. Default is false. */
-    skipStderrCheck?: boolean;
-    /** The timeout in milliseconds. If provided, the process will be terminated after this time. */
-    timeoutMs?: number;
-    /** The current working directory for the spawned process. */
-    cwd?: string;
+	/** If true, don't throw an error when stderr is not empty. Default is false. */
+	skipStderrCheck?: boolean;
+	/** The timeout in milliseconds. If provided, the process will be terminated after this time. */
+	timeoutMs?: number;
+	/** The current working directory for the spawned process. */
+	cwd?: string;
 }
 
 /**
  * Interface for the event emitter functionality of spawned processes.
  */
 export interface SpawnEventEmitter {
-    on(event: 'stdOut' | 'stdErr' | 'exit', listener: (data: string) => void): void;
-    off(event: 'stdOut' | 'stdErr' | 'exit', listener: (data: string) => void): void;
-}
+    on(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
+    on(event: 'exit', listener: (exitCode: number) => void): void;
+    off(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
+    off(event: 'exit', listener: (exitCode: number) => void): void;
+    pid: number | null;
+  }
 
 /**
  * Represents a spawned process with event emitter functionality.
  */
 class SpawnedProcess implements SpawnEventEmitter {
-    private listeners: { [key: string]: ((data: string) => void)[] } = {
-        stdOut: [],
-        stdErr: [],
-        exit: []
-    };
+	private listeners: { [key: string]: ((data: string) => void)[] } = {
+		stdOut: [],
+		stdErr: [],
+		exit: [],
+	};
+    pid: number | null = null;
 
-    on(event: 'stdOut' | 'stdErr' | 'exit', listener: (data: string) => void): void {
-        this.listeners[event].push(listener);
-    }
+	on(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
+	on(event: 'exit', listener: (exitCode: number) => void): void;
+	on(event: 'stdOut' | 'stdErr' | 'exit', listener: ((data: string) => void) | ((exitCode: number) => void)): void {
+		this.listeners[event].push(listener as any);
+	}
 
-    off(event: 'stdOut' | 'stdErr' | 'exit', listener: (data: string) => void): void {
-        const index = this.listeners[event].indexOf(listener);
-        if (index !== -1) {
-            this.listeners[event].splice(index, 1);
-        }
-    }
+	off(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
+	off(event: 'exit', listener: (exitCode: number) => void): void;
+	off(event: 'stdOut' | 'stdErr' | 'exit', listener: ((data: string) => void) | ((exitCode: number) => void)): void {
+		const index = this.listeners[event].indexOf(listener as any);
+		if (index !== -1) {
+			this.listeners[event].splice(index, 1);
+		}
+	}
 
-    emit(event: 'stdOut' | 'stdErr' | 'exit', data: string): void {
-        this.listeners[event].forEach(listener => listener(data));
-    }
+	emit(event: 'stdOut' | 'stdErr' | 'exit', data: string): void {
+		this.listeners[event].forEach((listener) => listener(data));
+	}
 }
 
 // Map to store all active spawned processes
@@ -153,11 +161,11 @@ const spawnedProcesses = new Map<number, SpawnedProcess>();
 
 // Global event handler for all spawned processes
 events.on('spawnedProcess', (evt: any) => {
-    const { id, action, data } = evt.detail;
-    const process = spawnedProcesses.get(id);
-    if (process) {
-        process.emit(action as 'stdOut' | 'stdErr' | 'exit', data);
-    }
+	const { id, action, data } = evt.detail;
+	const process = spawnedProcesses.get(id);
+	if (process) {
+		process.emit(action as 'stdOut' | 'stdErr' | 'exit', data);
+	}
 });
 
 /**
@@ -168,37 +176,34 @@ events.on('spawnedProcess', (evt: any) => {
  * @returns A promise that resolves with the exit code, combined with an event emitter interface.
  * @throws Will throw an error if the process spawn fails or times out.
  */
-export function spawn(command: string, args: (string | number)[] = [], options: SpawnOptions = {}): SpawnEventEmitter & Promise<number> {
+export function spawn(command: string, args: (string | number)[] = [], options: SpawnOptions = {}): SpawnEventEmitter {
     const fullCommand = buildCommand(command, args);
     const spawnedProcess = new SpawnedProcess();
-
-    const promise = new Promise<number>((resolve, reject) => {
-        let timeoutId: Timer | null = null;
-
-        const handleExit = (exitCode: string) => {
-            if (timeoutId) clearTimeout(timeoutId);
-            resolve(parseInt(exitCode, 10));
-        };
-
-        spawnedProcess.on('exit', handleExit);
-
-        os.spawnProcess(fullCommand, options.cwd)
-            .then((process) => {
-                spawnedProcesses.set(process.id, spawnedProcess);
-
-                if (options.timeoutMs) {
-                    timeoutId = setTimeout(() => {
-                        os.updateSpawnedProcess(process.id, 'terminate');
-                        spawnedProcesses.delete(process.id);
-                        reject(new Error(`Process execution timed out after ${options.timeoutMs}ms`));
-                    }, options.timeoutMs);
-                }
-            })
-            .catch((error) => {
-                reject(new Error(`Failed to spawn process: ${error.message}`));
-            });
-    });
-
-    // Combine the SpawnedProcess instance with the Promise
-    return Object.assign(spawnedProcess, promise);
-}
+  
+    let timeoutId: Timer | null = null;
+  
+    const handleExit = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  
+    spawnedProcess.on('exit', handleExit);
+  
+    os.spawnProcess(fullCommand, options.cwd)
+      .then((process) => {
+        spawnedProcess.pid = process.pid;
+        spawnedProcesses.set(process.id, spawnedProcess);
+  
+        if (options.timeoutMs) {
+          timeoutId = setTimeout(() => {
+            os.updateSpawnedProcess(process.id, 'terminate');
+            spawnedProcesses.delete(process.id);
+            throw new Error(`Process execution timed out after ${options.timeoutMs}ms`);
+          }, options.timeoutMs);
+        }
+      })
+      .catch((error) => {
+        throw new Error(`Failed to spawn process: ${error.message}`);
+      });
+  
+    return Object.assign(spawnedProcess);
+  }

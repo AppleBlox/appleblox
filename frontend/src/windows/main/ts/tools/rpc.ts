@@ -114,7 +114,7 @@ export class DiscordRPC {
 		}).catch(console.error);
 
 		console.info(`[RPC] Starting with command: '${DiscordRPC.binaryPath} ${args.join(' ')}'`);
-		await spawn(DiscordRPC.binaryPath, args).catch(console.error);
+		spawn(DiscordRPC.binaryPath, args);
 		DiscordRPC.currentOptions = options;
 	}
 
