@@ -1,7 +1,7 @@
 import { getValue } from '@/windows/main/components/settings';
-import type { GameEventInfo } from '../instance';
-import { curlGet } from '../../utils';
 import { Notification } from '../../tools/notifications';
+import { curlGet } from '../../utils';
+import type { GameEventInfo } from '../instance';
 
 interface IPResponse {
 	ip: string;

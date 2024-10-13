@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { Braces } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
+	import FlagEditor from '../components/flag-editor/flag-editor.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
-	import FlagEditor from '../components/flag-editor/flag-editor.svelte';
-	import { Braces } from 'lucide-svelte';
 	import Roblox from '../ts/roblox';
-	import { toast } from 'svelte-sonner';
 
 	export let render = true;
 

@@ -2,8 +2,8 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import * as path from 'node:path';
 import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
-import neutralino from './scripts/package/vite-plugin';
 import circleDependency from 'vite-plugin-circular-dependency';
+import neutralino from './scripts/package/vite-plugin';
 
 // https://vitejs.dev/config/
 export default defineConfig({

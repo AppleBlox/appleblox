@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Github, MessageSquare } from 'lucide-svelte';
 	import { os } from '@neutralinojs/lib';
-	import Panel from '../components/settings/panel.svelte';
+	import { Github, MessageSquare } from 'lucide-svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
+	import Panel from '../components/settings/panel.svelte';
 
 	export let render = true;
 

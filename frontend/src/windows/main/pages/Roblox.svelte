@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { CopyCheck, BugOff, PictureInPicture, Play } from 'lucide-svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { os } from '@neutralinojs/lib';
+	import { BugOff, CopyCheck, PictureInPicture, Play } from 'lucide-svelte';
 	import path from 'path-browserify';
-	import Roblox from '../ts/roblox';
 	import { toast } from 'svelte-sonner';
-	import Panel from '../components/settings/panel.svelte';
-	import { SettingsPanelBuilder } from '../components/settings';
-	import type { SettingsOutput } from '../components/settings/types';
 	import LoadingSpinner from '../components/LoadingSpinner.svelte';
+	import { SettingsPanelBuilder } from '../components/settings';
+	import Panel from '../components/settings/panel.svelte';
+	import type { SettingsOutput } from '../components/settings/types';
+	import Roblox from '../ts/roblox';
 
 	export let render = true;
 

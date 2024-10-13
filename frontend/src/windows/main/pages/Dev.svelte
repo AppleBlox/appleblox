@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { LucideAArrowUp } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import { Notification } from '../ts/tools/notifications';
-	import { toast } from 'svelte-sonner';
 
 	export let render = true;
 

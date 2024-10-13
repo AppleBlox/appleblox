@@ -1,9 +1,9 @@
-import { getValue } from "@/windows/main/components/settings";
-import { shell } from "../../tools/shell";
-import Roblox from "..";
-import type { GameEventInfo } from "../instance";
-import { curlGet } from "../../utils";
-import { RPCController, type RPCOptions } from "../../tools/rpc";
+import { getValue } from '@/windows/main/components/settings';
+import Roblox from '..';
+import { RPCController, type RPCOptions } from '../../tools/rpc';
+import { shell } from '../../tools/shell';
+import { curlGet } from '../../utils';
+import type { GameEventInfo } from '../instance';
 
 interface RobloxGame {
 	id: number;
@@ -54,20 +54,20 @@ let rpcOptions: RPCOptions = {
 };
 
 async function gameJoiningEntry(data: GameEventInfo) {
-    // Resolution fix for Mods using a Retina screen
+	// Resolution fix for Mods using a Retina screen
 	if ((await getValue<boolean>('mods.general.fix_res')) === true) {
-		const maxRes = (
-            // Get max possible resolution
-			await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'", [], {
-				completeCommand: true,
-			})
-		).stdOut
-			.trim()
-			.split(' ');
+		const maxRes = // Get max possible resolution
+			(
+				await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'", [], {
+					completeCommand: true,
+				})
+			).stdOut
+				.trim()
+				.split(' ');
 		await Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 6);
 	}
 
-    // Fetch game information using the Roblox API
+	// Fetch game information using the Roblox API
 	const placeMatch = data.data.match(/place\s+(\d+)\s+/); // placeID
 	if (placeMatch == null) {
 		console.error(`[Activity] Couldn't retrieve the placeId from the logs: ${data.data}`);

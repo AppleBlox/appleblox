@@ -1,11 +1,11 @@
-import { events, filesystem, os } from '@neutralinojs/lib';
+import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import Roblox from '.';
 import { getValue } from '../../components/settings';
-import { shell, spawn, type SpawnEventEmitter } from '../tools/shell';
-import { isProcessAlive, sleep } from '../utils';
 import { libraryPath } from '../libraries';
 import { Notification } from '../tools/notifications';
+import { shell, spawn, type SpawnEventEmitter } from '../tools/shell';
+import { isProcessAlive, sleep } from '../utils';
 
 // Export value to be able to set it from other code
 let restartWatcher = false;

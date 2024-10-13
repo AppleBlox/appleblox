@@ -210,36 +210,36 @@ type PermissionTarget = 'u' | 'g' | 'o' | 'a';
  * Options for the chmod command.
  */
 export interface ChmodOptions extends ExecuteOptions {
-  /** Apply changes recursively to directories and their contents (-R) */
-  recursive?: boolean;
-  /** Use the numeric mode specification */
-  numeric?: boolean;
-  /** Change the file mode bits of the symbolic link itself, not the file it points to (-h) */
-  modifySymlink?: boolean;
-  /** Use silent mode; suppress most error messages (-f) */
-  silent?: boolean;
-  /** Display information about the changes made (-v) */
-  verbose?: boolean;
-  /** Don't change any file modes; useful for testing (-n) */
-  dryRun?: boolean;
-  /** Change the user ID of the file (-u) */
-  setUserId?: boolean;
-  /** Change the group ID of the file (-g) */
-  setGroupId?: boolean;
-  /** Set the sticky bit (-t) */
-  setSticky?: boolean;
-  /** Remove read permission (u-r, g-r, o-r, a-r) */
-  removeRead?: PermissionTarget;
-  /** Remove write permission (u-w, g-w, o-w, a-w) */
-  removeWrite?: PermissionTarget;
-  /** Remove execute permission (u-x, g-x, o-x, a-x) */
-  removeExecute?: PermissionTarget;
-  /** Add read permission (u+r, g+r, o+r, a+r) */
-  addRead?: PermissionTarget;
-  /** Add write permission (u+w, g+w, o+w, a+w) */
-  addWrite?: PermissionTarget;
-  /** Add execute permission (u+x, g+x, o+x, a+x) */
-  addExecute?: PermissionTarget;
+	/** Apply changes recursively to directories and their contents (-R) */
+	recursive?: boolean;
+	/** Use the numeric mode specification */
+	numeric?: boolean;
+	/** Change the file mode bits of the symbolic link itself, not the file it points to (-h) */
+	modifySymlink?: boolean;
+	/** Use silent mode; suppress most error messages (-f) */
+	silent?: boolean;
+	/** Display information about the changes made (-v) */
+	verbose?: boolean;
+	/** Don't change any file modes; useful for testing (-n) */
+	dryRun?: boolean;
+	/** Change the user ID of the file (-u) */
+	setUserId?: boolean;
+	/** Change the group ID of the file (-g) */
+	setGroupId?: boolean;
+	/** Set the sticky bit (-t) */
+	setSticky?: boolean;
+	/** Remove read permission (u-r, g-r, o-r, a-r) */
+	removeRead?: PermissionTarget;
+	/** Remove write permission (u-w, g-w, o-w, a-w) */
+	removeWrite?: PermissionTarget;
+	/** Remove execute permission (u-x, g-x, o-x, a-x) */
+	removeExecute?: PermissionTarget;
+	/** Add read permission (u+r, g+r, o+r, a+r) */
+	addRead?: PermissionTarget;
+	/** Add write permission (u+w, g+w, o+w, a+w) */
+	addWrite?: PermissionTarget;
+	/** Add execute permission (u+x, g+x, o+x, a+x) */
+	addExecute?: PermissionTarget;
 }
 
 /**
@@ -249,56 +249,56 @@ export interface ChmodOptions extends ExecuteOptions {
  * @param options - Options for the chmod command and execution.
  */
 export async function chmod(path: string, mode: string, options: ChmodOptions = {}): Promise<void> {
-  const args: string[] = [];
+	const args: string[] = [];
 
-  if (options.recursive) args.push('-R');
-  if (options.modifySymlink) args.push('-h');
-  if (options.silent) args.push('-f');
-  if (options.verbose) args.push('-v');
-  if (options.dryRun) args.push('-n');
+	if (options.recursive) args.push('-R');
+	if (options.modifySymlink) args.push('-h');
+	if (options.silent) args.push('-f');
+	if (options.verbose) args.push('-v');
+	if (options.dryRun) args.push('-n');
 
-  if (options.numeric) {
-    args.push(mode);
-  } else {
-    let symbolicMode = '';
+	if (options.numeric) {
+		args.push(mode);
+	} else {
+		let symbolicMode = '';
 
-    const applyPermission = (type: PermissionTarget, action: '+' | '-', permission: 'r' | 'w' | 'x') => {
-      symbolicMode += `${type}${action}${permission},`;
-    };
+		const applyPermission = (type: PermissionTarget, action: '+' | '-', permission: 'r' | 'w' | 'x') => {
+			symbolicMode += `${type}${action}${permission},`;
+		};
 
-    if (options.setUserId) symbolicMode += 'u+s,';
-    if (options.setGroupId) symbolicMode += 'g+s,';
-    if (options.setSticky) symbolicMode += '+t,';
+		if (options.setUserId) symbolicMode += 'u+s,';
+		if (options.setGroupId) symbolicMode += 'g+s,';
+		if (options.setSticky) symbolicMode += '+t,';
 
-    if (options.removeRead) applyPermission(options.removeRead, '-', 'r');
-    if (options.removeWrite) applyPermission(options.removeWrite, '-', 'w');
-    if (options.removeExecute) applyPermission(options.removeExecute, '-', 'x');
-    if (options.addRead) applyPermission(options.addRead, '+', 'r');
-    if (options.addWrite) applyPermission(options.addWrite, '+', 'w');
-    if (options.addExecute) applyPermission(options.addExecute, '+', 'x');
+		if (options.removeRead) applyPermission(options.removeRead, '-', 'r');
+		if (options.removeWrite) applyPermission(options.removeWrite, '-', 'w');
+		if (options.removeExecute) applyPermission(options.removeExecute, '-', 'x');
+		if (options.addRead) applyPermission(options.addRead, '+', 'r');
+		if (options.addWrite) applyPermission(options.addWrite, '+', 'w');
+		if (options.addExecute) applyPermission(options.addExecute, '+', 'x');
 
-    if (symbolicMode) {
-      args.push(symbolicMode.slice(0, -1)); // Remove trailing comma
-    } else {
-      args.push(mode);
-    }
-  }
+		if (symbolicMode) {
+			args.push(symbolicMode.slice(0, -1)); // Remove trailing comma
+		} else {
+			args.push(mode);
+		}
+	}
 
-  args.push(path);
+	args.push(path);
 
-  await shell('chmod', args, options);
+	await shell('chmod', args, options);
 }
 
 /**
  * Options for creating a temporary directory.
  */
 export interface CreateTempDirOptions extends ExecuteOptions {
-  /** The directory under which to create the temporary directory. Defaults to system temp directory. */
-  baseDir?: string;
-  /** A prefix for the directory name. */
-  prefix?: string;
-  /** If true, creates a directory that's only readable and writable by the current user. */
-  private?: boolean;
+	/** The directory under which to create the temporary directory. Defaults to system temp directory. */
+	baseDir?: string;
+	/** A prefix for the directory name. */
+	prefix?: string;
+	/** If true, creates a directory that's only readable and writable by the current user. */
+	private?: boolean;
 }
 
 /**
@@ -307,24 +307,24 @@ export interface CreateTempDirOptions extends ExecuteOptions {
  * @returns A promise that resolves with the path of the created temporary directory.
  */
 export async function createTempDir(options: CreateTempDirOptions = {}): Promise<string> {
-  const args: string[] = ['-d'];
+	const args: string[] = ['-d'];
 
-  if (options.baseDir) {
-    args.push('-p', options.baseDir);
-  }
+	if (options.baseDir) {
+		args.push('-p', options.baseDir);
+	}
 
-  if (options.prefix) {
-    args.push(options.prefix);
-  } else {
-    args.push('tmp.XXXXXX');
-  }
+	if (options.prefix) {
+		args.push(options.prefix);
+	} else {
+		args.push('tmp.XXXXXX');
+	}
 
-  if (options.private) {
-    args.unshift('-p');
-  }
+	if (options.private) {
+		args.unshift('-p');
+	}
 
-  const result = await shell('mktemp', args, options);
-  return result.stdOut.trim();
+	const result = await shell('mktemp', args, options);
+	return result.stdOut.trim();
 }
 
 /**
@@ -348,49 +348,49 @@ export interface ZipOptions extends ExecuteOptions {
 	password?: string;
 	/** The working directory from which to execute the zip command */
 	cwd?: string;
-  }
-  
-  /**
-   * Creates a zip archive of the specified files or directories.
-   * @param zipFile - The name of the zip file to create.
-   * @param sources - An array of file or directory paths to include in the zip.
-   * @param options - Options for the zip command and execution.
-   */
-  export async function zip(zipFile: string, sources: string[], options: ZipOptions = {}): Promise<void> {
+}
+
+/**
+ * Creates a zip archive of the specified files or directories.
+ * @param zipFile - The name of the zip file to create.
+ * @param sources - An array of file or directory paths to include in the zip.
+ * @param options - Options for the zip command and execution.
+ */
+export async function zip(zipFile: string, sources: string[], options: ZipOptions = {}): Promise<void> {
 	const args: string[] = ['-q'];
-  
+
 	if (options.compressionLevel !== undefined) {
-	  args.push(`-${options.compressionLevel}`);
+		args.push(`-${options.compressionLevel}`);
 	}
-  
+
 	if (options.includeHidden) {
-	  args.push('-D');
+		args.push('-D');
 	}
-  
+
 	if (options.recursive) {
-	  args.push('-r');
+		args.push('-r');
 	}
-  
+
 	if (options.symlinks) {
-	  args.push('-y');
+		args.push('-y');
 	}
-  
+
 	if (options.password) {
-	  args.push('-P', options.password);
+		args.push('-P', options.password);
 	}
-  
+
 	args.push(zipFile);
-  
+
 	if (options.exclude) {
-	  options.exclude.forEach(pattern => {
-		args.push('-x', pattern);
-	  });
+		options.exclude.forEach((pattern) => {
+			args.push('-x', pattern);
+		});
 	}
-  
+
 	args.push(...sources);
-  
+
 	await shell('zip', args, { ...options, cwd: options.cwd });
-  }
+}
 
 // Default export containing all functions
 const shellFS = {
@@ -407,7 +407,7 @@ const shellFS = {
 	open,
 	chmod,
 	createTempDir,
-	zip
+	zip,
 };
 
 export default shellFS;

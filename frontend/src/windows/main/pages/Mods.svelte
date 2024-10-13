@@ -2,7 +2,7 @@
 	import ApplebloxIcon from '@/assets/favicon.png';
 	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
 	import { filesystem, os } from '@neutralinojs/lib';
-	import { Book, Folder } from 'lucide-svelte';
+	import { Book } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';

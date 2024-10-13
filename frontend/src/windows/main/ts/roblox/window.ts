@@ -1,8 +1,8 @@
-import { computer, os } from '@neutralinojs/lib';
+import { computer } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
 import { shell, spawn, type SpawnEventEmitter } from '../tools/shell';
-import { sleep } from '../utils';
 import shellFS from '../tools/shellfs';
+import { sleep } from '../utils';
 
 const pipeName = '/tmp/window_relay_ablox';
 let shouldRestartWindowManager = false;

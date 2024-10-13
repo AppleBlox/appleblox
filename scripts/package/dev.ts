@@ -9,7 +9,7 @@ async function main(downloadNeuBinaries = false, createBinaries = false) {
 		await $`bunx neu update`;
 	}
 	if (createBinaries) {
-		await buildSidecar()
+		await buildSidecar();
 	}
 
 	// Clear terminal

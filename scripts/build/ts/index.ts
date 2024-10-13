@@ -23,7 +23,7 @@ export async function build() {
 	}
 
 	await buildSidecar();
-	await buildViteAndNeu(!argv.includes("--no-vite"));
+	await buildViteAndNeu(!argv.includes('--no-vite'));
 
 	if (BuildConfig.mac) {
 		await macBuild();

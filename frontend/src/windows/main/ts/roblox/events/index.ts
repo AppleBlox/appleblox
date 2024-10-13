@@ -12,12 +12,12 @@ export default function onGameEvent(data: GameEventInfo) {
 		case 'GameDisconnected':
 		case 'GameLeaving':
 			gameDisconnected(data);
-            break;
-        case "GameJoinedEntry":
-            gameJoinedEntry(data);
-            break;
-        case "GameMessageEntry":
-            gameMessageEntry(data);
+			break;
+		case 'GameJoinedEntry':
+			gameJoinedEntry(data);
+			break;
+		case 'GameMessageEntry':
+			gameMessageEntry(data);
 			break;
 	}
 }

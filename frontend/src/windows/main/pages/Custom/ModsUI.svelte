@@ -8,14 +8,14 @@
 	import RefreshIcon from '@/assets/panel/refresh.png';
 	import SillyCat from '@/assets/panel/silly.webp';
 
+	import { FolderOpen } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
+	import { fade } from 'svelte/transition';
+	import { getConfigPath } from '../../components/settings';
 	import Roblox from '../../ts/roblox';
 	import shellFS from '../../ts/tools/shellfs';
-	import { FolderOpen } from 'lucide-svelte';
-	import { getConfigPath } from '../../components/settings';
 	import { sleep } from '../../ts/utils';
-	import { fade } from 'svelte/transition';
 
 	let mods: { filename: string; path: string; state: boolean }[] = [];
 	Roblox.Mods.loadMods().then((m) => (mods = m));

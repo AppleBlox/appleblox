@@ -1,8 +1,8 @@
 import { getValue } from '@/windows/main/components/settings';
-import type { GameEventInfo } from '../instance';
 import { RPCController, type RPCOptions } from '../../tools/rpc';
-import type { RichPresence, SetWindowData } from './types';
+import type { GameEventInfo } from '../instance';
 import { RobloxWindow, type WindowData } from '../window';
+import type { RichPresence, SetWindowData } from './types';
 
 let rpcOptions: RPCOptions = {
 	clientId: '1257650541677383721',

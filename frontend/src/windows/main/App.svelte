@@ -5,6 +5,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { events, os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
+	import { blur } from 'svelte/transition';
 	import Sidebar from './Sidebar/Sidebar.svelte';
 	import Code from './components/Code.svelte';
 	import Onboarding from './components/Onboarding.svelte';
@@ -20,7 +21,6 @@
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils';
 	import { focusWindow } from './ts/window';
-	import { blur } from 'svelte/transition';
 
 	let currentPage: string;
 

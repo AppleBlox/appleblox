@@ -5,7 +5,7 @@ export function getMode(): 'dev' | 'prod' {
 }
 
 export async function isProcessAlive(pid: number | string) {
-	const cmd = await shell('ps', ['-p', pid.toString()],{skipStderrCheck: true});
+	const cmd = await shell('ps', ['-p', pid.toString()], { skipStderrCheck: true });
 	return cmd.stdOut.includes(String(pid));
 }
 
@@ -30,7 +30,9 @@ export function getStringDiff(oldStr: string, newStr: string): string {
 }
 
 export async function curlGet(url: string): Promise<any> {
-	const res = JSON.parse((await shell('curl', ['-X', 'GET', '-H', 'Content-Type: application/json', url], {skipStderrCheck: true})).stdOut);
+	const res = JSON.parse(
+		(await shell('curl', ['-X', 'GET', '-H', 'Content-Type: application/json', url], { skipStderrCheck: true })).stdOut
+	);
 	return res;
 }
 

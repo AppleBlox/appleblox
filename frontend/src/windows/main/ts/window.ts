@@ -29,17 +29,17 @@ hotkeys('ctrl+x,cmd+x', () => {
 
 hotkeys('ctrl+z,cmd+z', () => {
 	document.execCommand('undo');
-	return false
+	return false;
 });
 
 hotkeys('ctrl+shift+z,cmd+shift+z', () => {
 	document.execCommand('redo');
-	return false
+	return false;
 });
 
 hotkeys('cmd+q,cmd+w', () => {
 	events.broadcast('exitApp');
-	return false
+	return false;
 });
 
 export async function focusWindow() {
