@@ -10,7 +10,7 @@ const ALERTER_RELEASE = 'https://github.com/vjeantet/alerter/releases/download/1
 export async function buildSidecar() {
 	const logger = new Signale({ scope: 'sidecar' });
 
-	const sidecarFiles: { name: string; filename: string; args: string[] }[] = [
+	const sidecarFiles: { name: string; filename: string; args: string[]; includeSuffix?: boolean; isSwift?: boolean }[] = [
 		{
 			name: 'Bootstrap',
 			filename: 'bootstrap.m',
@@ -20,11 +20,20 @@ export async function buildSidecar() {
 			name: 'Urlscheme',
 			filename: 'urlscheme.m',
 			args: ['-framework', 'Foundation', '-framework', 'ApplicationServices'],
+			includeSuffix: true,
 		},
 		{
 			name: 'Window Manager',
-			filename: 'window_manager.mm',
-			args: ['-framework', 'Foundation', '-framework', 'ApplicationServices'],
+			filename: 'window_manager.swift',
+			args: [],
+			includeSuffix: true,
+			isSwift: true,
+		},
+		{
+			name: 'Roblox Logs Watcher',
+			filename: 'rlogs.m',
+			args: ['-framework', 'Foundation'],
+			includeSuffix: true,
 		},
 	];
 
@@ -32,26 +41,32 @@ export async function buildSidecar() {
 	for (const file of sidecarFiles) {
 		logger.await(`Compiling "${file.name}"`);
 		const perf = performance.now();
-		const outPath = resolve(join('bin', file.filename.split('.')[0]));
+		const outPath = resolve(join('bin', `${file.filename.split('.')[0]}${file.includeSuffix === true ? '_ablox' : ''}`));
 		const filePath = resolve(join('scripts/build/sidecar', file.filename));
-		const args = [
-			'gcc',
-			'-Wno-deprecated-declarations',
-			'-Wall',
-			'-Wextra',
-			'-mmacosx-version-min=10.13',
-			'-arch',
-			'x86_64',
-			'-arch',
-			'arm64',
-			'-isysroot',
-			'/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk',
-			...file.args,
-			filePath,
-			'-o',
-			outPath,
-		];
+		let args: string[];
+		if (file.isSwift) {
+			args = ['swiftc', filePath, '-o', outPath];
+		} else {
+			args = [
+				'gcc',
+				'-Wno-deprecated-declarations',
+				'-Wall',
+				'-Wextra',
+				'-mmacosx-version-min=10.13',
+				'-arch',
+				'x86_64',
+				'-arch',
+				'arm64',
+				'-isysroot',
+				'/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk',
+				...file.args,
+				filePath,
+				'-o',
+				outPath,
+			];
+		}
 		await Bun.spawn(args).exited;
+
 		logger.complete(`Compiled "${file.name} in ${((performance.now() - perf) / 1000).toFixed(3)}s`);
 	}
 

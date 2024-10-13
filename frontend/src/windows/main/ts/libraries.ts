@@ -27,14 +27,20 @@ const LibPaths: LibPathsType = {
 	},
 	window_manager: {
 		darwin: {
-			prod: '/lib/window_manager',
-			dev: '/bin/window_manager',
+			prod: '/lib/window_manager_ablox',
+			dev: '/bin/window_manager_ablox',
 		},
 	},
 	urlscheme: {
 		darwin: {
-			prod: '/lib/urlscheme',
-			dev: '/bin/urlscheme',
+			prod: '/lib/urlscheme_ablox',
+			dev: '/bin/urlscheme_ablox',
+		},
+	},
+	rlogs: {
+		darwin: {
+			prod: '/lib/rlogs_ablox',
+			dev: '/bin/rlogs_ablox',
 		},
 	},
 };
