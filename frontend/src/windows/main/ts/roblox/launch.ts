@@ -27,6 +27,7 @@ export async function launchRoblox(
 	// Constant settings
 	const constSettings = {
 		areModsEnabled: (await getValue<boolean>('mods.general.enabled')) === true,
+		fixResolution: (await getValue<boolean>('mods.general.fix_res')) === true,
 	};
 
 	if (rbxInstance || (await shell('pgrep', ['-f', 'RobloxPlayer'], { skipStderrCheck: true })).stdOut.trim().length > 2) {
@@ -144,20 +145,10 @@ export async function launchRoblox(
 		setLaunchProgress(60);
 		setTimeout(async () => {
 			try {
-				if (constSettings.areModsEnabled && (await getValue<boolean>('mods.general.fix_res')) === true) {
-					const maxRes = (
-						await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'", [], {
-							completeCommand: true,
-						})
-					).stdOut
-						.trim()
-						.split(' ');
-					Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 5);
-					new Notification({
-						title: 'Resolution changed',
-						content: "Your resolution was temporarily changed (5s) by the 'Fix Resolution' setting.",
-						timeout: 10,
-					}).show();
+				if (constSettings.areModsEnabled && constSettings.fixResolution) {
+					setLaunchText('Disabling Retina resolution...');
+					setLaunchProgress(80);
+					await Roblox.Mods.toggleHighRes(false);
 				}
 				const robloxInstance = new RobloxInstance(true);
 				await robloxInstance.init();
@@ -171,17 +162,27 @@ export async function launchRoblox(
 
 				robloxInstance.on('gameEvent', onGameEvent);
 				robloxInstance.on('exit', async () => {
-					console.info('[Launch] Roblox exited');
+					console.info('[Launch] Roblox instance exited');
 					if (constSettings.areModsEnabled) {
-						await Roblox.Mods.restoreRobloxFolders()
+						new Notification({
+							title: 'Cleaning mods content...',
+							content: "Please don't quit AppleBlox until this process is finished.",
+							subtitle: 'Quitting the app may corrupt Roblox',
+							timeout: 5,
+						}).show();
+						Roblox.Mods.restoreRobloxFolders()
 							.catch(console.error)
-							.then(() => {
+							.then(async () => {
 								console.info(
 									`[Launch] Removed mod files from "${path.join(Roblox.path, 'Contents/Resources/')}"`
 								);
+								// Use if block because checking if high resolution is enabled require file operations, so it's more optimized that way.
+								if (constSettings.fixResolution) {
+									await Roblox.Mods.toggleHighRes(true);
+								}
+								await Roblox.Mods.removeCustomFont();
 							});
 					}
-					await Roblox.Mods.removeCustomFont();
 					RPCController.stop();
 					setWindowVisibility(true);
 					focusWindow();

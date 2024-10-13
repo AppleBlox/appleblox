@@ -96,9 +96,9 @@
 				})
 				.addSwitch({ label: 'Enable Mods', description: 'Applies your mods', id: 'enabled', default: false })
 				.addSwitch({
-					label: 'Fix resolution',
+					label: 'Reduce Resolution',
 					description:
-						'Maximizes the resolution when opening Roblox. This fixes some icons not appearing in some cases',
+						'Render Roblox at a lower resolution to be able to use Mods not designed for Apple Retina screens.',
 					id: 'fix_res',
 					default: false,
 				})
