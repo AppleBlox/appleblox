@@ -20,7 +20,7 @@
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils';
 	import { focusWindow } from './ts/window';
-	import { fade, blur } from 'svelte/transition';
+	import { blur } from 'svelte/transition';
 
 	let currentPage: string;
 

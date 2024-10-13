@@ -5,11 +5,12 @@ import './ts/roblox';
 import './ts/window';
 
 // Imports
-import { events, init, app as neuApp } from '@neutralinojs/lib';
+import { events, init, app as neuApp, os } from '@neutralinojs/lib';
 import { version } from '../../../../package.json';
 import App from './App.svelte';
 import { RPCController } from './ts/tools/rpc';
-import { shell } from './ts/tools/shell';
+import { shell, spawn } from './ts/tools/shell';
+import { libraryPath } from './ts/libraries';
 
 // Initialize NeutralinoJS
 init();
