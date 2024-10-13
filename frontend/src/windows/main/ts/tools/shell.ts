@@ -112,29 +112,75 @@ export interface SpawnOptions {
 	timeoutMs?: number;
 	/** The current working directory for the spawned process. */
 	cwd?: string;
+	/** If true, the command will be treated as a "whole" command and args will be ignored */
+	completeCommand?: boolean;
 }
 
 /**
  * Interface for the event emitter functionality of spawned processes.
  */
 export interface SpawnEventEmitter {
-    on(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
-    on(event: 'exit', listener: (exitCode: number) => void): void;
-    off(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
-    off(event: 'exit', listener: (exitCode: number) => void): void;
-    pid: number | null;
-  }
+	/**
+	 * Adds a listener for the specified event.
+	 * @param event - The event to listen for ('stdOut' or 'stdErr').
+	 * @param listener - The callback function to execute when the event occurs.
+	 */
+	on(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
+	/**
+	 * Adds a listener for the exit event.
+	 * @param event - The 'exit' event.
+	 * @param listener - The callback function to execute when the process exits.
+	 */
+	on(event: 'exit', listener: (exitCode: number) => void): void;
+	/**
+	 * Removes a listener for the specified event.
+	 * @param event - The event to stop listening for ('stdOut' or 'stdErr').
+	 * @param listener - The callback function to remove.
+	 */
+	off(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
+	/**
+	 * Removes a listener for the exit event.
+	 * @param event - The 'exit' event.
+	 * @param listener - The callback function to remove.
+	 */
+	off(event: 'exit', listener: (exitCode: number) => void): void;
+	/** The process ID of the spawned process. */
+	pid: number | null;
+	/**
+	 * Writes data to the stdin of the spawned process.
+	 * @param data - The data to write to stdin.
+	 * @returns A promise that resolves when the write operation is complete.
+	 */
+	writeStdin(data: string): Promise<void>;
+	/**
+	 * Signals the end of stdin input for the spawned process.
+	 * @returns A promise that resolves when the end of stdin is signaled.
+	 */
+	endStdin(): Promise<void>;
+	/**
+	 * Kills the spawned process.
+	 * @param force Force quit the process
+	 * @throws Will throw an error if the process PID is not available.
+	 */
+	kill(force?: boolean): Promise<void>;
+}
 
 /**
  * Represents a spawned process with event emitter functionality.
  */
 class SpawnedProcess implements SpawnEventEmitter {
-	private listeners: { [key: string]: ((data: string) => void)[] } = {
+	private listeners: { [key: string]: ((data: string | number) => void)[] } = {
 		stdOut: [],
 		stdErr: [],
 		exit: [],
 	};
-    pid: number | null = null;
+	pid: number;
+	processId: number;
+
+	constructor(pid: number, processId: number) {
+		this.pid = pid;
+		this.processId = processId;
+	}
 
 	on(event: 'stdOut' | 'stdErr', listener: (data: string) => void): void;
 	on(event: 'exit', listener: (exitCode: number) => void): void;
@@ -151,8 +197,22 @@ class SpawnedProcess implements SpawnEventEmitter {
 		}
 	}
 
-	emit(event: 'stdOut' | 'stdErr' | 'exit', data: string): void {
+	emit(event: 'stdOut' | 'stdErr', data: string): void;
+	emit(event: 'exit', exitCode: number): void;
+	emit(event: 'stdOut' | 'stdErr' | 'exit', data: string | number): void {
 		this.listeners[event].forEach((listener) => listener(data));
+	}
+
+	async writeStdin(data: string): Promise<void> {
+		await os.updateSpawnedProcess(this.processId, 'stdIn', data);
+	}
+
+	async endStdin(): Promise<void> {
+		await os.updateSpawnedProcess(this.processId, 'stdInEnd');
+	}
+
+	async kill(force = false): Promise<void> {
+		await shell('kill', force ? ['-9', this.pid.toString()] : [this.pid.toString()], { skipStderrCheck: true });
 	}
 }
 
@@ -164,7 +224,11 @@ events.on('spawnedProcess', (evt: any) => {
 	const { id, action, data } = evt.detail;
 	const process = spawnedProcesses.get(id);
 	if (process) {
-		process.emit(action as 'stdOut' | 'stdErr' | 'exit', data);
+		if (action === 'exit') {
+			process.emit(action, parseInt(data, 10));
+		} else {
+			process.emit(action as 'stdOut' | 'stdErr', data);
+		}
 	}
 });
 
@@ -173,37 +237,39 @@ events.on('spawnedProcess', (evt: any) => {
  * @param command - The command to execute.
  * @param args - An array of arguments for the command.
  * @param options - Spawn options.
- * @returns A promise that resolves with the exit code, combined with an event emitter interface.
+ * @returns A Promise that resolves to a SpawnEventEmitter that allows interaction with the spawned process.
  * @throws Will throw an error if the process spawn fails or times out.
  */
-export function spawn(command: string, args: (string | number)[] = [], options: SpawnOptions = {}): SpawnEventEmitter {
-    const fullCommand = buildCommand(command, args);
-    const spawnedProcess = new SpawnedProcess();
-  
-    let timeoutId: Timer | null = null;
-  
-    const handleExit = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  
-    spawnedProcess.on('exit', handleExit);
-  
-    os.spawnProcess(fullCommand, options.cwd)
-      .then((process) => {
-        spawnedProcess.pid = process.pid;
-        spawnedProcesses.set(process.id, spawnedProcess);
-  
-        if (options.timeoutMs) {
-          timeoutId = setTimeout(() => {
-            os.updateSpawnedProcess(process.id, 'terminate');
-            spawnedProcesses.delete(process.id);
-            throw new Error(`Process execution timed out after ${options.timeoutMs}ms`);
-          }, options.timeoutMs);
-        }
-      })
-      .catch((error) => {
-        throw new Error(`Failed to spawn process: ${error.message}`);
-      });
-  
-    return Object.assign(spawnedProcess);
-  }
+export async function spawn(
+	command: string,
+	args: (string | number)[] = [],
+	options: SpawnOptions = {}
+): Promise<SpawnEventEmitter> {
+	const fullCommand = options.completeCommand ? command : buildCommand(command, args);
+	let timeoutId: Timer | null = null;
+
+	try {
+		const process = await os.spawnProcess(fullCommand, options.cwd);
+		const spawnedProcess = new SpawnedProcess(process.pid, process.id);
+		spawnedProcesses.set(process.id, spawnedProcess);
+
+		const handleExit = () => {
+			if (timeoutId) clearTimeout(timeoutId);
+			spawnedProcesses.delete(process.id);
+		};
+
+		spawnedProcess.on('exit', handleExit);
+
+		if (options.timeoutMs) {
+			timeoutId = setTimeout(async () => {
+				await os.updateSpawnedProcess(process.id, 'terminate');
+				spawnedProcesses.delete(process.id);
+				throw new Error(`Process execution timed out after ${options.timeoutMs}ms`);
+			}, options.timeoutMs);
+		}
+
+		return spawnedProcess;
+	} catch (error) {
+		throw new Error(`Failed to spawn process: ${(error as Error).message}`);
+	}
+}

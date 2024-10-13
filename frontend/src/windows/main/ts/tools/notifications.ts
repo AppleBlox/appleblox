@@ -159,7 +159,7 @@ export class Notification {
 				}
 			}
 
-			this.process = spawn(alerter, args);
+			this.process = await spawn(alerter, args);
 
 			this.process.on('stdOut', (data) => {
 				const trimmedData = data.trim();
@@ -202,7 +202,7 @@ export class Notification {
 	 */
 	public static async list(groupId: string = 'ALL'): Promise<ListedNotification[]> {
 		const alerter = libraryPath('notifications');
-		const notif = spawn(alerter, ['-list', groupId, '-json']);
+		const notif = await spawn(alerter, ['-list', groupId, '-json']);
 
 		return new Promise((resolve, reject) => {
 			let output = '';
