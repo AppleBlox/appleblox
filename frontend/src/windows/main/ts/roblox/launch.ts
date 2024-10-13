@@ -6,7 +6,6 @@ import { Notification } from '../tools/notifications';
 import { RPCController } from '../tools/rpc';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
-import { sleep } from '../utils';
 import { focusWindow, setWindowVisibility } from '../window';
 import onGameEvent from './events';
 import { RobloxInstance } from './instance';
@@ -34,15 +33,10 @@ export async function launchRoblox(
 	};
 
 	if (rbxInstance || (await shell('pgrep', ['-f', 'RobloxPlayer'], { skipStderrCheck: true })).stdOut.trim().length > 2) {
-		if (robloxUrl) {
-			await shell('pkill', ['-f', 'RobloxPlayer']);
-			await sleep(300);
-		} else {
 			setLaunchText('Roblox is already open');
 			setLaunchingRoblox(false);
 			toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
 			return;
-		}
 	}
 	try {
 		console.info('[Launch] Launching Roblox');

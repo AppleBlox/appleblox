@@ -140,14 +140,7 @@ export class RobloxInstance {
 
 	/** Starts the Roblox Instance */
 	public async start(url?: string) {
-		if (this.gameInstance) {
-			if (url) {
-				await this.quit();
-				await sleep(1000); // Precaution delay
-			} else {
-				throw new Error('An instance is already running');
-			}
-		}
+		if (this.gameInstance) throw new Error('An instance is already running');
 
 		console.info('[Roblox.Instance] Opening Roblox instance');
 
