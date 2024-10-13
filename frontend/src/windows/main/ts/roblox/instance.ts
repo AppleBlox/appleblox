@@ -1,15 +1,16 @@
 import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
-import Roblox from '.';
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
 import { Notification } from '../tools/notifications';
 import { shell, spawn, type SpawnEventEmitter } from '../tools/shell';
 import { isProcessAlive, sleep } from '../utils';
+import { RobloxDelegate } from './delegate';
+import { robloxPath } from './path';
+import { RobloxUtils } from './utils';
 
 // Export value to be able to set it from other code
 let restartWatcher = false;
-export const setRestartWatcherVar = (value: boolean) => (restartWatcher = value);
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';
@@ -134,7 +135,7 @@ export class RobloxInstance {
 
 	/** Initalize class values */
 	public async init() {
-		if (!(await Roblox.Utils.hasRoblox())) return;
+		if (!(await RobloxUtils.hasRoblox())) return;
 	}
 
 	/** Starts the Roblox Instance */
@@ -152,16 +153,16 @@ export class RobloxInstance {
 
 		// Launch Roblox
 		if (url) {
-			await Roblox.Delegate.toggle(false);
+			await RobloxDelegate.toggle(false);
 			await shell('open', [url]);
 		} else {
-			await shell('open', [Roblox.path]);
+			await shell('open', [robloxPath]);
 		}
 
 		await sleep(1000); // Give time for Roblox to open
 		// "If block" because settings can be edited and maybe it will not be boolean
 		if ((await getValue<boolean>('roblox.launching.delegate')) === true) {
-			await Roblox.Delegate.toggle(true);
+			await RobloxDelegate.toggle(true);
 		}
 
 		// We find every roblox processes and get the RobloxPlayer one

@@ -3,15 +3,14 @@ import { sleep } from '@/windows/main/ts/utils';
 import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
-import Roblox from '.';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
-import { setRestartWatcherVar } from './instance';
+import { robloxPath } from './path';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
 	static async hasRoblox(popup = true): Promise<boolean> {
-		if (await shellFS.exists(path.join(Roblox.path, 'Contents/MacOS/RobloxPlayer'))) {
+		if (await shellFS.exists(path.join(robloxPath, 'Contents/MacOS/RobloxPlayer'))) {
 			return true;
 		}
 		if (!popup) return false;
@@ -51,7 +50,7 @@ END`,
 
 			toast.info('Opening Roblox...', { duration: 1000 });
 			console.info('[Roblox.Utils] Opening Roblox...');
-			await shellFS.open(Roblox.path);
+			await shellFS.open(robloxPath);
 
 			await sleep(1000);
 
@@ -133,7 +132,6 @@ END`,
 	}
 
 	static async killAll() {
-		setRestartWatcherVar(false);
 		await shell(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`, [], {
 			completeCommand: true,
 			skipStderrCheck: true,

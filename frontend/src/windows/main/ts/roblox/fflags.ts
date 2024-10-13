@@ -1,13 +1,13 @@
 import { filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
-import Roblox from '.';
 import { getAllProfiles, getSelectedProfile, type Profile } from '../../components/flag-editor';
 import { getConfigPath, getValue, loadSettings } from '../../components/settings';
 import type { SelectElement, SettingsOutput } from '../../components/settings/types';
 import { Notification } from '../tools/notifications';
 import shellFS from '../tools/shellfs';
 import { curlGet } from '../utils';
+import { robloxPath } from './path';
 
 const FLAGS_WHITELIST = ['FFlagUserIsBloxstrap', 'FFlagUserAllowsWindowMovement'];
 
@@ -467,7 +467,7 @@ export class RobloxFFlags {
 		};
 	}
 	static async writeClientAppSettings() {
-		const filePath = path.join(Roblox.path, 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
+		const filePath = path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
 		if (await shellFS.exists(filePath)) {
 			await filesystem.remove(filePath);
 		}

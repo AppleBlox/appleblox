@@ -44,7 +44,6 @@
     "typescript": "^5.3.3",
     "vite": "4.4.9",
     "vite-plugin-checker": "^0.7.2",
-    "vite-plugin-circular-dependency": "^0.5.0",
     "vite-plugin-html": "^3.2.2"
   },
   "dependencies": {

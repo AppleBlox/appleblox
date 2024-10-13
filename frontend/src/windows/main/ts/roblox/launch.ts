@@ -1,7 +1,6 @@
 import beautify from 'json-beautify';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
-import Roblox from '.';
 import { getValue } from '../../components/settings';
 import { Notification } from '../tools/notifications';
 import { RPCController } from '../tools/rpc';
@@ -11,6 +10,10 @@ import { sleep } from '../utils';
 import { focusWindow, setWindowVisibility } from '../window';
 import onGameEvent from './events';
 import { RobloxInstance } from './instance';
+import { RobloxFFlags } from './fflags';
+import { robloxPath } from './path';
+import { RobloxUtils } from './utils';
+import { RobloxMods } from './mods';
 
 let rbxInstance: RobloxInstance | null = null;
 
@@ -44,7 +47,7 @@ export async function launchRoblox(
 	try {
 		console.info('[Launch] Launching Roblox');
 		setLaunchingRoblox(true);
-		if (!(await Roblox.Utils.hasRoblox())) {
+		if (!(await RobloxUtils.hasRoblox())) {
 			console.info('[Launch] Roblox is not installed. Exiting launch process.');
 			setLaunchingRoblox(false);
 			return;
@@ -52,20 +55,20 @@ export async function launchRoblox(
 
 		// Fast Flags
 		setLaunchProgress(20);
-		if (await shellFS.exists(path.join(Roblox.path, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'))) {
+		if (await shellFS.exists(path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'))) {
 			console.info(
-				`[Launch] Removing current ClientAppSettings.json file in "${path.join(Roblox.path, 'Contents/MacOS/ClientSettings/ClientAppSettings.json"')}`
+				`[Launch] Removing current ClientAppSettings.json file in "${path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json"')}`
 			);
-			await shellFS.remove(path.join(Roblox.path, 'Contents/MacOS/ClientSettings/'));
+			await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
 			setLaunchText('Removing current ClientAppSettings...');
 		}
 
 		setLaunchProgress(30);
 		setLaunchText('Copying fast flags...');
 		console.info('[Launch] Copying fast flags...');
-		await shellFS.createDirectory(path.join(Roblox.path, 'Contents/MacOS/ClientSettings'));
+		await shellFS.createDirectory(path.join(robloxPath, 'Contents/MacOS/ClientSettings'));
 		console.info('[Launch] Parsing saved FFlags...');
-		const presetFlags = await Roblox.FFlags.parseFlags(true);
+		const presetFlags = await RobloxFFlags.parseFlags(true);
 		// Invalid presets
 		if (
 			Object.keys(presetFlags.invalidFlags).length > 0 &&
@@ -82,7 +85,7 @@ export async function launchRoblox(
 				return;
 			}
 		}
-		const editorFlags = await Roblox.FFlags.parseFlags(false);
+		const editorFlags = await RobloxFFlags.parseFlags(false);
 		// Invalid selected profile flags
 		if (
 			Object.keys(editorFlags.invalidFlags).length > 0 &&
@@ -126,11 +129,11 @@ export async function launchRoblox(
 		};
 		console.info('[Launch] FastFlags: ', fflags);
 		await shellFS.writeFile(
-			path.join(Roblox.path, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'),
+			path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'),
 			JSON.stringify(fflags)
 		);
 		console.info(
-			`[Launch] Wrote FFlags to "${path.join(Roblox.path, 'Contents/MacOS/ClientSettings/ClientAppSettings.json')}"`
+			`[Launch] Wrote FFlags to "${path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json')}"`
 		);
 
 		// Mods
@@ -138,17 +141,17 @@ export async function launchRoblox(
 			setLaunchProgress(40);
 			setLaunchText('Copying Mods...');
 
-			await Roblox.Mods.copyToFiles();
+			await RobloxMods.copyToFiles();
 		}
-		await Roblox.Mods.applyCustomFont();
+		await RobloxMods.applyCustomFont();
 
 		setLaunchProgress(60);
 		setTimeout(async () => {
 			try {
+				await RobloxMods.toggleHighRes(!constSettings.fixResolution);
 				if (constSettings.areModsEnabled && constSettings.fixResolution) {
 					setLaunchText('Disabling Retina resolution...');
 					setLaunchProgress(80);
-					await Roblox.Mods.toggleHighRes(false);
 				}
 				const robloxInstance = new RobloxInstance(true);
 				await robloxInstance.init();
@@ -170,17 +173,15 @@ export async function launchRoblox(
 							subtitle: 'Quitting the app may corrupt Roblox',
 							timeout: 5,
 						}).show();
-						Roblox.Mods.restoreRobloxFolders()
+						RobloxMods.restoreRobloxFolders()
 							.catch(console.error)
 							.then(async () => {
-								console.info(
-									`[Launch] Removed mod files from "${path.join(Roblox.path, 'Contents/Resources/')}"`
-								);
+								console.info(`[Launch] Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
 								// Use if block because checking if high resolution is enabled require file operations, so it's more optimized that way.
 								if (constSettings.fixResolution) {
-									await Roblox.Mods.toggleHighRes(true);
+									await RobloxMods.toggleHighRes(true);
 								}
-								await Roblox.Mods.removeCustomFont();
+								await RobloxMods.removeCustomFont();
 							});
 					}
 					RPCController.stop();
@@ -191,17 +192,17 @@ export async function launchRoblox(
 				});
 			} catch (err) {
 				if (constSettings.areModsEnabled) {
-					await Roblox.Mods.restoreRobloxFolders()
+					await RobloxMods.restoreRobloxFolders()
 						.catch(console.error)
 						.then(() => {
-							console.info(`[Launch] Removed mod files from "${path.join(Roblox.path, 'Contents/Resources/')}"`);
+							console.info(`[Launch] Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
 						});
 				}
 				console.error(err);
 				setLaunchingRoblox(false);
 				toast.error('An error occured while starting Roblox.');
-				await shellFS.remove(path.join(Roblox.path, 'Contents/MacOS/ClientSettings/'));
-				console.info(`[Launch] Deleted "${path.join(Roblox.path, 'Contents/MacOS/ClientSettings/')}"`);
+				await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
+				console.info(`[Launch] Deleted "${path.join(robloxPath, 'Contents/MacOS/ClientSettings/')}"`);
 				return;
 			}
 
@@ -210,8 +211,8 @@ export async function launchRoblox(
 			setWindowVisibility(false);
 			setTimeout(() => {
 				setLaunchingRoblox(false);
-				shellFS.remove(path.join(Roblox.path, 'Contents/MacOS/ClientSettings/'));
-				console.info(`[Launch] Deleted "${path.join(Roblox.path, 'Contents/MacOS/ClientSettings')}"`);
+				shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
+				console.info(`[Launch] Deleted "${path.join(robloxPath, 'Contents/MacOS/ClientSettings')}"`);
 			}, 1000);
 		}, 1000);
 	} catch (err) {
