@@ -9,6 +9,8 @@ import { Notification } from '../tools/notifications';
 import shellFS from '../tools/shellfs';
 import { curlGet } from '../utils';
 
+const FLAGS_WHITELIST = ['FFlagUserIsBloxstrap', 'FFlagUserAllowsWindowMovement'];
+
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
 export interface EditorFlag {
@@ -23,6 +25,18 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		forceVulkan: ((await getValue<number[]>('fastflags.graphics.fps_target'))[0] || 60) > 60,
 	};
 	const flags = new FastFlagsList()
+		// Panel: Integrations
+		// SDK
+		// Window Movement
+		.addFlag({
+			name: 'Window Movement',
+			flags: { FFlagUserIsBloxstrap: true, FFlagUserAllowsWindowMovement: true },
+			path: 'integrations.sdk.window',
+			type: 'switch',
+			value: async (s) => (await getValue<boolean>('integrations.sdk.enabled')) === true && (s as boolean) === true,
+		})
+
+		// Panel: FastFlags
 		// GRAPHICS
 		// FPS Target
 		.addFlag({
@@ -689,7 +703,8 @@ export class FastFlagsList {
 			return (
 				this.trackerCache.mac?.includes(flagName) ||
 				this.trackerCache.windows?.includes(flagName) ||
-				this.trackerCache.client?.includes(flagName)
+				this.trackerCache.client?.includes(flagName) ||
+				FLAGS_WHITELIST.includes(flagName)
 			);
 		});
 		let result: FFs = {};

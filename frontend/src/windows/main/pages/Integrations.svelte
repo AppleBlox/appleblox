@@ -1,8 +1,20 @@
 <script lang="ts">
+	import { app } from '@neutralinojs/lib';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 
 	export let render = true;
+
+	async function onSwitchClicked(e: CustomEvent) {
+		const { id, state } = e.detail
+		switch (id) {
+			case "window":
+				if (!state) return;
+				await app.writeProcessOutput("askPerm")
+				app.readProcessInput()
+				break;
+		}
+	}
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Integrations')
@@ -36,12 +48,22 @@
 					description: 'Games can change your discord RPC',
 					id: 'rpc',
 					default: false,
+					toggleable: {
+						id: 'enabled',
+						type: 'switch',
+						value: true,
+					},
 				})
 				.addSwitch({
 					label: 'Control Roblox window',
 					description: "Games can change your Roblox window's size, position, etc...",
 					id: 'window',
 					default: false,
+					toggleable: {
+						id: 'enabled',
+						type: 'switch',
+						value: true,
+					},
 				})
 		)
 		.addCategory((category) =>
@@ -92,4 +114,4 @@
 		.build();
 </script>
 
-<Panel {panel} {render} />
+<Panel {panel} {render} on:switch={onSwitchClicked}/>
