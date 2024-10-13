@@ -40,5 +40,7 @@
         </array>
         <key>LSUIElement</key>
         <true />
+        <key>NSAccessibilityUsageDescription</key>
+        <string>AppleBlox requires Accessibility permissions to move and resize Roblox's window.</string>
     </dict>
 </plist>

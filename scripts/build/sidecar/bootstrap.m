@@ -5,6 +5,7 @@
 @property (nonatomic, strong) NSPipe *outputPipe;
 @property (nonatomic, strong) NSFileHandle *logFileHandle;
 @property (nonatomic, strong) NSString *deeplinkArgument;
+@property (nonatomic, assign) BOOL isRequestingPermission;
 @end
 
 @implementation AppDelegate
@@ -100,8 +101,33 @@
     if (data.length > 0) {
         NSString *output = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         [self logMessage:[NSString stringWithFormat:@"Main executable output: %@", output]];
+        
+        // Check if the output contains "askPerm"
+        if ([output containsString:@"askPerm"] && !self.isRequestingPermission) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self requestAccessibilityPermission];
+            });
+        }
     }
     [[self.outputPipe fileHandleForReading] readInBackgroundAndNotify];
+}
+
+- (void)requestAccessibilityPermission {
+    [self logMessage:@"Requesting accessibility permission"];
+    self.isRequestingPermission = YES;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSDictionary *options = @{(__bridge id)kAXTrustedCheckOptionPrompt: @YES};
+        BOOL accessibilityEnabled = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
+        
+        if (accessibilityEnabled) {
+            [self logMessage:@"Accessibility permission granted"];
+        } else {
+            [self logMessage:@"Accessibility permission not granted"];
+        }
+        
+        self.isRequestingPermission = NO;
+    });
 }
 
 - (void)setupLogging {
