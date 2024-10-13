@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
@@ -12,7 +13,7 @@
 	import { Braces, Clipboard, Delete, Plus, Search } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { correctAndParseJSON } from '../../ts/utils';
 
 	type FastFlag = string | boolean | null | number;
 	interface EditorFlag {
@@ -58,7 +59,7 @@
 
 		let flagsJson: Record<string, FastFlag> = {};
 		try {
-			flagsJson = JSON.parse(clipboardContent);
+			flagsJson = correctAndParseJSON(clipboardContent).parsedJSON;
 		} catch (err) {
 			toast.error("Couldn't import flags, your JSON is probably invalid (malformatted)");
 			return;
