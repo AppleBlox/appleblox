@@ -40,6 +40,7 @@
 	function removeSelected(): void {
 		flags = flags.filter((_, index) => !selectedFlags.has(index));
 		selectedFlags.clear();
+		toast.success('Removed selected flag(s)', { duration: 1000 });
 		dispatch('update', flags);
 	}
 
@@ -76,7 +77,7 @@
 			return;
 		}
 		flags = [...flags, ...newEditorFlags];
-		toast.success('Imported flags', { duration: 1500 });
+		toast.success('Imported flag(s)', { duration: 1000 });
 		dispatch('update', flags);
 	}
 
@@ -89,7 +90,7 @@
 		const flagsJsonString: string = beautify(flagsObject, null, 1, 100);
 		try {
 			await clipboard.writeText(flagsJsonString);
-			toast.success('Selected flags copied to clipboard!', { duration: 2000 });
+			toast.success('Selected flag(s) copied to clipboard!', { duration: 1000 });
 		} catch (err) {
 			toast.error("Couldn't copy flags to the clipboard");
 			console.error("Couldn't copy flags to the clipboard:", err);
