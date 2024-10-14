@@ -1,6 +1,6 @@
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
-import { spawn, type SpawnEventEmitter } from './shell';
+import { buildCommand, spawn, type SpawnEventEmitter } from './shell';
 
 /**
  * Represents an action that can be associated with a notification.
@@ -160,6 +160,7 @@ export class Notification {
 			}
 
 			this.process = await spawn(alerter, args);
+			console.log(`Spawning notification: ${buildCommand(alerter,args)}`);
 
 			this.process.on('stdOut', (data) => {
 				const trimmedData = data.trim();
