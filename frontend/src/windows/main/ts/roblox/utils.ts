@@ -123,12 +123,14 @@ END`,
 			path.join(savePath, 'Launch Roblox.app/Contents/Resources/icon.icns'),
 			await blob.arrayBuffer()
 		);
-		await filesystem.writeFile(
+		await shellFS.writeFile(
 			path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'),
-			`#!/bin/bash\n${path.join(path.dirname(window.NL_PATH), 'MacOS/bootstrap')} --launch`
+			'#!/bin/bash\nopen appleblox://launch'
 		);
-		await shellFS.chmod(path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch').replaceAll(' ', '\\ '), '+x');
-		toast.success(`Created a shortcut at "${path.join(savePath, 'Launch Roblox.app')}"`);
+		const shortcutPath = path.join(savePath, 'Launch Roblox.app');
+		await shellFS.chmod(path.join(shortcutPath, 'Contents/MacOS/launch'), '+x');
+		toast.success(`Created a shortcut at "${shortcutPath}"`);
+		await shellFS.open(shortcutPath, { reveal: true });
 	}
 
 	static async killAll() {

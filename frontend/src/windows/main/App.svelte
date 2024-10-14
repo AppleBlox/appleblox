@@ -38,6 +38,7 @@
 		},
 	};
 
+	/** Trigger a popup (related to invalid flags) */
 	async function flagErrorPopup(title: string, description: string, code: string) {
 		launchInfo.flagPopup.title = title;
 		launchInfo.flagPopup.description = description;
@@ -50,41 +51,45 @@
 		return flagErrorPopupClicked;
 	}
 
-	// Checks if the app is opened with the --launch or --roblox argument
-	async function checkArgs() {
-		if (window.NL_ARGS.includes('--launch')) {
-			console.info("[App] Launching Roblox from '--launch'");
-
-			await focusWindow()
+	/** Launches roblox with the correct handlers */
+	async function launchRobloxWithHandlers(url?: string) {
+		await Roblox.launch(
 			// Defines which values should be modified during the launch phase (the loading progress, text, etc...)
-			await Roblox.launch(
-				(value) => (launchInfo.isConnected = value),
-				(value) => (launchInfo.launching = value),
-				(value) => (launchInfo.progress = value),
-				(value) => (launchInfo.text = value),
-				flagErrorPopup
-			);
-		}
+			(value) => (launchInfo.isConnected = value),
+			(value) => (launchInfo.launching = value),
+			(value) => (launchInfo.progress = value),
+			(value) => (launchInfo.text = value),
+			flagErrorPopup,
+			url
+		);
+	}
 
+	/** Checks if the app is opened with a URI */
+	async function checkDeeplink() {
 		const urlArgument = window.NL_ARGS.find((arg) => arg.includes('--deeplink='));
-		if (urlArgument) {
-			const url = urlArgument.slice(11)
+		if (!urlArgument) return;
+		const url = urlArgument.slice(11);
+		if (url.startsWith('appleblox://')) {
+			const command = url.slice(12).trim();
+			switch (command) {
+				case 'launch':
+					console.info("[App] Launching Roblox from 'appleblox://launch'");
+					await focusWindow();
+					await launchRobloxWithHandlers();
+					break;
+			}
+		} else if (url.startsWith('roblox://') || url.startsWith('roblox-player://')) {
 			console.info('[App] Launching AppleBlox with Roblox URI.');
-			await focusWindow()
-			await Roblox.launch(
-				(value) => (launchInfo.isConnected = value),
-				(value) => (launchInfo.launching = value),
-				(value) => (launchInfo.progress = value),
-				(value) => (launchInfo.text = value),
-				flagErrorPopup,
-				url
-			);
+			await focusWindow();
+			await launchRobloxWithHandlers(url);
+		}
+		if (urlArgument) {
 		}
 	}
-	checkArgs();
+	checkDeeplink();
 
 	// Sets the theme to the system's mode
-	setMode("system");
+	setMode('system');
 
 	// Makes it so links are opened in the default browser and not Appleblox's webview.
 	document.addEventListener('click', (event) => {
@@ -125,7 +130,10 @@
 	<Toaster richColors />
 	<!-- Content div -->
 	{#if launchInfo.launching}
-		<div class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col" transition:blur={{ duration: 300 }}>
+		<div
+			class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col"
+			transition:blur={{ duration: 300 }}
+		>
 			<p class="font-bold text-2xl">{launchInfo.text}</p>
 			<Progress max={100} bind:value={launchInfo.progress} class="w-[60%]" />
 		</div>
@@ -134,13 +142,7 @@
 			bind:currentPage
 			bind:isLaunched={launchInfo.isConnected}
 			on:launchRoblox={async () => {
-				await Roblox.launch(
-					(value) => (launchInfo.isConnected = value),
-					(value) => (launchInfo.launching = value),
-					(value) => (launchInfo.progress = value),
-					(value) => (launchInfo.text = value),
-					flagErrorPopup
-				);
+				await launchRobloxWithHandlers();
 			}}
 			id="sidebar"
 		/>
