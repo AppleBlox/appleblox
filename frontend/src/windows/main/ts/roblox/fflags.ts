@@ -9,7 +9,7 @@ import shellFS from '../tools/shellfs';
 import { curlGet } from '../utils';
 import { robloxPath } from './path';
 
-const FLAGS_WHITELIST = ['FFlagUserIsBloxstrap', 'FFlagUserAllowsWindowMovement'];
+const FLAGS_WHITELIST = ['FFlagUserIsBloxstrap', 'FFlagUserAllowsWindowMovement', 'FFlagDebugGraphicsDisableMetal'];
 
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
@@ -65,7 +65,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		})
 		.addFlag({
 			name: 'Rendering Engine (Vulkan)',
-			flags: { FFlagDebugGraphicsPreferVulkan: true },
+			flags: { FFlagDebugGraphicsPreferVulkan: true, FFlagDebugGraphicsDisableMetal: true },
 			path: 'fastflags.graphics.engine',
 			type: 'select',
 			value: async (s) => data.forceVulkan || (s as SelectElement).value === 'vulkan',
