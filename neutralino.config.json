@@ -15,6 +15,7 @@
 	"tokenSecurity": "none",
 	"modes": {
 		"window": {
+			"hidden": true,
 			"title": "AppleBlox",
 			"width": 1150,
 			"height": 700,
