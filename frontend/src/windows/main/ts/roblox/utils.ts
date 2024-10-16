@@ -91,13 +91,13 @@ END`,
 		if (!savePath) {
 			return;
 		}
-		if (await shellFS.exists(path.join(savePath, 'Launch Roblox.app'))) {
-			await filesystem.remove(path.join(savePath, 'Launch Roblox.app'));
+		if (await shellFS.exists(path.join(savePath, 'Play Roblox.app'))) {
+			await filesystem.remove(path.join(savePath, 'Play Roblox.app'));
 		}
-		await filesystem.createDirectory(path.join(savePath, 'Launch Roblox.app/Contents/MacOS'));
-		await filesystem.createDirectory(path.join(savePath, 'Launch Roblox.app/Contents/Resources'));
+		await filesystem.createDirectory(path.join(savePath, 'Play Roblox.app/Contents/MacOS'));
+		await filesystem.createDirectory(path.join(savePath, 'Play Roblox.app/Contents/Resources'));
 		await filesystem.writeFile(
-			path.join(savePath, 'Launch Roblox.app/Contents/Info.plist'),
+			path.join(savePath, 'Play Roblox.app/Contents/Info.plist'),
 			`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -120,14 +120,14 @@ END`,
 		const response = await fetch(AppIcon);
 		const blob = await response.blob();
 		await filesystem.writeBinaryFile(
-			path.join(savePath, 'Launch Roblox.app/Contents/Resources/icon.icns'),
+			path.join(savePath, 'Play Roblox.app/Contents/Resources/icon.icns'),
 			await blob.arrayBuffer()
 		);
 		await shellFS.writeFile(
-			path.join(savePath, 'Launch Roblox.app/Contents/MacOS/launch'),
+			path.join(savePath, 'Play Roblox.app/Contents/MacOS/launch'),
 			'#!/bin/bash\nopen appleblox://launch'
 		);
-		const shortcutPath = path.join(savePath, 'Launch Roblox.app');
+		const shortcutPath = path.join(savePath, 'Play Roblox.app');
 		await shellFS.chmod(path.join(shortcutPath, 'Contents/MacOS/launch'), '+x');
 		toast.success(`Created a shortcut at "${shortcutPath}"`);
 		await shellFS.open(shortcutPath, { reveal: true });

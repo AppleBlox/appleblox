@@ -33,10 +33,10 @@ export async function launchRoblox(
 	};
 
 	if (rbxInstance || (await shell('pgrep', ['-f', 'RobloxPlayer'], { skipStderrCheck: true })).stdOut.trim().length > 2) {
-			setLaunchText('Roblox is already open');
-			setLaunchingRoblox(false);
-			toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
-			return;
+		setLaunchText('Roblox is already open');
+		setLaunchingRoblox(false);
+		toast.error('Due to technical reasons, you must close all instances of Roblox before launching from AppleBlox.');
+		return;
 	}
 	try {
 		console.info('[Launch] Launching Roblox');
@@ -172,9 +172,7 @@ export async function launchRoblox(
 							.then(async () => {
 								console.info(`[Launch] Removed mod files from "${path.join(robloxPath, 'Contents/Resources/')}"`);
 								// Use if block because checking if high resolution is enabled require file operations, so it's more optimized that way.
-								if (constSettings.fixResolution) {
-									await RobloxMods.toggleHighRes(true);
-								}
+								await RobloxMods.toggleHighRes(true);
 								await RobloxMods.removeCustomFont();
 							});
 					}
