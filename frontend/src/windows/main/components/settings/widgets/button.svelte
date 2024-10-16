@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
+	import { cn } from '$lib/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { type ButtonIcon } from '..';
-	import { cn } from '$lib/utils';
 
 	export let label: string;
 	export let description: string;

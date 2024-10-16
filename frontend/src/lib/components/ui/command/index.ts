@@ -13,14 +13,14 @@ import Root from './command.svelte';
 const Loading = CommandPrimitive.Loading;
 
 export {
-    //
-    Root as Command,
-    Dialog as CommandDialog,
-    Empty as CommandEmpty,
-    Group as CommandGroup, Input as CommandInput, Item as CommandItem, List as CommandList, Loading as CommandLoading, Separator as CommandSeparator,
-    Shortcut as CommandShortcut, Dialog,
-    Empty,
-    Group, Input, Item, List, Loading, Root, Separator,
-    Shortcut
+	//
+	Root as Command,
+	Dialog as CommandDialog,
+	Empty as CommandEmpty,
+	Group as CommandGroup, Input as CommandInput, Item as CommandItem, List as CommandList, Loading as CommandLoading, Separator as CommandSeparator,
+	Shortcut as CommandShortcut, Dialog,
+	Empty,
+	Group, Input, Item, List, Loading, Root, Separator,
+	Shortcut
 };
 

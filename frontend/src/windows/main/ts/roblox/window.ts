@@ -80,7 +80,7 @@ export class RobloxWindow {
 
 			// Write move data to relay file
 			const cmd = `echo '[{"appName":"Roblox","x":${windowCache.x},"y":${windowCache.y},"width":${windowCache.w},"height":${windowCache.h}}]' > ${pipeName} &`;
-			shell(cmd, [], { completeCommand: true })
+			shell(cmd, [], { completeCommand: true });
 		} catch (err) {
 			console.error("[Roblox.Window] Couldn't modify window:", err);
 		}

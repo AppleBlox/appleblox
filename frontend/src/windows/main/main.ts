@@ -24,8 +24,8 @@ async function quit() {
 
 // When NeutralinoJS is ready:
 events.on('ready', async () => {
-	neuWindow.show()
-	focusWindow()
+	neuWindow.show();
+	focusWindow();
 	setTimeout(async () => {
 		console.info(`[Main] AppleBlox v${version}`);
 		console.info(`[Main] Current Time: ${new Date().toLocaleString()}`);

@@ -8,11 +8,11 @@ import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
 import { focusWindow, setWindowVisibility } from '../window';
 import onGameEvent from './events';
-import { RobloxInstance } from './instance';
 import { RobloxFFlags } from './fflags';
+import { RobloxInstance } from './instance';
+import { RobloxMods } from './mods';
 import { robloxPath } from './path';
 import { RobloxUtils } from './utils';
-import { RobloxMods } from './mods';
 
 let rbxInstance: RobloxInstance | null = null;
 

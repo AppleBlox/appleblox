@@ -16,7 +16,9 @@
 	let body = '';
 
 	async function checkForUpdate() {
-		const checkWifi = await shell(`if ping -c 1 -W 1 8.8.8.8 &> /dev/null; then echo "true"; else echo "false"; fi`,[],{completeCommand: true});
+		const checkWifi = await shell(`if ping -c 1 -W 1 8.8.8.8 &> /dev/null; then echo "true"; else echo "false"; fi`, [], {
+			completeCommand: true,
+		});
 		if (!checkWifi.stdOut.includes('true')) {
 			toast.error('Could not connect to internet');
 			return;

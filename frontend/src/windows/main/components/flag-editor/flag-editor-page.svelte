@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Panel from '../settings/panel.svelte';
 	import { SettingsPanelBuilder } from '../settings';
+	import Panel from '../settings/panel.svelte';
 	import Editor from './editor.svelte';
 
 	const panel = new SettingsPanelBuilder()

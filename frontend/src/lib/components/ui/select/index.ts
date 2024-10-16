@@ -12,10 +12,10 @@ const Input = SelectPrimitive.Input;
 const Value = SelectPrimitive.Value;
 
 export {
-    Content, Group,
-    Input, Item, Label, Root,
-    //
-    Root as Select, Content as SelectContent, Group as SelectGroup,
-    Input as SelectInput, Item as SelectItem, Label as SelectLabel, Separator as SelectSeparator, Trigger as SelectTrigger, Value as SelectValue, Separator, Trigger, Value
+	Content, Group,
+	Input, Item, Label, Root,
+	//
+	Root as Select, Content as SelectContent, Group as SelectGroup,
+	Input as SelectInput, Item as SelectItem, Label as SelectLabel, Separator as SelectSeparator, Trigger as SelectTrigger, Value as SelectValue, Separator, Trigger, Value
 };
 

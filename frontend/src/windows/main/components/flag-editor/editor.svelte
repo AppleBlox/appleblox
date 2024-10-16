@@ -1,15 +1,21 @@
 <script lang="ts">
-	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	import { Textarea } from '$lib/components/ui/textarea/index.js';
-	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import * as Select from '$lib/components/ui/select';
+	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import { events, os, filesystem } from '@neutralinojs/lib';
-	import { Upload, Import, Plus, Trash2, Gamepad2, TriangleAlert } from 'lucide-svelte';
+	import * as Select from '$lib/components/ui/select';
+	import { Separator } from '$lib/components/ui/separator/index.js';
+	import { Textarea } from '$lib/components/ui/textarea/index.js';
+	import { cn } from '$lib/utils';
+	import SillyCat from '@/assets/panel/silly.webp';
+	import { events, filesystem, os } from '@neutralinojs/lib';
+	import type { Selected } from 'bits-ui';
+	import { Gamepad2, Import, Plus, Trash2, TriangleAlert, Upload } from 'lucide-svelte';
+	import path from 'path-browserify';
+	import { toast } from 'svelte-sonner';
 	import {
 		createProfile,
 		deleteProfile,
@@ -18,21 +24,14 @@
 		setSelectedProfile,
 		stringToId,
 		writeProfile,
-		type EditorFlag,
 		type Profile,
 	} from '.';
-	import SillyCat from '@/assets/panel/silly.webp';
 	import { formatConsoleLog } from '../../ts/debugging';
-	import SmallButton from './small-button.svelte';
-	import { Input } from '$lib/components/ui/input';
-	import { toast } from 'svelte-sonner';
-	import type { Selected } from 'bits-ui';
 	import shellFS from '../../ts/tools/shellfs';
-	import path from 'path-browserify';
 	import Combox from '../Combox.svelte';
-	import FlagTable from './flag-table.svelte';
-	import { cn } from '$lib/utils';
 	import LoadingSpinner from '../LoadingSpinner.svelte';
+	import FlagTable from './flag-table.svelte';
+	import SmallButton from './small-button.svelte';
 
 	type SelectElement = Selected<string>;
 

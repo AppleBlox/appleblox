@@ -1,8 +1,8 @@
 import Root from './switch.svelte';
 
 export {
-    Root,
-    //
-    Root as Switch
+	Root,
+	//
+	Root as Switch
 };
 

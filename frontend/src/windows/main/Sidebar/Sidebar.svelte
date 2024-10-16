@@ -4,10 +4,10 @@
 	import { createEventDispatcher } from 'svelte';
 	import { version } from '../../../../../package.json';
 
-	import DiscordIcon from '@/assets/sidebar/discord.png';
-	import GithubIcon from '@/assets/sidebar/github.png';
 	import BugsIcon from '@/assets/sidebar/bugs.png';
+	import DiscordIcon from '@/assets/sidebar/discord.png';
 	import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
+	import GithubIcon from '@/assets/sidebar/github.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
 	import KillIcon from '@/assets/sidebar/kill.png';
 	import ModsIcon from '@/assets/sidebar/mods.png';
@@ -20,10 +20,10 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import path from 'path-browserify';
 	import Roblox from '../ts/roblox';
+	import shellFS from '../ts/tools/shellfs';
 	import { getMode } from '../ts/utils';
 	import LinkBtn from './LinkBtn.svelte';
 	import SidebarBtn from './SidebarBtn.svelte';
-	import shellFS from '../ts/tools/shellfs';
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';

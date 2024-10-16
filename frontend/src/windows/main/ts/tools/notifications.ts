@@ -27,7 +27,7 @@ type NotificationSound =
 	| 'sosumi'
 	| 'submarine'
 	| 'tink'
-	| "default";
+	| 'default';
 
 /**
  * Options for creating a notification.
@@ -147,7 +147,7 @@ export class Notification {
 	public async show(): Promise<void> {
 		try {
 			if ((await getValue('misc.advanced.notify_all')) === true) {
-				this.options.sound = this.options.sound || "funk";
+				this.options.sound = this.options.sound || 'funk';
 			}
 
 			const alerter = libraryPath('notifications');

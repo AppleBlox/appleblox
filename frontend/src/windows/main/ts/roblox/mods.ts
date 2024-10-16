@@ -60,7 +60,7 @@ export class RobloxMods {
 			new Notification({
 				title: 'Error while removing mods',
 				content: "The 'Resources' backup hasn't been found. Mods will not be removed.",
-				sound: "basso",
+				sound: 'basso',
 				timeout: 6,
 			}).show();
 			return;
