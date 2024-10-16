@@ -9,6 +9,7 @@
 	import Panel from '../components/settings/panel.svelte';
 	import type { SettingsOutput } from '../components/settings/types';
 	import Roblox from '../ts/roblox';
+	import { Description } from '$lib/components/ui/alert';
 
 	export let render = true;
 
@@ -82,9 +83,23 @@
 		)
 		.addCategory((category) =>
 			category
-				.setName('Launching')
-				.setDescription('Launching phase settings')
-				.setId('launching')
+				.setName('Behavior')
+				.setDescription('Dictate how the Roblox app should work')
+				.setId('behavior')
+				.addSwitch({
+					label: 'Delegate launching to AppleBlox',
+					description:
+						'When you launch Roblox, AppleBlox will open first in the background and apply the chosen settings',
+					id: 'delegate',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Disable Roblox desktop app',
+					description: 'The Roblox desktop app will be closed when you leave a game',
+					id: 'disable_desktop_app',
+					default: false,
+				})
+				.addSeparator({ orientation: 'horizontal' })
 				.addButton({
 					label: 'Create a launch shortcut',
 					description:
@@ -92,13 +107,6 @@
 					id: 'create_shortcut_btn',
 					variant: 'default',
 					icon: { component: Play },
-				})
-				.addSwitch({
-					label: 'Delegate launching to AppleBlox',
-					description:
-						'When you launch Roblox, AppleBlox will open first in the background and apply the chosen settings',
-					id: 'delegate',
-					default: false,
 				})
 		)
 		.build();

@@ -68,7 +68,7 @@
 		)
 		.addCategory((category) =>
 			category
-				.setName('Discord Riche Presence')
+				.setName('Discord Rich Presence')
 				.setDescription("Show information about what you're playing on your Discord profile")
 				.setId('rpc')
 				.addSwitch({

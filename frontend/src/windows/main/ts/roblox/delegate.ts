@@ -22,10 +22,10 @@ export class RobloxDelegate {
 		// If it's not active but toggled in settings, retoggle.
 		const cmd = await shell(`${urlscheme}`, ['check', 'roblox-player', 'ch.origaming.appleblox'], { skipStderrCheck: true });
 		const toggled = cmd.stdOut.includes('true') || cmd.stdErr.includes('true');
-		if (!toggled && retoggle && (await getValue<boolean>('roblox.launching.delegate')) === true) {
+		if (!toggled && retoggle && (await getValue<boolean>('roblox.behavior.delegate')) === true) {
 			await this.toggle(true);
 			return true;
-		} else if (toggled && retoggle && (await getValue<boolean>('roblox.launching.delegate')) === false) {
+		} else if (toggled && retoggle && (await getValue<boolean>('roblox.behavior.delegate')) === false) {
 			await this.toggle(false);
 			return false;
 		}
