@@ -62,7 +62,6 @@ export class RobloxWindow {
 	 */
 	public static async setWindow(windowData: Partial<WindowData>) {
 		try {
-			const start = performance.now();
 			await this.spawnWindowManager();
 			if (!windowManager) {
 				console.error("[Roblox.Window] Couldn't set window. Window Manager was undefined.");
@@ -80,12 +79,8 @@ export class RobloxWindow {
 			windowData.h = scaleCoordinate(windowCache.x, 'y', screenSize);
 
 			// Write move data to relay file
-			const cmd = `echo '[{"appName":"Roblox","x":${windowCache.x},"y":${windowCache.y},"width":${windowCache.w},"height":${windowCache.h}}]' > ${pipeName}`;
-			shell(cmd, [], { completeCommand: true }).then(() => {
-				console.info(
-					`[Roblox.Window] Moved Roblox window to "${windowData.x},${windowData.y}", size "${windowData.w},${windowData.h}" in ${performance.now() - start}`
-				);
-			});
+			const cmd = `echo '[{"appName":"Roblox","x":${windowCache.x},"y":${windowCache.y},"width":${windowCache.w},"height":${windowCache.h}}]' > ${pipeName} &`;
+			shell(cmd, [], { completeCommand: true })
 		} catch (err) {
 			console.error("[Roblox.Window] Couldn't modify window:", err);
 		}
@@ -141,7 +136,6 @@ export class RobloxWindow {
 	/** Maximizes the roblox window on the desktop */
 	public static async maximize() {
 		const screenSize = await this.getDesktopSize();
-		console.log(screenSize);
 		await this.setWindow({ x: 0, y: 0, w: screenSize.width, h: screenSize.height });
 	}
 
@@ -219,7 +213,8 @@ export class RobloxWindow {
 		}
 		shouldRestartWindowManager = false;
 		await shell('pkill', ['-f', 'window_manager_ablox'], { skipStderrCheck: true });
-		windowManager = await spawn(`${libraryPath('window_manager')} <> ${pipeName} &`, [], {
+		const cmd = `${libraryPath('window_manager')} <> ${pipeName}`;
+		windowManager = await spawn(cmd, [], {
 			completeCommand: true,
 		});
 
@@ -233,7 +228,7 @@ export class RobloxWindow {
 				this.spawnWindowManager();
 			}
 		});
-		console.info(`[Roblox.Window] Spawned Window manager with PID: ${windowManager.pid}`);
+		console.info(`[Roblox.Window] Spawned Window manager with PID: "${windowManager.pid}" using command:`, cmd);
 	}
 
 	private static async getDesktopSize(): Promise<computer.Resolution> {
