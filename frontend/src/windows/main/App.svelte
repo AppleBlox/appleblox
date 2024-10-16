@@ -78,7 +78,7 @@
 					await launchRobloxWithHandlers();
 					break;
 			}
-		} else if (url.startsWith('roblox://') || url.startsWith('roblox-player://')) {
+		} else if (url.startsWith('roblox:') || url.startsWith('roblox-player:')) {
 			console.info('[App] Launching AppleBlox with Roblox URI.');
 			await focusWindow();
 			await launchRobloxWithHandlers(url);
