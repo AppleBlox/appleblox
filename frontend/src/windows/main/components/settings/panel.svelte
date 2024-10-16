@@ -125,6 +125,7 @@
 		// Apply overrides
 		if (overrides) {
 			for (const [category, widgets] of Object.entries(overrides)) {
+				if (settings[category] == null) settings[category] = {};
 				for (const [widget, value] of Object.entries(widgets)) {
 					settings[category][widget] = value;
 				}
