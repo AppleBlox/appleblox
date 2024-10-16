@@ -3,6 +3,7 @@ import gameDisconnected from './gameDisconnected';
 import gameJoinedEntry from './gameJoinedEntry';
 import gameJoiningEntry from './gameJoiningEntry';
 import gameMessageEntry from './gameMessageEntry';
+import returnToLuaApp from './returnToLuaApp';
 
 export default function onGameEvent(data: GameEventInfo) {
 	switch (data.event) {
@@ -18,6 +19,9 @@ export default function onGameEvent(data: GameEventInfo) {
 			break;
 		case 'GameMessageEntry':
 			gameMessageEntry(data);
+			break;
+		case 'ReturnToLuaApp':
+			returnToLuaApp();
 			break;
 	}
 }
