@@ -20,7 +20,7 @@
 					closeLabel: 'Close now',
 					dropdownLabel: 'The menu thingy',
 					subtitle: 'une tuile',
-					sound: true,
+					sound: "funk",
 				});
 				notif.show();
 				notif.on('clicked', () => {

@@ -27,7 +27,7 @@ async function gameJoinedEntry(data: GameEventInfo) {
 			content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
 			title: 'Server Joined',
 			timeout: 5,
-			sound: false,
+			sound: "frog",
 		}).show();
 	}
 }

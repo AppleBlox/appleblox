@@ -12,6 +12,23 @@ export interface NotificationAction {
 	value: string;
 }
 
+type NotificationSound =
+	| 'basso'
+	| 'blow'
+	| 'bottle'
+	| 'frog'
+	| 'funk'
+	| 'glass'
+	| 'hero'
+	| 'morse'
+	| 'ping'
+	| 'pop'
+	| 'purr'
+	| 'sosumi'
+	| 'submarine'
+	| 'tink'
+	| "default";
+
 /**
  * Options for creating a notification.
  */
@@ -22,8 +39,8 @@ export interface NotificationOptions {
 	content: string;
 	/** An optional group identifier for the notification. */
 	group?: string;
-	/** Whether to play a sound when showing the notification. */
-	sound?: boolean;
+	/** Name of the sound to play when showing the notification. */
+	sound?: NotificationSound;
 	/** The duration in seconds for which the notification should be displayed. */
 	timeout?: number;
 	/** An optional subtitle for the notification. */
@@ -130,7 +147,7 @@ export class Notification {
 	public async show(): Promise<void> {
 		try {
 			if ((await getValue('misc.advanced.notify_all')) === true) {
-				this.options.sound = true;
+				this.options.sound = this.options.sound || "funk";
 			}
 
 			const alerter = libraryPath('notifications');
@@ -144,7 +161,7 @@ export class Notification {
 				'ch.origaming.appleblox',
 				...(this.options.group ? ['-group', this.options.group] : []),
 				...(this.options.timeout ? ['-timeout', Math.floor(this.options.timeout).toString()] : []),
-				...(this.options.sound ? ['-sound', 'default'] : []),
+				...(this.options.sound ? ['-sound', this.options.sound] : []),
 				...(this.options.subtitle ? ['-subtitle', this.options.subtitle] : []),
 				...(this.options.closeLabel ? ['-closeLabel', this.options.closeLabel] : []),
 				...(this.options.appIcon ? ['-appIcon', this.options.appIcon] : []),
@@ -160,7 +177,7 @@ export class Notification {
 			}
 
 			this.process = await spawn(alerter, args);
-			console.log(`Spawning notification: ${buildCommand(alerter,args)}`);
+			console.info(`Spawning notification: ${buildCommand(alerter, args)}`);
 
 			this.process.on('stdOut', (data) => {
 				const trimmedData = data.trim();
