@@ -1,4 +1,4 @@
-import { shell } from './tools/shell';
+import { shell } from '../tools/shell';
 
 export function getMode(): 'dev' | 'prod' {
 	return import.meta.env.MODE === 'development' ? 'dev' : 'prod';
@@ -7,26 +7,6 @@ export function getMode(): 'dev' | 'prod' {
 export async function isProcessAlive(pid: number | string) {
 	const cmd = await shell('ps', ['-p', pid.toString()], { skipStderrCheck: true });
 	return cmd.stdOut.includes(String(pid));
-}
-
-export function getStringDiff(oldStr: string, newStr: string): string {
-	if (oldStr === newStr) return '';
-	const oldChars = oldStr.split('');
-	const newChars = newStr.split('');
-	let startDiff = 0;
-	let endDiff = 0;
-	while (startDiff < oldChars.length && startDiff < newChars.length && oldChars[startDiff] === newChars[startDiff]) {
-		startDiff++;
-	}
-	while (
-		endDiff < oldChars.length - startDiff &&
-		endDiff < newChars.length - startDiff &&
-		oldChars[oldChars.length - 1 - endDiff] === newChars[newChars.length - 1 - endDiff]
-	) {
-		endDiff++;
-	}
-	const diff = newChars.slice(startDiff, newChars.length - endDiff).join('');
-	return diff;
 }
 
 export async function curlGet(url: string): Promise<any> {
@@ -102,3 +82,22 @@ export function correctAndParseJSON(input: string): { parsedJSON: any; correctio
 		throw new Error(`Failed to parse JSON: ${(error as Error).message}`);
 	}
 }
+
+/**
+ * Returns the current date in a format compatible with POSIX path names.
+ * The format is: YYYY-MM-DD_HH-mm-ss
+ * 
+ * @returns {string} The formatted date string
+ */
+export function getPosixCompatibleDate(): string {
+	const now = new Date();
+	
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	const hours = String(now.getHours()).padStart(2, '0');
+	const minutes = String(now.getMinutes()).padStart(2, '0');
+	const seconds = String(now.getSeconds()).padStart(2, '0');
+  
+	return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+  }

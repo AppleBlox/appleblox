@@ -1,13 +1,12 @@
 <script lang="ts">
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { os } from '@neutralinojs/lib';
 	import { version } from '@root/package.json';
-	import { FileArchive, FolderCog, FolderOpen, List, Trash2 } from 'lucide-svelte';
+	import { FileArchive, FolderCog, FolderOpen, List } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import { SettingsPanelBuilder, getConfigPath } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
-	import { clearLogs, disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
+	import { disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
 	import Roblox from '../ts/roblox';
 	import shellFS from '../ts/tools/shellfs';
 
@@ -23,17 +22,14 @@
 				toast.success('Console redirection enabled', { duration: 1000 });
 				break;
 			case 'open_logs': {
-				const logPath = path.join(path.dirname(await getConfigPath()), 'appleblox.log');
+				const logPath = path.join(path.dirname(await getConfigPath()), 'logs');
 				if (!(await shellFS.exists(logPath))) {
-					toast.error("The logs file doesn't seem to exist.");
+					toast.error("The logs folder doesn't seem to exist.");
 					return;
 				}
 				shellFS.open(logPath, { reveal: true });
 				break;
 			}
-			case 'clear_logs':
-				clearLogsPopup = true;
-				break;
 			case 'open_folder':
 				shellFS.open(path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox'), { reveal: true });
 				break;
@@ -90,24 +86,16 @@
 				})
 				.addSwitch({
 					label: 'Redirect logs to file',
-					description:
-						'Redirect every console.log(), etc... to the logs file. (Recommended: ON)',
+					description: 'Redirect every console.log(), etc... to the logs file. (Recommended: ON)',
 					id: 'redirect_console',
 					default: true,
 				})
 				.addButton({
-					label: 'Open logs file',
-					description: 'Opens the logs file in finder',
+					label: 'Open logs folder',
+					description: 'Opens the logs folder in finder',
 					id: 'open_logs',
 					variant: 'default',
-					icon: { component: List },
-				})
-				.addButton({
-					label: 'Clear logs',
-					description: 'Clears the logs file',
-					id: 'clear_logs',
-					variant: 'destructive',
-					icon: { component: Trash2 },
+					icon: { component: FolderOpen },
 				})
 				.addButton({
 					label: 'Export configuration',
@@ -137,30 +125,5 @@
 		)
 		.build();
 </script>
-
-<AlertDialog.Root bind:open={clearLogsPopup}>
-	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description
-				>This action cannot be undone. This will permanently delete your logs.</AlertDialog.Description
-			>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action
-				on:click={() => {
-					clearLogs()
-						.then(() => {
-							toast.success('The logs have been cleared');
-						})
-						.catch(() => {
-							toast.error('An error occured while clearing the logs');
-						});
-				}}>Continue</AlertDialog.Action
-			>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
 
 <Panel {panel} on:button={buttonClicked} on:switch={switchClicked} {render} />

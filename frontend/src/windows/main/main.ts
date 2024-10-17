@@ -11,6 +11,8 @@ import App from './App.svelte';
 import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
 import { focusWindow } from './ts/window';
+import { getMode } from './ts/utils';
+import { logDebugInfo } from './ts/utils/debug';
 
 // Initialize NeutralinoJS
 init();
@@ -25,12 +27,9 @@ async function quit() {
 // When NeutralinoJS is ready:
 events.on('ready', async () => {
 	neuWindow.show();
-	focusWindow();
+	if (getMode() === 'prod') focusWindow();
 	setTimeout(async () => {
-		console.info(`[Main] AppleBlox v${version}`);
-		console.info(`[Main] Current Time: ${new Date().toLocaleString()}`);
-		console.info(`[Main] NeutralinoJS Version: ${window.NL_VERSION}`);
-		console.info(`[Main] ${(await shell('uname', ['-a'])).stdOut.trim()}`);
+		logDebugInfo();
 	}, 500);
 });
 

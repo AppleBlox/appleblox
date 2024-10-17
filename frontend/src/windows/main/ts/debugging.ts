@@ -1,9 +1,31 @@
 // File with debugging functions
-// It will redirect the app's logs to the appleblox.log file while still logging in the web browser
+// It will redirect the app's logs to the log file while still logging in the web browser
 import { filesystem } from '@neutralinojs/lib';
-import path from 'path-browserify';
+import path, { dirname } from 'path-browserify';
 import { getConfigPath, loadSettings } from '../components/settings';
 import shellFS from './tools/shellfs';
+import { getMode, getPosixCompatibleDate } from './utils';
+import { version } from '@root/package.json';
+
+let logPath: string | null = null;
+/** Create the logging file for this app session */
+async function setupLogs() {
+	if (logPath != null) return;
+	const logsDir = path.join(path.dirname(await getConfigPath()), 'logs');
+	if (getMode() === 'dev') {
+		logPath = path.join(logsDir, 'dev.log');
+		return;
+	}
+	logPath = path.join(logsDir, `${getPosixCompatibleDate()}_${version}.log`);
+	if (!(await shellFS.exists(logsDir))) {
+		await shellFS.createDirectory(logsDir);
+	}
+	if (!(await shellFS.exists(logPath))) {
+		await shellFS.writeFile(logPath, '');
+	}
+}
+
+setupLogs();
 
 /** Tries to format every variable to a string */
 export function formatConsoleLog(...args: any[]): string {
@@ -51,22 +73,13 @@ function getCircularReplacer() {
 	};
 }
 
-/** Clears the logs */
-export async function clearLogs() {
-	try {
-		const appleBloxDir = path.dirname(await getConfigPath());
-		await filesystem.writeFile(path.join(appleBloxDir, 'appleblox.log'), '');
-	} catch (err) {
-		console.error('Failed to clear the logs:');
-		console.error(err);
-	}
-}
-
 /** Appends a message to the log file */
 async function appendLog(message: string) {
+	if (!logPath) setupLogs();
 	try {
 		const appleBloxDir = path.dirname(await getConfigPath());
-		await filesystem.appendFile(path.join(appleBloxDir, 'appleblox.log'), `${message}\n`);
+		// @ts-expect-error: logPath will be defined because the setupLogs() function has been called
+		await filesystem.appendFile(logPath, `${message}\n`);
 	} catch (err) {
 		console.error('Failed to write log to file', err);
 	}

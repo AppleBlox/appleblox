@@ -19,7 +19,7 @@
 	import Mods from './pages/Mods.svelte';
 	import RobloxPage from './pages/Roblox.svelte';
 	import Roblox from './ts/roblox';
-	import { sleep } from './ts/utils';
+	import { sleep } from './ts/utils/';
 	import { focusWindow } from './ts/window';
 
 	let currentPage: string;
