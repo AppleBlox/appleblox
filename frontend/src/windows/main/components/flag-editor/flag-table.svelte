@@ -10,10 +10,11 @@
 	import * as Table from '$lib/components/ui/table';
 	import { clipboard } from '@neutralinojs/lib';
 	import beautify from 'json-beautify';
-	import { Braces, Clipboard, Delete, Plus, Search } from 'lucide-svelte';
+	import { Braces, Clipboard, Delete, Plus, Search, Ellipsis, Edit, Trash2, Copy } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { correctAndParseJSON } from '../../ts/utils';
+	import { correctAndParseJSON } from '../../ts/utils/';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 
 	type FastFlag = string | boolean | null | number;
 	interface EditorFlag {
@@ -33,6 +34,11 @@
 	let flagDialogName: string = '';
 	let flagDialogValue: FastFlag = '';
 
+	function isFlagNameValid(name: string): boolean {
+		const validPattern = /^[A-Za-z0-9_;]+$/;
+		return validPattern.test(name) && name.length > 0;
+	}
+
 	function addFlag(): void {
 		showFlagDialog = true;
 	}
@@ -42,6 +48,54 @@
 		selectedFlags.clear();
 		toast.success('Removed selected flag(s)', { duration: 1000 });
 		dispatch('update', flags);
+	}
+
+	function contextMenuRemove(flag: string): void {
+		flags = flags.filter((f) => f.flag !== flag);
+		toast.success('Removed flag', { duration: 750 });
+		dispatch('update', flags);
+	}
+
+	let currentFlagInput: string;
+	let toRenameFlagName: string;
+	let openRenameFlagDialog = false;
+	function showRenameFlagDialog(flag: string): void {
+		currentFlagInput = flag;
+		toRenameFlagName = flag;
+		openRenameFlagDialog = true;
+	}
+
+	function contextMenuRename(flag: string, newName: string): void {
+		if (!isFlagNameValid(newName)) {
+			toast.error('A flag cannot be null or contain special characters in its name.', { duration: 3000 });
+			return;
+		}
+		let flagToModifyIndex = flags.findIndex((f) => f.flag === flag);
+		if (flagToModifyIndex === -1) {
+			console.error(`Couldn't find the flag "${flag}" to edit.`);
+			return;
+		}
+		const currentFlag = flags[flagToModifyIndex];
+		flags[flagToModifyIndex] = { flag: newName, enabled: currentFlag.enabled, value: currentFlag.value };
+		flags = flags; // Trigger reactivity
+		openRenameFlagDialog = false;
+		toast.success('Renamed flag', { duration: 750 });
+		dispatch('update', flags);
+	}
+
+	async function contextMenuCopy(flag: string): Promise<void> {
+		const flagToCopy = flags.find((f) => f.flag === flag);
+		if (!flagToCopy) {
+			console.error(`Couldn't find the flag "${flag}" to copy.`);
+			return;
+		}
+		const flagJsonString = beautify({ [flagToCopy.flag]: flagToCopy.value }, null, 1, 100);
+		try {
+			await clipboard.writeText(flagJsonString);
+		} catch (err) {
+			console.error("Couldn't write to clipboard:", err);
+		}
+		toast.success('Flag copied to clipboard', { duration: 750 });
 	}
 
 	let showAlertReplace: boolean = false;
@@ -131,6 +185,14 @@
 			if (!aStartsWith && bStartsWith) return 1;
 			return a.flag.localeCompare(b.flag);
 		});
+
+	function handleRowClick(index: number, event: MouseEvent): void {
+		// Ignore clicks on interactive elements
+		if ((event.target as HTMLElement).closest('input, button, .lucide-ellipsis')) {
+			return;
+		}
+		toggleSelection(index);
+	}
 </script>
 
 <Card.Root class="p-4 w-full mr-[5px]">
@@ -140,13 +202,15 @@
 		<Button
 			on:click={copyFlags}
 			variant="outline"
-			class={`duration-100 transition-opacity ${selectedFlags.size < 1 ? 'opacity-60 select-one pointer-events-none' : ''}`}
+			disabled={selectedFlags.size < 1}
+			class={`duration-100 transition-opacity ${selectedFlags.size < 1 ? 'opacity-60' : ''}`}
 			><Clipboard class="h-5 w-5 mr-2" />Export</Button
 		>
 		<Button
 			on:click={removeSelected}
 			variant="outline"
-			class={`hover:border-red-500 border-[1px] duration-100 transition ${selectedFlags.size < 1 ? 'opacity-60 select-one pointer-events-none' : ''}`}
+			disabled={selectedFlags.size < 1}
+			class={`hover:border-red-500 border-[1px] duration-100 transition ${selectedFlags.size < 1 ? 'opacity-60' : ''}`}
 			><Delete class="h-5 w-5 mr-2" />Remove Selected</Button
 		>
 		<div class="flex-grow"></div>
@@ -167,20 +231,24 @@
 				<Table.Head><div class="w-[100px]">Flag</div></Table.Head>
 				<Table.Head>Value</Table.Head>
 				<Table.Head class="w-[100px]">Enabled</Table.Head>
+				<Table.Head class="w-[50px]"></Table.Head>
 			</Table.Row>
 		</Table.Header>
 		<Table.Body>
-			{#each filteredFlags as flag (flag.flag)}
-				<Table.Row>
-					<Table.Cell>
+			{#each filteredFlags as flag, index (flag.flag)}
+				<Table.Row 
+					class="cursor-pointer {selectedFlags.has(flags.indexOf(flag)) ? 'bg-muted' : ''}"
+					on:click={(event) => handleRowClick(flags.indexOf(flag), event)}
+				>
+					<Table.Cell class="w-[50px]">
 						<Checkbox
 							checked={selectedFlags.has(flags.indexOf(flag))}
 							onCheckedChange={() => toggleSelection(flags.indexOf(flag))}
 						/>
 					</Table.Cell>
-					<Table.Cell class="max-w-64">
-						<div class="flex w-full h-full justify-center text-foreground font-bold">
-							<Input class="text-ellipsis overflow-hidden" disabled value={flag.flag} />
+					<Table.Cell class="min-w-64">
+						<div class="flex w-full h-full justify-center text-foreground font-mono">
+							<Label class="text-start w-full text-ellipsis overflow-x-hidden select-none">{flag.flag}</Label>
 						</div>
 					</Table.Cell>
 					<Table.Cell>
@@ -188,13 +256,40 @@
 							bind:value={flag.value}
 							on:input={() => updateFlag(flags.indexOf(flag), 'value', flag.value)}
 							placeholder="Flag value"
+							on:click={(e) => e.stopPropagation()}
 						/>
 					</Table.Cell>
-					<Table.Cell>
+					<Table.Cell class="w-[100px]">
 						<Switch
 							checked={flag.enabled}
 							onCheckedChange={(checked) => updateFlag(flags.indexOf(flag), 'enabled', checked)}
+							on:click={(e) => e.stopPropagation()}
 						/>
+					</Table.Cell>
+					<Table.Cell class="w-[50px]">
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger><Ellipsis /></DropdownMenu.Trigger>
+							<DropdownMenu.Content>
+								<DropdownMenu.Item
+									class="cursor-pointer"
+									on:click={() => {
+										showRenameFlagDialog(flag.flag);
+									}}>Rename</DropdownMenu.Item
+								>
+								<DropdownMenu.Item
+									class="cursor-pointer"
+									on:click={() => {
+										contextMenuCopy(flag.flag);
+									}}>Copy</DropdownMenu.Item
+								>
+								<DropdownMenu.Item
+									class="cursor-pointer text-kill-red"
+									on:click={() => {
+										contextMenuRemove(flag.flag);
+									}}>Delete</DropdownMenu.Item
+								>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
 					</Table.Cell>
 				</Table.Row>
 			{/each}
@@ -222,7 +317,7 @@
 			<Button
 				type="submit"
 				on:click={() => {
-					if (/[!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(flagDialogName.trim()) || flagDialogName.trim().length < 1) {
+					if (!isFlagNameValid(flagDialogName)) {
 						toast.error('A flag cannot be null or contain special characters in its name.', { duration: 3000 });
 						return;
 					}
@@ -276,3 +371,26 @@
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
+
+<Dialog.Root bind:open={openRenameFlagDialog}>
+	<Dialog.Content class="sm:max-w-[425px]">
+		<Dialog.Header>
+			<Dialog.Title>Rename flag</Dialog.Title>
+			<Dialog.Description>Choose a new name for this flag. Click save when you're done.</Dialog.Description>
+		</Dialog.Header>
+		<div class="grid gap-4 py-4">
+			<div class="grid grid-cols-4 items-center gap-4">
+				<Label for="flag" class="text-right">Flag Name</Label>
+				<Input id="flag" bind:value={currentFlagInput} class="col-span-3" />
+			</div>
+		</div>
+		<Dialog.Footer>
+			<Button
+				type="submit"
+				on:click={() => {
+					contextMenuRename(toRenameFlagName, currentFlagInput);
+				}}>Save changes</Button
+			>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
