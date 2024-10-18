@@ -175,7 +175,7 @@
 {#if render}
 	{#if settingsLoaded}
 		<div transition:fade={{ duration: fadeIn ? 200 : 0 }}>
-			<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-3 mt-3 p-5">
+			<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-3 my-3 p-5">
 				<div>
 					<!-- Title + Description -->
 					<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>

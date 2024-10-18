@@ -9,7 +9,6 @@
 	import Panel from '../components/settings/panel.svelte';
 	import type { SettingsOutput } from '../components/settings/types';
 	import Roblox from '../ts/roblox';
-	import { Description } from '$lib/components/ui/alert';
 
 	export let render = true;
 

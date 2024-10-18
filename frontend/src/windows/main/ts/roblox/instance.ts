@@ -320,12 +320,12 @@ export class RobloxInstance {
 		console.info('[Roblox.Instance] Starting logs watcher: Killing existing ones...');
 		restartWatcher = false;
 		// Why kill and not peace ;)?
-		// await shell('pkill', ['-f', 'rlogs_ablox'], { skipStderrCheck: true });
+		await shell('pkill', ['-f', 'rlogs_ablox'], { skipStderrCheck: true });
 		await sleep(500);
 
 		// Launching process
 		this.logsInstance = await spawn(libraryPath('rlogs'), [logsPath]);
-		os.spawnProcess(buildCommand(libraryPath('rlogs'), [logsPath]));
+		// os.spawnProcess(buildCommand(libraryPath('rlogs'), [logsPath]));
 		if (stdOutHandler) {
 			this.logsInstance.off('stdOut', stdOutHandler);
 			this.logsInstance.on('stdOut', stdOutHandler);

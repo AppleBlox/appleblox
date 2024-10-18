@@ -114,7 +114,10 @@ export class DiscordRPC {
 		}).catch(console.error);
 
 		console.info(`[RPC] Starting with command: '${DiscordRPC.binaryPath} ${args.join(' ')}'`);
-		spawn(DiscordRPC.binaryPath, args);
+		const rpcProcess = await spawn(DiscordRPC.binaryPath, args);
+		rpcProcess.on('stdErr', (data: string) => {
+			console.error('[RPC] Process emitted stdErr:', data);
+		});
 		DiscordRPC.currentOptions = options;
 	}
 

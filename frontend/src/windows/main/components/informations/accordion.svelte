@@ -9,7 +9,7 @@
 	export { className as class };
 </script>
 
-<Accordion.Root>
+<Accordion.Root class="w-full flex-grow">
 	<Accordion.Item value="item-1">
 		<Accordion.Trigger class={className}>{label}</Accordion.Trigger>
 		<Accordion.Content>

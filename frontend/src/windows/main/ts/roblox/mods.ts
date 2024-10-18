@@ -7,6 +7,7 @@ import { Notification } from '../tools/notifications';
 import shellFS from '../tools/shellfs';
 import { sleep } from '../utils';
 import { robloxPath } from './path';
+import { shell } from '../tools/shell';
 
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
@@ -151,18 +152,8 @@ export class RobloxMods {
 	static async toggleHighRes(state: boolean) {
 		// Get the path to Roblox's Info.plist file
 		const plistPath = path.join(robloxPath, 'Contents/Info.plist');
-		const content = await shellFS.readFile(plistPath);
-		// Check if the plist file's res value is set to true
-		const lines = content.split('\n');
-		const highResKeyIndex = lines.findIndex((line) => line.includes('<key>NSHighResolutionCapable</key>'));
-		if (!highResKeyIndex) {
-			throw new Error(`[Roblox.Mods] NSHighResolutionCapable key wasn't found at: ${plistPath}`);
-		}
-		const booleanValueIndex = highResKeyIndex + 1;
-		const isHighResEnabled = lines[booleanValueIndex].includes('<true/>');
-		if (isHighResEnabled === state) return;
-		lines[booleanValueIndex] = lines[booleanValueIndex].replaceAll(`<${isHighResEnabled}/>`, `<${!isHighResEnabled}/>`);
-		const newContent = lines.join('\n');
-		await shellFS.writeFile(plistPath, newContent);
+		await shell(`/usr/libexec/PlistBuddy -c "Set :NSHighResolutionCapable ${state}" "${plistPath}"`, [], {
+			completeCommand: true,
+		});
 	}
 }

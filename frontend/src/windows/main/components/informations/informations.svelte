@@ -38,7 +38,7 @@
 	const technologies: Technology[] = [
 		{
 			name: 'NeutralinoJS',
-			description: 'Lightweight C++ and cross-platform framework for making apps',
+			description: 'Lightweight C++ and cross-platform framework for making desktop apps',
 			avatar: 'https://raw.githubusercontent.com/neutralinojs/design-guide/d3a8fc284d9fff591b173d3bf53998ee0424aeea/logo/neutralinojs_logo_vector.svg',
 			link: 'https://neutralino.js.org',
 		},
@@ -72,12 +72,12 @@
 	];
 </script>
 
-<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-2 w-full">
 	<h2 class="font-extralight text-xl text-rose-500/80">Developers</h2>
 	<ContributorsCollection contributors={developers} />
 	<h2 class="font-serif tracking-widest text-xl text-rose-400/80">Artists</h2>
 	<ContributorsCollection contributors={artists} />
 	<Accordion contributors={testers} label="Testers" class="font-mono text-xl text-rose-300/80" />
-	<Accordion contributors={technologies} label="Technologies" class="font-mono text-xl text-sky-600" />
-	<Accordion contributors={inspirations} label="Inspirations" class="font-mono text-xl text-purple-600/50" />
+	<Accordion contributors={inspirations} label="Inspirations" class="font-mono text-xl text-rose-200/80" />
+	<Accordion contributors={technologies} label="Technologies" class="font-mono text-xl text-rose-100/80" />
 </div>
