@@ -1,6 +1,6 @@
 {
   "name": "appleblox",
-  "version": "0.8.0-dev.8",
+  "version": "0.8.0-dev.9",
   "description": "MacOS roblox launcher",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {
@@ -49,12 +49,12 @@
   "dependencies": {
     "@neutralinojs/lib": "^5.1.0",
     "@types/bun": "^1.1.9",
-    "bits-ui": "^0.21.15",
+    "bits-ui": "^0.21.16",
     "clsx": "^2.1.1",
     "cmdk-sv": "^0.0.18",
     "hotkeys-js": "^3.13.7",
     "json-beautify": "^1.1.1",
-    "lucide-svelte": "^0.446.0",
+    "lucide-svelte": "^0.453.0",
     "mode-watcher": "^0.3.1",
     "path-browserify": "^1.0.1",
     "semver-compare": "^1.0.0",
