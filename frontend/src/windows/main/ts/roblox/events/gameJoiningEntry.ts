@@ -120,7 +120,7 @@ async function gameJoiningEntry(data: GameEventInfo) {
 		rpcOptions.buttonUrl2 = undefined;
 	}
 
-	await RPCController.set(rpcOptions);
+	RPCController.set(rpcOptions);
 }
 
 export default gameJoiningEntry;

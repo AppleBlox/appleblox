@@ -242,8 +242,15 @@ export class RobloxInstance {
 		await sleep(3000);
 
 		// Read the first content to not miss anything (We use iconv to make sure there is no non-UTF8 chars)
-		// await shell(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`, [], { completeCommand: true });
-		// const content = (await shell('cat', ['/tmp/roblox_ablox.log'])).stdOut.trim();
+		shell(`iconv -f utf-8 -t utf-8 -c "${this.latestLogPath}" > /tmp/roblox_ablox.log`, [], { completeCommand: true }).then(
+			() => {
+				console.info('[Roblox.Instance] Converted first logs content');
+				shell('cat', ['/tmp/roblox_ablox.log']).then((result) => {
+					console.info('[Roblox.Instance] Processing first logs content');
+					this.processLines(result.stdOut.trim().split('\n'));
+				});
+			}
+		);
 
 		let lastNotificationTime: null | number = null; // Store the UNIX time at which the last errror notification was created, to prevent spam
 		const stdOutHandler = async (data: string) => {
