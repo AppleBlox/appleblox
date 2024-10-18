@@ -415,7 +415,8 @@ export class RobloxFFlags {
 		let invalidSelectedProfileFlags: FFs = {};
 		if (selectedProfile) {
 			let modifiedFlagsObject: FFs = {};
-			for (const { flag, value } of selectedProfile.flags) {
+			for (const { flag, value, enabled } of selectedProfile.flags) {
+				if (!enabled) continue;
 				modifiedFlagsObject[flag] = value;
 			}
 			selectedProfileFlags = await flagsList.validate(modifiedFlagsObject);
