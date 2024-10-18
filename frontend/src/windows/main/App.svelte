@@ -6,7 +6,7 @@
 	import { events, os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
 	import { blur } from 'svelte/transition';
-	import Sidebar from './Sidebar/Sidebar.svelte';
+	import Sidebar from './sidebar/sidebar.svelte';
 	import Code from './components/Code.svelte';
 	import Onboarding from './components/Onboarding.svelte';
 	import Updater from './components/Updater.svelte';
@@ -21,6 +21,7 @@
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils/';
 	import { focusWindow } from './ts/window';
+	import Appearance from './pages/Appearance.svelte';
 
 	let currentPage: string;
 
@@ -157,6 +158,8 @@
 				<Support />
 			{:else if currentPage === 'mods'}
 				<Mods />
+			{:else if currentPage === 'appearance'}
+				<Appearance />
 			{:else if currentPage === 'dev'}
 				<Dev />
 			{:else if currentPage === 'roblox'}

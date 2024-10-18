@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { os } from '@neutralinojs/lib';
-	import SidebarBtn from './SidebarBtn.svelte';
+	import SidebarBtn from './sidebar-btn.svelte';
 
 	export let label: string;
 	export let icon: string;

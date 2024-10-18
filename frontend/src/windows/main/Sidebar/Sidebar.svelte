@@ -10,6 +10,7 @@
 	import GithubIcon from '@/assets/sidebar/github.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
 	import KillIcon from '@/assets/sidebar/kill.png';
+	import AppearanceIcon from '@/assets/sidebar/appearance.png';
 	import ModsIcon from '@/assets/sidebar/mods.png';
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
@@ -22,8 +23,8 @@
 	import Roblox from '../ts/roblox';
 	import shellFS from '../ts/tools/shellfs';
 	import { getMode } from '../ts/utils';
-	import LinkBtn from './LinkBtn.svelte';
-	import SidebarBtn from './SidebarBtn.svelte';
+	import LinkBtn from './link-btn.svelte';
+	import SidebarBtn from './sidebar-btn.svelte';
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
@@ -49,6 +50,7 @@
 		{ label: 'Roblox', id: 'roblox', icon: RobloxIcon },
 		{ label: 'FastFlags', id: 'fastflags', icon: FastFlagsIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
+		{ label: "Appearance", id: "appearance", icon: AppearanceIcon},
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Info', id: 'info', icon: CreditsIcon },
 	];
@@ -136,7 +138,7 @@
 
 		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
 			<Button
-				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-kill-red hover:hue-rotate-0' : 'bg-play-green/85 hover:bg-play-green/60'} font-mono w-full transition-all duration-200 group`}
+				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0' : 'bg-green-500/85 hover:bg-green-500/60'} font-mono w-full transition-all duration-200 group`}
 				on:click={() => {
 					if (isLaunched) {
 						Roblox.Utils.killAll();

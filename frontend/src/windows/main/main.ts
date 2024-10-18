@@ -6,7 +6,7 @@ import './ts/window';
 
 // Imports
 import { events, init, app as neuApp, window as neuWindow } from '@neutralinojs/lib';
-import { version } from '../../../../package.json';
+import { loadTheme } from './components/theme-input/theme';
 import App from './App.svelte';
 import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
@@ -26,8 +26,12 @@ async function quit() {
 
 // When NeutralinoJS is ready:
 events.on('ready', async () => {
+	// Load CSS Theme
+	await loadTheme();
+	// Show the window
 	neuWindow.show();
 	if (getMode() === 'prod') focusWindow();
+	// Log debug information
 	setTimeout(async () => {
 		logDebugInfo();
 	}, 500);

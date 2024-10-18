@@ -283,7 +283,7 @@
 									}}>Copy</DropdownMenu.Item
 								>
 								<DropdownMenu.Item
-									class="cursor-pointer text-kill-red"
+									class="cursor-pointer text-red-500"
 									on:click={() => {
 										contextMenuRemove(flag.flag);
 									}}>Delete</DropdownMenu.Item
