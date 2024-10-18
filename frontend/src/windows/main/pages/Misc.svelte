@@ -9,6 +9,7 @@
 	import { disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
 	import Roblox from '../ts/roblox';
 	import shellFS from '../ts/tools/shellfs';
+	import { shell } from '../ts/tools/shell';
 
 	export let render = true;
 
@@ -37,19 +38,26 @@
 				shellFS.open(path.join(Roblox.path, 'Contents'), { reveal: true });
 				break;
 			case 'export_config':
-				const configPath = await getConfigPath();
-				const logPath = path.join(path.dirname(configPath), 'appleblox.log');
 				const exportPath = await os.showFolderDialog('Where do you want to save the file?', {
 					defaultPath: path.join(await os.getEnv('HOME'), 'Desktop'),
 				});
 				if (!exportPath || exportPath.length < 1) return; // User canceled
+
 				const archivePath = path.join(exportPath, `abloxconfig-${version}.zip`);
 				if (await shellFS.exists(archivePath)) {
 					await shellFS.remove(archivePath);
 				}
-				await shellFS.zip(archivePath, [path.basename(logPath), path.basename(configPath)], {
+				const appleBloxPath = path.dirname(await getConfigPath());
+				const lastFiveLogs = (
+					await shell(`ls -tr "${path.join(appleBloxPath, 'logs')}" | tail -5`, [], { completeCommand: true })
+				).stdOut
+					.split('\n')
+					.filter((file) => file.length > 0)
+					.map((file) => `logs/${file}`);
+
+				await shellFS.zip(archivePath, ['config', 'theme.css', ...lastFiveLogs], {
 					recursive: true,
-					cwd: path.dirname(configPath),
+					cwd: appleBloxPath,
 				});
 				await shellFS.open(archivePath, { reveal: true });
 				break;
