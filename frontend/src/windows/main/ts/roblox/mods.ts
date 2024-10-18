@@ -73,7 +73,7 @@ export class RobloxMods {
 		new Notification({
 			title: 'Resources restored',
 			content: 'Roblox has been cleaned of any Mods remnants..',
-			timeout: 5,
+			timeout: 7,
 		}).show();
 		await sleep(100);
 	}
@@ -155,5 +155,6 @@ export class RobloxMods {
 		await shell(`/usr/libexec/PlistBuddy -c "Set :NSHighResolutionCapable ${state}" "${plistPath}"`, [], {
 			completeCommand: true,
 		});
+		console.info(`[Roblox.Mods] Set NSHighResolutionCapable to ${state}`);
 	}
 }

@@ -161,12 +161,6 @@ export async function launchRoblox(
 				robloxInstance.on('exit', async () => {
 					console.info('[Launch] Roblox instance exited');
 					if (constSettings.areModsEnabled) {
-						new Notification({
-							title: 'Cleaning mods content...',
-							content: "Please don't quit AppleBlox until this process is finished.",
-							subtitle: 'Quitting the app may corrupt Roblox',
-							timeout: 5,
-						}).show();
 						RobloxMods.restoreRobloxFolders()
 							.catch(console.error)
 							.then(async () => {
@@ -195,6 +189,7 @@ export async function launchRoblox(
 				toast.error('An error occured while starting Roblox.');
 				await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
 				console.info(`[Launch] Deleted "${path.join(robloxPath, 'Contents/MacOS/ClientSettings/')}"`);
+				await RobloxMods.toggleHighRes(true);
 				return;
 			}
 
