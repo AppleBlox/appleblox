@@ -4,11 +4,8 @@
 	import * as Card from '$lib/components/ui/card/index';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
-
-	import RefreshIcon from '@/assets/panel/refresh.png';
 	import SillyCat from '@/assets/panel/silly.webp';
-
-	import { FolderOpen } from 'lucide-svelte';
+	import { FolderOpen, RefreshCcw } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
@@ -60,17 +57,21 @@
 					>Enable or disable certain mods. They are loaded in alphabetical order (1,2,3,a,b,c)</Card.Description
 				>
 			</div>
-			<Button variant="outline" class="mr-3" on:click={async()=>{
-				try {
-					const folderPath = path.join(path.dirname(await getConfigPath()), 'mods');
-					await shellFS.createDirectory(folderPath);
-					await sleep(10);
-					await shellFS.open(folderPath);
-				} catch (err) {
-					toast.error(`An error occured: ${err}`);
-					console.error('[ModsPanel]', err);
-				}
-			}}><FolderOpen class="mr-3"/>Open folder</Button>
+			<Button
+				variant="outline"
+				class="mr-3"
+				on:click={async () => {
+					try {
+						const folderPath = path.join(path.dirname(await getConfigPath()), 'mods');
+						await shellFS.createDirectory(folderPath);
+						await sleep(10);
+						await shellFS.open(folderPath);
+					} catch (err) {
+						toast.error(`An error occured: ${err}`);
+						console.error('[ModsPanel]', err);
+					}
+				}}><FolderOpen class="mr-3" />Open folder</Button
+			>
 			<Button
 				class="ml-auto mb-3 w-10 p-0"
 				variant="default"
@@ -84,14 +85,14 @@
 					});
 				}}
 			>
-				<img src={RefreshIcon} alt="Refresh icon" class={`towhite-always w-[50%] ${refreshSpin ? 'animate-spin' : ''}`} />
+				<RefreshCcw class={`text-primary-foreground w-[50%] ${refreshSpin ? 'animate-spin' : ''}`} />
 			</Button>
 		</div>
 
 		{#if mods.length > 0}
 			{#each mods as mod (mod.filename)}
 				<Separator class="my-3" />
-				<div class="flex items-center" transition:fade={{duration: 100}}>
+				<div class="flex items-center" transition:fade={{ duration: 100 }}>
 					<div>
 						<p class="font-semibold text-[#0a0808] dark:text-red-100">{mod.filename}</p>
 						<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{mod.path}</p>
@@ -109,7 +110,10 @@
 			<div class="flex flex-col justify-center items-center gap-3">
 				<Alert.Root>
 					<Alert.Title>No mods found</Alert.Title>
-					<Alert.Description class="flex gap-3 items-center justify-start"><p>You haven't downloaded any mods.</p><img src={SillyCat} alt="No mods found icnon" class="w-16 h-10 rounded-sm" /></Alert.Description>
+					<Alert.Description class="flex gap-3 items-center justify-start"
+						><p>You haven't downloaded any mods.</p>
+						<img src={SillyCat} alt="No mods found icnon" class="w-16 h-10 rounded-sm" /></Alert.Description
+					>
 				</Alert.Root>
 			</div>
 		{/if}

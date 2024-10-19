@@ -23,7 +23,6 @@
 	import Roblox from '../ts/roblox';
 	import shellFS from '../ts/tools/shellfs';
 	import { getMode } from '../ts/utils';
-	import LinkBtn from './link-btn.svelte';
 	import SidebarBtn from './sidebar-btn.svelte';
 
 	export let isLaunched: boolean = false;
@@ -50,7 +49,7 @@
 		{ label: 'Roblox', id: 'roblox', icon: RobloxIcon },
 		{ label: 'FastFlags', id: 'fastflags', icon: FastFlagsIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
-		{ label: "Appearance", id: "appearance", icon: AppearanceIcon},
+		{ label: 'Appearance', id: 'appearance', icon: AppearanceIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Info', id: 'info', icon: CreditsIcon },
 	];
@@ -128,12 +127,7 @@
 		</div>
 	</div>
 
-	<div class="mt-auto flex flex-col items-center px-10 mb-4">
-		{#each linksBtns as { label, url, icon }}
-			<LinkBtn {label} {url} {icon} />
-		{/each}
-	</div>
-	<div class="flex flex-col items-center mb-4">
+	<div class="flex flex-col items-center mb-4 mt-auto">
 		<p class="text-sm text-muted-foreground mb-2">v{version}</p>
 
 		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
@@ -147,7 +141,7 @@
 					dispatch('launchRoblox', true);
 				}}
 			>
-				<img src={buttonIcon} alt="Button Icon" class="mr-1 mt-[1px] w-5 h-5 towhite-always" />
+				<img src={buttonIcon} alt="Button Icon" class="mr-1 mt-[1px] w-5 h-5" />
 				<p class="font-mono transition duration-150">{buttonState}</p>
 			</Button>
 		</div>
