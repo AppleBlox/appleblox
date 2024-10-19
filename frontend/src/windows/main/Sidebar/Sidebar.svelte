@@ -24,6 +24,7 @@
 	import shellFS from '../ts/tools/shellfs';
 	import { getMode } from '../ts/utils';
 	import SidebarBtn from './sidebar-btn.svelte';
+	import ColorImage from '../components/color-image.svelte';
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
@@ -141,7 +142,7 @@
 					dispatch('launchRoblox', true);
 				}}
 			>
-				<img src={buttonIcon} alt="Button Icon" class="mr-1 mt-[1px] w-5 h-5" />
+				<ColorImage src={buttonIcon} alt="Button icon" class="w-5 h-5 mr-1 mt-[1px]" color="white" />
 				<p class="font-mono transition duration-150">{buttonState}</p>
 			</Button>
 		</div>

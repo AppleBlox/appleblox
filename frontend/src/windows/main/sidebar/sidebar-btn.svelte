@@ -3,6 +3,7 @@
 	export let icon: string;
 	export let id: string;
 	import { createEventDispatcher } from 'svelte';
+	import ColorImage from '../components/color-image.svelte';
 
 	export let currentPage: string;
 	export let position: { total: number; index: number };
@@ -21,10 +22,7 @@
 			class={`absolute right-[-10px] h-14 w-10 bg-background -z-10 ${position.index === 0 ? 'top-20' : position.index === position.total - 1 && 'mb-6'}`}
 		></div>
 	{/if}
-	<div class="w-4 h-4 mx-4 relative">
-		<img src={icon} alt="Sidebar icon" class="w-full h-full object-contain" />
-		<div class="absolute inset-0 bg-foreground" style="mask-image: url({icon}); mask-size: contain; mask-repeat: no-repeat; mask-position: center;"></div>
-	</div>
+	<ColorImage src={icon} alt="Sidebar icon" color="foreground" class="w-4 h-4 mx-4"/>
 	<p
 		class={`${currentPage === id ? 'text-primary' : 'text-foreground'} transition duration-100 font-mono text-[14px] hover:saturate-150 hover:text-primary`}
 	>
