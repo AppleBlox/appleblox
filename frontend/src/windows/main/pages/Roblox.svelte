@@ -51,30 +51,30 @@
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Roblox')
-		.setDescription('Settings about the Roblox application')
+		.setDescription('Roblox application settings and controls')
 		.setId('roblox')
 		.addCategory((category) =>
 			category
-				.setName('Multi Instances')
-				.setDescription('Run multiple Roblox windows at once')
+				.setName('Multiple Instances')
+				.setDescription('Run multiple Roblox instances simultaneously')
 				.setId('multi_instances')
 				.addButton({
-					label: 'Enable Multi Instances',
-					description: 'Refresh the patch to make Roblox allow multiple windows',
+					label: 'Enable Multi-Instance',
+					description: 'Update patch to allow multiple Roblox windows',
 					id: 'multi_roblox_btn',
 					variant: 'default',
 					icon: { component: CopyCheck },
 				})
 				.addButton({
-					label: 'Open Instance',
-					description: 'Open a Roblox instance (window)',
+					label: 'New Instance',
+					description: 'Open an additional Roblox instance',
 					id: 'open_instance_btn',
 					variant: 'secondary',
 					icon: { component: PictureInPicture },
 				})
 				.addButton({
-					label: 'Terminate all instances',
-					description: 'Force-close every open Roblox instances. (Make sure to have saved your progress)',
+					label: 'Close All',
+					description: 'Force close all Roblox windows (You should save your progress first)',
 					id: 'close_roblox_btn',
 					variant: 'destructive',
 					icon: { component: BugOff },
@@ -82,27 +82,25 @@
 		)
 		.addCategory((category) =>
 			category
-				.setName('Behavior')
-				.setDescription('Dictate how the Roblox app should work')
+				.setName('Launch Settings')
+				.setDescription('Control how Roblox launches games')
 				.setId('behavior')
 				.addSwitch({
 					label: 'Delegate launching to AppleBlox',
-					description:
-						'When you launch Roblox, AppleBlox will open first in the background and apply the chosen settings',
+					description: 'Let AppleBlox configure settings before launching Roblox',
 					id: 'delegate',
 					default: false,
 				})
 				.addSwitch({
-					label: 'Disable Roblox desktop app',
-					description: 'The Roblox desktop app will be closed when you leave a game',
+					label: 'Disable Desktop app',
+					description: 'Automatically close Roblox when leaving games',
 					id: 'disable_desktop_app',
 					default: false,
 				})
 				.addSeparator({ orientation: 'horizontal' })
 				.addButton({
-					label: 'Create a launch shortcut',
-					description:
-						'Creates a shortcut that can be used to launch Roblox (with all the AppleBlox features) without having to open this app',
+					label: 'Create Launch Shortcut',
+					description: 'Create a desktop shortcut that launches Roblox with AppleBlox features',
 					id: 'create_shortcut_btn',
 					variant: 'default',
 					icon: { component: Play },

@@ -78,43 +78,43 @@
 	}
 
 	const panel = new SettingsPanelBuilder()
-		.setName('Miscellaneous')
-		.setDescription("Other features that don't have their own tab")
+		.setName('System')
+		.setDescription('System integration and debugging options')
 		.setId('misc')
 		.addCategory((category) =>
 			category
-				.setName('Other')
-				.setDescription("Features that don't really have a category")
+				.setName('Settings')
+				.setDescription('System preferences and debugging tools')
 				.setId('advanced')
 				.addSwitch({
-					label: 'Enable sound for all notifications',
-					description: 'Plays a sound for every AppleBlox notification',
+					label: 'Notification Sounds',
+					description: 'Enable sound for all AppleBlox notifications',
 					id: 'notify_all',
 					default: false,
 				})
 				.addSwitch({
-					label: 'Redirect logs to file',
-					description: 'Redirect every console.log(), etc... to the logs file. (Recommended: ON)',
+					label: 'Log to File',
+					description: 'Save all console output to log files (Recommended)',
 					id: 'redirect_console',
 					default: true,
 				})
 				.addButton({
-					label: 'Open logs folder',
-					description: 'Opens the logs folder in finder',
+					label: 'View Logs',
+					description: 'Open the logs folder in Finder',
 					id: 'open_logs',
 					variant: 'default',
 					icon: { component: FolderOpen },
 				})
 				.addButton({
-					label: 'Export configuration',
-					description: 'Exports your logs and config folder as an archive',
+					label: 'Export Settings',
+					description: 'Save your logs and configuration as an archive',
 					id: 'export_config',
 					variant: 'secondary',
 					icon: { component: FileArchive },
 				})
 				.addButton({
-					label: 'Open AppleBlox folder',
-					description: 'Opens the AppleBlox folder in Finder',
+					label: 'AppleBlox Folder',
+					description: 'Open AppleBlox application data folder',
 					id: 'open_folder',
 					variant: 'outline',
 					icon: {
@@ -122,8 +122,8 @@
 					},
 				})
 				.addButton({
-					label: 'Open Roblox app folder',
-					description: 'Opens the Roblox.app folder in Finder',
+					label: 'Roblox Folder',
+					description: 'Open Roblox.app installation folder',
 					id: 'open_roblox_folder',
 					variant: 'outline',
 					icon: {

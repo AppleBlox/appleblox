@@ -20,40 +20,38 @@
 	}
 
 	const panel = new SettingsPanelBuilder()
-		.setName('Informations')
+		.setName('About')
 		.setId('info')
-		.setDescription('Useful resources & awesome contributors')
-		.addCategory(category => 
-			category
-				.setId("contributors")
-				.addCustom({
-					label: "",
-					description: "",
-					id: "info_page",
-					component: Informations,
-				})
+		.setDescription('About AppleBlox and helpful resources')
+		.addCategory((category) =>
+			category.setId('contributors').addCustom({
+				label: '',
+				description: '',
+				id: 'info_page',
+				component: Informations,
+			})
 		)
-		.addCategory(category =>
+		.addCategory((category) =>
 			category
-				.setName("Resources")
-				.setDescription("Useful links and guides for the app")
-				.setId("resources")
+				.setName('Links')
+				.setDescription('Community and development resources')
+				.setId('resources')
 				.addButton({
-					label: 'Join Discord server',
-					description: 'Opens the Discord server invitation link',
+					label: 'Discord Server',
+					description: 'Get help and connect with the community',
 					id: 'discord_btn',
 					variant: 'outline',
 					icon: { component: MessageSquare },
 				})
 				.addButton({
-					label: 'Github Repo',
-					description: 'Opens the Github repository',
+					label: 'Github',
+					description: 'View source code, report issues and contribute',
 					id: 'github_btn',
 					variant: 'outline',
 					icon: { component: Github },
 				})
 		)
-		.build()
+		.build();
 </script>
 
 <Panel {panel} on:button={onButtonClicked} {render} />

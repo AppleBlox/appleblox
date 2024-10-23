@@ -42,63 +42,75 @@
 		const { id } = e.detail;
 		switch (id) {
 			case 'custom_font':
-				await shellFS.remove(path.join(await os.getEnv("HOME"),"Library","Application Support","AppleBlox/.cache/fonts/CustomFont.ttf"),{skipStderrCheck: true})
-				await shellFS.remove(path.join(await os.getEnv("HOME"),"Library","Application Support","AppleBlox/.cache/fonts/CustomFont.otf"),{skipStderrCheck: true})
-				await shellFS.remove(path.join(await os.getEnv("HOME"),"Library","Application Support","AppleBlox/.cache/fonts/CustomFont.ttc"),{skipStderrCheck: true})
+				await shellFS.remove(
+					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/.cache/fonts/CustomFont.ttf'),
+					{ skipStderrCheck: true }
+				);
+				await shellFS.remove(
+					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/.cache/fonts/CustomFont.otf'),
+					{ skipStderrCheck: true }
+				);
+				await shellFS.remove(
+					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/.cache/fonts/CustomFont.ttc'),
+					{ skipStderrCheck: true }
+				);
 				break;
 		}
 	}
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Mods')
-		.setDescription('Textures and other enhancements')
+		.setDescription('Custom textures and UI enhancements')
 		.setId('mods')
 		.addCategory((category) =>
 			category
 				.setName('Built-in')
-				.setDescription('Built-in mods and features')
+				.setDescription('Default AppleBlox modifications')
 				.setId('builtin')
 				.addFilePicker({
 					label: 'Custom Font',
-					description: 'Choose a custom font to apply to Roblox',
+					description: 'Choose a custom font file to apply to Roblox',
 					id: 'custom_font',
 					accept: ['ttf', 'otf', 'ttc'],
 				})
 		)
 		.addCategory((category) =>
 			category
-				.setName('General')
+				.setName('Custom Mods')
 				.setDescription(
-					"Options about Roblox mods. To install mods, simply drag the files and folder you downloaded into AppleBlox's mods folder. To find mods, join the Bloxstrap Discord server. DO NOT ask help about AppleBlox there"
+					"To install mods, drag files to the mods folder. Find mods in the Bloxstrap Discord - please don't request AppleBlox support there"
 				)
 				.setId('general')
 				.addButton({
-					label: 'Read mods guide',
-					description:
-						'Adding mods in AppleBlox is the same as Bloxstrap. You just have to put in the correct AppleBlox folders',
+					label: 'Installation Guide',
+					description: 'Learn how to install mods (same process as Bloxstrap)',
 					id: 'mods_help',
 					variant: 'outline',
 					icon: { component: Book },
 				})
 				.addButton({
-					label: 'Join AppleBlox Discord server',
-					description: 'Opens the Discord server invitation link (go to the #mods channel)',
+					label: 'AppleBlox Discord',
+					description: 'Join for AppleBlox support and updates',
 					id: 'join_appleblox',
 					variant: 'outline',
 					icon: { src: ApplebloxIcon },
 				})
 				.addButton({
-					label: 'Join Bloxstrap Discord server',
-					description: 'Opens the Discord server invitation link (go to the #mods channel)',
+					label: 'Bloxstrap Discord',
+					description: 'Find and download compatible mods',
 					id: 'join_bloxstrap',
 					variant: 'outline',
 					icon: { src: BloxstrapIcon },
 				})
-				.addSwitch({ label: 'Enable Mods', description: 'Applies your mods', id: 'enabled', default: false })
 				.addSwitch({
-					label: 'Reduce Resolution',
-					description:
-						'Render Roblox at a lower resolution to be able to use Mods not designed for Apple Retina screens.',
+					label: 'Enable Mods',
+					description: 'Apply installed mods to Roblox',
+					id: 'enabled',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Legacy Resolution',
+					description: 'Lower resolution for mods not designed for Retina displays',
 					id: 'fix_res',
 					default: false,
 				})

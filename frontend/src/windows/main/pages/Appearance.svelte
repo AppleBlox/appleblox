@@ -5,16 +5,16 @@
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Appearance')
-		.setDescription('Use custom themes for the app')
+		.setDescription('Customize AppleBlox interface theme')
 		.setId('appearance')
 		.addCategory((category) =>
 			category
-				.setName('General')
-				.setDescription('Main settings for themes')
+				.setName('Theme')
+				.setDescription('Customize app appearance')
 				.setId('general')
 				.addCustom({ label: '', description: '', id: 'theme_input', component: ThemeInput })
 		)
 		.build();
 </script>
 
-<Panel {panel} autosave={false}/>
+<Panel {panel} autosave={false} />
