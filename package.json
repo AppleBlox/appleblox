@@ -1,7 +1,7 @@
 {
   "name": "appleblox",
-  "version": "0.8.0-dev.12",
-  "description": "MacOS roblox launcher",
+  "version": "0.8.0-dev.13",
+  "description": "Lightweight and fast Roblox launcher for MacOS",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {
     "vite:dev": "vite",
