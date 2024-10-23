@@ -9,7 +9,15 @@ import shellFS from '../tools/shellfs';
 import { curlGet } from '../utils';
 import { robloxPath } from './path';
 
-const FLAGS_WHITELIST = ['FFlagUserIsBloxstrap', 'FFlagUserAllowsWindowMovement', 'FFlagDebugGraphicsDisableMetal'];
+const FLAGS_WHITELIST = [
+	// Project: Afternight
+	'FFlagUserIsBloxstrap',
+	'FFlagUserAllowsWindowMovement',
+	// Unlock FPS
+	'FFlagDebugGraphicsDisableMetal',
+	// Fix V1 menu
+	'FFlagSettingsHubIndependentBackgroundVisibility',
+];
 
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
@@ -229,6 +237,8 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 				FFlagEnableInGameMenuModernization: false,
 				/* Chrome */ FFlagEnableInGameMenuChrome: false,
 				FFlagFixReportButtonCutOff: false,
+				FFlagSettingsHubIndependentBackgroundVisibility: false,
+				FFlagEnableInGameMenuChromeABTest4: false,
 			},
 			path: 'fastflags.ui.menu_version',
 			type: 'select',
