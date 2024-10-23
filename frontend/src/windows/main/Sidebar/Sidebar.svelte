@@ -1,13 +1,10 @@
 <script lang="ts">
 	import { Separator } from '$lib/components/ui/separator/index.js';
-	import { os } from '@neutralinojs/lib';
+	import { os, events } from '@neutralinojs/lib';
 	import { createEventDispatcher } from 'svelte';
 	import { version } from '../../../../../package.json';
 
-	import BugsIcon from '@/assets/sidebar/bugs.png';
-	import DiscordIcon from '@/assets/sidebar/discord.png';
 	import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
-	import GithubIcon from '@/assets/sidebar/github.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
 	import KillIcon from '@/assets/sidebar/kill.png';
 	import AppearanceIcon from '@/assets/sidebar/appearance.png';
@@ -20,7 +17,6 @@
 
 	import Button from '$lib/components/ui/button/button.svelte';
 	import path from 'path-browserify';
-	import Roblox from '../ts/roblox';
 	import shellFS from '../ts/tools/shellfs';
 	import { getMode } from '../ts/utils';
 	import SidebarBtn from './sidebar-btn.svelte';
@@ -29,21 +25,6 @@
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
 	export let id: string;
-
-	// Sidebar Buttons
-	const linksBtns: { label: string; icon: string; url: string }[] = [
-		{ label: 'Discord', icon: DiscordIcon, url: 'https://appleblox.com/discord' },
-		{
-			label: 'GitHub',
-			icon: GithubIcon,
-			url: 'https://github.com/AppleBlox/appleblox',
-		},
-		{
-			label: 'Issues',
-			icon: BugsIcon,
-			url: 'https://github.com/AppleBlox/appleblox/issues',
-		},
-	];
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
@@ -136,7 +117,7 @@
 				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0' : 'bg-green-500/85 hover:bg-green-500/60'} font-mono w-full transition-all duration-200 group`}
 				on:click={() => {
 					if (isLaunched) {
-						Roblox.Utils.killAll();
+						events.broadcast('instance:quit').catch(console.error);
 						return;
 					}
 					dispatch('launchRoblox', true);

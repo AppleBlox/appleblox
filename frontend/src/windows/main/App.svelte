@@ -128,15 +128,16 @@
 	<Onboarding />
 	<Updater />
 	<ModeWatcher track={true} />
-	<Toaster richColors />
+	<Toaster richColors id="toaster" />
 	<!-- Content div -->
 	{#if launchInfo.launching}
 		<div
 			class="h-full w-full flex justify-center items-center fixed top-0 left-0 flex-col"
 			transition:blur={{ duration: 300 }}
+			id="launch_div"
 		>
-			<p class="font-bold text-2xl">{launchInfo.text}</p>
-			<Progress max={100} bind:value={launchInfo.progress} class="w-[60%]" />
+			<p class="font-bold text-2xl" id="launch_text">{launchInfo.text}</p>
+			<Progress max={100} bind:value={launchInfo.progress} class="w-[60%]" id="launch_progress" />
 		</div>
 	{:else}
 		<Sidebar
