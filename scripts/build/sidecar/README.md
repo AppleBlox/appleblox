@@ -13,12 +13,6 @@ Launches the `main` executable with these arguments:
 
 It also captures if the app was launched using a deeplink, in which case it will either, launch the app, or re-launch the main executable if it is already open. The bootstrap will exit once the main executable exits.
 
-## Rlogs (Roblox Logs)
-
-This is just a simple file watcher, that returns new changes (lines) to stdOut as arrays.
-
-When *rlogs* needs to output a message, it will be prefixed with: `message:`. Every 5 minutes, it checks if the log file size changed, if it did, it should check for the new content it potentially missed, and unwatch + rewatch the file.
-
 ## UrlScheme
 
 Utility CLI to change the default handler for an URI (LSHandler). Used to open AppleBlox from the website.

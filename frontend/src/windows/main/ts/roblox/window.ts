@@ -1,3 +1,8 @@
+/** 
+ * Hey, sorry but I decided to discontinue this. The code is still here because it works,
+ * but Neutralino is honestly ##### me off so I decided I won't bother supporting this niche feature ;)
+*/
+
 import { computer } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
 import { shell, spawn, type SpawnEventEmitter } from '../tools/shell';
@@ -158,19 +163,6 @@ export class RobloxWindow {
 			w: windowCache.w,
 			h: windowCache.h,
 		});
-	}
-
-	// TODO: remove this
-	/** Sets the desktop resolution */
-	public static async setDesktopRes(
-		/** Width of the desktop */
-		width: number | string,
-		/** Height of the desktop */
-		height: number | string,
-		/** Duration in ms */
-		duration = 1000
-	): Promise<void> {
-		return; // todo: change to modifying Roblox's plist
 	}
 
 	/** Returns the position of the roblox window as X and Y or null */

@@ -54,19 +54,6 @@ let rpcOptions: RPCOptions = {
 };
 
 async function gameJoiningEntry(data: GameEventInfo) {
-	// Resolution fix for Mods using a Retina screen
-	if ((await getValue<boolean>('mods.general.fix_res')) === true) {
-		const maxRes = // Get max possible resolution
-			(
-				await shell("system_profiler SPDisplaysDataType | grep Resolution | awk -F': ' '{print $2}'", [], {
-					completeCommand: true,
-				})
-			).stdOut
-				.trim()
-				.split(' ');
-		await Roblox.Window.setDesktopRes(maxRes[0], maxRes[2], 6);
-	}
-
 	// Fetch game information using the Roblox API
 	const placeMatch = data.data.match(/place\s+(\d+)\s+/); // placeID
 	if (placeMatch == null) {
@@ -100,7 +87,7 @@ async function gameJoiningEntry(data: GameEventInfo) {
 
 	rpcOptions = {
 		...rpcOptions,
-		details: `Playing ${gameInfo.name}`,
+		details: `${gameInfo.name}`,
 		state: `by ${gameInfo.creator.name}`,
 		buttonText1: 'See game page',
 		buttonUrl1: `https://www.roblox.com/games/${placeId}/`,

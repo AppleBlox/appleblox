@@ -34,7 +34,7 @@ export interface ExecuteOptions {
  * @param arg - The argument to escape.
  * @returns The escaped argument.
  */
-function escapeShellArg(arg: string | number): string {
+export function escapeShellArg(arg: string | number): string {
 	return `'${arg.toString().replace(/'/g, "'\\''")}'`;
 }
 
@@ -146,6 +146,8 @@ export interface SpawnEventEmitter {
 	off(event: 'exit', listener: (exitCode: number) => void): void;
 	/** The process ID of the spawned process. */
 	pid: number | null;
+	/** The Neutralino process ID */
+	processId: number | null;
 	/**
 	 * Writes data to the stdin of the spawned process.
 	 * @param data - The data to write to stdin.

@@ -3,6 +3,7 @@ import { RPCController, type RPCOptions } from '../../tools/rpc';
 import type { GameEventInfo } from '../instance';
 import { RobloxWindow, type WindowData } from '../window';
 import type { RichPresence, SetWindowData } from './types';
+import { sleep } from '../../utils';
 
 let rpcOptions: RPCOptions = {
 	clientId: '1257650541677383721',
@@ -49,7 +50,12 @@ async function gameMessageEntry(messageData: GameEventInfo) {
 			RobloxWindow.setWindow(params);
 			break;
 		case 'SetWindowDefault':
-			RobloxWindow.maximize();
+			// Exit fullscreen and maximize window
+			RobloxWindow.setFullscreen(false).then(() => {
+				sleep(500).then(() => {
+					RobloxWindow.maximize();
+				});
+			});
 			break;
 		case 'RestoreWindow':
 		case 'RestoreWindowState':

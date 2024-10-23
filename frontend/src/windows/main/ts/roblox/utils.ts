@@ -134,7 +134,7 @@ END`,
 	}
 
 	static async killAll() {
-		await shell(`ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs kill -9`, [], {
+		await shell(`ps aux | grep -i Roblox | grep -v grep | awk '{print $2}' | xargs kill -9`, [], {
 			completeCommand: true,
 			skipStderrCheck: true,
 		});

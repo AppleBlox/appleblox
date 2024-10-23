@@ -36,13 +36,7 @@ const LibPaths: LibPathsType = {
 			prod: '/lib/urlscheme_ablox',
 			dev: '/bin/urlscheme_ablox',
 		},
-	},
-	rlogs: {
-		darwin: {
-			prod: '/lib/rlogs_ablox',
-			dev: '/bin/rlogs_ablox',
-		},
-	},
+	}
 };
 
 export function libraryPath<T extends keyof LibPathsType>(libName: T): string {

@@ -28,13 +28,7 @@ export async function buildSidecar() {
 			args: [],
 			includeSuffix: true,
 			isSwift: true,
-		},
-		{
-			name: 'Roblox Logs Watcher',
-			filename: 'rlogs.m',
-			args: ['-framework', 'Foundation'],
-			includeSuffix: true,
-		},
+		}
 	];
 
 	await $`mkdir -p bin`;
