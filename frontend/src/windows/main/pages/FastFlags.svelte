@@ -57,7 +57,7 @@
 					description: 'Override game lighting technology',
 					id: 'lightning',
 					items: [
-						{ label: 'Game Default', value: 'default' },
+						{ label: 'Default', value: 'default' },
 						{ label: 'Voxel', value: 'voxel' },
 						{ label: 'ShadowMap', value: 'shadowmap' },
 						{ label: 'Future', value: 'future' },
@@ -121,19 +121,19 @@
 				})
 				.addSwitch({
 					label: 'Anti-aliasing',
-					description: 'Smooth jagged edges',
+					description: 'Smooth and sharper edges',
 					id: 'antialiasing',
 					default: true,
 				})
 				.addSwitch({
-					label: 'Dynamic LOD',
+					label: 'Level-of-detail',
 					description: 'Reduce detail for distant objects',
 					id: 'lod',
 					default: false,
 				})
 				.addSwitch({
-					label: 'Optimize Lighting',
-					description: 'Reduce lighting update frequency',
+					label: 'Reduce lightning updates',
+					description: 'Make the lightning update cycle slower',
 					id: 'light_updates',
 					default: false,
 				})
@@ -148,7 +148,7 @@
 					description: 'Set texture detail level',
 					id: 'textures_quality',
 					items: [
-						{ label: 'Game Default', value: 'default' },
+						{ label: 'Default', value: 'default' },
 						{ label: 'Ultra', value: '3' },
 						{ label: 'High', value: '2' },
 						{ label: 'Medium', value: '1' },
@@ -158,7 +158,7 @@
 				})
 				.addSwitch({
 					label: 'Character Textures',
-					description: 'Enable detailed player textures',
+					description: 'Enable player textures',
 					id: 'player_textures',
 					default: true,
 				})
@@ -185,11 +185,11 @@
 					description: 'Choose in-game menu version',
 					id: 'menu_version',
 					items: [
-						{ label: 'Classic (2015)', value: 'v1' },
-						{ label: 'Modern (2020)', value: 'v2' },
-						{ label: 'Latest (2023)', value: 'v4' },
-						{ label: 'Chrome Style', value: 'v4chrome' },
-						{ label: 'Game Default', value: 'default' },
+						{ label: 'Version 1 (2015)', value: 'v1' },
+						{ label: 'Version 2 (2020)', value: 'v2' },
+						{ label: 'Version 4 (2023)', value: 'v4' },
+						{ label: 'Version 4 (Chrome)', value: 'v4chrome' },
+						{ label: 'Default', value: 'default' },
 					],
 					default: 'default',
 				})

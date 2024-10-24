@@ -70,7 +70,7 @@ export async function launchRoblox(
 		) {
 			const isIgnored = await showFlagErrorPopup(
 				'Outdated presets',
-				"The following flag presets have been removed from Roblox and won't work. To fix this issue, update to the latest version of the app (if you're not already on it) or wait for a fix to be released.",
+				"You are using presets which contain outdated flags. They may or may not work. To fix this, update to the latest version of the app or wait for a new one.",
 				presetFlags.nameMap.join(', ')
 			);
 			if (!isIgnored) {
@@ -86,8 +86,8 @@ export async function launchRoblox(
 			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
 		) {
 			const isIgnored = await showFlagErrorPopup(
-				'Invalid selected profile flags',
-				"You have one or several flags that don't exist in your selected profile:",
+				'Invalid flags in selected profile',
+				"You have one or several invalid flags in your selected profile:",
 				beautify(editorFlags.invalidFlags, null, 2, 100)
 			);
 			if (!isIgnored) {
@@ -103,8 +103,8 @@ export async function launchRoblox(
 			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
 		) {
 			const isIgnored = await showFlagErrorPopup(
-				'Invalid game profiles flags',
-				"You have one or several flags that don't exist in the following profiles:",
+				'Invalid flags in game profile(s)',
+				"You have one or several invalid flags in the following profiles:",
 				editorFlags.invalidProfileFlags
 					.map((profile) => `${profile.name.toUpperCase()}:\n ${beautify(profile.flags, null, 2, 100)}`)
 					.join('<br><br>')
