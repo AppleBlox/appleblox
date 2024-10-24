@@ -57,6 +57,11 @@ export interface RPCOptions {
 	disableColor?: boolean;
 }
 
+/** Escape shell argument but without the quotes */
+function escapeText(str: string): string {
+	return escapeShellArg(str).slice(1, -1);
+}
+
 /**
  * Class representing a Discord Rich Presence client
  */
@@ -243,8 +248,8 @@ export class DiscordRPC {
 		const args: string[] = [];
 
 		if (options.clientId) args.push('-c', options.clientId);
-		if (options.details) args.push('-d', escapeShellArg(options.details).slice(1, -1)); // Remove quotes
-		if (options.state) args.push('-s', options.state);
+		if (options.details) args.push('-d', escapeText(options.details)); // Remove quotes
+		if (options.state) args.push('-s', escapeText(options.state));
 		if (options.largeImage) args.push('-N', options.largeImage);
 		if (options.largeImageText) args.push('-I', options.largeImageText);
 		if (options.smallImage) args.push('-n', options.smallImage);
