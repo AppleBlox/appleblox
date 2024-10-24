@@ -1,4 +1,4 @@
-import { filesystem } from '@neutralinojs/lib';
+import { computer, filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import { getAllProfiles, getSelectedProfile, type Profile } from '../../components/flag-editor';
@@ -27,10 +27,16 @@ export interface EditorFlag {
 	value: string;
 }
 
+let computerRefreshRate: number | null = null;
+async function getRefreshRate() {
+	computerRefreshRate = computerRefreshRate || (await computer.getDisplays())[0].refreshRate;
+	return computerRefreshRate;
+}
+
 /** Function used to build the flags list */
 async function buildFlagsList(): Promise<FastFlagsList> {
 	let data = {
-		forceVulkan: ((await getValue<number[]>('fastflags.graphics.fps_target'))[0] || 60) > 60,
+		forceVulkan: ((await getValue<number[]>('fastflags.graphics.fps_target'))[0] || 60) > (await getRefreshRate()), // Check if target FPS is higher than the main display's refresh rate
 	};
 	const flags = new FastFlagsList()
 		// Panel: Integrations
@@ -48,14 +54,15 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		// GRAPHICS
 		// FPS Target
 		.addFlag({
-			name: 'FPS Target',
+			name: 'FPS Limit',
 			flags: { DFIntTaskSchedulerTargetFps: '%s' },
 			path: 'fastflags.graphics.fps_target',
 			type: 'slider',
+			value: async (s) => (s as number[])[0] !== (await getRefreshRate()),
 		})
-		// Rendering Engine
+		// Graphics API
 		.addFlag({
-			name: 'Rendering Engine (OpenGL)',
+			name: 'Graphics API (OpenGL)',
 			flags: {
 				FFlagDebugGraphicsDisableMetal: true,
 				FFlagDebugGraphicsPreferOpenGL: true,
@@ -65,14 +72,14 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			value: async (s) => !data.forceVulkan && (s as SelectElement).value === 'opengl',
 		})
 		.addFlag({
-			name: 'Rendering Engine (Metal)',
+			name: 'Graphics API (Metal)',
 			flags: { FFlagDebugGraphicsPreferMetal: true },
 			path: 'fastflags.graphics.engine',
 			type: 'select',
 			value: async (s) => !data.forceVulkan && (s as SelectElement).value === 'metal',
 		})
 		.addFlag({
-			name: 'Rendering Engine (Vulkan)',
+			name: 'Graphics API (Vulkan)',
 			flags: { FFlagDebugGraphicsPreferVulkan: true, FFlagDebugGraphicsDisableMetal: true },
 			path: 'fastflags.graphics.engine',
 			type: 'select',
@@ -111,7 +118,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		})
 		// Graphics w/ render distance
 		.addFlag({
-			name: 'Graphics w/ render distance',
+			name: 'Graphics Quality',
 			flags: { DFIntDebugFRMQualityLevelOverride: '%s' },
 			path: 'fastflags.graphics.quality_distance',
 			type: 'slider',
@@ -120,7 +127,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		})
 		// Terrain grass
 		.addFlag({
-			name: 'Terrain grass',
+			name: '3D Grass',
 			flags: {
 				FIntFRMMinGrassDistance: 0,
 				FIntFRMMaxGrassDistance: 0,
@@ -151,7 +158,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		})
 		// PostFX
 		.addFlag({
-			name: 'PostFX',
+			name: 'Visual Effects',
 			flags: { FFlagDisablePostFx: true },
 			path: 'fastflags.graphics.postfx',
 			type: 'switch',
@@ -167,7 +174,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		})
 		// Level-of-detail
 		.addFlag({
-			name: 'Level-of-detail',
+			name: 'D',
 			flags: {
 				DFIntCSGLevelOfDetailSwitchingDistance: 0,
 				DFIntCSGLevelOfDetailSwitchingDistanceL12: 0,
@@ -207,7 +214,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		})
 		// Flat textures
 		.addFlag({
-			name: 'Flat textures',
+			name: 'Simple textures',
 			flags: {
 				FStringPartTexturePackTablePre2022:
 					'{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
@@ -505,7 +512,7 @@ interface AddFlagOpts {
 		| boolean
 		| number[]
 		| null
-		| ((settingValue: string | number | boolean | [number] | { label: string; value: string }) => Promise<boolean>);
+		| ((settingValue: string | number | boolean | number[] | { label: string; value: string }) => Promise<boolean>);
 	/** The flags added if the setting === the value */
 	flags: FFs;
 }
