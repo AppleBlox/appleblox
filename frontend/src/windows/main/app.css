@@ -19,7 +19,6 @@
 	line-height: 1.5;
 	font-weight: 400;
 
-	color: rgba(255, 255, 255, 0.87);
 	background-color: #242424;
 
 	font-synthesis: none;
@@ -37,7 +36,7 @@
 		--popover-foreground: 0 0% 0%;
 		--card: 0 0% 94%;
 		--card-foreground: 0 0% 4%;
-		--border: 0 0% 87.84%;
+		--border: 0 0% 80%;
 		--input: 0 0% 88%;
 		--primary: 346.19 64.65% 42.16%;
 		--primary-foreground: 0 0% 100%;
