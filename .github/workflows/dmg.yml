@@ -1,0 +1,50 @@
+name: Build and Create DMG
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Build and package app
+        run: bun run release
+
+      - name: Get version from package.json
+        id: get_version
+        run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_ENV
+
+      - name: Upload (mac_x64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AppleBlox-${{ env.VERSION }}_x64.dmg
+          path: dist/AppleBlox-${{ env.VERSION }}_x64.dmg
+
+      - name: Upload (mac_universal)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AppleBlox-${{ env.VERSION }}_universal.dmg
+          path: dist/AppleBlox-${{ env.VERSION }}_universal.dmg
+
+      - name: Upload (mac_arm64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AppleBlox-${{ env.VERSION }}_arm64.dmg
+          path: dist/AppleBlox-${{ env.VERSION }}_arm64.dmg

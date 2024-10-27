@@ -1,11 +1,11 @@
 // THIS FILE IS IN BETA. PLEASE TELL ME IF ANYTHING LOOKS STRANGE
-import neuConfig from '@root/neutralino.config.json';
 import BuildConfig from '@root/build.config';
-import fs from 'fs';
-import path from 'path';
+import neuConfig from '@root/neutralino.config.json';
+import { $ } from 'bun';
+import { existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 import { c } from 'tar';
-import { copyFolderSync } from './utils';
 
 export async function linuxBuild() {
 	const logger = new Signale();
@@ -14,67 +14,73 @@ export async function linuxBuild() {
 		return;
 	}
 
-	const Dist = path.resolve('.tmpbuild');
-	const Libraries = path.resolve('build/lib/Linux');
+	const Dist = resolve('.tmpbuild');
+	const Libraries = resolve('build/lib/Linux');
 
 	for (const app of BuildConfig.linux.architecture) {
 		const appTime = performance.now();
-		const appDist = path.resolve(Dist, 'linux_' + app, BuildConfig.appBundleName);
-		fs.mkdirSync(appDist, { recursive: true });
-		const zipDir = path.resolve(appDist, 'zip');
-		fs.mkdirSync(zipDir);
+		const appDist = resolve(Dist, `linux_${app}`, BuildConfig.appBundleName);
+		await $`mkdir -p "${appDist}"`;
+		const zipDir = resolve(appDist, 'zip');
+		await $`mkdir -p ${zipDir}`;
 
-		const l = new Signale({ scope: 'build-linux_' + app, interactive: true });
+		const l = new Signale({ scope: `build-linux_${app}`, interactive: true });
 		l.await(`Building linux-${app}`);
 
-		const neuResources = path.resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
-		if (!fs.existsSync(neuResources)) {
+		const neuResources = resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
+		if (!existsSync(neuResources)) {
 			l.fatal("No 'resources.neu' file was not found in the ./dist directory");
 			return;
 		}
 
-		const executable = path.resolve('dist', neuConfig.cli.binaryName, `${neuConfig.cli.binaryName}-linux_${app}`);
-		if (!fs.existsSync(executable)) {
+		const executable = resolve('dist', neuConfig.cli.binaryName, `${neuConfig.cli.binaryName}-linux_${app}`);
+		if (!existsSync(executable)) {
 			l.fatal(`The '${neuConfig.cli.binaryName}-linux_${app}' executable was not found in the ./dist directory`);
 			return;
 		}
 
 		// Installer
-		const InstallScript = path.resolve(appDist, 'install.sh');
-		const InstallTemplate = fs
-			.readFileSync(path.resolve(__dirname, '../templates/linux/install.sh'), 'utf-8')
+		const InstallScript = resolve(appDist, 'install.sh');
+		const InstallTemplate = (await Bun.file(resolve(__dirname, '../templates/linux/install.sh')).text())
 			.replaceAll('{APP_NAME}', BuildConfig.appName)
 			.replaceAll('{APP_PATH}', BuildConfig.linux.appPath)
 			.replaceAll('{APP_BUNDLE}', BuildConfig.appBundleName);
-		fs.writeFileSync(InstallScript, InstallTemplate);
+		await Bun.write(InstallScript, InstallTemplate);
 
 		// Desktop file
-		const DesktopFile = path.resolve(zipDir, BuildConfig.appBundleName + '.desktop');
-		const DesktopTemplate = fs
-			.readFileSync(path.resolve(__dirname, '../templates/linux/app.desktop'), 'utf-8')
+		const DesktopFile = resolve(zipDir, `${BuildConfig.appBundleName}.desktop`);
+		const DesktopTemplate = (await Bun.file(resolve(__dirname, '../templates/linux/app.desktop')).text())
 			.replaceAll('{APP_VERSION}', neuConfig.version)
 			.replaceAll('{APP_NAME}', BuildConfig.appName)
 			.replaceAll('{APP_PATH}', BuildConfig.linux.appPath)
-			.replaceAll('{APP_ICON_PATH}', path.join(BuildConfig.linux.appPath, 'appIcon.png'))
-			.replaceAll('{APP_EXEC}', path.join(BuildConfig.linux.appPath, 'neu_main'));
-		fs.writeFileSync(DesktopFile, DesktopTemplate);
+			.replaceAll('{APP_ICON_PATH}', join(BuildConfig.linux.appPath, 'appIcon.png'))
+			.replaceAll('{APP_EXEC}', join(BuildConfig.linux.appPath, 'neu_main'));
+		await Bun.write(DesktopFile, DesktopTemplate);
 
 		// Resources
-		fs.copyFileSync(neuResources, path.resolve(zipDir, 'resources.neu'));
-		fs.copyFileSync(BuildConfig.linux.appIcon, path.resolve(zipDir, 'appIcon.png'));
-		fs.copyFileSync(path.resolve('./neutralino.config.json'), path.resolve(zipDir, 'neutralino.config.json'));
+		await $`cp "${neuResources}" "${resolve(zipDir, 'resources.neu')}"`;
+		await $`cp "${BuildConfig.linux.appIcon}" "${resolve(zipDir, 'appIcon.png')}"`;
+		await $`cp "${resolve('./neutralino.config.json')}" "${resolve(zipDir, 'neutralino.config.json')}"`;
 
 		// Libraries
-		if (fs.existsSync(Libraries)) {
-			copyFolderSync(Libraries, zipDir);
+		if (existsSync(Libraries)) {
+			await $`cp -r "${Libraries}" "${zipDir}"`;
 		}
 
 		// Executables
-		fs.copyFileSync(executable, path.resolve(zipDir, 'neu_main'));
+
+		await $`cp "${executable}" "${resolve(zipDir, 'neu_main')}"`;
 
 		// Zip
-		await c({ gzip: true, file: path.join(appDist, BuildConfig.appName + '.tgz'), cwd: zipDir }, ['.']);
-		fs.rmSync(zipDir, { recursive: true });
+		await c(
+			{
+				gzip: true,
+				file: join(appDist, `${BuildConfig.appName}.tgz`),
+				cwd: zipDir,
+			},
+			['.']
+		);
+		await $`rm -rf "${zipDir}"`;
 
 		l.complete(`linux_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 		console.log('');

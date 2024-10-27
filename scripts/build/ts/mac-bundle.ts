@@ -1,10 +1,10 @@
-import neuConfig from '@root/neutralino.config.json';
-import { version } from "@root/package.json"
 import BuildConfig from '@root/build.config';
-import fs from 'fs';
-import path from 'path';
-import {Signale} from 'signale';
-import {copyFolderSync} from './utils';
+import neuConfig from '@root/neutralino.config.json';
+import { version } from '@root/package.json';
+import { $, sleep } from 'bun';
+import { chmodSync, existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { Signale } from 'signale';
 
 export async function macBuild() {
 	const logger = new Signale();
@@ -13,64 +13,70 @@ export async function macBuild() {
 		return;
 	}
 
-	const Dist = path.resolve('.tmpbuild');
-	const Libraries = path.resolve('build/lib/MacOS');
+	await sleep(1000);
+	const Dist = resolve('.tmpbuild');
+	const Libraries = resolve('bin');
+	const LibrariesBlacklist = ['bootstrap', 'neutralino'];
 
 	for (const app of BuildConfig.mac.architecture) {
 		const appTime = performance.now();
-		const appDist = path.resolve(Dist, 'mac_' + app);
+		const appDist = resolve(Dist, `mac_${app}`);
 
-		const l = new Signale({scope: 'build-mac-' + app, interactive: true});
+		const l = new Signale({ scope: `build-mac-${app}`, interactive: true });
 		l.await(`Building mac-${app}`);
 
-		const neuResources = path.resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
-		if (!fs.existsSync(neuResources)) {
+		const neuResources = resolve('dist', neuConfig.cli.binaryName, 'resources.neu');
+		if (!existsSync(neuResources)) {
 			l.fatal("No 'resources.neu' file was not found in the ./dist directory");
 			return;
 		}
 
-		const executable = path.resolve('dist', neuConfig.cli.binaryName, `${neuConfig.cli.binaryName}-mac_${app}`);
-		if (!fs.existsSync(executable)) {
+		const executable = resolve('dist', neuConfig.cli.binaryName, `${neuConfig.cli.binaryName}-mac_${app}`);
+		if (!existsSync(executable)) {
 			l.fatal(`The '${neuConfig.cli.binaryName}-mac_${app}' executable was not found in the ./dist directory`);
 			return;
 		}
 
 		// Directory Structure
-		const Contents = path.resolve(appDist, `${BuildConfig.appName}.app/Contents`);
-		fs.mkdirSync(Contents, {recursive: true});
-		const MacOS = path.resolve(Contents, 'MacOS');
-		fs.mkdirSync(MacOS);
-		const Resources = path.resolve(Contents, 'Resources');
-		fs.mkdirSync(Resources);
+		const Contents = resolve(appDist, `${BuildConfig.appName}.app/Contents`);
+		await $`mkdir -p "${Contents}"`;
+		const MacOS = resolve(Contents, 'MacOS');
+		await $`mkdir -p "${MacOS}"`;
+		const Resources = resolve(Contents, 'Resources');
+		await $`mkdir -p "${Resources}"`;
 
 		// Plist
-		const InfoPlist = path.resolve(Contents, 'Info.plist');
-		const InfoPlistTemplate = fs
-			.readFileSync(path.resolve(__dirname, '../templates/mac/Info.plist'), 'utf-8')
+		const InfoPlist = resolve(Contents, 'Info.plist');
+		const InfoPlistTemplate = (await Bun.file(resolve(__dirname, '../templates/mac/Info.plist')).text())
 			.replaceAll('{APP_NAME}', BuildConfig.appName)
 			.replaceAll('{APP_ID}', neuConfig.applicationId)
 			.replaceAll('{APP_BUNDLE}', BuildConfig.appBundleName)
 			.replaceAll('{APP_MIN_OS}', BuildConfig.mac.minimumOS)
 			.replaceAll('{APP_VERSION}', version);
-		fs.writeFileSync(InfoPlist, InfoPlistTemplate);
+		await Bun.write(InfoPlist, InfoPlistTemplate);
 
 		// Executables
-		fs.copyFileSync(executable, path.resolve(MacOS, 'main'));
-		fs.chmodSync(path.resolve(MacOS, 'main'), '755');
-		fs.copyFileSync(path.resolve(__dirname, '../templates/mac/bootstrap'), path.resolve(MacOS, 'bootstrap'));
-		fs.chmodSync(path.resolve(MacOS, 'bootstrap'), '755');
+		await $`cp "${executable}" "${resolve(MacOS, 'main')}"`;
+		chmodSync(resolve(MacOS, 'main'), '755');
+		await $`cp "${resolve('bin/bootstrap')}" "${resolve(MacOS, 'bootstrap')}"`;
+		chmodSync(resolve(MacOS, 'bootstrap'), '755');
 
 		// Resources
-		fs.copyFileSync(neuResources, path.resolve(Resources, 'resources.neu'));
+		await $`cp "${neuResources}" "${resolve(Resources, 'resources.neu')}"`;
 
 		// Assets
-		fs.copyFileSync(BuildConfig.mac.appIcon, path.resolve(Resources, 'icon.icns'));
+		await $`cp "${BuildConfig.mac.appIcon}" "${resolve(Resources, 'icon.icns')}"`;
 
 		// Libraries
-		if (fs.existsSync(Libraries)) {
-			copyFolderSync(Libraries, path.resolve(Resources, 'lib'));
+		if (existsSync(Libraries)) {
+			const files = (await $`ls ./bin | grep -E '${LibrariesBlacklist.join('|')}'`.text()).split('\n');
+			files.pop();
+			await $`cp -r "${Libraries}" "${resolve(Resources, 'lib')}"`;
+			for (const file of files) {
+				await $`rm -rf "${join(Resources, 'lib', file)}"`;
+			}
 		}
 		l.complete(`mac_${app} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
-		console.log("")
+		console.log('');
 	}
 }

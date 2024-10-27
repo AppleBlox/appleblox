@@ -1,38 +1,58 @@
+// Init imports
 import './app.css';
-import './ts/window';
-import './ts/roblox/path';
 import './ts/debugging';
+import './ts/roblox';
+import './ts/window';
+
+// Imports
+import { computer, events, init, app as neuApp, window as neuWindow, os } from '@neutralinojs/lib';
+import { loadTheme } from './components/theme-input/theme';
 import App from './App.svelte';
-import { events, init, os } from '@neutralinojs/lib';
-import { version } from '../../../../package.json';
-import { RPCController } from './ts/rpc';
-import { loadSettings } from './ts/settings';
-import { AbloxWatchdog } from './ts/watchdog';
+import { RPCController } from './ts/tools/rpc';
+import { shell } from './ts/tools/shell';
+import { focusWindow } from './ts/window';
+import { getMode } from './ts/utils';
+import { logDebugInfo } from './ts/utils/debug';
+import semverCompare from 'semver-compare';
 
 // Initialize NeutralinoJS
 init();
 
+async function quit() {
+	console.info('[Main] Exiting app');
+	await RPCController.stop();
+	await shell('pkill', ['-f', '_ablox'], { skipStderrCheck: true });
+	await neuApp.exit();
+}
+
 // When NeutralinoJS is ready:
 events.on('ready', async () => {
+	// Load CSS Theme
+	await loadTheme();
+	// Show the window
+	neuWindow.show();
+	if (getMode() === 'prod') focusWindow();
+	// Log debug information
 	setTimeout(async () => {
-		console.log('\n');
-		console.log('===========');
-		console.log(`AppleBlox v${version}`);
-		console.log(`Current Time: ${new Date().toLocaleString()}`);
-		console.log(`NeutralinoJS Version: ${window.NL_VERSION}`);
-		console.log(`${(await os.execCommand('uname -a')).stdOut.trim()}`);
-		console.log('===========');
-
-		/** Launch the process manager */
-		const watchdog = new AbloxWatchdog();
-		watchdog.start().catch(console.error);
+		logDebugInfo();
 	}, 500);
+	// Show warning if using MacOS -11
+	const info = await computer.getOSInfo();
+	console.info(info);
+	const isElevenOrMore = (await semverCompare(info.version.split('-')[0], '11.0.0')) >= 0;
+	if (!isElevenOrMore) {
+		os.showMessageBox(
+			'Incompatible MacOS Version',
+			"Due to specific limitations in AppleBlox's code, we cannot support older versions (>11) at this time. If the app is blank and doesn't load, please don't report this issue.",
+			'OK' as os.MessageBoxChoice,
+			'WARNING' as os.Icon.WARNING
+		);
+	}
 });
 
 // Cleanup when the application is closing
-events.on('windowClose', async () => {
-	await RPCController.stop();
-});
+events.on('windowClose', quit);
+events.on('exitApp', quit);
 
 const app = new App({
 	// @ts-expect-error

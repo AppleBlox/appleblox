@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
     <dict>
         <key>NSHighResolutionCapable</key>
-        <true/>
+        <true />
         <key>CFBundleExecutable</key>
         <string>bootstrap</string>
         <key>CFBundleGetInfoString</key>
@@ -15,7 +15,7 @@
         <key>CFBundleName</key>
         <string>{APP_BUNDLE}</string>
         <key>CFBundleShortVersionString</key>
-        <string>{APP_VERSION}</string> 
+        <string>{APP_VERSION}</string>
         <key>CFBundleGetInfoString</key>
         <string>{APP_NAME} {APP_VERSION}</string>
         <key>CFBundlePackageType</key>
@@ -25,7 +25,22 @@
         <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSAllowsArbitraryLoads</key>
-            <true/>
+            <true />
         </dict>
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleURLName</key>
+                <string>{APP_ID}</string>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>appleblox</string>
+                </array>
+            </dict>
+        </array>
+        <key>LSUIElement</key>
+        <true />
+        <key>NSAccessibilityUsageDescription</key>
+        <string>AppleBlox requires Accessibility permissions to move and resize Roblox's window.</string>
     </dict>
-    </plist>
+</plist>

@@ -2,7 +2,7 @@ type MacArch = 'x64' | 'arm64' | 'universal';
 type LinuxArch = 'x64' | 'arm64' | 'armhf';
 
 export interface Config {
-	devPort: number,
+	devPort: number;
 	projectPath: string;
 	outDir: string;
 	appName: string;

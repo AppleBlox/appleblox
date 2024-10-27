@@ -1,4 +1,6 @@
-/bun.lockb
+# Pre-built binaries
+/bin
+
 .tmp
 .tmpbuild
 window_state_config.json
