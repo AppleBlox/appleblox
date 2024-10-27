@@ -44,6 +44,7 @@
 	}
 
 	function removeSelected(): void {
+		if (selectedFlags.size < 1) return;
 		flags = flags.filter((_, index) => !selectedFlags.has(index));
 		selectedFlags.clear();
 		toast.success('Removed selected flag(s)', { duration: 1000 });
@@ -136,6 +137,7 @@
 	}
 
 	async function copyFlags(): Promise<void> {
+		if (selectedFlags.size < 1) return;
 		let flagsObject: Record<string, FastFlag> = {};
 		for (const flagIndex of selectedFlags) {
 			const flag = flags[flagIndex];
@@ -202,15 +204,13 @@
 		<Button
 			on:click={copyFlags}
 			variant="outline"
-			disabled={selectedFlags.size < 1}
-			class={`duration-100 transition-opacity ${selectedFlags.size < 1 ? 'opacity-60' : ''}`}
+			class={`duration-100 transition-opacity ${selectedFlags.size < 1 ? 'opacity-50 cursor-not-allowed border-none' : ''}`}
 			><Clipboard class="h-5 w-5 mr-2" />Export</Button
 		>
 		<Button
 			on:click={removeSelected}
 			variant="outline"
-			disabled={selectedFlags.size < 1}
-			class={`hover:border-red-500 border-[1px] duration-100 transition ${selectedFlags.size < 1 ? 'opacity-60' : ''}`}
+			class={`hover:border-red-500 border-[1px] duration-100 transition ${selectedFlags.size < 1 ? 'opacity-50 cursor-not-allowed border-none' : ''}`}
 			><Delete class="h-5 w-5 mr-2" />Remove Selected</Button
 		>
 		<div class="flex-grow"></div>
@@ -236,7 +236,7 @@
 		</Table.Header>
 		<Table.Body>
 			{#each filteredFlags as flag, index (flag.flag)}
-				<Table.Row 
+				<Table.Row
 					class="cursor-pointer {selectedFlags.has(flags.indexOf(flag)) ? 'bg-muted' : ''}"
 					on:click={(event) => handleRowClick(flags.indexOf(flag), event)}
 				>
