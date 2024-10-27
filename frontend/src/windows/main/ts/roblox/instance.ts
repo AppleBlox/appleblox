@@ -261,6 +261,7 @@ export class RobloxInstance {
 		this.logsDirectory = path.join(await os.getEnv('HOME'), 'Library/Logs/Roblox');
 		let tries = 10;
 
+		// Wait for log file to appear
 		while (this.latestLogPath == null) {
 			if (tries < 1) {
 				throw new Error(
@@ -285,19 +286,31 @@ export class RobloxInstance {
 			}
 		}
 
-		await sleep(3000);
+		// Read initial content immediately after finding the file
+		try {
+			const initialStats = await filesystem.getStats(this.latestLogPath);
+			if (initialStats.size > 0) {
+				const initialContent = await filesystem.readFile(this.latestLogPath);
+				const initialLines = initialContent.split('\n');
+				this.processLines(initialLines);
+
+				// Set position after processing initial content
+				this.lastPosition = initialStats.size;
+				this.lastFileSize = initialStats.size;
+			} else {
+				this.lastPosition = 0;
+				this.lastFileSize = 0;
+			}
+		} catch (err) {
+			console.error('[Roblox.Instance] Error reading initial log content:', err);
+			this.lastPosition = 0;
+			this.lastFileSize = 0;
+		}
 
 		// Initialize performance monitoring
 		this.pollCount = 0;
 		this.lastPerformanceLog = Date.now();
-
-		// Read initial content and set up initial state
-		const stats = await filesystem.getStats(this.latestLogPath);
-		const initialContent = await filesystem.readFile(this.latestLogPath);
-		this.lastPosition = stats.size;
-		this.lastFileSize = stats.size;
 		this.lastPollTime = Date.now();
-		this.processLines(initialContent.split('\n'));
 
 		// Set up polling interval
 		this.pollInterval = setInterval(() => {
