@@ -19,6 +19,7 @@ interface DmgOptions {
 }
 
 async function createCustomDMG(options: DmgOptions) {
+	const guidePath = resolve(join("scripts/build/assets","Install Guide.rtf"))
 	const {
 		sourceFolder,
 		outputName,
@@ -42,6 +43,7 @@ async function createCustomDMG(options: DmgOptions) {
 		`--text-size ${textSize || 12}`, // Default to 12 if not provided
 		`--icon-size ${iconSize || 100}`, // Default to 100
 		iconPos ? `--icon "${BuildConfig.appName}.app" ${iconPos}` : '', // Icon position (left, y centered)
+		`--add-file "Install Guide.rtf" "${guidePath}" 300 40`,
 		`--app-drop-link ${appDropLink || '600 120'}`, // Default to '600 120' (right side) if not provided
 		`"${outputName}.dmg"`,
 		`"${sourceFolder}"`,

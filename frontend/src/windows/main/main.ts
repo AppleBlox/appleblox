@@ -37,15 +37,15 @@ events.on('ready', async () => {
 		logDebugInfo();
 	}, 500);
 	// Show warning if using MacOS -11
-	const version = (await computer.getOSInfo()).version;
-	const isElevenOrMore = (await semverCompare(version.split('-')[0], '11.0.0')) >= 0;
+	const info = await computer.getOSInfo();
+	console.info(info);
+	const isElevenOrMore = (await semverCompare(info.version.split('-')[0], '11.0.0')) >= 0;
 	if (!isElevenOrMore) {
-		console.log(os)
 		os.showMessageBox(
 			'Incompatible MacOS Version',
 			"Due to specific limitations in AppleBlox's code, we cannot support older versions (>11) at this time. If the app is blank and doesn't load, please don't report this issue.",
-			"OK" as os.MessageBoxChoice,
-			"WARNING" as os.Icon.WARNING
+			'OK' as os.MessageBoxChoice,
+			'WARNING' as os.Icon.WARNING
 		);
 	}
 });
