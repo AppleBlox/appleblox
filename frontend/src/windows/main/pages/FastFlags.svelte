@@ -77,7 +77,7 @@
 				})
 				.addSwitch({
 					label: 'Separate Quality & Distance',
-					description: 'Split graphics quality from render distance (enables the slider below)',
+					description: 'Split graphics quality from render distance (enables the slider below) <span style="color: hsl(var(--warning));">Be careful as some games like Apocalypse Rising 2 use older ways of loading objects, and setting this slider to 1 makes them unplayable.</span>',
 					id: 'quality_distance_toggle',
 					default: false,
 				})
