@@ -22,7 +22,7 @@
 			class={`absolute right-[-10px] h-14 w-10 bg-background -z-10 ${position.index === 0 ? 'top-20' : position.index === position.total - 1 && 'mb-6'}`}
 		></div>
 	{/if}
-	<ColorImage src={icon} alt="Sidebar icon" color="foreground" class="w-4 h-4 mx-4"/>
+	<ColorImage src={icon} alt="Sidebar icon" color="hsl(var(--foreground))" class="w-4 h-4 mx-4"/>
 	<p
 		class={`${currentPage === id ? 'text-primary' : 'text-foreground'} transition duration-100 font-mono text-[14px] hover:saturate-150 hover:text-primary`}
 	>
