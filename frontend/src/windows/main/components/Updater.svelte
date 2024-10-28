@@ -3,13 +3,12 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { os } from '@neutralinojs/lib';
 	import compare from 'semver-compare';
-	import SvelteMarkdown from 'svelte-markdown';
 	import { toast } from 'svelte-sonner';
 	import { version } from '../../../../../package.json';
 	import { shell } from '../ts/tools/shell';
 	import { curlGet } from '../ts/utils';
-	import Link from './Link.svelte';
 	import { loadSettings, saveSettings } from './settings';
+	import MarkdownViewer from './markdown-viewer.svelte';
 
 	let showUpdatePopup = false;
 	let updateVersion = version;
@@ -60,16 +59,12 @@
 	}
 </script>
 
-<AlertDialog.Root bind:open={showUpdatePopup}>
-	<AlertDialog.Content>
+<AlertDialog.Root bind:open={showUpdatePopup} closeOnOutsideClick={true} closeOnEscape={true}>
+	<AlertDialog.Content class="max-h-[90vh] max-w-[90vw] overflow-scroll">
 		<AlertDialog.Header>
-			<AlertDialog.Title>A new release is available (v{updateVersion})</AlertDialog.Title>
-			<AlertDialog.Description>
-				<SvelteMarkdown
-					source={body.replace(/(\n\s*\n)+/g, '<br><br>')}
-					options={{ gfm: true, breaks: true }}
-					renderers={{ link: Link }}
-				/>
+			<AlertDialog.Description class="text-foreground mt-0">
+				<p class="text-card-foreground mb-3">A new release is available (v{updateVersion})</p>
+				<MarkdownViewer content={body}/>
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
