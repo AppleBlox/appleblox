@@ -1,5 +1,8 @@
 # AppleBlox
 
+<div align="center">
+    <img src=".github/assets/logo.png" style="width:30%;">
+</div>
 ---
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AppleBlox/appleblox/build.yml?color=%23F43F5E)
