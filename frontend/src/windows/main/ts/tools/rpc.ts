@@ -1,7 +1,7 @@
 // Discord RPC wrapper & controller
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
-import { escapeShellArg, shell, spawn } from './shell';
+import { buildCommand, escapeShellArg, shell, spawn } from './shell';
 
 /**
  * Options for configuring the Discord Rich Presence
@@ -118,7 +118,7 @@ export class DiscordRPC {
 			skipStderrCheck: true,
 		}).catch(console.error);
 
-		console.info(`[RPC] Starting with command: '${DiscordRPC.binaryPath} ${args.join(' ')}'`);
+		console.info(`[RPC] Starting with command: ${buildCommand(DiscordRPC.binaryPath,args)}`);
 		const rpcProcess = await spawn(DiscordRPC.binaryPath, args);
 		rpcProcess.on('stdErr', (data: string) => {
 			console.error('[RPC] Process emitted stdErr:', data);
