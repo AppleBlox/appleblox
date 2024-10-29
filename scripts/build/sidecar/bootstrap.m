@@ -68,7 +68,7 @@
 
 - (BOOL)isMacOSVersionSupported {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion >= 30;
+    return version.majorVersion >= 11;
 }
 
 - (void)showUnsupportedVersionDialog {
