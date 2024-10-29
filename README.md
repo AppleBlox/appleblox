@@ -1,7 +1,7 @@
 # AppleBlox
 
 <div align="center">
-    <img src=".github/assets/logo.png" style="width:30%;">
+<img src=".github/assets/logo2.png" style="width:30%;">
 </div>
 
 ---
@@ -17,6 +17,13 @@ AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://gi
 
 The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview).
 
+Versions:
+- arm64 (Apple's own chips: M1, M2, M3, etc)
+- x64 (Intel Architecture)
+- universal (Universal Version)
+
+For the development version (more unstable but has the latest features and more) see the [development releases](https://nightly.link/AppleBlox/appleblox/workflows/build/dev?preview)
+
 ## Features
 
 - Server Notifications: Displays the hosting region of the game server.
@@ -25,6 +32,13 @@ The latest version is available on the [Releases](https://github.com/AppleBlox/a
 - Custom Flags: Allows creation of custom FastFlags profiles, including game-specific configurations.
 - Multi-instance (Experimental): Enables running multiple Roblox windows simultaneously.
 - Mods: Supports UI customization through community-created mods.
+- Bloxstrap SDK: In-house implementation of Bloxstrap SDK for game developers.
+
+## App Related Features
+
+- Customizable Appearance: Allows for a different design for the app using community-made themes.
+- Delegate Launching to Appleblox: Let AppleBlox configure settings before launching Roblox.
+- Disable Roblox Desktop App: Automatically close Roblox when leaving games.
 
 ## Development
 
