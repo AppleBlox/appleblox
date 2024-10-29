@@ -1,7 +1,7 @@
 # AppleBlox
 
 <div align="center">
-<img src=".github/assets/logo2.png" style="width:30%;">
+<img src=".github/assets/logo.png" style="width:30%;">
 </div>
 
 ---
