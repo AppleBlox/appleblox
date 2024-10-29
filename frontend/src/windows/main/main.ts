@@ -22,6 +22,10 @@ async function quit() {
 	console.info('[Main] Exiting app');
 	await RPCController.stop();
 	await shell('pkill', ['-f', '_ablox'], { skipStderrCheck: true });
+	// Send quit event if in browser mode
+	if (window.NL_ARGS.includes('--mode=browser')) {
+		neuApp.writeProcessOutput('quit');
+	}
 	await neuApp.exit();
 }
 
@@ -53,6 +57,13 @@ events.on('ready', async () => {
 // Cleanup when the application is closing
 events.on('windowClose', quit);
 events.on('exitApp', quit);
+
+// Check if app is in browser mode and add tab close event
+if (window.NL_ARGS.includes("--mode=browser")) {
+	window.addEventListener("beforeunload",()=>{
+		quit()
+	})
+}
 
 const app = new App({
 	// @ts-expect-error

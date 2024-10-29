@@ -14,10 +14,12 @@
     [self setupLogging];
     [self logMessage:@"Application did finish launching"];
     
-    // Check if we were launched with a URL
+    // Check if we were launched with a URL first
+    BOOL hasDeeplink = NO;
     NSArray *arguments = [[NSProcessInfo processInfo] arguments];
     for (NSString *arg in arguments) {
         if ([arg hasPrefix:@"--deeplink="]) {
+            hasDeeplink = YES;
             self.deeplinkArgument = arg;
             [self logMessage:[NSString stringWithFormat:@"App launched with URL: %@", self.deeplinkArgument]];
             [self terminateOtherInstances];
@@ -25,7 +27,86 @@
         }
     }
     
-    [self launchMainExecutable];
+    BOOL isSupported = [self isMacOSVersionSupported];
+    
+    if (!isSupported) {
+        if (hasDeeplink) {
+            // Automatically use browser mode for deeplinks on unsupported OS
+            [self logMessage:@"Unsupported OS with deeplink - automatically using browser mode"];
+            [self setupActivationPolicy:YES];
+            [self continueStartup:YES];
+        } else {
+            // Show dialog for normal launches on unsupported OS
+            [self showUnsupportedVersionDialog];
+        }
+    } else {
+        // Normal startup for supported OS
+        [self setupActivationPolicy:NO];
+        [self continueStartup:NO];
+    }
+}
+
+- (void)setupActivationPolicy:(BOOL)browserMode {
+    if (browserMode) {
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    }
+}
+
+- (void)centerWindow:(NSWindow *)window {
+    NSRect screenFrame = [NSScreen mainScreen].frame;
+    NSRect windowFrame = window.frame;
+    
+    CGFloat x = NSMidX(screenFrame) - (windowFrame.size.width / 2);
+    CGFloat y = NSMidY(screenFrame) - (windowFrame.size.height / 2);
+    
+    [window setFrameOrigin:NSMakePoint(x, y)];
+}
+
+- (void)continueStartup:(BOOL)browserMode {
+    [self launchMainExecutable:browserMode];
+}
+
+- (BOOL)isMacOSVersionSupported {
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return version.majorVersion >= 30;
+}
+
+- (void)showUnsupportedVersionDialog {
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.messageText = @"Unsupported MacOS Version";
+    alert.informativeText = @"AppleBlox has been reported broken on older versions of MacOS (<11). If you encounter a white window, please do not report this issue. You can try running AppleBlox in your default browser as a temporary fix.";
+    
+    NSButton *browserButton = [alert addButtonWithTitle:@"Open in default browser"];
+    NSButton *openButton = [alert addButtonWithTitle:@"Open Anyway"];
+    
+    // Make browser button the default button
+    browserButton.highlighted = YES;
+    [browserButton setKeyEquivalent:@"\r"];  // Return key
+    [openButton setKeyEquivalent:@""];
+    
+    // Explicitly mark browser button as the default button with accent color
+    [alert.window.contentView.window setDefaultButtonCell:browserButton.cell];
+    
+    // Center the alert window on screen before showing it
+    [self centerWindow:alert.window];
+    
+    // Make sure alert window is frontmost and focused
+    [NSApp activateIgnoringOtherApps:YES];
+    [alert.window makeKeyAndOrderFront:nil];
+    
+    NSModalResponse response = [alert runModal];
+    
+    if (response == NSAlertFirstButtonReturn) {
+        // Browser button clicked
+        [self logMessage:@"User chose to open in browser mode"];
+        [self setupActivationPolicy:YES];
+        [self continueStartup:YES];
+    } else {
+        // Open Anyway button clicked
+        [self logMessage:@"User chose to continue despite version warning"];
+        [self setupActivationPolicy:NO];
+        [self continueStartup:NO];
+    }
 }
 
 - (void)terminateOtherInstances {
@@ -40,7 +121,7 @@
     }
 }
 
-- (void)launchMainExecutable {
+- (void)launchMainExecutable:(BOOL)browserMode {
     NSString *mainPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"Contents/MacOS/main"];
     NSString *resourcesPath = [[NSBundle mainBundle] resourcePath];
     
@@ -61,6 +142,10 @@
                                      @"--enable-extensions=true",
                                      @"--window-enable-inspector=true",
                                      nil];
+    
+    if (browserMode) {
+        [taskArguments addObject:@"--mode=browser"];
+    }
     
     if (self.deeplinkArgument) {
         [taskArguments addObject:self.deeplinkArgument];
