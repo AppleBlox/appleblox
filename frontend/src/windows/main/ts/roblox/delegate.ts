@@ -35,16 +35,18 @@ export class RobloxDelegate {
 	/** Enable/disable delegation */
 	static async toggle(delegate: boolean) {
 		if (delegate) {
-			const toggled = await setUrlscheme('roblox-player', 'ch.origaming.appleblox');
-			if (!toggled.toggled) {
+			const toggledPlayer = await setUrlscheme('roblox-player', 'ch.origaming.appleblox');
+			const toggleApp = await setUrlscheme('roblox', 'ch.origaming.appleblox');
+			if (!toggledPlayer.toggled || !toggleApp.toggled) {
 				toast.error("Couldn't set Roblox's URI");
-				console.error("Couldn't set Roblox's URI:", toggled.stdErr, toggled.stdOut);
+				console.error("Couldn't set Roblox's URI:", { app: toggleApp, player: toggledPlayer });
 			}
 		} else {
-			const toggled = await setUrlscheme('roblox-player', 'com.roblox.RobloxPlayer');
-			if (!toggled.toggled) {
+			const toggledPlayer = await setUrlscheme('roblox-player', 'com.roblox.RobloxPlayer');
+			const toggleApp = await setUrlscheme('roblox', 'com.roblox.RobloxPlayer');
+			if (!toggledPlayer.toggled || !toggleApp.toggled) {
 				toast.error("Couldn't set Roblox's URI");
-				console.error("Couldn't set Roblox's URI:", toggled.stdErr, toggled.stdOut);
+				console.error("Couldn't set Roblox's URI:", { app: toggleApp, player: toggledPlayer });
 			}
 		}
 	}
