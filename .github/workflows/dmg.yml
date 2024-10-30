@@ -107,7 +107,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: Release ${{ needs.build.outputs.version }}
-          tag_name: v${{ needs.build.outputs.version }}
+          tag_name: ${{ needs.build.outputs.version }}
           draft: true
           files: |
             ./artifacts/AppleBlox-*/*.dmg
