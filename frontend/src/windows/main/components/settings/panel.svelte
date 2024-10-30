@@ -6,7 +6,7 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { createEventDispatcher } from 'svelte';
-	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
+	import LoadingSpinner from '../loading-spinner.svelte';
 
 	import ButtonWidget from './widgets/button.svelte';
 	import FilepickerWidget from './widgets/filepicker.svelte';

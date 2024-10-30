@@ -7,7 +7,7 @@
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import shellFS from '../ts/tools/shellfs';
-	import ModsUi from './Custom/ModsUI.svelte';
+	import ModsUi from '../components/mods-ui.svelte';
 
 	export let render = true;
 

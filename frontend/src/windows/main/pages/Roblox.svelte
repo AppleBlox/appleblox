@@ -4,7 +4,7 @@
 	import { BugOff, CopyCheck, PictureInPicture, Play } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
-	import LoadingSpinner from '../components/LoadingSpinner.svelte';
+	import LoadingSpinner from '../components/loading-spinner.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import type { SettingsOutput } from '../components/settings/types';

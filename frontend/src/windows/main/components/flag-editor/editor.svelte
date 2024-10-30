@@ -28,8 +28,8 @@
 	} from '.';
 	import { formatConsoleLog } from '../../ts/debugging';
 	import shellFS from '../../ts/tools/shellfs';
-	import Combox from '../Combox.svelte';
-	import LoadingSpinner from '../LoadingSpinner.svelte';
+	import Combox from '../combox.svelte';
+	import LoadingSpinner from '../loading-spinner.svelte';
 	import FlagTable from './flag-table.svelte';
 	import SmallButton from './small-button.svelte';
 

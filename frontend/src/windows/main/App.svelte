@@ -7,9 +7,9 @@
 	import { ModeWatcher, setMode } from 'mode-watcher';
 	import { blur } from 'svelte/transition';
 	import Sidebar from './sidebar/sidebar.svelte';
-	import Code from './components/Code.svelte';
-	import Onboarding from './components/Onboarding.svelte';
-	import Updater from './components/Updater.svelte';
+	import Code from './components/code.svelte';
+	import Onboarding from './components/onboarding.svelte';
+	import Updater from './components/updater.svelte';
 	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
 	import Dev from './pages/Dev.svelte';
 	import FastFlags from './pages/FastFlags.svelte';
