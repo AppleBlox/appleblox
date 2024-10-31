@@ -13,6 +13,7 @@ import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
 import { robloxPath } from './path';
 import { RobloxUtils } from './utils';
+import { events, os } from '@neutralinojs/lib';
 
 let rbxInstance: RobloxInstance | null = null;
 
@@ -30,6 +31,8 @@ export async function launchRoblox(
 	const constSettings = {
 		areModsEnabled: (await getValue<boolean>('mods.general.enabled')) === true,
 		fixResolution: (await getValue<boolean>('mods.general.fix_res')) === true,
+		returnToWebsite: (await getValue<boolean>('roblox.behavior.return_to_website')) === true,
+		closeOnExit: (await getValue<boolean>('roblox.behavior.close_on_exit')) === true,
 	};
 
 	if (rbxInstance) {
@@ -125,6 +128,8 @@ export async function launchRoblox(
 			...presetFlags.invalidFlags,
 		};
 		console.info('[Launch] FastFlags: ', fflags);
+		console.info('[Launch] Preset flags:', { ...presetFlags.validFlags, ...presetFlags.invalidFlags });
+		console.info('[Launch] Custom flags:', { ...editorFlags.validFlags, ...editorFlags.invalidFlags });
 		await shellFS.writeFile(
 			path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json'),
 			JSON.stringify(fflags)
@@ -163,6 +168,7 @@ export async function launchRoblox(
 				robloxInstance.on('gameEvent', onGameEvent);
 				robloxInstance.on('exit', async () => {
 					console.info('[Launch] Roblox instance exited');
+					if (constSettings.returnToWebsite) os.open('https://www.roblox.com');
 					if (constSettings.areModsEnabled) {
 						RobloxMods.restoreRobloxFolders()
 							.catch(console.error)
@@ -178,6 +184,7 @@ export async function launchRoblox(
 					focusWindow();
 					setRobloxConnected(false);
 					rbxInstance = null;
+					if (constSettings.closeOnExit) events.broadcast('exitApp');
 				});
 			} catch (err) {
 				if (constSettings.areModsEnabled) {
