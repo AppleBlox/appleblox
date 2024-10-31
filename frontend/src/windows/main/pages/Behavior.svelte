@@ -51,8 +51,8 @@
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Roblox')
-		.setDescription('Roblox application settings and controls')
-		.setId('roblox')
+		.setDescription('Roblox application settings and other bootstrapper behavior')
+		.setId('roblox') // Not updating the ID to preserve old settings
 		.addCategory((category) =>
 			category
 				.setName('Multiple Instances')
@@ -82,13 +82,26 @@
 		)
 		.addCategory((category) =>
 			category
-				.setName('Launch Settings')
-				.setDescription('Control how Roblox launches games')
+				.setName('Bootstrapper Behavior')
+				.setDescription('Control how Roblox launches and how AppleBlox should handle each instance')
 				.setId('behavior')
 				.addSwitch({
 					label: 'Delegate launching to AppleBlox',
 					description: 'Let AppleBlox configure settings before launching Roblox',
 					id: 'delegate',
+					default: false,
+				})
+				.addSwitch({
+					label: 'Return to website',
+					description:
+						'Automatically open the <a href="https://www.roblox.com">www.roblox.com</a> website when closing Roblox.',
+					id: 'return_to_website',
+					default: false,
+				})
+				.addSwitch({
+					label: "Exit AppleBlox when Roblox is closed",
+					description: "Automatically close AppleBlox if the Roblox Desktop app is closed.",
+					id: "close_on_exit",
 					default: false,
 				})
 				.addSwitch({

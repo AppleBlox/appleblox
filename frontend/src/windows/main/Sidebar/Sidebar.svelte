@@ -28,7 +28,7 @@
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
-		{ label: 'Roblox', id: 'roblox', icon: RobloxIcon },
+		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },
 		{ label: 'FastFlags', id: 'fastflags', icon: FastFlagsIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
 		{ label: 'Appearance', id: 'appearance', icon: AppearanceIcon },
