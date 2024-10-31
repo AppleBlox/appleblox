@@ -1,7 +1,11 @@
-name: Build app
+name: Build and Create DMG
 
 on:
   push:
+    branches:
+      - main
+      - dev
+  pull_request:
     branches:
       - main
       - dev
@@ -9,38 +13,104 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    outputs:
+      version: ${{ env.VERSION }}
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install Dependencies
         run: bun install
+        continue-on-error: false
+
+      - name: Install create-dmg
+        run: |
+          brew update
+          brew install create-dmg
+        continue-on-error: false
 
       - name: Build and package app
-        run: bun run package
+        run: bun run release
+        continue-on-error: false
 
       - name: Get version from package.json
         id: get_version
-        run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_ENV
+        run: |
+          if [ -f "package.json" ]; then
+            echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_ENV
+          else
+            echo "Error: package.json not found"
+            exit 1
+          fi
+
+      - name: Verify DMG files exist
+        run: |
+          for arch in x64 universal arm64; do
+            if [ ! -f "dist/AppleBlox-${VERSION}_${arch}.dmg" ]; then
+              echo "Error: DMG file for ${arch} not found"
+              exit 1
+            fi
+          done
 
       - name: Upload (mac_x64)
         uses: actions/upload-artifact@v4
         with:
-          name: AppleBlox-${{ env.VERSION }}_x64
-          path: dist/mac_x64
+          name: AppleBlox-${{ env.VERSION }}_x64.dmg
+          path: dist/AppleBlox-${{ env.VERSION }}_x64.dmg
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload (mac_universal)
         uses: actions/upload-artifact@v4
         with:
-          name: AppleBlox-${{ env.VERSION }}_universal
-          path: dist/mac_universal
+          name: AppleBlox-${{ env.VERSION }}_universal.dmg
+          path: dist/AppleBlox-${{ env.VERSION }}_universal.dmg
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload (mac_arm64)
         uses: actions/upload-artifact@v4
         with:
-          name: AppleBlox-${{ env.VERSION }}_arm64
-          path: dist/mac_arm64
+          name: AppleBlox-${{ env.VERSION }}_arm64.dmg
+          path: dist/AppleBlox-${{ env.VERSION }}_arm64.dmg
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Build Summary
+        if: always()
+        run: |
+          echo "### Build Results 📦" >> $GITHUB_STEP_SUMMARY
+          echo "Version: ${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- x64 DMG: $(ls -lh dist/AppleBlox-${VERSION}_x64.dmg 2>/dev/null || echo 'Not built')" >> $GITHUB_STEP_SUMMARY
+          echo "- Universal DMG: $(ls -lh dist/AppleBlox-${VERSION}_universal.dmg 2>/dev/null || echo 'Not built')" >> $GITHUB_STEP_SUMMARY
+          echo "- ARM64 DMG: $(ls -lh dist/AppleBlox-${VERSION}_arm64.dmg 2>/dev/null || echo 'Not built')" >> $GITHUB_STEP_SUMMARY
+
+  create-release:
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ needs.build.outputs.version }}
+          tag_name: ${{ needs.build.outputs.version }}
+          draft: true
+          files: |
+            ./artifacts/AppleBlox-*/*.dmg
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
