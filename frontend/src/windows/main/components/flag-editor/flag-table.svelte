@@ -117,6 +117,7 @@
 		try {
 			flagsJson = correctAndParseJSON(clipboardContent).parsedJSON;
 		} catch (err) {
+			console.error(err)
 			toast.error("Couldn't import flags, your JSON is probably invalid (malformatted)");
 			return;
 		}

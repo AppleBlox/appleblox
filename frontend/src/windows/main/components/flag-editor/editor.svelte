@@ -70,6 +70,12 @@
 	let addProfileValue = '';
 	async function addProfile() {
 		const name = addProfileValue.trim();
+		if (!/^[a-zA-Z0-9\u00C0-\u024F_\-;,\s]+$/.test(name)) {
+			toast.error('Profile name can only contain alphanumerical characters, spaces, colons, underscores and semicolons.', {
+				duration: 5000,
+			});
+			return;
+		}
 		if (name.length < 1) {
 			toast.error("Profile name can't be blank.");
 			return;
