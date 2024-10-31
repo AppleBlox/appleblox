@@ -98,6 +98,27 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # This ensures we fetch all history and tags
+
+      - name: Get previous tag
+        run: |
+          echo "PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
+
+      - name: Generate commit history
+        run: |
+          if [ -n "${{ env.PREVIOUS_TAG }}" ]; then
+            echo "### Commits since ${{ env.PREVIOUS_TAG }}" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"- [%h](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H) %s" ${{ env.PREVIOUS_TAG }}..HEAD >> CHANGELOG.md
+          else
+            echo "### Initial Release" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"- [%h](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H) %s" >> CHANGELOG.md
+          fi
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -112,5 +133,6 @@ jobs:
           files: |
             ./artifacts/AppleBlox-*/*.dmg
           generate_release_notes: true
+          body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
