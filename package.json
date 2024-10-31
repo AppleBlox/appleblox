@@ -1,6 +1,6 @@
 {
   "name": "appleblox",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Lightweight and fast Roblox launcher for MacOS",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {
@@ -71,6 +71,7 @@
     "core-js",
     "es5-ext",
     "esbuild",
-    "svelte-preprocess"
+    "svelte-preprocess",
+    "utf-8-validate"
   ]
 }
