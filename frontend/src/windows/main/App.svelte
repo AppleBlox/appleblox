@@ -17,7 +17,7 @@
 	import Integrations from './pages/Integrations.svelte';
 	import Misc from './pages/Misc.svelte';
 	import Mods from './pages/Mods.svelte';
-	import RobloxPage from './pages/Roblox.svelte';
+	import BehaviorPage from './pages/Behavior.svelte';
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils/';
 	import { focusWindow } from './ts/window';
@@ -123,7 +123,7 @@
 		<FastFlags render={false} />
 		<Misc render={false} />
 		<Mods render={false} />
-		<RobloxPage render={false} />
+		<BehaviorPage render={false} />
 	</div>
 	<Onboarding />
 	<Updater />
@@ -164,7 +164,7 @@
 			{:else if currentPage === 'dev'}
 				<Dev />
 			{:else if currentPage === 'roblox'}
-				<RobloxPage />
+				<BehaviorPage />
 			{:else if currentPage === 'flags_editor'}
 				<FlagEditorPage />
 			{:else}
