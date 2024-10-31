@@ -5,7 +5,7 @@ import './ts/roblox';
 import './ts/window';
 
 // Imports
-import { computer, events, init, app as neuApp, window as neuWindow, os } from '@neutralinojs/lib';
+import { events, init, app as neuApp, window as neuWindow } from '@neutralinojs/lib';
 import { loadTheme } from './components/theme-input/theme';
 import App from './App.svelte';
 import { RPCController } from './ts/tools/rpc';
@@ -13,7 +13,6 @@ import { shell } from './ts/tools/shell';
 import { focusWindow } from './ts/window';
 import { getMode } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
-import semverCompare from 'semver-compare';
 
 // Initialize NeutralinoJS
 init();
@@ -38,20 +37,9 @@ events.on('ready', async () => {
 	if (getMode() === 'prod') focusWindow();
 	// Log debug information
 	setTimeout(async () => {
+		console.info(`Running at http://localhost:${window.NL_PORT}`)
 		logDebugInfo();
 	}, 500);
-	// Show warning if using MacOS -11
-	const info = await computer.getOSInfo();
-	console.info(info);
-	const isElevenOrMore = (await semverCompare(info.version.split('-')[0], '11.0.0')) >= 0;
-	if (!isElevenOrMore) {
-		os.showMessageBox(
-			'Incompatible MacOS Version',
-			"Due to specific limitations in AppleBlox's code, we cannot support older versions (>11) at this time. If the app is blank and doesn't load, please don't report this issue.",
-			'OK' as os.MessageBoxChoice,
-			'WARNING' as os.Icon.WARNING
-		);
-	}
 });
 
 // Cleanup when the application is closing
