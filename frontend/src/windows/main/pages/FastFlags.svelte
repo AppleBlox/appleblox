@@ -163,12 +163,6 @@
 					default: true,
 				})
 				.addSwitch({
-					label: 'Simplified Textures',
-					description: 'Use solid colors instead of textures',
-					id: 'flat_textures',
-					default: false,
-				})
-				.addSwitch({
 					label: 'Debug Skybox',
 					description: 'Use simple gray sky for testing',
 					id: 'debug_sky',

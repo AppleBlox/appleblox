@@ -212,21 +212,6 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			type: 'switch',
 			value: false,
 		})
-		// Flat textures
-		.addFlag({
-			name: 'Simple textures',
-			flags: {
-				FStringPartTexturePackTablePre2022:
-					'{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
-				FStringPartTexturePackTable2022:
-					'{"glass":{"ids":["rbxassetid://7547304948","rbxassetid://7546645118"],"color":[254,254,254,7]}}',
-				FStringTerrainMaterialTablePre2022: '',
-				FStringTerrainMaterialTable2022: '',
-			},
-			path: 'fastflags.visual.flat_textures',
-			type: 'switch',
-			value: true,
-		})
 		// Debug Sky
 		.addFlag({
 			name: 'Debug Sky',
