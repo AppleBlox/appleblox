@@ -1,6 +1,6 @@
 {
   "name": "appleblox",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "Lightweight and fast Roblox launcher for MacOS",
   "main": "frontend/src/windows/main/main.ts",
   "scripts": {

@@ -4,17 +4,18 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';
 	import * as Table from '$lib/components/ui/table';
 	import { clipboard } from '@neutralinojs/lib';
 	import beautify from 'json-beautify';
-	import { Braces, Clipboard, Delete, Plus, Search, Ellipsis, Edit, Trash2, Copy } from 'lucide-svelte';
+	import { Braces, Clipboard, Delete, Ellipsis, Plus, Search } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { correctAndParseJSON } from '../../ts/utils/';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { correctAndParseJSON } from '../../ts/utils/json';
+	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 
 	type FastFlag = string | boolean | null | number;
 	interface EditorFlag {
@@ -103,24 +104,15 @@
 	let willBeReplacedFlags: string[] = [];
 	let newEditorFlags: EditorFlag[] = [];
 
-	async function importFlags(): Promise<void> {
-		let clipboardContent: string = '';
-		try {
-			clipboardContent = await clipboard.readText();
-		} catch (err) {
-			toast.error("Couldn't read clipboard");
-			console.error("Couldn't read clipboard:", err);
-			return;
-		}
+	let openImportFlagsDialog = false;
+	let importFlagsDialogValue: string;
+	function showImportFlagsDialog() {
+		openImportFlagsDialog = true;
+	}
 
+	async function importFlags(flagsString: string): Promise<void> {
 		let flagsJson: Record<string, FastFlag> = {};
-		try {
-			flagsJson = correctAndParseJSON(clipboardContent).parsedJSON;
-		} catch (err) {
-			console.error(err)
-			toast.error("Couldn't import flags, your JSON is probably invalid (malformatted)");
-			return;
-		}
+		flagsJson = correctAndParseJSON(flagsString, { friendly: true }); // Throws error if invalid
 
 		newEditorFlags = [];
 		for (const [flag, value] of Object.entries(flagsJson)) {
@@ -201,7 +193,7 @@
 <Card.Root class="p-4 w-full mr-[5px]">
 	<div class="flex gap-2 mb-4">
 		<Button on:click={addFlag} variant="outline"><Plus class="h-5 w-5 mr-2" />Add Flag</Button>
-		<Button on:click={importFlags} variant="outline"><Braces class="h-5 w-5 mr-2" />Import</Button>
+		<Button on:click={showImportFlagsDialog} variant="outline"><Braces class="h-5 w-5 mr-2" />Import</Button>
 		<Button
 			on:click={copyFlags}
 			variant="outline"
@@ -391,6 +383,41 @@
 				on:click={() => {
 					contextMenuRename(toRenameFlagName, currentFlagInput);
 				}}>Save changes</Button
+			>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
+
+<Dialog.Root bind:open={openImportFlagsDialog}>
+	<Dialog.Content class="sm:max-w-[550px]">
+		<Dialog.Header>
+			<Dialog.Title>Import flags</Dialog.Title>
+			<Dialog.Description>Paste your fast flags JSON here.</Dialog.Description>
+		</Dialog.Header>
+		<div class="grid gap-4 py-4">
+			<Textarea
+				bind:value={importFlagsDialogValue}
+				placeholder={'{\n   "DFFlagUseAppleBlox": true,\n   "FFlagEnableUltraBurgers": false\n}'}
+				class="col-span-3 min-h-48 text-start align-top"
+			/>
+		</div>
+		<Dialog.Footer>
+			<Button
+				on:click={async () => {
+					const imported = await importFlags(importFlagsDialogValue || '')
+						.then(() => {
+							return true;
+						})
+						.catch((err) => {
+							console.error(err);
+							toast.error(err.toString());
+							return false;
+						});
+					if (imported) {
+						openImportFlagsDialog = false;
+						importFlagsDialogValue = '';
+					}
+				}}>Import</Button
 			>
 		</Dialog.Footer>
 	</Dialog.Content>

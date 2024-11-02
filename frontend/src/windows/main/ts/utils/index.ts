@@ -31,63 +31,6 @@ interface JSONParseResult {
 }
 
 /**
- * Attempts to correct and parse potentially invalid JSON input with support for nested JSON objects.
- * Specifically handles the case of double-escaped nested JSON strings.
- *
- * @param {string} input - The JSON string to correct and parse
- * @returns {JSONParseResult} Object containing parsed JSON and correction records
- * @throws {Error} If the JSON cannot be parsed after attempted corrections
- */
-export function correctAndParseJSON(input: string): JSONParseResult {
-	const corrections: string[] = [];
-	let jsonString = input.trim();
-
-	// Step 1: First try to parse as-is
-	try {
-		const parsed = JSON.parse(jsonString);
-		return { parsedJSON: parsed, corrections };
-	} catch (e) {
-		// Continue with corrections if direct parsing fails
-	}
-
-	// Step 2: Handle escaped string values that should be objects
-	try {
-		// Replace escaped quotes with temporary markers
-		jsonString = jsonString.replace(/\\"/g, '__QUOTE__');
-
-		// Parse the JSON with temporary markers
-		let parsed = JSON.parse(jsonString.replace(/__QUOTE__/g, '"'));
-
-		// Process any string values that look like they should be objects
-		for (const key in parsed) {
-			if (typeof parsed[key] === 'string') {
-				try {
-					// If the string value looks like JSON, try to parse it
-					if (parsed[key].includes('{') && parsed[key].includes('}')) {
-						const unescaped = parsed[key].replace(/\\\\"/g, '"').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-						parsed[key] = JSON.parse(unescaped);
-						corrections.push(`Parsed nested JSON in key: ${key}`);
-					}
-				} catch (innerError) {
-					// If parsing the nested JSON fails, leave it as a string
-					corrections.push(`Failed to parse nested JSON in key: ${key}`);
-				}
-			}
-		}
-
-		return { parsedJSON: parsed, corrections };
-	} catch (error) {
-		// If all parsing attempts fail, throw an error with details
-		throw new Error(
-			`Failed to parse JSON: ${(error as Error).message}\nNear: ${jsonString.substring(
-				Math.max(0, (error as any).pos - 50),
-				Math.min(jsonString.length, (error as any).pos + 50)
-			)}`
-		);
-	}
-}
-
-/**
  * Returns the current date in a format compatible with POSIX path names.
  * The format is: YYYY-MM-DD_HH-mm-ss
  *

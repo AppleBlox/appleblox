@@ -54,4 +54,4 @@
 		.build();
 </script>
 
-<Panel {panel} on:button={onButtonClicked} {render} />
+<Panel {panel} on:button={onButtonClicked} {render} autosave={false} />
