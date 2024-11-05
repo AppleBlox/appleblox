@@ -18,7 +18,7 @@ AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://gi
 The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview).
 
 Versions:
-- arm64 (Apple's own chips: M1, M2, M3, etc)
+- arm64 (Apple's arm64 chips)
 - x64 (Intel Architecture)
 - universal (Universal Version)
 
@@ -39,6 +39,7 @@ For the development version (more unstable but has the latest features and more)
 - Customizable Appearance: Allows for a different design for the app using community-made themes.
 - Delegate Launching to Appleblox: Let AppleBlox configure settings before launching Roblox.
 - Disable Roblox Desktop App: Automatically close Roblox when leaving games.
+- Open Roblox Website: Automatically opens the Roblox website when you leave a game
 
 ## Development
 
