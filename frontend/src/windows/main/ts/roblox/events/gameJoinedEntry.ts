@@ -15,9 +15,13 @@ interface IPResponse {
 	readme: string;
 }
 
+let lastJoinedServer: string[] | null = null;
 async function gameJoinedEntry(data: GameEventInfo) {
 	// Add the join server button
 	const server = data.data.substring(10).split('|');
+	// Prevent notifications spam
+	if (server === lastJoinedServer) return;
+	lastJoinedServer = server;
 	console.info(`[Activity] Current server: ${server[0]}, Port: ${server[1]}`);
 	if ((await getValue<boolean>('integrations.activity.notify_location')) === true) {
 		const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);

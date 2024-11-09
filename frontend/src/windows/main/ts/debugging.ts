@@ -1,156 +1,235 @@
-// File with debugging functions
-// It will redirect the app's logs to the log file while still logging in the web browser
 import { filesystem } from '@neutralinojs/lib';
-import path, { dirname } from 'path-browserify';
+import path from 'path-browserify';
 import { getConfigPath, loadSettings } from '../components/settings';
 import shellFS from './tools/shellfs';
 import { getMode, getPosixCompatibleDate } from './utils';
 import { version } from '@root/package.json';
 
-let logPath: string | null = null;
-/** Create the logging file for this app session */
-async function setupLogs() {
-	if (logPath != null) return;
-	const logsDir = path.join(path.dirname(await getConfigPath()), 'logs');
-	if (getMode() === 'dev') {
-		logPath = path.join(logsDir, 'dev.log');
-		return;
-	}
-	logPath = path.join(logsDir, `${getPosixCompatibleDate()}_${version}.log`);
-	if (!(await shellFS.exists(logsDir))) {
-		await shellFS.createDirectory(logsDir);
-	}
-	if (!(await shellFS.exists(logPath))) {
-		await shellFS.writeFile(logPath, '');
-	}
+// Types
+type LogLevel = 'INFO' | 'ERROR' | 'WARN' | 'DEBUG' | 'TRACE';
+type ConsoleMethod = keyof typeof console;
+
+interface LoggerState {
+  isRedirectionEnabled: boolean;
+  overriddenConsoleFunctions: boolean;
+  logPath: string | null;
 }
 
-setupLogs();
-
-/** Tries to format every variable to a string */
-export function formatConsoleLog(...args: any[]): string {
-	return `[${new Date().toLocaleTimeString()}] ${args
-		.map((arg) => {
-			if (arg === null) {
-				return 'null';
-			}
-			if (arg === undefined) {
-				return 'undefined';
-			}
-			if (typeof arg === 'string') {
-				return arg;
-			}
-			if (typeof arg === 'number') {
-				return arg.toString();
-			}
-			if (typeof arg === 'boolean') {
-				return arg.toString();
-			}
-			if (Array.isArray(arg)) {
-				return JSON.stringify(arg);
-			}
-			if (typeof arg === 'object') {
-				return JSON.stringify(arg, getCircularReplacer());
-			}
-			if (typeof arg === 'function') {
-				return arg.toString();
-			}
-			return String(arg);
-		})
-		.join(' ')}`;
+interface LogEntry {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
 }
 
-function getCircularReplacer() {
-	const seen = new WeakSet();
-	return (key: string, value: any) => {
-		if (typeof value === 'object' && value !== null) {
-			if (seen.has(value)) {
-				return '[Circular]';
-			}
-			seen.add(value);
-		}
-		return value;
-	};
+// Logger state management
+const state: LoggerState = {
+  isRedirectionEnabled: false,
+  overriddenConsoleFunctions: false,
+  logPath: null
+};
+
+// Original console methods store
+const originalConsoleMethods: Partial<Record<ConsoleMethod, Function>> = {
+  log: console.log,
+  error: console.error,
+  warn: console.warn,
+  info: console.info,
+  debug: console.debug,
+  trace: console.trace
+};
+
+// Formatting utilities
+class LogFormatter {
+  static getTimestamp(): string {
+    return new Date().toISOString();
+  }
+
+  static formatError(error: Error): string {
+    return `${error.name}: ${error.message}\nStack: ${error.stack || 'No stack trace available'}`;
+  }
+
+  static formatObject(obj: object): string {
+    try {
+      return JSON.stringify(obj, this.circularReplacer(), 2);
+    } catch (err) {
+      return `[Object: circular or complex structure]\n${String(obj)}`;
+    }
+  }
+
+  static formatArray(arr: any[]): string {
+    try {
+      return JSON.stringify(arr, this.circularReplacer(), 2);
+    } catch (err) {
+      return `[Array: circular or complex structure]\n${String(arr)}`;
+    }
+  }
+
+  static formatValue(value: any): string {
+    if (value === null) return 'null';
+    if (value === undefined) return 'undefined';
+    
+    switch (typeof value) {
+      case 'string': return value;
+      case 'number': return value.toString();
+      case 'boolean': return value.toString();
+      case 'function': return `[Function: ${value.name || 'anonymous'}]`;
+      case 'symbol': return value.toString();
+      case 'bigint': return `${value.toString()}n`;
+      case 'object':
+        if (value instanceof Error) return this.formatError(value);
+        if (Array.isArray(value)) return this.formatArray(value);
+        if (value instanceof Map) return this.formatObject(Object.fromEntries(value));
+        if (value instanceof Set) return this.formatArray(Array.from(value));
+        if (value instanceof Date) return value.toISOString();
+        if (value instanceof RegExp) return value.toString();
+        return this.formatObject(value);
+      default:
+        return String(value);
+    }
+  }
+
+  private static circularReplacer() {
+    const seen = new WeakSet();
+    return (key: string, value: any) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular]';
+        }
+        seen.add(value);
+      }
+      return value;
+    };
+  }
+
+  static formatLogEntry(level: LogLevel, args: any[]): LogEntry {
+    const formattedArgs = args.map(arg => this.formatValue(arg)).join(' ');
+    return {
+      timestamp: this.getTimestamp(),
+      level,
+      message: formattedArgs
+    };
+  }
 }
 
-/** Appends a message to the log file */
-async function appendLog(message: string) {
-	if (!logPath) setupLogs();
-	try {
-		const appleBloxDir = path.dirname(await getConfigPath());
-		// @ts-expect-error: logPath will be defined because the setupLogs() function has been called
-		await filesystem.appendFile(logPath, `${message}\n`);
-	} catch (err) {
-		console.error('Failed to write log to file', err);
-	}
+// File management
+class LogFileManager {
+  static async setupLogDirectory(): Promise<string> {
+    const logsDir = path.join(path.dirname(await getConfigPath()), 'logs');
+    if (!(await shellFS.exists(logsDir))) {
+      await shellFS.createDirectory(logsDir);
+    }
+    return logsDir;
+  }
+
+  static async createLogPath(): Promise<string> {
+    const logsDir = await this.setupLogDirectory();
+    if (getMode() === 'dev') {
+      return path.join(logsDir, 'dev.log');
+    }
+    return path.join(logsDir, `${getPosixCompatibleDate()}_${version}.log`);
+  }
+
+  static async ensureLogFile(logPath: string): Promise<void> {
+    if (!(await shellFS.exists(logPath))) {
+      await shellFS.writeFile(logPath, '');
+    }
+  }
+
+  static async appendToLog(logPath: string, entry: LogEntry): Promise<void> {
+    const logLine = `[${entry.timestamp}] [${entry.level}] ${entry.message}\n`;
+    try {
+      await filesystem.appendFile(logPath, logLine);
+    } catch (err) {
+      // Use original console to avoid infinite recursion
+      originalConsoleMethods.error?.call(console, 'Failed to write to log file:', err);
+    }
+  }
 }
 
-function createLoggerFunction(originalFunction: Function, logLevel: string) {
-	return async (...args: any[]) => {
-		if (isRedirectionEnabled) {
-			const formattedMessage = formatConsoleLog(...args);
-			await appendLog(formattedMessage);
-			// Use apply to maintain the correct context and pass all arguments
-			originalFunction.apply(console, [...args]);
-		} else {
-			// If redirection is not enabled, just call the original function
-			originalFunction.apply(console, args);
-		}
-	};
+// Console override management
+class ConsoleManager {
+  static createLoggerFunction(originalFn: Function, level: LogLevel) {
+    return async (...args: any[]) => {
+      if (!state.isRedirectionEnabled) {
+        return originalFn.apply(console, args);
+      }
+
+      const logEntry = LogFormatter.formatLogEntry(level, args);
+      
+      // Ensure we have a log path
+      if (!state.logPath) {
+        state.logPath = await LogFileManager.createLogPath();
+        await LogFileManager.ensureLogFile(state.logPath);
+      }
+
+      // Write to file
+      await LogFileManager.appendToLog(state.logPath, logEntry);
+      
+      // Write to original console
+      originalFn.apply(console, args);
+    };
+  }
+
+  static override(): void {
+    if (state.overriddenConsoleFunctions) return;
+
+    console.log = this.createLoggerFunction(originalConsoleMethods.log!, 'INFO');
+    console.error = this.createLoggerFunction(originalConsoleMethods.error!, 'ERROR');
+    console.warn = this.createLoggerFunction(originalConsoleMethods.warn!, 'WARN');
+    console.info = this.createLoggerFunction(originalConsoleMethods.info!, 'INFO');
+    console.debug = this.createLoggerFunction(originalConsoleMethods.debug!, 'DEBUG');
+    console.trace = this.createLoggerFunction(originalConsoleMethods.trace!, 'TRACE');
+
+    state.overriddenConsoleFunctions = true;
+  }
+
+  static restore(): void {
+    if (!state.overriddenConsoleFunctions) return;
+
+    Object.entries(originalConsoleMethods).forEach(([method, fn]) => {
+      if (fn) {
+        (console as any)[method] = fn;
+      }
+    });
+
+    state.overriddenConsoleFunctions = false;
+  }
 }
 
-const originalConsoleLog = console.log;
-const originalConsoleError = console.error;
-const originalConsoleWarn = console.warn;
-const originalConsoleInfo = console.info;
-const originalConsoleDebug = console.debug;
-
-let isRedirectionEnabled = false;
-let overriddenConsoleFunctions = false;
-
+// Initialize logger
 (async () => {
-	const settings = await loadSettings('misc');
-	if (!settings) return;
-	isRedirectionEnabled = settings.advanced.redirect_console;
-	if (isRedirectionEnabled) {
-		overrideConsoleFunctions();
-	}
+  const settings = await loadSettings('misc');
+  if (!settings) return;
+  
+  state.isRedirectionEnabled = settings.advanced.redirect_console;
+  if (state.isRedirectionEnabled) {
+    state.logPath = await LogFileManager.createLogPath();
+    await LogFileManager.ensureLogFile(state.logPath);
+    ConsoleManager.override();
+  }
 })();
 
-function overrideConsoleFunctions() {
-	if (!overriddenConsoleFunctions) {
-		console.log = createLoggerFunction(originalConsoleLog, 'INFO');
-		console.error = createLoggerFunction(originalConsoleError, 'ERROR');
-		console.warn = createLoggerFunction(originalConsoleWarn, 'WARN');
-		console.info = createLoggerFunction(originalConsoleInfo, 'INFO');
-		console.debug = createLoggerFunction(originalConsoleDebug, 'DEBUG');
-		overriddenConsoleFunctions = true;
-	}
+// Public API
+export function formatConsoleLog(...args: any[]): string {
+  const { message } = LogFormatter.formatLogEntry('INFO', args);
+  return message;
+}
+export async function enableConsoleRedirection(): Promise<void> {
+  const appleBloxDir = path.dirname(await getConfigPath());
+  if (!shellFS.exists(appleBloxDir)) {
+    await filesystem.createDirectory(appleBloxDir);
+  }
+  
+  state.isRedirectionEnabled = true;
+  state.logPath = await LogFileManager.createLogPath();
+  await LogFileManager.ensureLogFile(state.logPath);
+  ConsoleManager.override();
+  
+  console.info('[Debugging] Enabled console redirection');
 }
 
-function restoreConsoleFunctions() {
-	if (overriddenConsoleFunctions) {
-		console.log = originalConsoleLog;
-		console.error = originalConsoleError;
-		console.warn = originalConsoleWarn;
-		console.info = originalConsoleInfo;
-		console.debug = originalConsoleDebug;
-		overriddenConsoleFunctions = false;
-	}
-}
-
-export async function enableConsoleRedirection() {
-	const appleBloxDir = path.dirname(await getConfigPath());
-	if (!shellFS.exists(appleBloxDir)) {
-		await filesystem.createDirectory(appleBloxDir);
-	}
-	isRedirectionEnabled = true;
-	overrideConsoleFunctions();
-	console.info('[Debugging] Enabled console redirection');
-}
-
-export function disableConsoleRedirection() {
-	isRedirectionEnabled = false;
-	restoreConsoleFunctions();
-	console.info('[Debugging] Disabled console redirection');
+export function disableConsoleRedirection(): void {
+  state.isRedirectionEnabled = false;
+  ConsoleManager.restore();
+  console.info('[Debugging] Disabled console redirection');
 }
