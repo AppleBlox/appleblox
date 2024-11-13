@@ -5,7 +5,7 @@
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Appearance')
-		.setDescription('Customize AppleBlox interface theme')
+		.setDescription('Customize AppleBlox's interface')
 		.setId('appearance')
 		.addCategory((category) =>
 			category

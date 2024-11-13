@@ -145,7 +145,7 @@
 				.setId('visual')
 				.addSelect({
 					label: 'Texture Quality',
-					description: 'Set texture detail level',
+					description: 'Set the texture detail level',
 					id: 'textures_quality',
 					items: [
 						{ label: 'Default', value: 'default' },
@@ -164,7 +164,7 @@
 				})
 				.addSwitch({
 					label: 'Debug Skybox',
-					description: 'Use simple gray sky for testing',
+					description: 'Use a simple gray sky for testing',
 					id: 'debug_sky',
 					default: false,
 				})
@@ -214,7 +214,7 @@
 				})
 				.addSwitch({
 					label: 'Disable Telemetry',
-					description: 'Disable Roblox analytics collection',
+					description: 'Disable Roblox's analytics collection',
 					id: 'telemetry',
 					default: false,
 				})
@@ -231,14 +231,14 @@
 					id: 'fflags_editor',
 				})
 				.addSwitch({
-					label: 'Ignore Flag Warnings',
+					label: 'Ignore FFlag Warnings',
 					description: 'Suppress invalid flag notifications',
 					id: 'ignore_flags_warning',
 					default: false,
 				})
 				.addSeparator({ orientation: 'horizontal' })
 				.addButton({
-					label: 'Save to ClientAppSettings.json',
+					label: 'Save FFlags to ClientAppSettings.json',
 					description: 'Write flags directly to Roblox config (not recommended)',
 					id: 'write_clientappsettings_btn',
 					variant: 'outline',

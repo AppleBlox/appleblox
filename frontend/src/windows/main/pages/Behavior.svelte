@@ -59,21 +59,21 @@
 				.setDescription('Run multiple Roblox instances simultaneously')
 				.setId('multi_instances')
 				.addButton({
-					label: 'Enable Multi-Instance',
+					label: 'Enable multi-instance',
 					description: 'Update patch to allow multiple Roblox windows',
 					id: 'multi_roblox_btn',
 					variant: 'default',
 					icon: { component: CopyCheck },
 				})
 				.addButton({
-					label: 'New Instance',
+					label: 'New instance',
 					description: 'Open an additional Roblox instance',
 					id: 'open_instance_btn',
 					variant: 'secondary',
 					icon: { component: PictureInPicture },
 				})
 				.addButton({
-					label: 'Close All',
+					label: 'Close all',
 					description: 'Force close all Roblox windows (You should save your progress first)',
 					id: 'close_roblox_btn',
 					variant: 'destructive',
@@ -94,7 +94,7 @@
 				.addSwitch({
 					label: 'Return to website',
 					description:
-						'Automatically open the <a href="https://www.roblox.com">www.roblox.com</a> website when closing Roblox.',
+						'Automatically open the website <a href="https://www.roblox.com">www.roblox.com</a> when closing Roblox.',
 					id: 'return_to_website',
 					default: false,
 				})
@@ -105,14 +105,14 @@
 					default: false,
 				})
 				.addSwitch({
-					label: 'Disable Desktop app',
+					label: 'Disable desktop app',
 					description: 'Automatically close Roblox when leaving games',
 					id: 'disable_desktop_app',
 					default: false,
 				})
 				.addSeparator({ orientation: 'horizontal' })
 				.addButton({
-					label: 'Create Launch Shortcut',
+					label: 'Create launch shortcut',
 					description: 'Create a desktop shortcut that launches Roblox with AppleBlox features',
 					id: 'create_shortcut_btn',
 					variant: 'default',
