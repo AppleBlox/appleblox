@@ -71,12 +71,11 @@ export async function launchRoblox(
 		const presetFlags = await RobloxFFlags.parseFlags(true);
 		// Invalid presets
 		if (
-			Object.keys(presetFlags.invalidFlags).length > 0 &&
-			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
+			Object.keys(presetFlags.invalidFlags).length > 0
 		) {
 			const isIgnored = await showFlagErrorPopup(
 				'Outdated presets',
-				'You are using presets which contain outdated flags. They may or may not work. To fix this, update to the latest version of the app or wait for a new one.',
+				'You are using outdated flags presets. The presets listed here may not work correctly. If you are on the latest version of the app, you just have to wait for a fix, otherwise, update to the latest version.',
 				presetFlags.nameMap.join(', ')
 			);
 			if (!isIgnored) {
@@ -88,8 +87,7 @@ export async function launchRoblox(
 		const editorFlags = await RobloxFFlags.parseFlags(false);
 		// Invalid selected profile flags
 		if (
-			Object.keys(editorFlags.invalidFlags).length > 0 &&
-			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
+			Object.keys(editorFlags.invalidFlags).length > 0
 		) {
 			const isIgnored = await showFlagErrorPopup(
 				'Invalid flags in selected profile',
