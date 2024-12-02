@@ -100,7 +100,7 @@ async function gameJoiningEntry(data: GameEventInfo) {
 		rpcOptions = {
 			...rpcOptions,
 			buttonText2: 'Join server',
-			buttonUrl2: `"${joinLink}"`,
+			buttonUrl2: `${joinLink}`,
 		};
 	} else {
 		rpcOptions.buttonText2 = undefined;
