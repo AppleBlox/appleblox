@@ -1,26 +1,9 @@
 <script lang="ts">
-	import { Braces } from 'lucide-svelte';
-	import { toast } from 'svelte-sonner';
 	import FlagEditor from '../components/flag-editor/flag-editor.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
-	import Roblox from '../ts/roblox';
 
 	export let render = true;
-
-	async function onButtonClicked(e: CustomEvent) {
-		const { id } = e.detail;
-		switch (id) {
-			case 'write_clientappsettings_btn':
-				try {
-					await Roblox.FFlags.writeClientAppSettings();
-				} catch (err) {
-					console.error('[FastFlagsPanel] ', err);
-					toast.error('An error occured while writing ClientAppSettings.json');
-				}
-				break;
-		}
-	}
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Fast Flags')
@@ -31,14 +14,11 @@
 				.setName('Graphics Engine')
 				.setDescription('Core graphics and performance settings')
 				.setId('graphics')
-				.addSlider({
-					label: 'FPS Limit',
-					description: 'Maximum frames per second',
-					id: 'fps_target',
-					default: [60],
-					min: 1,
-					max: 240,
-					step: 1,
+				.addSwitch({
+					label: 'Unlock FPS',
+					description: 'Reach FPS counts higher than your supported refresh rate (enables Vulkan)',
+					id: 'unlock_fps',
+					default: false,
 				})
 				.addSelect({
 					label: 'Graphics API',
@@ -77,7 +57,8 @@
 				})
 				.addSwitch({
 					label: 'Separate Quality & Distance',
-					description: 'Split graphics quality from render distance (enables the slider below) <span style="color: hsl(var(--warning));">Be careful as some games like Apocalypse Rising 2 use older ways of loading objects, and setting this slider to 1 makes them unplayable.</span>',
+					description:
+						'Split graphics quality from render distance (enables the slider below) <span style="color: hsl(var(--warning));">Be careful as some games like Apocalypse Rising 2 use older ways of loading objects, and setting this slider to 1 makes them unplayable.</span>',
 					id: 'quality_distance_toggle',
 					default: false,
 				})
@@ -96,33 +77,9 @@
 					},
 				})
 				.addSwitch({
-					label: '3D Grass',
-					description: 'Enable detailed terrain grass',
-					id: 'grass',
-					default: true,
-				})
-				.addSwitch({
-					label: 'World Shadows',
-					description: 'Enable environmental shadows',
-					id: 'shadows',
-					default: true,
-				})
-				.addSwitch({
-					label: 'Character Shadows',
-					description: 'Enable player character shadows',
-					id: 'player_shadows',
-					default: true,
-				})
-				.addSwitch({
 					label: 'Visual Effects',
 					description: 'Enable post-processing effects',
 					id: 'postfx',
-					default: true,
-				})
-				.addSwitch({
-					label: 'Anti-aliasing',
-					description: 'Smooth and sharper edges',
-					id: 'antialiasing',
 					default: true,
 				})
 				.addSwitch({
@@ -131,31 +88,12 @@
 					id: 'lod',
 					default: false,
 				})
-				.addSwitch({
-					label: 'Reduce lightning updates',
-					description: 'Make the lightning update cycle slower',
-					id: 'light_updates',
-					default: false,
-				})
 		)
 		.addCategory((category) =>
 			category
 				.setName('Visual Quality')
 				.setDescription('Texture and visual enhancement settings')
 				.setId('visual')
-				.addSelect({
-					label: 'Texture Quality',
-					description: 'Set texture detail level',
-					id: 'textures_quality',
-					items: [
-						{ label: 'Default', value: 'default' },
-						{ label: 'Ultra', value: '3' },
-						{ label: 'High', value: '2' },
-						{ label: 'Medium', value: '1' },
-						{ label: 'Low', value: '0' },
-					],
-					default: 'default',
-				})
 				.addSwitch({
 					label: 'Character Textures',
 					description: 'Enable player textures',
@@ -179,22 +117,10 @@
 					description: 'Choose in-game menu version',
 					id: 'menu_version',
 					items: [
-						{ label: 'Version 1 (2015)', value: 'v1' },
 						{ label: 'Version 2 (2020)', value: 'v2' },
-						{ label: 'Version 4 (2023)', value: 'v4' },
-						{ label: 'Version 4 (Chrome)', value: 'v4chrome' },
-						{ label: 'Default', value: 'default' },
+						{ label: 'Default (Chrome)', value: 'default' },
 					],
 					default: 'default',
-				})
-				.addSlider({
-					label: 'UI Font Size',
-					description: 'Adjust interface text size',
-					id: 'font_size',
-					default: [1],
-					step: 1,
-					max: 100,
-					min: 1,
 				})
 		)
 		.addCategory((category) =>
@@ -219,33 +145,22 @@
 					default: false,
 				})
 		)
-		.addCategory((category) =>
-			category
-				.setName('Advanced')
-				.setDescription('Expert settings - use with caution')
-				.setId('advanced')
-				.addCustom({
+		.addCategory(
+			(category) =>
+				category.setName('Advanced').setDescription('Expert settings - use with caution').setId('advanced').addCustom({
 					label: '',
 					description: '',
 					component: FlagEditor,
 					id: 'fflags_editor',
 				})
-				.addSwitch({
-					label: 'Ignore Flag Warnings',
-					description: 'Suppress invalid flag notifications',
-					id: 'ignore_flags_warning',
-					default: false,
-				})
-				.addSeparator({ orientation: 'horizontal' })
-				.addButton({
-					label: 'Save to ClientAppSettings.json',
-					description: 'Write flags directly to Roblox config (not recommended)',
-					id: 'write_clientappsettings_btn',
-					variant: 'outline',
-					icon: { component: Braces },
-				})
+			// .addSwitch({
+			// 	label: 'Ignore Flag Warnings',
+			// 	description: 'Suppress invalid flag notifications',
+			// 	id: 'ignore_flags_warning',
+			// 	default: false,
+			// })
 		)
 		.build();
 </script>
 
-<Panel {panel} {render} on:button={onButtonClicked} />
+<Panel {panel} {render} />
