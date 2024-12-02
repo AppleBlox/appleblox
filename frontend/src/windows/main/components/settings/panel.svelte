@@ -197,7 +197,7 @@
 								{/if}
 								<!-- Disable the widget if the button it is linked to is disabled -->
 								<div
-									class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-30 select-one group'}`}
+									class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-30 select-one group pointer-events-none'}`}
 								>
 									<!-- Description of the widget (except button) -->
 									{#if widget.options.type !== 'button'}

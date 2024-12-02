@@ -16,10 +16,10 @@
 </script>
 
 <Select.Root {items} selected={defaultItem} onSelectedChange={handleSelect}>
-	<Select.Trigger class="w-[180px] dark:bg-neutral-900 bg-neutral-300 ml-auto mr-4 border-none">
-		<Select.Value class="text-black dark:text-white" />
+	<Select.Trigger class="w-[180px] dark:bg-neutral-900 bg-neutral-300 ml-auto mr-4 border-none text-left">
+		<Select.Value class="text-foreground" />
 	</Select.Trigger>
-	<Select.Content class="bg-popover border-none dark:text-white text-black">
+	<Select.Content class="bg-popover border-none text-foreground">
 		<Select.Group>
 			{#each items || [] as item (item.value)}
 				<Select.Item value={item} label={item.label}>{item.label}</Select.Item>

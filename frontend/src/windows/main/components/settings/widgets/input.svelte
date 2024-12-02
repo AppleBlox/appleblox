@@ -48,7 +48,7 @@
 	<Tooltip.Trigger>
 		<Input
 			bind:value
-			class={`dark:bg-neutral-900 bg-neutral-300 text-center border-none w-[250px] font-sans mr-4 transition duration-150 ${doWarnAnimation ? 'animate-shake ring-red-900' : ''}`}
+			class={`text-foreground text-center border-none w-[250px] font-sans mr-4 transition duration-150 ${doWarnAnimation ? 'animate-shake ring-red-900' : ''}`}
 			{placeholder}
 			on:keypress={handleKeypress}
 			on:change={handleInput}
