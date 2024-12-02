@@ -27,38 +27,37 @@ export interface EditorFlag {
 	value: string;
 }
 
-let computerRefreshRate: number | null = null;
-async function getRefreshRate() {
-	computerRefreshRate = computerRefreshRate || (await computer.getDisplays())[0].refreshRate;
-	return computerRefreshRate;
-}
-
 /** Function used to build the flags list */
 async function buildFlagsList(): Promise<FastFlagsList> {
 	let data = {
-		forceVulkan: ((await getValue<number[]>('fastflags.graphics.fps_target'))[0] || 60) > (await getRefreshRate()), // Check if target FPS is higher than the main display's refresh rate
+		forceVulkan: false,
 	};
 	const flags = new FastFlagsList()
 		// Panel: Integrations
 		// SDK
 		// Window Movement
-		.addFlag({
-			name: 'Window Movement',
-			flags: { FFlagUserIsBloxstrap: true, FFlagUserAllowsWindowMovement: true },
-			path: 'integrations.sdk.window',
-			type: 'switch',
-			value: async (s) => (await getValue<boolean>('integrations.sdk.enabled')) === true && (s as boolean) === true,
-		})
+		// .addFlag({
+		// 	name: 'Window Movement',
+		// 	flags: { FFlagUserIsBloxstrap: true, FFlagUserAllowsWindowMovement: true },
+		// 	path: 'integrations.sdk.window',
+		// 	type: 'switch',
+		// 	value: async (s) => (await getValue<boolean>('integrations.sdk.enabled')) === true && (s as boolean) === true,
+		// })
 
 		// Panel: FastFlags
 		// GRAPHICS
-		// FPS Target
+		// Unlock FPS
 		.addFlag({
-			name: 'FPS Limit',
-			flags: { DFIntTaskSchedulerTargetFps: '%s' },
-			path: 'fastflags.graphics.fps_target',
-			type: 'slider',
-			value: async (s) => (s as number[])[0] !== (await getRefreshRate()),
+			name: 'Unlock FPS',
+			flags: {},
+			path: 'fastflags.graphics.unlock_fps',
+			type: 'switch',
+			value: async (s) => {
+				if ((s as boolean) === true) {
+					data.forceVulkan = true;
+				}
+				return false;
+			},
 		})
 		// Graphics API
 		.addFlag({
@@ -125,37 +124,6 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			value: async (settingValue) =>
 				settingValue === true && (await getValue<boolean>('fastflags.graphics.quality_distance_toggle')) === true,
 		})
-		// Terrain grass
-		.addFlag({
-			name: '3D Grass',
-			flags: {
-				FIntFRMMinGrassDistance: 0,
-				FIntFRMMaxGrassDistance: 0,
-				FIntRenderGrassDetailStrands: 0,
-			},
-			path: 'fastflags.graphics.grass',
-			type: 'switch',
-			value: false,
-		})
-		// Shadows
-		.addFlag({
-			name: 'Shadows',
-			flags: {
-				DFIntCullFactorPixelThresholdShadowMapHighQuality: '2147483647',
-				DFIntCullFactorPixelThresholdShadowMapLowQuality: '2147483647',
-			},
-			path: 'fastflags.graphics.shadows',
-			type: 'switch',
-			value: false,
-		})
-		// Player Shadows
-		.addFlag({
-			name: 'Player shadows',
-			flags: { FIntRenderShadowIntensity: 0 },
-			path: 'fastflags.graphics.shadows',
-			type: 'switch',
-			value: false,
-		})
 		// PostFX
 		.addFlag({
 			name: 'Visual Effects',
@@ -164,46 +132,18 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			type: 'switch',
 			value: false,
 		})
-		// Anti-aliasing
-		.addFlag({
-			name: 'Anti-aliasing',
-			flags: { FIntDebugForceMSAASamples: 0 },
-			path: 'fastflags.graphics.antialiasing',
-			type: 'switch',
-			value: false,
-		})
 		// Level-of-detail
 		.addFlag({
-			name: 'D',
+			name: 'Level-of-detail',
 			flags: {
 				DFIntCSGLevelOfDetailSwitchingDistance: 0,
 				DFIntCSGLevelOfDetailSwitchingDistanceL12: 0,
-				DFIntCSGLevelOfDetailSwitchingDistanceL23: 0,
-				DFIntCSGLevelOfDetailSwitchingDistanceL34: 0,
 			},
 			path: 'fastflags.graphics.lod',
 			type: 'switch',
 			value: true,
 		})
-		// Limit light updates
-		.addFlag({
-			name: 'Limit light updates',
-			flags: { FIntRenderLocalLightUpdatesMax: 1, FIntRenderLocalLightUpdatesMin: 1 },
-			path: 'fastflags.graphics.light_updates',
-			type: 'switch',
-			value: true,
-		})
 		// VISUAL
-		// Textures quality
-		.addFlag({
-			name: 'Textures quality',
-			flags: { DFFlagTextureQualityOverrideEnabled: true, DFIntTextureQualityOverride: '%s' },
-			path: 'fastflags.visual.textures_quality',
-			type: 'select',
-			async value(settingValue) {
-				return (settingValue as SelectElement).value !== 'default';
-			},
-		})
 		// Player textures
 		.addFlag({
 			name: 'Player textures',
@@ -223,58 +163,18 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		// UI
 		// Menu version
 		.addFlag({
-			name: 'Menu version (Version 1)',
-			flags: {
-				/* v2 */ FFlagDisableNewIGMinDUA: true,
-				FFlagEnableInGameMenuModernization: false,
-				/* Chrome */ FFlagEnableInGameMenuChrome: false,
-				FFlagFixReportButtonCutOff: false,
-				FFlagSettingsHubIndependentBackgroundVisibility: false,
-				FFlagEnableInGameMenuChromeABTest4: false,
-			},
-			path: 'fastflags.ui.menu_version',
-			type: 'select',
-			value: 'v1',
-		})
-		.addFlag({
 			name: 'Menu version (Version 2)',
 			flags: {
 				/* v2 */ FFlagDisableNewIGMinDUA: false,
 				FFlagEnableInGameMenuModernization: false,
 				/* Chrome */ FFlagEnableInGameMenuChrome: false,
 				FFlagFixReportButtonCutOff: false,
+				FIntNewInGameMenuPercentRollout3: 100,
+				FFlagEnableInGameMenuChromeABTest4: false,
 			},
 			path: 'fastflags.ui.menu_version',
 			type: 'select',
 			value: 'v2',
-		})
-		.addFlag({
-			name: 'Menu version (Version 4)',
-			flags: {
-				/* v2 */ FFlagDisableNewIGMinDUA: true,
-				FFlagEnableInGameMenuModernization: true,
-				/* Chrome */ FFlagEnableInGameMenuChrome: false,
-			},
-			path: 'fastflags.ui.menu_version',
-			type: 'select',
-			value: 'v4',
-		})
-		.addFlag({
-			name: 'Menu version (Version 4 Chrome)',
-			flags: {
-				FFlagEnableInGameMenuChrome: true,
-				FFlagChromeBetaFeature: true,
-			},
-			path: 'fastflags.ui.menu_version',
-			type: 'select',
-			value: 'v4chrome',
-		})
-		// Font size
-		.addFlag({
-			name: 'Font size',
-			flags: { FIntFontSizePadding: '%s' },
-			path: 'fastflags.ui.font_size',
-			type: 'slider',
 		})
 		// UTILITY
 		// Hide GUI
@@ -301,16 +201,6 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			type: 'switch',
 			value: true,
 		});
-
-	// Actions
-	if (data.forceVulkan === true) {
-		new Notification({
-			title: 'Renderer defaulted to Vulkan',
-			content: "Vulkan has been automatically enabled because you set a higher FPS cap than your monitor's refresh rate.",
-			timeout: 7,
-		}).show();
-	}
-
 	return flags;
 }
 
