@@ -154,7 +154,7 @@
 					id: 'fflags_editor',
 				})
 			// .addSwitch({
-			// 	label: 'Ignore Flag Warnings',
+			// 	label: 'Ignore FFlag Warnings',
 			// 	description: 'Suppress invalid flag notifications',
 			// 	id: 'ignore_flags_warning',
 			// 	default: false,
