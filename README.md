@@ -17,8 +17,10 @@ AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://gi
 
 The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview).
 
-Versions:
-- arm64 (Apple's own chips: M1, M2, M3, etc)
+[Mac Chip Guide](https://support.apple.com/en-us/109033)
+
+Versions: 
+- [arm64](https://en.wikipedia.org/wiki/Apple_silicon) (Apple Silicon Chips or M1+)
 - x64 (Intel Architecture)
 - universal (Universal Version)
 
@@ -30,9 +32,8 @@ For the development version (more unstable but has the latest features and more)
 - Discord Rich Presence: Integrates with Discord to show gaming activity.
 - FFlags Presets: Provides pre-configured Fast flags settings.
 - Custom Flags: Allows creation of custom FastFlags profiles, including game-specific configurations.
-- Multi-instance (Experimental): Enables running multiple Roblox windows simultaneously.
-- Mods: Supports UI customization through community-created mods.
-- Bloxstrap SDK: In-house implementation of Bloxstrap SDK for game developers.
+- [Mods](https://github.com/bloxstraplabs/bloxstrap/wiki/Adding-custom-mods): Supports UI customization through community-created mods.
+- [Bloxstrap SDK](https://github.com/bloxstraplabs/bloxstrap/wiki/Integrating-Bloxstrap-functionality-into-your-game): In-house implementation of Bloxstrap SDK for game developers.
 
 ## App Related Features
 
