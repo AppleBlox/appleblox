@@ -24,13 +24,15 @@ export class RobloxMods {
 				path: mod.path,
 				state: !path.basename(mod.path).endsWith('.disabled'),
 			}))
-			.sort((a, b) => `${a}`.localeCompare(b.filename, undefined, { numeric: true }));
+			.sort((a, b) => `${a}`.localeCompare(b.filename, undefined, { numeric: true }))
+			.reverse(); // Alphabetical priority
 	}
 
 	/** Copy the mods to Roblox's files */
 	static async copyToFiles() {
-		// Load the mods. We reverse to respect the alphabetical priority
-		const mods = (await RobloxMods.loadMods()).filter((m) => m.state).reverse();
+		// Load the mods.
+		const mods = (await RobloxMods.loadMods()).filter((m) => m.state);
+		console.info("[Roblox.Mods] Loading mods:",mods)
 		if (mods.length < 1) return;
 
 		const resourcesFolder = path.join(Roblox.path, 'Contents/Resources/');

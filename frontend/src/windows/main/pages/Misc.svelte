@@ -93,6 +93,12 @@
 					default: false,
 				})
 				.addSwitch({
+					label: "Use alternative notifications",
+					description: "Use AppleScript to show AppleBlox's notification. Less detailed, but may work better for some people.",
+					id: "alternative_notifications",
+					default: false
+				})
+				.addSwitch({
 					label: 'Log to File',
 					description: 'Save all console output to log files (Recommended)',
 					id: 'redirect_console',
