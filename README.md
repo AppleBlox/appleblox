@@ -1,5 +1,5 @@
 > [!NOTE]  
-> AppleBlox is still maintained. I have switched to a PC so the developpement may take a bit more time. You can try the [dev builds](https://appleblox.com/download/dev).
+> AppleBlox is still maintained. Ori (the main developer) has switched to a PC so the development may take a bit more time. You can try the [dev builds](https://appleblox.com/download/dev).
 
 # AppleBlox
 
@@ -16,7 +16,7 @@
 ![Static Badge](https://img.shields.io/badge/built_with_apples-%23F43F5E)
 [![Discord](https://img.shields.io/discord/1263512148450082837?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.gg/MWHgn8VNZT)
 
-AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap). It includes features such as DiscordRPC and Fast-flags, with ongoing development for additional functionality.
+AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap). It includes features such as Discord Rich Presence and Fast-flags, with ongoing development for additional functionality.
 
 The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview).
 
@@ -39,7 +39,7 @@ For the development version (more unstable but has the latest features and more)
 
 ## App Related Features
 
-- Customizable Appearance: Allows for a different design for the app using community-made themes.
+- Customizable Appearance: Allows for a different design for the app using CSS.
 - Delegate Launching to Appleblox: Let AppleBlox configure settings before launching Roblox.
 - Disable Roblox Desktop App: Automatically close Roblox when leaving games.
 
