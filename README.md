@@ -21,7 +21,7 @@ AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://gi
 The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/dev?preview).
 
 Versions:
-- arm64 (Apple's own chips: M1, M2, M3, etc)
+- arm64 (Apple Silicon Chips such as: M1, M2, M3, etc)
 - x64 (Intel Architecture)
 - universal (Universal Version)
 
