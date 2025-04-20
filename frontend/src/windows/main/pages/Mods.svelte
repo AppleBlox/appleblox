@@ -30,7 +30,7 @@
 		const { id, file } = e.detail;
 		switch (id) {
 			case 'custom_font': {
-				const cachePath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/.cache/fonts');
+				const cachePath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/cache/fonts');
 				await shellFS.createDirectory(cachePath);
 				await filesystem.copy(file, path.join(cachePath, `CustomFont${path.extname(file)}`)).catch(console.error);
 				break;
@@ -43,15 +43,15 @@
 		switch (id) {
 			case 'custom_font':
 				await shellFS.remove(
-					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/.cache/fonts/CustomFont.ttf'),
+					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/cache/fonts/CustomFont.ttf'),
 					{ skipStderrCheck: true }
 				);
 				await shellFS.remove(
-					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/.cache/fonts/CustomFont.otf'),
+					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/cache/fonts/CustomFont.otf'),
 					{ skipStderrCheck: true }
 				);
 				await shellFS.remove(
-					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/.cache/fonts/CustomFont.ttc'),
+					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/cache/fonts/CustomFont.ttc'),
 					{ skipStderrCheck: true }
 				);
 				break;

@@ -4,12 +4,25 @@
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import { Notification } from '../ts/tools/notifications';
+	import Roblox from '../ts/roblox';
 
 	export let render = true;
 
 	async function onButtonClick(e: CustomEvent) {
 		const { id } = e.detail as { id: string };
-		if (!id.endsWith('_notif')) return;
+		if (!id.endsWith('_notif')) {
+			switch (id) {
+				case 'backup':
+					try {
+						Roblox.Mods.createBackup(true);
+						toast.success('Created backup :3', { duration: 3000 });
+					} catch (err) {
+						toast.error("Couldn't create backup", { duration: 3000 });
+						console.error(err);
+					}
+					break;
+			}
+		}
 		const action = id.split('_')[0];
 		switch (action) {
 			case 'normal': {
@@ -20,7 +33,7 @@
 					closeLabel: 'Close now',
 					dropdownLabel: 'The menu thingy',
 					subtitle: 'une tuile',
-					sound: "funk",
+					sound: 'hero',
 				});
 				notif.show();
 				notif.on('clicked', () => {
@@ -47,7 +60,11 @@
 				const notif = new Notification({
 					title: 'Action thingy',
 					content: 'kewl :D',
-					actions: [{label: "This", value: "this"},{label: "Aber", value: "aber"}, {label: "Schokolade", value: "chocolat"}]
+					actions: [
+						{ label: 'This', value: 'this' },
+						{ label: 'Aber', value: 'aber' },
+						{ label: 'Schokolade', value: 'chocolat' },
+					],
 				});
 				notif.show();
 				notif.on('clicked', () => {
@@ -187,10 +204,22 @@
 					variant: 'outline',
 				})
 		)
+		.addCategory((category) =>
+			category
+				.setName('Others')
+				.setId('others')
+				.setDescription('balls')
+				.addButton({
+					label: 'Create Resources backup',
+					description: "Saves the Roblox's resources inside AppleBlox/cache",
+					id: 'backup',
+					variant: 'default',
+				})
+		)
 		.build();
 </script>
 
 <div>
-	<Panel panel={devPanel} {render} on:button={onButtonClick}/>
+	<Panel panel={devPanel} {render} on:button={onButtonClick} />
 	<h2>Args: "{window.NL_ARGS}"</h2>
 </div>
