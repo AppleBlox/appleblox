@@ -14,11 +14,14 @@
 				.setName('Graphics Engine')
 				.setDescription('Core graphics and performance settings')
 				.setId('graphics')
-				.addSwitch({
-					label: 'Unlock FPS',
-					description: 'Reach FPS counts higher than your supported refresh rate (enables Vulkan)',
-					id: 'unlock_fps',
-					default: false,
+				.addSlider({
+					label: 'FPS Limit',
+					description: 'Sets the maximum number of frames per second. <br><span style="color: hsl(var(--warning));">Requires the Vulkan graphic API.</span>',
+					id: 'fps_target',
+					default: [60],
+					min: 1,
+					max: 240,
+					step: 1,
 				})
 				.addSelect({
 					label: 'Graphics API',
@@ -28,8 +31,8 @@
 					items: [
 						{ label: 'Default', value: 'default' },
 						{ label: 'Metal', value: 'metal' },
-						{ label: 'Vulkan (MoltenVK)', value: 'vulkan' },
-						{ label: 'OpenGL (Intel)', value: 'opengl' },
+						{ label: 'Vulkan', value: 'vulkan' },
+						{ label: 'OpenGL', value: 'opengl' },
 					],
 				})
 				.addSelect({
