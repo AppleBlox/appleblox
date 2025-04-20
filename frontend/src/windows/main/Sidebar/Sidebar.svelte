@@ -4,7 +4,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { version } from '../../../../../package.json';
 
-	import FastFlagsIcon from '@/assets/sidebar/fastflags.png';
+	import EngineIcon from '@/assets/sidebar/engine.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
 	import KillIcon from '@/assets/sidebar/kill.png';
 	import AppearanceIcon from '@/assets/sidebar/appearance.png';
@@ -29,7 +29,7 @@
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
 		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },
-		{ label: 'FastFlags', id: 'fastflags', icon: FastFlagsIcon },
+		{ label: 'Engine', id: 'engine', icon: EngineIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
 		{ label: 'Appearance', id: 'appearance', icon: AppearanceIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },

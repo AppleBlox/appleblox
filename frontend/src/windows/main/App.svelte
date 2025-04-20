@@ -13,7 +13,7 @@
 	import Appearance from './pages/Appearance.svelte';
 	import BehaviorPage from './pages/Behavior.svelte';
 	import Dev from './pages/Dev.svelte';
-	import FastFlags from './pages/FastFlags.svelte';
+	import Engine from './pages/Engine.svelte';
 	import Support from './pages/Info.svelte';
 	import Integrations from './pages/Integrations.svelte';
 	import Misc from './pages/Misc.svelte';
@@ -132,7 +132,7 @@
 	<div>
 		<!-- Not-rendered panels. Used to preload settings -->
 		<Integrations render={false} />
-		<FastFlags render={false} />
+		<Engine render={false} />
 		<Misc render={false} />
 		<Mods render={false} />
 		<BehaviorPage render={false} />
@@ -163,8 +163,8 @@
 		<div class="fixed overflow-y-scroll max-h-full top-0 left-48 w-[83%]">
 			{#if currentPage == 'integrations'}
 				<Integrations />
-			{:else if currentPage === 'fastflags'}
-				<FastFlags />
+			{:else if currentPage === 'engine'}
+				<Engine />
 			{:else if currentPage === 'misc'}
 				<Misc />
 			{:else if currentPage === 'info'}
