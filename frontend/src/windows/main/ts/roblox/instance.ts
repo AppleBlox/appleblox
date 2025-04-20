@@ -5,7 +5,7 @@ import { Notification } from '../tools/notifications';
 import { shell } from '../tools/shell';
 import { isProcessAlive, sleep } from '../utils';
 import { RobloxDelegate } from './delegate';
-import { robloxPath } from './path';
+import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
 
 type EventHandler = (data?: any) => void;
@@ -156,7 +156,7 @@ export class RobloxInstance {
 			await RobloxDelegate.toggle(false);
 			await shell('open', [url]);
 		} else {
-			await shell('open', [robloxPath]);
+			await shell('open', [await getMostRecentRoblox()]);
 		}
 
 		await sleep(1000);

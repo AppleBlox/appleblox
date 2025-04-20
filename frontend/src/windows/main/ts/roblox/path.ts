@@ -3,9 +3,7 @@ import { os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import shellFS from '../tools/shellfs';
 
-export let robloxPath: string = '/Applications/Roblox.app';
-
-async function getMostRecentRoblox() {
+export async function getMostRecentRoblox(): Promise<string> {
 	const knownPaths = ['/Applications/Roblox.app/', path.join(await os.getEnv('HOME'), 'Applications/Roblox.app/')];
 	let mostRecentPath = '';
 	let date = 0;
@@ -18,8 +16,6 @@ async function getMostRecentRoblox() {
 			mostRecentPath = info.name;
 		}
 	}
-	robloxPath = mostRecentPath;
-	console.info(`[Roblox.Path] Most recently opened Roblox app is at: "${robloxPath}"`);
+	console.info(`[Roblox.Path] Most recently opened Roblox app is at: "${mostRecentPath}"`);
+	return mostRecentPath;
 }
-
-getMostRecentRoblox();

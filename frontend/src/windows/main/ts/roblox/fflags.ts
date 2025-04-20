@@ -6,7 +6,7 @@ import { getConfigPath, getValue, loadSettings } from '../../components/settings
 import type { SelectElement, SettingsOutput } from '../../components/settings/types';
 import shellFS from '../tools/shellfs';
 import { isUrlReachable } from '../utils';
-import { robloxPath } from './path';
+import { getMostRecentRoblox } from './path';
 import { Curl } from '../tools/curl';
 
 const FLAGS_WHITELIST = ['FFlagDebugGraphicsDisableMetal'];
@@ -329,7 +329,7 @@ export class RobloxFFlags {
 
 	static async writeClientAppSettings() {
 		console.info('[FastFlags] Starting ClientAppSettings write process...');
-		const filePath = path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
+		const filePath = path.join(await getMostRecentRoblox(), 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
 
 		if (await shellFS.exists(filePath)) {
 			console.info('[FastFlags] Removing existing ClientAppSettings file...');

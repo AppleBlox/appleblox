@@ -5,12 +5,12 @@ import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
-import { robloxPath } from './path';
+import { getMostRecentRoblox } from './path';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
 	static async hasRoblox(popup = true): Promise<boolean> {
-		if (await shellFS.exists(path.join(robloxPath, 'Contents/MacOS/RobloxPlayer'))) {
+		if (await shellFS.exists(path.join(await getMostRecentRoblox(), 'Contents/MacOS/RobloxPlayer'))) {
 			return true;
 		}
 		if (!popup) return false;
@@ -50,7 +50,7 @@ END`,
 
 			toast.info('Opening Roblox...', { duration: 1000 });
 			console.info('[Roblox.Utils] Opening Roblox...');
-			await shellFS.open(robloxPath);
+			await shellFS.open(await getMostRecentRoblox());
 
 			await sleep(1000);
 

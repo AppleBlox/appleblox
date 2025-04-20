@@ -11,7 +11,7 @@ import onGameEvent from './events';
 import { RobloxFFlags } from './fflags';
 import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
-import { robloxPath } from './path';
+import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
 import { events, os } from '@neutralinojs/lib';
 
@@ -27,6 +27,8 @@ export async function launchRoblox(
 	showFlagErrorPopup: (title: string, description: string, code: string, flagNames?: string[]) => Promise<void>,
 	robloxUrl?: string
 ) {
+	const robloxPath = await getMostRecentRoblox()
+
 	// Constant settings
 	const constSettings = {
 		areModsEnabled: (await getValue<boolean>('mods.general.enabled')) === true,

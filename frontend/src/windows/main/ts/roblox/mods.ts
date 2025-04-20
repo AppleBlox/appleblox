@@ -6,7 +6,7 @@ import { getValue } from '../../components/settings';
 import { Notification } from '../tools/notifications';
 import shellFS from '../tools/shellfs';
 import { sleep } from '../utils';
-import { robloxPath } from './path';
+import { getMostRecentRoblox } from './path';
 import { shell } from '../tools/shell';
 
 export class RobloxMods {
@@ -36,8 +36,8 @@ export class RobloxMods {
 		const resBackupFolder = path.join(modsCacheFolder, 'Resources');
 		if (await shellFS.exists(resBackupFolder)) {
 			if (!force) return;
+			console.info('[Roblox.Mods] Replacing old backup with a new one.');
 		}
-		console.info('[Roblox.Mods] Replaced old backup with a new one.');
 		const robloxResFolder = path.join(Roblox.path, 'Contents', 'Resources');
 		await shellFS.copy(robloxResFolder, modsCacheFolder, true);
 	}
@@ -163,7 +163,7 @@ export class RobloxMods {
 	/** Toggle NSHighResolutionCapable in Roblox's plist flie */
 	static async toggleHighRes(state: boolean) {
 		// Get the path to Roblox's Info.plist file
-		const plistPath = path.join(robloxPath, 'Contents/Info.plist');
+		const plistPath = path.join(await getMostRecentRoblox(), 'Contents/Info.plist');
 		await shell(`/usr/libexec/PlistBuddy -c "Set :NSHighResolutionCapable ${state}" "${plistPath}"`, [], {
 			completeCommand: true,
 		});
