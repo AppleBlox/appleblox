@@ -87,7 +87,7 @@ async function gameJoiningEntry(data: GameEventInfo) {
 
 	rpcOptions = {
 		...rpcOptions,
-		details: `${gameInfo.name}`,
+		details: gameInfo.name,
 		state: `by ${gameInfo.creator.name}`,
 		buttonText1: 'See game page',
 		buttonUrl1: `https://www.roblox.com/games/${placeId}/`,

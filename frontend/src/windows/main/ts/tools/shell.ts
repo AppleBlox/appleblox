@@ -4,7 +4,7 @@ import { events, os } from '@neutralinojs/lib';
 /**
  * Represents the result of a shell command execution.
  */
-interface ExecutionResult {
+export interface ExecutionResult {
 	/** The standard output of the command. */
 	stdOut: string;
 	/** The standard error output of the command. */

@@ -283,8 +283,7 @@ let discordRPC: DiscordRPC | null = null;
 const presets: { [key: string]: RPCOptions } = {
 	inRobloxApp: {
 		clientId: '1257650541677383721',
-		details: 'Currently browsing the app',
-		state: 'In the launcher',
+		details: 'Browsing the app',
 		largeImage: 'roblox',
 		largeImageText: 'Roblox',
 		enableTime: true,
