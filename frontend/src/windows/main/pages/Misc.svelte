@@ -1,19 +1,62 @@
 <script lang="ts">
-	import { os } from '@neutralinojs/lib';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { events, os } from '@neutralinojs/lib';
 	import { version } from '@root/package.json';
-	import { FileArchive, FolderCog, FolderOpen, List } from 'lucide-svelte';
+	import { FileArchive, FolderCog, FolderOpen } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import { SettingsPanelBuilder, getConfigPath } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import { disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
 	import Roblox from '../ts/roblox';
-	import shellFS from '../ts/tools/shellfs';
 	import { shell } from '../ts/tools/shell';
+	import shellFS from '../ts/tools/shellfs';
+	import { getContext } from 'svelte';
+
+	const { getCurrentPage } = getContext('pageData') as { getCurrentPage: () => string };
 
 	export let render = true;
 
-	let clearLogsPopup = false;
+	let exportSettingsPopup = false;
+
+	// Had to do this because of a bug I couldn't fix
+	events.on('exportSettings', () => {
+		if (getCurrentPage() === 'misc') return;
+		exportSettingsPopup = true;
+	});
+
+	async function exportSettings() {
+		exportSettingsPopup = false;
+		const formattedDate = new Date()
+			.toLocaleString('en-GB', {
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit',
+				hour12: false,
+			})
+			.replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+):(\d+)/, '$1-$2-$3_$4-$5-$6');
+		const archivePath = path.join(await os.getEnv('HOME'), `abloxconfig-${version}-${formattedDate}.zip`);
+		if (await shellFS.exists(archivePath)) {
+			await shellFS.remove(archivePath);
+		}
+		const appleBloxPath = path.dirname(await getConfigPath());
+		const lastTenLogs = (
+			await shell(`ls -tr "${path.join(appleBloxPath, 'logs')}" | tail -10`, [], { completeCommand: true })
+		).stdOut
+			.split('\n')
+			.filter((file) => file.length > 0)
+			.map((file) => `logs/${file}`);
+
+		await shellFS.zip(archivePath, ['config', 'theme.css', ...lastTenLogs], {
+			recursive: true,
+			cwd: appleBloxPath,
+		});
+		toast.success('Your settings have been exported.', { duration: 3000 });
+		await shellFS.open(archivePath, { reveal: true });
+	}
 
 	async function buttonClicked(e: CustomEvent) {
 		const { id } = e.detail;
@@ -38,28 +81,7 @@
 				shellFS.open(path.join(Roblox.path, 'Contents'), { reveal: true });
 				break;
 			case 'export_config':
-				const exportPath = await os.showFolderDialog('Where do you want to save the file?', {
-					defaultPath: path.join(await os.getEnv('HOME'), 'Desktop'),
-				});
-				if (!exportPath || exportPath.length < 1) return; // User canceled
-
-				const archivePath = path.join(exportPath, `abloxconfig-${version}.zip`);
-				if (await shellFS.exists(archivePath)) {
-					await shellFS.remove(archivePath);
-				}
-				const appleBloxPath = path.dirname(await getConfigPath());
-				const lastFiveLogs = (
-					await shell(`ls -tr "${path.join(appleBloxPath, 'logs')}" | tail -5`, [], { completeCommand: true })
-				).stdOut
-					.split('\n')
-					.filter((file) => file.length > 0)
-					.map((file) => `logs/${file}`);
-
-				await shellFS.zip(archivePath, ['config', 'theme.css', ...lastFiveLogs], {
-					recursive: true,
-					cwd: appleBloxPath,
-				});
-				await shellFS.open(archivePath, { reveal: true });
+				exportSettingsPopup = true;
 				break;
 		}
 	}
@@ -93,10 +115,11 @@
 					default: false,
 				})
 				.addSwitch({
-					label: "Use alternative notifications",
-					description: "Use AppleScript to show AppleBlox's notification. Less detailed, but may work better for some people.",
-					id: "alternative_notifications",
-					default: false
+					label: 'Use alternative notifications',
+					description:
+						"Use AppleScript to show AppleBlox's notification. Less detailed, but may work better for some people.",
+					id: 'alternative_notifications',
+					default: false,
 				})
 				.addSwitch({
 					label: 'Log to File',
@@ -141,3 +164,18 @@
 </script>
 
 <Panel {panel} on:button={buttonClicked} on:switch={switchClicked} {render} />
+<AlertDialog.Root bind:open={exportSettingsPopup}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Export settings?</AlertDialog.Title>
+			<AlertDialog.Description
+				>You should only provide your settings when asked to in the AppleBlox Discord server or inside a GitHub issue.
+				This option should only be used to get support, and not anything else.</AlertDialog.Description
+			>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action on:click={exportSettings}>Export</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

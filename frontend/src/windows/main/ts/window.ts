@@ -1,6 +1,5 @@
 // Set up keyboard shortcuts and add extra commands to neutralino
 import { events } from '@neutralinojs/lib';
-
 import hotkeys from 'hotkeys-js';
 import { shell } from './tools/shell';
 
@@ -41,6 +40,11 @@ hotkeys('cmd+q,cmd+w', () => {
 	events.broadcast('exitApp');
 	return false;
 });
+
+hotkeys("cmd+p,ctrl+p", () => {
+	events.broadcast("exportSettings")
+	return false;
+})
 
 export async function focusWindow() {
 	try {
