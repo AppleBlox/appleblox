@@ -196,7 +196,9 @@ export class RobloxInstance {
 				new Notification({
 					title: 'Unable to start Roblox',
 					content: 'AppleBlox was unable to monitor your logs due to an error. Roblox has been closed.',
+					sound: 'hero',
 				}).show();
+				this.emit('exit');
 				await this.quit();
 				return;
 			});
@@ -363,6 +365,8 @@ export class RobloxInstance {
 			if (pattern.event === 'GameMessageEntry') continue;
 
 			const matchedLines = lines.filter((line) => pattern.regex.test(line));
+			// if (pattern.event === 'GameJoinedEntry' && matchedLines.length > 0) {
+			// }
 			for (const line of matchedLines) {
 				const match = line.match(pattern.regex);
 				if (match) {
