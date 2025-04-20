@@ -24,7 +24,7 @@ export async function launchRoblox(
 	setLaunchingRoblox: (value: boolean) => void,
 	setLaunchProgress: (value: number) => void,
 	setLaunchText: (value: string) => void,
-	showFlagErrorPopup: (title: string, description: string, code: string) => Promise<boolean>,
+	showFlagErrorPopup: (title: string, description: string, code: string, flagNames?: string[]) => Promise<void>,
 	robloxUrl?: string
 ) {
 	// Constant settings
@@ -69,55 +69,41 @@ export async function launchRoblox(
 		await shellFS.createDirectory(path.join(robloxPath, 'Contents/MacOS/ClientSettings'));
 		console.info('[Launch] Parsing saved FFlags...');
 		const presetFlags = await RobloxFFlags.parseFlags(true);
+		const presetInvalidFlagKeys = Object.keys(presetFlags.invalidFlags);
 		// Invalid presets
-		if (
-			Object.keys(presetFlags.invalidFlags).length > 0
-		) {
-			const isIgnored = await showFlagErrorPopup(
+		if (presetInvalidFlagKeys.length > 0) {
+			await showFlagErrorPopup(
 				'Outdated presets',
 				'You are using outdated flags presets. The presets listed here may not work correctly. If you are on the latest version of the app, you just have to wait for a fix, otherwise, update to the latest version.',
 				presetFlags.nameMap.join(', ')
 			);
-			if (!isIgnored) {
-				setLaunchingRoblox(false);
-				setRobloxConnected(false);
-				return;
-			}
 		}
 		const editorFlags = await RobloxFFlags.parseFlags(false);
 		// Invalid selected profile flags
-		if (
-			Object.keys(editorFlags.invalidFlags).length > 0
-		) {
-			const isIgnored = await showFlagErrorPopup(
+		if (editorFlags.invalidFlags.length > 0) {
+			await showFlagErrorPopup(
 				'Invalid flags in selected profile',
-				'You have one or several invalid flags in your selected profile:',
-				beautify(editorFlags.invalidFlags, null, 2, 100)
+				'You have one or several invalid flags in your selected profile. Please be aware that thex will have no effect on your game. You can choose to ignore this warning or remove the problematic flags.',
+				editorFlags.invalidFlags.join(', '),
+				editorFlags.invalidFlags
 			);
-			if (!isIgnored) {
-				setLaunchingRoblox(false);
-				setRobloxConnected(false);
-				return;
-			}
 		}
 		// Invalid game profile flags
-		if (
-			editorFlags.invalidProfileFlags &&
-			editorFlags.invalidProfileFlags.length > 0 &&
-			(await getValue('fastflags.advanced.ignore_flags_warning')) === false
-		) {
-			const isIgnored = await showFlagErrorPopup(
+		if (editorFlags.invalidProfileFlags && editorFlags.invalidProfileFlags.length > 0) {
+			const allFlagKeys = editorFlags.invalidProfileFlags
+				? editorFlags.invalidProfileFlags.reduce<string[]>((keys, profile) => {
+						const profileFlagKeys = Object.keys(profile.flags);
+						return [...keys, ...profileFlagKeys];
+					}, [])
+				: [];
+			await showFlagErrorPopup(
 				'Invalid flags in game profile(s)',
 				'You have one or several invalid flags in the following profiles:',
 				editorFlags.invalidProfileFlags
 					.map((profile) => `${profile.name.toUpperCase()}:\n ${beautify(profile.flags, null, 2, 100)}`)
-					.join('<br><br>')
+					.join('<br><br>'),
+				allFlagKeys
 			);
-			if (!isIgnored) {
-				setLaunchingRoblox(false);
-				setRobloxConnected(false);
-				return;
-			}
 		}
 		const fflags = {
 			...editorFlags.validFlags,

@@ -6,26 +6,36 @@
 	import { events, os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
 	import { blur } from 'svelte/transition';
-	import Sidebar from './sidebar/sidebar.svelte';
 	import Code from './components/code.svelte';
+	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
 	import Onboarding from './components/onboarding.svelte';
 	import Updater from './components/updater.svelte';
-	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
+	import Appearance from './pages/Appearance.svelte';
+	import BehaviorPage from './pages/Behavior.svelte';
 	import Dev from './pages/Dev.svelte';
 	import FastFlags from './pages/FastFlags.svelte';
 	import Support from './pages/Info.svelte';
 	import Integrations from './pages/Integrations.svelte';
 	import Misc from './pages/Misc.svelte';
 	import Mods from './pages/Mods.svelte';
-	import BehaviorPage from './pages/Behavior.svelte';
+	import Sidebar from './sidebar/Sidebar.svelte';
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils/';
 	import { focusWindow } from './ts/window';
-	import Appearance from './pages/Appearance.svelte';
+	import { setContext } from 'svelte';
 
 	let currentPage: string;
 
-	let flagErrorPopupClicked: boolean | null = null;
+	$: {
+		setContext('pageData', {
+			getCurrentPage: () => {
+				return currentPage;
+			},
+		});
+	}
+
+	let flagErrorPopupRemoveFlags: boolean | null = null;
+	let flagErrorPopupShowRemoveButton = false;
 	const launchInfo = {
 		launching: false,
 		progress: 1,
@@ -40,16 +50,18 @@
 	};
 
 	/** Trigger a popup (related to invalid flags) */
-	async function flagErrorPopup(title: string, description: string, code: string) {
+	async function flagErrorPopup(title: string, description: string, code: string, flagNames?: string[]) {
 		launchInfo.flagPopup.title = title;
 		launchInfo.flagPopup.description = description;
 		launchInfo.flagPopup.code = code;
 		launchInfo.flagPopup.show = true;
-		flagErrorPopupClicked = null;
-		while (flagErrorPopupClicked == null) {
+		if (flagNames && flagNames.length > 0) flagErrorPopupShowRemoveButton = true;
+		while (launchInfo.flagPopup.show) {
 			await sleep(100);
 		}
-		return flagErrorPopupClicked;
+		if (flagErrorPopupRemoveFlags && flagNames) {
+			Roblox.FFlags.removeFlagsFromConfig(flagNames);
+		}
 	}
 
 	/** Launches roblox with the correct handlers */
@@ -192,20 +204,22 @@
 			<AlertDialog.Footer class="flex-shrink-0">
 				<AlertDialog.Cancel
 					on:click={() => {
-						flagErrorPopupClicked = false;
-						launchInfo.flagPopup.show = false;
-					}}
-				>
-					Cancel
-				</AlertDialog.Cancel>
-				<AlertDialog.Action
-					on:click={() => {
-						flagErrorPopupClicked = true;
+						flagErrorPopupRemoveFlags = false;
 						launchInfo.flagPopup.show = false;
 					}}
 				>
 					Ignore
-				</AlertDialog.Action>
+				</AlertDialog.Cancel>
+				{#if flagErrorPopupShowRemoveButton}
+					<AlertDialog.Action
+						on:click={() => {
+							flagErrorPopupRemoveFlags = true;
+							launchInfo.flagPopup.show = false;
+						}}
+					>
+						Remove
+					</AlertDialog.Action>
+				{/if}
 			</AlertDialog.Footer>
 		</AlertDialog.Content>
 	</AlertDialog.Root>
