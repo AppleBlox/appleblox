@@ -24,15 +24,19 @@ async function gameJoinedEntry(data: GameEventInfo) {
 	lastJoinedServer = server;
 	console.info(`[Activity] Current server: ${server[0]}, Port: ${server[1]}`);
 	if ((await getValue<boolean>('integrations.activity.notify_location')) === true) {
-		const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
-		console.info(`[Activity] Server is located in "${ipReq.city}"`);
+		try {
+			const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
+			console.info(`[Activity] Server is located in "${ipReq.city}"`);
 
-		new Notification({
-			content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
-			title: 'Server Joined',
-			timeout: 5,
-			sound: 'frog',
-		}).show();
+			new Notification({
+				content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
+				title: 'Server Joined',
+				timeout: 5,
+				sound: 'frog',
+			}).show();
+		} catch {
+			new Notification({ content: "Something wrong happened while displaying server's region", title: 'An error occured', timeout: 5, sound: "hero"});
+		}
 	}
 }
 
