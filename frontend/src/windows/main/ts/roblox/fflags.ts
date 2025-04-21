@@ -149,7 +149,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
     		flags: { DFFlagDisableDPIScale: true },
     		path: 'fastflags.graphics.fracscaling',
     		type: 'switch',
-   			value: false,
+   			value: true,
    		})
 		// VISUAL
 		// Player textures
