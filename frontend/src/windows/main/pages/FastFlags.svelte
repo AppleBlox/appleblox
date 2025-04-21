@@ -88,6 +88,12 @@
 					id: 'lod',
 					default: false,
 				})
+				.addSwitch({
+					label: 'Fractional Scaling Fix',
+					description: 'Render at full resolution when using fractional scaling',
+					id: 'fracscaling',
+					default: true,
+				})
 		)
 		.addCategory((category) =>
 			category
