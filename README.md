@@ -1,5 +1,5 @@
 > [!NOTE]  
-> AppleBlox is still maintained. I have switched to a PC so the developpement may take a bit more time. You can try the [dev builds](https://appleblox.com/download/dev).
+> AppleBlox is still maintained. I have switched to a PC so developement may take a bit more time. You can try the [dev builds](https://appleblox.com/download/dev).
 
 # AppleBlox
 
@@ -16,7 +16,7 @@
 ![Static Badge](https://img.shields.io/badge/built_with_apples-%23F43F5E)
 [![Discord](https://img.shields.io/discord/1263512148450082837?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.gg/MWHgn8VNZT)
 
-AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap). It includes features such as DiscordRPC and Fast-flags, with ongoing development for additional functionality.
+AppleBlox is a Roblox launcher for **macOS**, inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap). It includes features such as DiscordRPC and Fast-flags, with ongoing development for additional functionality.
 
 The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/dev?preview).
 
@@ -25,7 +25,8 @@ Versions:
 - x64 (Intel Architecture)
 - universal (Universal Version)
 
-For the development version (more unstable but has the latest features and more) see the [development releases](https://nightly.link/AppleBlox/appleblox/workflows/build/dev?preview)
+> [!TIP]
+> For the development version (more unstable but has the latest features and more) see the [development releases](https://nightly.link/AppleBlox/appleblox/workflows/build/dev?preview).
 
 ## Features
 
@@ -56,7 +57,8 @@ Development commands:
 - `bun run --bun package`: Package the application (excluding DMG creation)
 - `bun run --bun release`: Package and create a DMG
 
-AppleBlox is built using [Svelte](https://svelte.dev) for the frontend and [NeutralinoJS](https://neutralino.js.org) for the backend. NeutralinoJS is a lightweight C++ alternative to Electron or NW.JS, suitable for single-platform applications. More information is available at [neutralino.js.org/docs](https://neutralino.js.org/docs).
+> [!NOTE]
+> AppleBlox is built using [Svelte](https://svelte.dev) for the frontend and [NeutralinoJS](https://neutralino.js.org) for the backend. NeutralinoJS is a lightweight C++ alternative to Electron or NW.JS, suitable for single-platform applications. > More information is available at [neutralino.js.org/docs](https://neutralino.js.org/docs).
 
 ## Pre-compiled Binaries
 
