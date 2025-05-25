@@ -84,3 +84,4 @@ Contributions are welcome. Please feel free to submit issues, pull requests, or 
 - Inspiration: @pizzaboxer's Bloxstrap
 - Icons: lucide-svelte & icons8
 - Objective-C sidecar: Generated with assistance from ClaudeAI and ChatGPT. Contributors are sought to replace this code.
+- 
