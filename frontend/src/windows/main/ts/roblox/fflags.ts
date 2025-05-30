@@ -121,6 +121,14 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			type: 'switch',
 			value: true,
 		})
+            // Fractional Scaling Fix
+        .addFlag({
+            name: 'Fractional Scaling',
+        	flags: { DFFlagDisableDPIScale: true },
+       		path: 'fastflags.graphics.fracscaling',
+       		type: 'switch',
+   			value: true,
+        })
 		// VISUAL
 		// Player textures
 		.addFlag({
