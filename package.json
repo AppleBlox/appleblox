@@ -20,7 +20,7 @@
   ],
   "type": "module",
   "author": "OrigamingWasTaken",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "devDependencies": {
     "@neutralinojs/neu": "^10.1.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.2",
