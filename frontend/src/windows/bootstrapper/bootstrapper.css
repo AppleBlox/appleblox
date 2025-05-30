@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: rgba(0,0,0,0);
+    border-radius: 30px;
+    overflow: hidden;
+}

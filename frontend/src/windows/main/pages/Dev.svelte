@@ -5,6 +5,8 @@
 	import Panel from '../components/settings/panel.svelte';
 	import { Notification } from '../ts/tools/notifications';
 	import Roblox from '../ts/roblox';
+	import { window as win } from '@neutralinojs/lib';
+	import { getMode } from '../ts/utils';
 
 	export let render = true;
 
@@ -21,6 +23,23 @@
 						console.error(err);
 					}
 					break;
+				case 'bootstrapper':
+					toast.error("This feature is still in dev.")
+					break;
+					// const res = await Roblox.Window.getDesktopSize();
+					// await win.create(getMode() === 'dev' ? 'http://localhost:5173/bootstrapper.html' : '/bootstrapper.html', {
+					// 	alwaysOnTop: false,
+					// 	width: 500,
+					// 	height: 400,
+					// 	borderless: false,
+					// 	resizable: true,
+					// 	useSavedState: false,
+					// 	exitProcessOnClose: true,
+					// 	title: 'AppleBlox Bootstrapper',
+					// 	x: res.width / 2,
+					// 	y: res.height / 2,
+					// 	processArgs: '--window-transparent=true --window-enable-inspector=true --window-center=true',
+					// });
 			}
 		}
 		const action = id.split('_')[0];
@@ -213,6 +232,12 @@
 					label: 'Create Resources backup',
 					description: "Saves the Roblox's resources inside AppleBlox/cache",
 					id: 'backup',
+					variant: 'default',
+				})
+				.addButton({
+					label: 'Create bootstrapper window',
+					description: '',
+					id: 'bootstrapper',
 					variant: 'default',
 				})
 		)

@@ -13,7 +13,8 @@ import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
 import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
-import { events, os } from '@neutralinojs/lib';
+import { events, os, window as win } from '@neutralinojs/lib';
+import { getMode } from '../utils';
 
 let rbxInstance: RobloxInstance | null = null;
 
@@ -27,7 +28,21 @@ export async function launchRoblox(
 	showFlagErrorPopup: (title: string, description: string, code: string, flagNames?: string[]) => Promise<void>,
 	robloxUrl?: string
 ) {
-	const robloxPath = await getMostRecentRoblox()
+	// const res = await RobloxWindow.getDesktopSize();
+	// await win.create(getMode() === 'dev' ? 'http://localhost:5173/bootstrapper.html' : '/bootstrapper.html', {
+	// 	alwaysOnTop: true,
+	// 	width: 1000,
+	// 	height: 675,
+	// 	borderless: true,
+	// 	resizable: false,
+	// 	useSavedState: false,
+	// 	exitProcessOnClose: true,
+	// 	title: 'AppleBlox Bootstrapper',
+	// 	x: res.width / 2,
+	// 	y: res.height / 2,
+	// 	processArgs: '--window-transparent=true --window-enable-inspector=true',
+	// });
+	const robloxPath = await getMostRecentRoblox();
 
 	// Constant settings
 	const constSettings = {

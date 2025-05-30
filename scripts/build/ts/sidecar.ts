@@ -23,12 +23,12 @@ export async function buildSidecar() {
 			includeSuffix: true,
 		},
 		{
-			name: 'Window Manager',
-			filename: 'window_manager.swift',
-			args: [],
+			name: 'Transparent viewer',
+			filename: 'transparent_viewer.swift',
+			args: ['-framework', 'Cocoa', '-framework', 'WebKit', '-target', 'x86_64-apple-macos11.0'],
 			includeSuffix: true,
 			isSwift: true,
-		}
+		},
 	];
 
 	await $`mkdir -p bin`;
@@ -39,7 +39,7 @@ export async function buildSidecar() {
 		const filePath = resolve(join('scripts/build/sidecar', file.filename));
 		let args: string[];
 		if (file.isSwift) {
-			args = ['swiftc', filePath, '-o', outPath];
+			args = ['swiftc', filePath, '-o', outPath, ...file.args];
 		} else {
 			args = [
 				'gcc',
