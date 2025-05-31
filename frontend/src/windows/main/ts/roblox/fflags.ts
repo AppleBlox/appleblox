@@ -4,10 +4,10 @@ import { toast } from 'svelte-sonner';
 import { getAllProfiles, getSelectedProfile, writeProfile, type Profile } from '../../components/flag-editor';
 import { getConfigPath, getValue, loadSettings } from '../../components/settings';
 import type { SelectElement, SettingsOutput } from '../../components/settings/types';
+import { Curl } from '../tools/curl';
 import shellFS from '../tools/shellfs';
 import { isUrlReachable } from '../utils';
 import { getMostRecentRoblox } from './path';
-import { Curl } from '../tools/curl';
 
 const FLAGS_WHITELIST = ['FFlagDebugGraphicsDisableMetal'];
 
@@ -121,14 +121,14 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			type: 'switch',
 			value: true,
 		})
-            // Fractional Scaling Fix
-        .addFlag({
-            name: 'Fractional Scaling',
-        	flags: { DFFlagDisableDPIScale: true },
-       		path: 'fastflags.graphics.fracscaling',
-       		type: 'switch',
-   			value: true,
-        })
+		// Fractional Scaling Fix
+		.addFlag({
+			name: 'Fractional Scaling',
+			flags: { DFFlagDisableDPIScale: true },
+			path: 'fastflags.graphics.fracscaling',
+			type: 'switch',
+			value: true,
+		})
 		// VISUAL
 		// Player textures
 		.addFlag({

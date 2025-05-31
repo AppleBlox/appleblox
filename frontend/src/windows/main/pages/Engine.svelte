@@ -28,17 +28,18 @@
 				})
 				.addSlider({
 					label: 'FPS Target',
-					description: 'Sets the maximum number of frames per second. <br><span style="color: hsl(var(--warning));">Requires the Vulkan graphics API (Option above).</span>',
+					description:
+						'Sets the maximum number of frames per second. <br><span style="color: hsl(var(--warning));">Requires the Vulkan graphics API (Option above).</span>',
 					id: 'fps_target',
 					default: [60],
 					min: 1,
 					max: 240,
 					step: 1,
 					toggleable: {
-						id: "engine",
-						type: "select",
-						value: "vulkan"
-					}
+						id: 'engine',
+						type: 'select',
+						value: 'vulkan',
+					},
 				})
 				.addSelect({
 					label: 'Lighting Technology',
@@ -54,7 +55,8 @@
 				})
 				.addSwitch({
 					label: 'Disable Voxel Shadows',
-					description: 'Remove shadows when using Voxel lighting <br><span style="color: hsl(var(--warning));">Requires Voxel lightning (Option above).</span>',
+					description:
+						'Remove shadows when using Voxel lighting <br><span style="color: hsl(var(--warning));">Requires Voxel lightning (Option above).</span>',
 					id: 'disable_voxel_shadows',
 					default: false,
 					toggleable: {

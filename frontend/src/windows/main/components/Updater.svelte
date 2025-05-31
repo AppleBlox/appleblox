@@ -64,7 +64,7 @@
 		<AlertDialog.Header>
 			<AlertDialog.Description class="text-foreground mt-0">
 				<p class="text-card-foreground mb-3">A new release is available (v{updateVersion})</p>
-				<MarkdownViewer content={body}/>
+				<MarkdownViewer content={body} />
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>

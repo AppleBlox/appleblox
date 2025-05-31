@@ -159,7 +159,9 @@
 		if (!widget.toggleable) return true;
 		const targetWidget = settings[category.id][widget.toggleable.id];
 		if (!targetWidget) {
-			console.error(`Couldn't check toggle state of ${category.id}.${widget.id} because target widget doesn't exist (${category.id}.${widget.toggleable.id})`)
+			console.error(
+				`Couldn't check toggle state of ${category.id}.${widget.id} because target widget doesn't exist (${category.id}.${widget.toggleable.id})`
+			);
 			return false;
 		}
 		switch (widget.toggleable.type) {

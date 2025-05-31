@@ -7,13 +7,13 @@ import './ts/window';
 
 // Imports
 import { events, init, app as neuApp, window as neuWindow } from '@neutralinojs/lib';
-import { loadTheme } from './components/theme-input/theme';
 import App from './App.svelte';
+import { loadTheme } from './components/theme-input/theme';
 import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
-import { focusWindow } from './ts/window';
 import { getMode } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
+import { focusWindow } from './ts/window';
 
 // Initialize NeutralinoJS
 init();
@@ -34,7 +34,7 @@ events.on('ready', async () => {
 	// Load CSS Theme
 	await loadTheme();
 	// Show the window
-	const deeplinkArg = window.NL_ARGS.find((arg) => arg.includes('--deeplink='))
+	const deeplinkArg = window.NL_ARGS.find((arg) => arg.includes('--deeplink='));
 	if (!deeplinkArg) {
 		await neuWindow.show();
 	}

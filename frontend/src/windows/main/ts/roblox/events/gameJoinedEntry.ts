@@ -35,7 +35,12 @@ async function gameJoinedEntry(data: GameEventInfo) {
 				sound: 'frog',
 			}).show();
 		} catch {
-			new Notification({ content: "Something wrong happened while displaying server's region", title: 'An error occured', timeout: 5, sound: "hero"});
+			new Notification({
+				content: "Something wrong happened while displaying server's region",
+				title: 'An error occured',
+				timeout: 5,
+				sound: 'hero',
+			});
 		}
 	}
 }

@@ -1,6 +1,6 @@
-import { computer, app } from '@neutralinojs/lib';
-import { shell } from '../tools/shell';
+import { app, computer } from '@neutralinojs/lib';
 import { version } from '@root/package.json';
+import { shell } from '../tools/shell';
 
 export async function logDebugInfo() {
 	try {

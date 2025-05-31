@@ -41,10 +41,10 @@ hotkeys('cmd+q,cmd+w', () => {
 	return false;
 });
 
-hotkeys("cmd+p,ctrl+p", () => {
-	events.broadcast("exportSettings")
+hotkeys('cmd+p,ctrl+p', () => {
+	events.broadcast('exportSettings');
 	return false;
-})
+});
 
 export async function focusWindow() {
 	try {

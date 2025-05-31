@@ -6,3 +6,4 @@ dist
 .git
 bin
 frontend/src/lib/components
+bun.lock

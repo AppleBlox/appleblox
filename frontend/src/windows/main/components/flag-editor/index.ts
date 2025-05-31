@@ -63,7 +63,7 @@ export async function getAllProfiles(): Promise<Profile[]> {
 	}
 	const entries = await filesystem.readDirectory(await getProfilesConfigPath());
 	for (const file of entries) {
-		if (!file.path.endsWith(".json")) continue;
+		if (!file.path.endsWith('.json')) continue;
 		try {
 			const data: Profile = JSON.parse(await filesystem.readFile(file.path));
 			// Check if the profile json is valid

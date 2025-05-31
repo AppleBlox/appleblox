@@ -205,16 +205,12 @@
 				})
 		)
 		.addCategory((category) =>
-			category
-				.setName('Others')
-				.setId('others')
-				.setDescription('balls')
-				.addButton({
-					label: 'Create Resources backup',
-					description: "Saves the Roblox's resources inside AppleBlox/cache",
-					id: 'backup',
-					variant: 'default',
-				})
+			category.setName('Others').setId('others').setDescription('balls').addButton({
+				label: 'Create Resources backup',
+				description: "Saves the Roblox's resources inside AppleBlox/cache",
+				id: 'backup',
+				variant: 'default',
+			})
 		)
 		.build();
 </script>

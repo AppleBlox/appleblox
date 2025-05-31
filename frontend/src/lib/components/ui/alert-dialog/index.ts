@@ -14,14 +14,14 @@ const Root = AlertDialogPrimitive.Root;
 const Trigger = AlertDialogPrimitive.Trigger;
 
 export {
-	Action,
-	//
-	Root as AlertDialog, Action as AlertDialogAction,
-	Cancel as AlertDialogCancel, Content as AlertDialogContent,
-	Description as AlertDialogDescription, Footer as AlertDialogFooter,
-	Header as AlertDialogHeader, Overlay as AlertDialogOverlay, Portal as AlertDialogPortal, Title as AlertDialogTitle, Trigger as AlertDialogTrigger, Cancel, Content,
-	Description, Footer,
-	Header, Overlay, Portal, Root,
-	Title, Trigger
+    Action,
+    //
+    Root as AlertDialog, Action as AlertDialogAction,
+    Cancel as AlertDialogCancel, Content as AlertDialogContent,
+    Description as AlertDialogDescription, Footer as AlertDialogFooter,
+    Header as AlertDialogHeader, Overlay as AlertDialogOverlay, Portal as AlertDialogPortal, Title as AlertDialogTitle, Trigger as AlertDialogTrigger, Cancel, Content,
+    Description, Footer,
+    Header, Overlay, Portal, Root,
+    Title, Trigger
 };
 

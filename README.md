@@ -18,6 +18,7 @@ AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://gi
 The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview).
 
 Versions:
+
 - arm64 (Apple's own chips: M1, M2, M3, etc)
 - x64 (Intel Architecture)
 - universal (Universal Version)
@@ -49,6 +50,7 @@ Setting up the AppleBlox development environment:
 3. Install additional dependencies: `brew install create-dmg`
 
 Development commands:
+
 - `bun run --bun dev`: Start the development environment
 - `bun run --bun package`: Package the application (excluding DMG creation)
 - `bun run --bun release`: Package and create a DMG
@@ -84,4 +86,4 @@ Contributions are welcome. Please feel free to submit issues, pull requests, or 
 - Inspiration: @pizzaboxer's Bloxstrap
 - Icons: lucide-svelte & icons8
 - Objective-C sidecar: Generated with assistance from ClaudeAI and ChatGPT. Contributors are sought to replace this code.
-- 
+-

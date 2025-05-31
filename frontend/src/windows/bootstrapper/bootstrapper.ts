@@ -1,16 +1,16 @@
-import "@/theme.css"
-import './bootstrapper.css';
-import App from './App.svelte';
+import '@/theme.css';
 import { init } from '@neutralinojs/lib';
+import App from './App.svelte';
+import './bootstrapper.css';
 
 try {
-    init()
+	init();
 } catch (error) {
-    console.error(error)
+	console.error(error);
 }
 
 const app = new App({
-    // @ts-expect-error
+	// @ts-expect-error
 	target: document.getElementById('app'),
 });
 

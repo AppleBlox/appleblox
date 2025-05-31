@@ -89,7 +89,7 @@
 			}
 		} else if (url.startsWith('roblox:') || url.startsWith('roblox-player:')) {
 			console.info('[App] Launching AppleBlox with Roblox URI.');
-			await launchRobloxWithHandlers(false,url);
+			await launchRobloxWithHandlers(false, url);
 		}
 	}
 	checkDeeplink();

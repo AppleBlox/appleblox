@@ -5,6 +5,7 @@ These scripts are used for native operations and are invoked from neutralino. Mo
 ## Bootstrap
 
 Launches the `main` executable with these arguments:
+
 ```
 --path=<app Resources folder>
 --enable-extensions=true"
@@ -20,10 +21,12 @@ Utility CLI to change the default handler for an URI (LSHandler). Used to open A
 ## Window Manager
 
 Takes **stdIn** like this format:
+
 ```json
-[{"appName": "Roblox", "x": 0, "y": 100, "w": 40, "h": 80}]
+[{ "appName": "Roblox", "x": 0, "y": 100, "w": 40, "h": 80 }]
 ```
-The array can contain any number of objects. The script will move the *first* window it finds of the specified app accordingly. In the frontend to be able to talk with this process easily, we create a pipe using `mkfifo` at `/tmp/window_relay_ablox`, then use the `echo` command to pass the stdIn. To be able to take input from the pipe, we start the window manager like this:
+
+The array can contain any number of objects. The script will move the _first_ window it finds of the specified app accordingly. In the frontend to be able to talk with this process easily, we create a pipe using `mkfifo` at `/tmp/window_relay_ablox`, then use the `echo` command to pass the stdIn. To be able to take input from the pipe, we start the window manager like this:
 
 ```bash
 ./window_manager <> pipe_path

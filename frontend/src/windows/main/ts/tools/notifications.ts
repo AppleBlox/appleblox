@@ -151,18 +151,18 @@ export class Notification {
 			}
 
 			// AppleScript (alternative) notifications
-			if (await getValue<boolean>("misc.advanced.alternative_notifications") === true) {
+			if ((await getValue<boolean>('misc.advanced.alternative_notifications')) === true) {
 				const escapeString = (str: string) => str.replace(/[\\"]/g, '\\$&');
 				const script = `display notification "${escapeString(this.options.content)}" with title "${escapeString(this.options.title)}"${
 					this.options.subtitle ? ` subtitle "${escapeString(this.options.subtitle)}"` : ''
 				}${this.options.sound ? ` sound name "${escapeString(this.options.sound)}"` : ''}`;
-				
+
 				this.process = await spawn('osascript', ['-e', script]);
 				this.process.on('exit', (code) => {
 					if (code === 0) this.emit('clicked');
 					else this.emit('closed');
 				});
-				
+
 				await this.process;
 				return;
 			}

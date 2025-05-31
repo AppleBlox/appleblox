@@ -12,7 +12,7 @@
 		const target = e.target as HTMLElement;
 		if (target.tagName === 'A') {
 			e.preventDefault();
-			e.stopImmediatePropagation()
+			e.stopImmediatePropagation();
 			const href = target.getAttribute('href');
 			if (href) {
 				os.open(href);
@@ -25,7 +25,10 @@
 </script>
 
 <article
-	class={cn('markdown-content prose dark:prose-invert max-w-none prose-headings:text-primary prose-a:text-secondary', className)}
+	class={cn(
+		'markdown-content prose dark:prose-invert max-w-none prose-headings:text-primary prose-a:text-secondary',
+		className
+	)}
 	on:click={handleLinkClick}
 	aria-hidden="true"
 >

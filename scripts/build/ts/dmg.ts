@@ -19,7 +19,7 @@ interface DmgOptions {
 }
 
 async function createCustomDMG(options: DmgOptions) {
-	const guidePath = resolve(join("scripts/build/assets","Install Guide.rtf"))
+	const guidePath = resolve(join('scripts/build/assets', 'Install Guide.rtf'));
 	const {
 		sourceFolder,
 		outputName,

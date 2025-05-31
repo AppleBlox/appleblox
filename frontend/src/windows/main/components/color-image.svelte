@@ -10,12 +10,7 @@
 </script>
 
 <div class={cn('relative', className)}>
-	<img 
-		{src} 
-		{alt} 
-		class="w-full h-full object-contain"
-		style="visibility: hidden;"
-	/>
+	<img {src} {alt} class="w-full h-full object-contain" style="visibility: hidden;" />
 	<div
 		class="absolute inset-0"
 		style:mask-image={`url(${src})`}

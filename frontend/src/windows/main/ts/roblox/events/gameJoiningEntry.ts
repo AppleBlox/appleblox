@@ -1,7 +1,5 @@
 import { getValue } from '@/windows/main/components/settings';
-import Roblox from '..';
 import { RPCController, type RPCOptions } from '../../tools/rpc';
-import { shell } from '../../tools/shell';
 import { curlGet } from '../../utils';
 import type { GameEventInfo } from '../instance';
 

@@ -99,9 +99,9 @@
 					default: false,
 				})
 				.addSwitch({
-					label: "Exit AppleBlox when Roblox is closed",
-					description: "Automatically close AppleBlox if the Roblox Desktop app is closed.",
-					id: "close_on_exit",
+					label: 'Exit AppleBlox when Roblox is closed',
+					description: 'Automatically close AppleBlox if the Roblox Desktop app is closed.',
+					id: 'close_on_exit',
 					default: false,
 				})
 				.addSwitch({

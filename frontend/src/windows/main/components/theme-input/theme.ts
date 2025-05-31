@@ -1,6 +1,6 @@
 import path from 'path-browserify';
-import { getConfigPath } from '../settings';
 import shellFS from '../../ts/tools/shellfs';
+import { getConfigPath } from '../settings';
 
 export async function readCssFile(): Promise<string> {
 	const cssFilePath = path.join(path.dirname(await getConfigPath()), 'theme.css');

@@ -34,23 +34,23 @@ const LibPaths: LibPathsType = {
 		darwin: {
 			prod: '/lib/transparent_viewer_ablox',
 			dev: '/bin/transparent_viewer_ablox',
-		}
-	}
+		},
+	},
 };
 
 export function libraryPath<T extends keyof LibPathsType>(libName: T): string {
 	if (!(libName in LibPaths)) throw Error(`Library "${libName}" doesn't exist.`);
 	const os = window.NL_OS.toLowerCase() as OS;
 	if (!(os in LibPaths[libName])) throw Error(`Library "${libName}" doesn't support OS "${os}".`);
-	
+
 	const mode = getMode();
-	
+
 	const pathsForOs = LibPaths[libName][os];
 	if (!pathsForOs) throw Error(`Library "${libName}" has no paths defined for OS "${os}".`);
 
 	const path = pathsForOs[mode];
 	if (!path) throw Error(`Library "${libName}" has no path defined for mode "${mode}" on OS "${os}".`);
-	
+
 	return join(window.NL_PATH, path);
 }
 

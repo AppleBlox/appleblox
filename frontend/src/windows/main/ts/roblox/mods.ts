@@ -4,10 +4,10 @@ import { toast } from 'svelte-sonner';
 import Roblox from '.';
 import { getValue } from '../../components/settings';
 import { Notification } from '../tools/notifications';
+import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
 import { sleep } from '../utils';
 import { getMostRecentRoblox } from './path';
-import { shell } from '../tools/shell';
 
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
