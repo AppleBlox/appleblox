@@ -65,7 +65,6 @@
 	/** Launches roblox with the correct handlers */
 	async function launchRobloxWithHandlers(checkFlags = true, url?: string) {
 		await Roblox.launch(
-			// Defines which values should be modified during the launch phase (the loading progress, text, etc...)
 			(value) => (launchInfo.isConnected = value),
 			(value) => (launchInfo.launching = value),
 			flagErrorPopup,
@@ -74,47 +73,20 @@
 		);
 	}
 
-	/** Checks if the app is opened with a URI */
-	async function checkDeeplink() {
-		const urlArgument = window.NL_ARGS.find((arg) => arg.includes('--deeplink='));
-		if (!urlArgument) return;
-		const url = urlArgument.slice(11);
-		if (url.startsWith('appleblox://')) {
-			const command = url.slice(12).trim();
-			switch (command) {
-				case 'launch':
-					console.info("[App] Launching Roblox from 'appleblox://launch'");
-					await launchRobloxWithHandlers(false);
-					break;
-			}
-		} else if (url.startsWith('roblox:') || url.startsWith('roblox-player:')) {
-			console.info('[App] Launching AppleBlox with Roblox URI.');
-			await launchRobloxWithHandlers(false, url);
-		}
-	}
-	checkDeeplink();
+	setMode('system');
 
-	// Sets the theme to the system's mode
-	// setMode('system');
-
-	// Makes it so links are opened in the default browser and not Appleblox's webview.
 	document.addEventListener('click', (event) => {
 		if (!event.target) return;
-		// @ts-expect-error
-		if (event.target.tagName === 'A') {
-			// Prevent default behavior (opening link)
+		const targetElement = event.target as HTMLElement;
+		if (targetElement.tagName === 'A') {
 			event.preventDefault();
-
-			// @ts-expect-error
-			const url = event.target.href;
-
-			// @ts-expect-error
-			if ((event.target.href as string).includes('localhost')) return;
-			os.open(url);
+			const url = targetElement.getAttribute('href');
+			if (url && !url.includes('localhost')) {
+				os.open(url).catch(err => console.error("Failed to open external link:", err));
+			}
 		}
 	});
 
-	// Listen for this dispatch event and change page accordingly.
 	events.on('ui:change_page', (evt: CustomEvent) => {
 		const { id } = evt.detail;
 		currentPage = id || currentPage;
@@ -123,7 +95,6 @@
 
 <main>
 	<div>
-		<!-- Not-rendered panels. Used to preload settings -->
 		<Integrations render={false} />
 		<Engine render={false} />
 		<Misc render={false} />
@@ -134,7 +105,6 @@
 	<Updater />
 	<ModeWatcher track={true} />
 	<Toaster richColors id="toaster" />
-	<!-- Content div -->
 	<div class="relative">
 		<Sidebar
 			bind:currentPage
