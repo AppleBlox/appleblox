@@ -11,7 +11,6 @@ type LibPathsType = {
 	}>;
 };
 
-// The library paths when in dev or production
 const LibPaths: LibPathsType = {
 	notifications: {
 		darwin: {
@@ -25,36 +24,33 @@ const LibPaths: LibPathsType = {
 			dev: '/bin/discordrpc_ablox',
 		},
 	},
-	window_manager: {
-		darwin: {
-			prod: '/lib/window_manager_ablox',
-			dev: '/bin/window_manager_ablox',
-		},
-	},
 	urlscheme: {
 		darwin: {
 			prod: '/lib/urlscheme_ablox',
 			dev: '/bin/urlscheme_ablox',
 		},
+	},
+	transparent_viewer: {
+		darwin: {
+			prod: '/lib/transparent_viewer_ablox',
+			dev: '/bin/transparent_viewer_ablox',
+		}
 	}
 };
 
 export function libraryPath<T extends keyof LibPathsType>(libName: T): string {
-	// Check if the library exists in the paths
 	if (!(libName in LibPaths)) throw Error(`Library "${libName}" doesn't exist.`);
-
-	// Get the OS and convert to lowercase
 	const os = window.NL_OS.toLowerCase() as OS;
-
-	// Check if the current OS is supported for the given library
 	if (!(os in LibPaths[libName])) throw Error(`Library "${libName}" doesn't support OS "${os}".`);
+	
+	const mode = getMode();
+	
+	const pathsForOs = LibPaths[libName][os];
+	if (!pathsForOs) throw Error(`Library "${libName}" has no paths defined for OS "${os}".`);
 
-	// Get the environment (dev or prod)
-	const mode = getMode() === 'dev' ? 'dev' : 'prod';
-
-	// Return the correct path based on OS and environment
-	if (!LibPaths[libName][os]) throw Error(`Library "${libName}"'s value wasn't found.`);
-	const path = LibPaths[libName][os][mode];
+	const path = pathsForOs[mode];
+	if (!path) throw Error(`Library "${libName}" has no path defined for mode "${mode}" on OS "${os}".`);
+	
 	return join(window.NL_PATH, path);
 }
 

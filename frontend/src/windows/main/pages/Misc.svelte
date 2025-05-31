@@ -122,6 +122,12 @@
 					default: false,
 				})
 				.addSwitch({
+					label: "Allow fixed fixed loading times",
+					description: "Set a minimal time for loading steps during Roblox launching. That way, you can better see the bootstrapper.",
+					id: "allow_fixed_loading_times",
+					default: true
+				})
+				.addSwitch({
 					label: 'Log to File',
 					description: 'Save all console output to log files (Recommended)',
 					id: 'redirect_console',

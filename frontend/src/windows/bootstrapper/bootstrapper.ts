@@ -1,6 +1,7 @@
+import "@/theme.css"
 import './bootstrapper.css';
 import App from './App.svelte';
-import { init, window as win } from '@neutralinojs/lib';
+import { init } from '@neutralinojs/lib';
 
 try {
     init()
