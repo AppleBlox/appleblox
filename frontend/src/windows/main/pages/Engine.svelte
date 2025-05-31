@@ -54,7 +54,7 @@
 				})
 				.addSwitch({
 					label: 'Disable Voxel Shadows',
-					description: 'Remove shadows when using Voxel lighting',
+					description: 'Remove shadows when using Voxel lighting <br><span style="color: hsl(var(--warning));">Requires Voxel lightning (Option above).</span>',
 					id: 'disable_voxel_shadows',
 					default: false,
 					toggleable: {

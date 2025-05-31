@@ -1,4 +1,5 @@
 // Init imports
+import '@/theme.css';
 import './app.css';
 import './ts/debugging';
 import './ts/roblox';
@@ -33,11 +34,14 @@ events.on('ready', async () => {
 	// Load CSS Theme
 	await loadTheme();
 	// Show the window
-	neuWindow.show();
-	if (getMode() === 'prod') focusWindow();
+	const deeplinkArg = window.NL_ARGS.find((arg) => arg.includes('--deeplink='))
+	if (!deeplinkArg) {
+		await neuWindow.show();
+	}
+	if (getMode() === 'prod' && !deeplinkArg) focusWindow();
 	// Log debug information
 	setTimeout(async () => {
-		console.info(`Running at http://localhost:${window.NL_PORT}`)
+		console.info(`Running at http://localhost:${window.NL_PORT}`);
 		logDebugInfo();
 	}, 500);
 });
@@ -47,10 +51,10 @@ events.on('windowClose', quit);
 events.on('exitApp', quit);
 
 // Check if app is in browser mode and add tab close event
-if (window.NL_ARGS.includes("--mode=browser")) {
-	window.addEventListener("beforeunload",()=>{
-		quit()
-	})
+if (window.NL_ARGS.includes('--mode=browser')) {
+	window.addEventListener('beforeunload', () => {
+		quit();
+	});
 }
 
 const app = new App({
