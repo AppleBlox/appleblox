@@ -1,6 +1,6 @@
-import { computer, app, window as w } from '@neutralinojs/lib';
+import { computer, app } from '@neutralinojs/lib';
 import { shell } from '../tools/shell';
-import { version } from "@root/package.json"
+import { version } from '@root/package.json';
 
 export async function logDebugInfo() {
 	try {
@@ -48,15 +48,6 @@ export async function logDebugInfo() {
 		// Neutralino Version
 		debugInfo += 'Neutralino Info:\n';
 		debugInfo += `  Version: ${window.NL_VERSION}\n\n`;
-
-		// Window Info
-		const size = await w.getSize();
-		const position = await w.getPosition();
-		const title = await w.getTitle();
-		debugInfo += 'Window Info:\n';
-		debugInfo += `  Size: ${size.width}x${size.height}\n`;
-		debugInfo += `  Position: (${position.x}, ${position.y})\n`;
-		debugInfo += `  Title: ${title}\n`;
 
 		// Log the debug info
 		console.info('AppleBlox Debug Information:\n\n' + debugInfo);
