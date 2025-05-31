@@ -50,17 +50,6 @@
 						value: true,
 					},
 				})
-				// .addSwitch({
-				// 	label: 'Window Control',
-				// 	description: "Allow games to modify the Roblox window's size and position",
-				// 	id: 'window',
-				// 	default: false,
-				// 	toggleable: {
-				// 		id: 'enabled',
-				// 		type: 'switch',
-				// 		value: true,
-				// 	},
-				// })
 		)
 		.addCategory((category) =>
 			category
