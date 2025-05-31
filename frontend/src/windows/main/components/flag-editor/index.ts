@@ -129,7 +129,7 @@ async function readConfig(): Promise<ProfilesConfig> {
 /** Returns the active profile */
 export async function getSelectedProfile(profiles: Profile[]): Promise<Profile | null> {
 	const config = await readConfig();
-	return profiles.find((p) => stringToId(p.name) === config.selected) || null;
+	return profiles.find((p) => stringToId(p.name) === config.selected) || profiles[0];
 }
 
 /** Set the selected profile */

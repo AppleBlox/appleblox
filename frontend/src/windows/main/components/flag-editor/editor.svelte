@@ -238,17 +238,18 @@
 	<div class="flex items-center justify-center mt-5">
 		<div class="flex justify-center items-center">
 			<Label for="profile" class="mr-10 text-foreground">Profile</Label>
-			<Combox
-				class="w-[270px]"
-				popoverClass="w-[270px]"
-				bind:items={profileItems}
-				name="profile"
-				placeholder="Search for a profile"
-				bind:selected={profileSelectValue}
-				on:select={(e) => {
-					onProfileSelectChange(e.detail);
-				}}
-			/>
+			<Select.Root onSelectedChange={onProfileSelectChange} bind:selected={profileSelectValue}>
+				<Select.Trigger class="w-[270px]">
+					<Select.Value placeholder="Select a profile" />
+				</Select.Trigger>
+				<Select.Content>
+					{#each profileItems as profile}
+						<Select.Item value={profile.value} label={profile.label}>{profile.label}</Select.Item>
+					{/each}
+				</Select.Content>
+				<Select.Input name="favoriteFruit" />
+			</Select.Root>
+
 			<Dialog.Root>
 				<Dialog.Trigger let:builder asChild>
 					<SmallButton builders={[builder]} tooltip="Create a new profile" class="p-3 ml-2"><Plus /></SmallButton>
