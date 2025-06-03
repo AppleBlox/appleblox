@@ -1,13 +1,13 @@
 {
 	"name": "appleblox",
-	"version": "0.9.0-dev.6",
+	"version": "0.9.0-dev.8",
 	"description": "Lightweight and fast Roblox launcher for MacOS",
 	"main": "frontend/src/windows/main/main.ts",
 	"scripts": {
 		"vite:dev": "vite",
 		"dev": "bun run scripts/package/dev.ts",
-		"package": "bun run scripts/build/ts/index.ts",
-		"release": "bun run package && bun run scripts/build/ts/dmg.ts",
+		"build": "bun run scripts/build/ts/index.ts",
+		"release": "bun run build && bun run scripts/build/ts/dmg.ts",
 		"format": "prettier --write ./",
 		"neu:empty": ""
 	},

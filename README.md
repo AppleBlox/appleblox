@@ -52,7 +52,7 @@ Setting up the AppleBlox development environment:
 Development commands:
 
 - `bun run --bun dev`: Start the development environment
-- `bun run --bun package`: Package the application (excluding DMG creation)
+- `bun run --bun build`: Package the application (excluding DMG creation)
 - `bun run --bun release`: Package and create a DMG
 
 AppleBlox is built using [Svelte](https://svelte.dev) for the frontend and [NeutralinoJS](https://neutralino.js.org) for the backend. NeutralinoJS is a lightweight C++ alternative to Electron or NW.JS, suitable for single-platform applications. More information is available at [neutralino.js.org/docs](https://neutralino.js.org/docs).

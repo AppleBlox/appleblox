@@ -10,7 +10,7 @@ try {
 	console.error(error);
 }
 
-await loadTheme();
+loadTheme().catch(console.error);
 
 const app = new App({
 	// @ts-expect-error
