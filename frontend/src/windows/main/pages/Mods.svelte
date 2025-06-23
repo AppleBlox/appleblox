@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ApplebloxIcon from '@/assets/favicon.png';
-	import BloxstrapIcon from '@/assets/panel/bloxstrap.png';
+	import GamebananaIcon from '@/assets/panel/gamebanana.png';
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book } from 'lucide-svelte';
 	import path from 'path-browserify';
@@ -14,8 +14,8 @@
 	async function onButtonClicked(e: CustomEvent) {
 		const { id } = e.detail;
 		switch (id) {
-			case 'join_bloxstrap':
-				os.open('https://discord.gg/nKjV3mGq6R');
+			case 'open_gamebanana':
+				os.open('https://gamebanana.com/games/2879');
 				break;
 			case 'join_appleblox':
 				os.open('https://appleblox.com/discord');
@@ -42,18 +42,36 @@
 		const { id } = e.detail;
 		switch (id) {
 			case 'custom_font':
-				await shellFS.remove(
-					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/cache/fonts/CustomFont.ttf'),
-					{ skipStderrCheck: true }
-				);
-				await shellFS.remove(
-					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/cache/fonts/CustomFont.otf'),
-					{ skipStderrCheck: true }
-				);
-				await shellFS.remove(
-					path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox/cache/fonts/CustomFont.ttc'),
-					{ skipStderrCheck: true }
-				);
+				for (const ext of ['ttf', 'otf', 'ttc']) {
+					const fontPath = path.join(
+						await os.getEnv('HOME'),
+						'Library',
+						'Application Support',
+						`AppleBlox/cache/fonts/CustomFont.${ext}`
+					);
+					await shellFS.remove(
+						path.join(
+							await os.getEnv('HOME'),
+							'Library',
+							'Application Support',
+							`AppleBlox/cache/fonts/LastCustomFont.${ext}`
+						),
+						{ skipStderrCheck: true }
+					);
+					if (await shellFS.exists(fontPath)) {
+						await shellFS.move(
+							fontPath,
+							path.join(
+								await os.getEnv('HOME'),
+								'Library',
+								'Application Support',
+								`AppleBlox/cache/fonts/LastCustomFont.${ext}`
+							)
+						);
+					}
+
+					await shellFS.remove(fontPath, { skipStderrCheck: true });
+				}
 				break;
 		}
 	}
@@ -78,7 +96,7 @@
 			category
 				.setName('Custom Mods')
 				.setDescription(
-					"To install mods, drag files to the mods folder. Find mods in the Bloxstrap Discord - please don't request AppleBlox support there"
+					"To install mods, drag files to the mods folder. Find mods in the AppleBlox discord server or Gamebanana."
 				)
 				.setId('general')
 				.addButton({
@@ -96,11 +114,11 @@
 					icon: { src: ApplebloxIcon },
 				})
 				.addButton({
-					label: 'Bloxstrap Discord',
+					label: 'Gamebanana',
 					description: 'Find and download compatible mods',
-					id: 'join_bloxstrap',
+					id: 'open_gamebanana',
 					variant: 'outline',
-					icon: { src: BloxstrapIcon },
+					icon: { src: GamebananaIcon },
 				})
 				.addSwitch({
 					label: 'Enable Mods',

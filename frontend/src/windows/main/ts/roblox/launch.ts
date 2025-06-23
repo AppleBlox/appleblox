@@ -277,14 +277,8 @@ async function setupRobloxInstance(
 	robloxInstance.on('exit', async () => {
 		console.info('[Launch] Roblox instance exited');
 		if (settings.returnToWebsite) os.open('https://www.roblox.com');
-		if (settings.areModsEnabled) {
-			RobloxMods.restoreRobloxFolders()
-				.catch(console.error)
-				.then(async () => {
-					await RobloxMods.toggleHighRes(true);
-					await RobloxMods.removeCustomFont();
-				});
-		}
+		RobloxMods.restoreRobloxFolders(settings.areModsEnabled).catch(console.error);
+		RobloxMods.toggleHighRes(true);
 		RPCController.stop();
 		handlers.setRobloxConnected(false);
 		rbxInstance = null;
@@ -354,7 +348,7 @@ export async function launchRoblox(
 				await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
 			}, 1500);
 		} catch (err) {
-			if (settings.areModsEnabled) await RobloxMods.restoreRobloxFolders().catch(console.error);
+			await RobloxMods.restoreRobloxFolders(settings.areModsEnabled).catch(console.error);
 			console.error(err);
 			toast.error('An error occurred while starting Roblox.');
 			await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));

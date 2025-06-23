@@ -54,7 +54,7 @@
 			<div>
 				<Card.Title class="text-primary">Mods Manager</Card.Title>
 				<Card.Description
-					>Enable or disable certain mods. They are loaded in alphabetical order (1,2,3,a,b,c)</Card.Description
+					>Enable or disable certain mods. They are loaded in alphanumerical order (1,2,3,a,b,c)</Card.Description
 				>
 			</div>
 			<Button

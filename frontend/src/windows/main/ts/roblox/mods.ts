@@ -1,10 +1,10 @@
-import { filesystem, os } from '@neutralinojs/lib';
+import { custom, events, filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import Roblox from '.';
 import { getValue } from '../../components/settings';
 import { Notification } from '../tools/notifications';
-import { shell } from '../tools/shell';
+import { shell, type ExecutionResult } from '../tools/shell';
 import shellFS from '../tools/shellfs';
 import { sleep } from '../utils';
 import { getMostRecentRoblox } from './path';
@@ -25,7 +25,7 @@ export class RobloxMods {
 				state: !path.basename(mod.path).endsWith('.disabled'),
 			}))
 			.sort((a, b) => `${a}`.localeCompare(b.filename, undefined, { numeric: true }))
-			.reverse(); // Alphabetical priority
+			.reverse(); // Alphabetical order
 	}
 
 	/** Creates a backup of the roblox Resources folder */
@@ -64,18 +64,25 @@ export class RobloxMods {
 	}
 
 	/** Restore original roblox folders */
-	static async restoreRobloxFolders() {
+	static async restoreRobloxFolders(areModsEnabled = true) {
+		events.broadcast('mods:restoring', true);
+
+		await this.removeCustomFont();
+
 		const appSupportFolder = path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox');
 		const resourcesFolder = path.join(Roblox.path, 'Contents/Resources');
 		const resBackupFolder = path.join(appSupportFolder, 'cache', 'mods', 'Resources');
 		if (!(await shellFS.exists(resBackupFolder))) {
-			toast.error("The 'Resources' backup hasn't been found. Mods will not be removed.");
-			new Notification({
-				title: 'Error while removing mods',
-				content: "The 'Resources' backup hasn't been found. Mods will not be removed.",
-				sound: 'hero',
-				timeout: 6,
-			}).show();
+			if (areModsEnabled) {
+				toast.error("An error occured and mods couldn't be removed.");
+				new Notification({
+					title: 'Error while removing mods',
+					content: "An error occured and mods couldn't be removed.",
+					sound: 'sosumi',
+					timeout: 6,
+				}).show();
+			}
+			events.broadcast('mods:restoring', false);
 			return;
 		}
 
@@ -84,10 +91,11 @@ export class RobloxMods {
 		await shellFS.remove(resBackupFolder);
 		new Notification({
 			title: 'Resources restored',
-			content: 'Roblox has been cleaned of any Mods remnants.',
+			content: 'Roblox has been cleaned of any mods.',
 			timeout: 7,
+			sound: 'pop',
 		}).show();
-		await sleep(100);
+		events.broadcast('mods:restoring', false);
 	}
 
 	/** Applies the custom font */
@@ -143,14 +151,47 @@ export class RobloxMods {
 	/** Removes the custom font */
 	static async removeCustomFont() {
 		// Exit if set to null
-		const fontValue = (await getValue('mods.builtin.custom_font')) as string | null;
-		if (!fontValue) return;
+		const customFont = (await getValue('mods.builtin.custom_font')) as string | null;
+		let fontValue = customFont;
+		if (!fontValue) {
+			const lastFontPath = await shell(
+				'files=(~/Library/Application\\ Support/AppleBlox/cache/fonts/LastCustomFont*.ttf ~/Library/Application\\ Support/AppleBlox/cache/fonts/LastCustomFont*.otf ~/Library/Application\\ Support/AppleBlox/cache/fonts/LastCustomFont*.ttc); real_files=(); for f in "${files[@]}"; do [ -f "$f" ] && real_files+=("$f"); done; [ "${#real_files[@]}" -gt 1 ] && echo "too_many" || [ "${#real_files[@]}" -eq 1 ] && echo "$(basename "${real_files[0]}")" || echo "null"',
+				[],
+				{ completeCommand: true }
+			);
+			if (lastFontPath.stdOut.includes('null')) {
+				return;
+			} else if (lastFontPath.stdOut.includes('too_many')) {
+				await shellFS.remove(path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/cache/fonts'));
+				new Notification({
+					title: "Couldn't remove custom font",
+					content: 'Too many backups were found.',
+					sound: 'sosumi',
+					timeout: 10,
+				}).show();
+				return;
+			} else {
+				const basename = path.basename(lastFontPath.stdOut.trim());
+				fontValue = basename;
+			}
+		}
 
 		const fontExt = path.extname(fontValue);
 		const fontsFolderPath = path.join(Roblox.path, 'Contents/Resources/content/fonts');
 		const customFontPath = path.join(Roblox.path, fontsFolderPath, `CustomFont${fontExt}`);
 		const familiesPath = path.join(Roblox.path, fontsFolderPath, 'families');
 		const cacheDir = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/cache/fonts/families');
+		if (!(await shellFS.exists(cacheDir))) {
+			if (await shellFS.exists(customFontPath)) {
+				new Notification({
+					title: "Couldn't remove font",
+					content: "An error occured and fonts weren't restored.",
+					timeout: 10,
+					sound: 'sosumi',
+				}).show();
+			}
+			return;
+		}
 
 		await shellFS.remove(customFontPath);
 		await shellFS.remove(familiesPath);
@@ -158,6 +199,13 @@ export class RobloxMods {
 		await shellFS.remove(cacheDir);
 
 		console.info('[Mods] Removed custom font');
+		if (customFont) {
+			new Notification({
+				title: 'Removed custom font',
+				content: "Restored Roblox's default fonts.",
+				timeout: 5,
+			}).show();
+		}
 	}
 
 	/** Toggle NSHighResolutionCapable in Roblox's plist flie */
