@@ -12,10 +12,10 @@
 		},
 	];
 	const artists: Contributor[] = [
-		{ name: 'typeofnull', description: 'Made the app logo', avatar: 'https://i.imgur.com/caBlXK5.png', link: null },
+		{ name: 'typeofnull', description: 'Maker of the current AppleBlox logo', avatar: 'https://i.imgur.com/caBlXK5.png', link: null },
 		{
 			name: 'abyzal.',
-			description: 'Made the v1 of the app logo',
+			description: 'Maker of the first AppleBlox logo',
 			avatar: 'https://avatars.githubusercontent.com/u/157009854?v=4',
 			link: 'https://github.com/PurvisiLOL',
 		},
@@ -23,13 +23,25 @@
 	const testers: Contributor[] = [
 		{
 			name: 'allFiction',
-			description: 'Moderator & main tester',
+			description: 'Moderator & tester',
 			avatar: 'https://avatars.githubusercontent.com/u/143362759?v=4',
 			link: 'https://github.com/AngrySausage',
 		},
 		{
+			name: 'TrisecTroop',
+			description: 'Moderator & tester',
+			avatar: 'https://avatars.githubusercontent.com/u/126478355?v=4',
+			link: 'https://github.com/TrisecTroop',
+		},
+		{
+			name: 'n.u.g',
+			description: 'Moderator & tester',
+			avatar: 'https://i.imgur.com/3UDfZGJ.png',
+			link: 'https://github.com/TrisecTroop',
+		},
+		{
 			name: 'atomic',
-			description: 'Tester & ori yap support 😉',
+			description: 'Tester & ori yap support',
 			avatar: 'https://avatars.githubusercontent.com/u/146490689?v=4',
 			link: 'https://github.com/20ch',
 		},

@@ -20,7 +20,7 @@
 	}
 
 	const panel = new SettingsPanelBuilder()
-		.setName('About')
+		.setName('Information')
 		.setId('info')
 		.setDescription('About AppleBlox and helpful resources')
 		.addCategory((category) =>

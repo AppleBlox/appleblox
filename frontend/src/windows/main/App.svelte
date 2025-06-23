@@ -91,6 +91,10 @@
 		const { id } = evt.detail;
 		currentPage = id || currentPage;
 	});
+
+	events.on("mods:restoring",(evt: CustomEvent) => {
+		launchInfo.launching = evt.detail
+	})
 </script>
 
 <main>
