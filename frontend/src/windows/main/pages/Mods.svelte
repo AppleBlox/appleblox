@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ApplebloxIcon from '@/assets/favicon.png';
 	import GamebananaIcon from '@/assets/panel/gamebanana.png';
+        import UpdateMods from '@/assets/panel/updatemods.png';
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book } from 'lucide-svelte';
 	import path from 'path-browserify';
@@ -22,6 +23,9 @@
 				break;
 			case 'mods_help':
 				os.open('https://github.com/pizzaboxer/bloxstrap/wiki/Adding-custom-mods');
+				break;
+                        case 'update_mods':
+				os.open('https://verdant-comet-741.notion.site/Updating-Mods-for-Roblox-on-macOS-21d37a6450cd808f8122f021c418cae6');
 				break;
 		}
 	}
@@ -119,6 +123,13 @@
 					id: 'open_gamebanana',
 					variant: 'outline',
 					icon: { src: GamebananaIcon },
+                                })
+				.addButton({
+					label: 'Updating Mods',
+					description: 'Update mods (atlas) yourself on macOS',
+					id: 'update_mods',
+					variant: 'outline',
+					icon: { src: UpdateMods },
 				})
 				.addSwitch({
 					label: 'Enable Mods',
