@@ -15,7 +15,7 @@
 	import shellFS from '../../ts/tools/shellfs';
 
 	export let mod: Mod;
-	let thumbnailUrl = `https://marketplace.appleblox.com/api/v1/mods/${mod.id}/image`;
+	let thumbnailUrl = `https://66.33.22.138/api/v1/mods/${mod.id}/image`;
 	let dialogOpen = false;
 	let imageLoaded = false;
 	let imageLoading = true;
@@ -134,7 +134,7 @@
 
 		// Load from network
 		try {
-			const response = await fetch(`https://marketplace.appleblox.com/api/v1/mods/${mod.id}/image`);
+			const response = await fetch(`https://66.33.22.138/api/v1/mods/${mod.id}/image`);
 			if (!response.ok) throw new Error('Failed to load image');
 
 			const blob = await response.blob();

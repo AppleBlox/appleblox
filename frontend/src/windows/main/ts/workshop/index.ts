@@ -2,7 +2,7 @@ import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import shellFS from '../tools/shellfs';
 
-const API_URL = 'https://marketplace.appleblox.com';
+const API_URL = 'https://66.33.22.138';
 
 interface Mod {
 	id: string;
