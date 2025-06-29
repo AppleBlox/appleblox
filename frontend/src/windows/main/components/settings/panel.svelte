@@ -157,8 +157,9 @@
 	/** Checks if the widget is in toggled state */
 	function isToggled(category: Category, widget: PanelWidget, _reactive: any) {
 		if (!widget.toggleable) return true;
+		const targetCategory = settings[category.id];
 		const targetWidget = settings[category.id][widget.toggleable.id];
-		if (!targetWidget) {
+		if (!(widget.toggleable.id in targetCategory)) {
 			console.error(
 				`Couldn't check toggle state of ${category.id}.${widget.id} because target widget doesn't exist (${category.id}.${widget.toggleable.id})`
 			);
