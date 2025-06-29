@@ -5,12 +5,13 @@ import { launchRoblox } from './launch';
 import { RobloxMods } from './mods';
 import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
+import * as RobloxVersion from './version';
 
 let robloxPath = '/Applications/Roblox.app'; // Most common path
 getMostRecentRoblox()
 	.then((path) => (robloxPath = path))
 	.catch((err) => {
-		console.error("An error occured while trying to get Roblox's most recent path.");
+		console.error("An error occured while trying to get Roblox's most recent path:", err);
 	});
 
 class Roblox {
@@ -21,6 +22,7 @@ class Roblox {
 	static Delegate = RobloxDelegate;
 	static launch = launchRoblox;
 	static path = robloxPath;
+	static Version = RobloxVersion
 }
 
 export default Roblox;

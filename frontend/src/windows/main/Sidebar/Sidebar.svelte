@@ -11,6 +11,7 @@
 	import ModsIcon from '@/assets/sidebar/mods.png';
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
+	import WorkshopIcon from '@/assets/sidebar/Workshop.png';
 
 	import CreditsIcon from '@/assets/sidebar/info.png';
 	import MiscIcon from '@/assets/sidebar/misc.png';
@@ -31,6 +32,7 @@
 		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },
 		{ label: 'Engine', id: 'engine', icon: EngineIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
+		{ label: 'Workshop', id: 'Workshop', icon: WorkshopIcon },
 		{ label: 'Appearance', id: 'appearance', icon: AppearanceIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Info', id: 'info', icon: CreditsIcon },
