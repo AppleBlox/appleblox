@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ApplebloxIcon from '@/assets/favicon.png';
+	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import GamebananaIcon from '@/assets/panel/gamebanana.png';
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book } from 'lucide-svelte';

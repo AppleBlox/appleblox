@@ -2,7 +2,7 @@
 	import { events, init as neuInit } from '@neutralinojs/lib';
 	import { onMount } from 'svelte';
 	import { Progress } from '@/lib/components/ui/progress';
-	import Logo from '@/assets/favicon.png';
+	import Logo from '@/assets/appleblox.svg';
 	import { mode, ModeWatcher, setMode } from 'mode-watcher';
 
 	let progress = 0;
