@@ -157,7 +157,7 @@ async function setupBootstrapper(): Promise<void> {
 	});
 
 	initialProgressListener = events.on('bootstrapper:ready', async () => {
-		console.log('[Launch] Bootstrapper reported ready. Sending initial state.');
+		console.info('[Launch] Bootstrapper reported ready. Sending initial state.');
 		await updateBootstrapper('bootstrapper:text', { text: 'Initializing launch sequence...' });
 		await updateBootstrapper('bootstrapper:progress', { progress: 5 });
 	});
