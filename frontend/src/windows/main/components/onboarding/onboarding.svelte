@@ -15,14 +15,14 @@
 	// Initialize onboarding state
 	async function initOnboarding() {
 		try {
-			const settings = await loadSettings('onboarding');
+			const settings = await loadSettings('onboarding_v2');
 			if (settings?.show) {
 				loadedSettings = true;
 			} else if (settings?.show === false) {
 				onboardingLoaded = true;
 			} else {
 				// First time - create onboarding settings
-				await saveSettings('onboarding', { show: true });
+				await saveSettings('onboarding_v2', { show: true });
 				loadedSettings = true;
 			}
 		} catch (error) {
@@ -189,7 +189,7 @@
 			}
 			
 			// Mark onboarding as complete
-			await saveSettings('onboarding', { show: false });
+			await saveSettings('onboarding_v2', { show: false });
 			
 			// Update UI state
 			onboardingLoaded = true;
