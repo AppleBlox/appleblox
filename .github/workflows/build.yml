@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-14-arm64
     outputs:
       version: ${{ env.VERSION }}
 
