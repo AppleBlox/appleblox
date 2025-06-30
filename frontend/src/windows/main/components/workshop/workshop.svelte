@@ -23,7 +23,7 @@
 </script>
 
 <div>
-	{#if true}
+	{#if loadStatus.error}
 		<div
 			class="fixed inset-0 bg-background bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center"
 			transition:fade={{ duration: 300, easing: quintOut }}
