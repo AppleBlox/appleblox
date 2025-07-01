@@ -1,35 +1,92 @@
 # Sidecar
 
-These scripts are used for native operations and are invoked from neutralino. Most of them are made using assistance from AI due to the lack of native contributors (skill issue on my part).
+Native macOS utilities for AppleBlox application operations. These scripts handle system-level tasks that require native code execution and are invoked from the Neutralino framework.
 
-## Bootstrap
+## Components
 
-Launches the `main` executable with these arguments:
+### Bootstrap (`bootstrap.m`)
 
-```
---path=<app Resources folder>
---enable-extensions=true"
---window-enable-inspector=true
-```
+Main launcher that bootstraps the AppleBlox application with proper configuration and deeplink handling.
 
-It also captures if the app was launched using a deeplink, in which case it will either, launch the app, or re-launch the main executable if it is already open. The bootstrap will exit once the main executable exits.
+**Features:**
+- Launches the main executable with required arguments:
+  ```
+  --path=<app Resources folder>
+  --enable-extensions=true
+  --window-enable-inspector=true
+  ```
+- **Deeplink Support**: Handles URL scheme launches and manages app instances
+- **Version Compatibility**: Detects macOS version and provides fallback options for unsupported versions (<11)
+- **Permission Management**: Automatically requests accessibility permissions when needed
+- **Instance Management**: Terminates duplicate instances when launching via deeplink
+- **Logging**: Comprehensive logging to `latest.log` for debugging
 
-## UrlScheme
+**macOS Version Handling:**
+- For macOS 11+: Normal app launch
+- For macOS <11: Shows dialog with options to run in browser mode or continue anyway
+- Automatic browser mode for deeplinks on unsupported versions
 
-Utility CLI to change the default handler for an URI (LSHandler). Used to open AppleBlox from the website.
+### URL Scheme Handler (`urlscheme.m`)
 
-## Window Manager
+Command-line utility for managing default URL scheme handlers on macOS.
 
-Takes **stdIn** like this format:
-
-```json
-[{ "appName": "Roblox", "x": 0, "y": 100, "w": 40, "h": 80 }]
-```
-
-The array can contain any number of objects. The script will move the _first_ window it finds of the specified app accordingly. In the frontend to be able to talk with this process easily, we create a pipe using `mkfifo` at `/tmp/window_relay_ablox`, then use the `echo` command to pass the stdIn. To be able to take input from the pipe, we start the window manager like this:
-
+**Usage:**
 ```bash
-./window_manager <> pipe_path
+# Set AppleBlox as default handler for a scheme
+./urlscheme set roblox com.appleblox.AppleBlox
+
+# Check current default handler
+./urlscheme check roblox com.appleblox.AppleBlox
 ```
 
-Please note that the **window manager** currently only has 1 use case and that is the rythm game `Project: Afternight`. In the future we may use it more.
+**Commands:**
+- `set <SCHEME> <BUNDLE_ID>`: Sets the specified bundle as default handler
+- `check <SCHEME> <BUNDLE_ID>`: Checks if the bundle is the current default handler
+
+### Transparent Viewer (`transparent_viewer.swift`)
+
+Advanced WebKit-based viewer for displaying web content in a transparent, floating window.
+
+**Features:**
+- **Transparent Design**: Vibrancy effects with minimal 4px padding and rounded corners
+- **Smart Window Management**: Borderless, floating window that stays above other apps
+- **Drag Support**: Custom draggable view for window repositioning
+- **Content Detection**: Waits for complete DOM rendering before showing window
+- **Quit Protection**: Disables standard quit shortcuts and prevents accidental closure
+
+**Usage:**
+```bash
+./transparent_viewer --width 800 --height 600 --url https://example.com
+```
+
+**Parameters:**
+- `--width`: Window width (default: 800)
+- `--height`: Window height (default: 600)
+- `--url`: Webpage URL to display (shows default page if omitted)
+
+**Technical Details:**
+- Uses `NSVisualEffectView` with `hudWindow` material for transparency
+- Implements multi-stage content readiness detection (images, fonts, visual elements)
+- Custom `DraggableView` class for window manipulation
+- Prevents standard app termination behaviors
+
+
+
+## Build Requirements
+
+- macOS 11+ (recommended)
+- Xcode command line tools
+- Swift 5.0+ (for transparent_viewer)
+- Objective-C runtime
+
+## Development Notes
+
+Most components were developed with AI assistance due to limited native macOS development expertise. The codebase prioritizes functionality and reliability over code elegance.
+
+## Integration
+
+These utilities integrate with the main AppleBlox Neutralino application through:
+- Process spawning and IPC
+- Named pipes for real-time communication
+- File-based logging and state management
+- System-level permission and URL scheme management
