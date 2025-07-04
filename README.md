@@ -1,5 +1,5 @@
 > [!NOTE]  
-> AppleBlox is still maintained. I have switched to a PC so the developpement may take a bit more time. You can try the [dev builds](https://appleblox.com/download/dev).
+> 0.9.0 will soon be released. You can try the [dev builds](https://appleblox.com/download/dev).
 
 # AppleBlox
 
