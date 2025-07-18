@@ -10,7 +10,7 @@ export async function getConfigPath(): Promise<string> {
 /** Saves the data provided to the Application Support folder */
 const saveQueue: { [key: string]: string } = {};
 let hasInterval = false;
-let saveInterval: Timer | null = null;
+let saveInterval: NodeJS.Timeout | null = null;
 
 // Initialize save interval once
 function initSaveInterval() {

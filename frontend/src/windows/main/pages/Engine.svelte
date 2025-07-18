@@ -27,7 +27,7 @@
 					],
 				})
 				.addSlider({
-					label: 'FPS Target',
+					label: 'Frame rate',
 					description:
 						'Sets the maximum number of frames per second. <br><span style="color: hsl(var(--warning));">Requires the Vulkan graphics API (Option above).</span>',
 					id: 'fps_target',

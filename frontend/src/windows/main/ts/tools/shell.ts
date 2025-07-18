@@ -248,7 +248,7 @@ export async function spawn(
 	options: SpawnOptions = {}
 ): Promise<SpawnEventEmitter> {
 	const fullCommand = options.completeCommand ? command : buildCommand(command, args);
-	let timeoutId: Timer | null = null;
+	let timeoutId: NodeJS.Timeout | null = null;
 
 	try {
 		const process = await os.spawnProcess(fullCommand, options.cwd);

@@ -106,7 +106,7 @@ export class RobloxInstance {
 	private lastFileSize = 0;
 	private logsDirectory: string | null = null;
 	private watchHandler: (evt: any) => void = () => {};
-	private pollInterval: Timer | null = null;
+	private pollInterval: NodeJS.Timeout | null = null;
 	private lastPollTime = 0;
 
 	// Polling configuration
@@ -155,8 +155,10 @@ export class RobloxInstance {
 		if (url) {
 			await RobloxDelegate.toggle(false);
 			await shell('open', [url]);
+			console.info(`[Roblox.Instance] Opening Roblox from URL.`);
 		} else {
-			await shell('open', [await getMostRecentRoblox()]);
+			await shell('open', ['-b', 'com.roblox.RobloxPlayer']); // Experimental voice chat fix (we launch by bundle id instead of using roblox's binary path)
+			console.info(`[Roblox.Instance] Opening Roblox from path.`);
 		}
 
 		await sleep(1000);
