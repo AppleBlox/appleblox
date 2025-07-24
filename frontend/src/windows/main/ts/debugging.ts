@@ -55,15 +55,15 @@ const originalConsoleMethods: Partial<Record<ConsoleMethod, Function>> = {
 
 class TypeUtils {
 	static isError(value: any): value is Error {
-		return value instanceof Error || 
-			   (value && typeof value === 'object' && 
-			    typeof value.message === 'string' && 
-			    typeof value.name === 'string');
+		return (
+			value instanceof Error ||
+			(value && typeof value === 'object' && typeof value.message === 'string' && typeof value.name === 'string')
+		);
 	}
 
 	static isPlainObject(value: any): boolean {
 		if (value === null || typeof value !== 'object') return false;
-		
+
 		const proto = Object.getPrototypeOf(value);
 		return proto === null || proto === Object.prototype;
 	}
@@ -91,7 +91,7 @@ class TypeUtils {
 			const name = constructor?.name || 'Object';
 			const proto = Object.getPrototypeOf(obj);
 			const protoName = proto?.constructor?.name || 'Unknown';
-			
+
 			return `[${name}${name !== protoName ? ` extends ${protoName}` : ''}]`;
 		} catch {
 			return '[Object]';
@@ -110,7 +110,7 @@ class LogFormatter {
 			const minutes = String(now.getMinutes()).padStart(2, '0');
 			const seconds = String(now.getSeconds()).padStart(2, '0');
 			const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-			
+
 			return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 		} catch {
 			return new Date().toString();
@@ -124,7 +124,7 @@ class LogFormatter {
 
 		try {
 			const parts: string[] = [];
-			
+
 			const name = TypeUtils.safeGetProperty(error, 'name') || 'Error';
 			const message = TypeUtils.safeGetProperty(error, 'message') || 'No message';
 			parts.push(`${name}: ${message}`);
@@ -179,8 +179,7 @@ class LogFormatter {
 					}
 				}
 			}
-		} catch {
-		}
+		} catch {}
 
 		return props;
 	}
@@ -200,8 +199,7 @@ class LogFormatter {
 					if (jsonResult !== obj) {
 						return this.formatValue(jsonResult, options, depth + 1);
 					}
-				} catch {
-				}
+				} catch {}
 			}
 
 			if (TypeUtils.isPlainObject(obj) && TypeUtils.isSerializable(obj)) {
@@ -216,7 +214,7 @@ class LogFormatter {
 
 	private static formatComplexObject(obj: any, options: SerializationOptions, depth: number): string {
 		const info = TypeUtils.getObjectInfo(obj);
-		
+
 		try {
 			if (obj.toString !== Object.prototype.toString && typeof obj.toString === 'function') {
 				try {
@@ -224,8 +222,7 @@ class LogFormatter {
 					if (stringResult !== '[object Object]' && stringResult.length <= options.maxStringLength) {
 						return `${info} ${stringResult}`;
 					}
-				} catch {
-				}
+				} catch {}
 			}
 
 			const props: string[] = [];
@@ -292,8 +289,8 @@ class LogFormatter {
 
 		switch (typeof value) {
 			case 'string':
-				return value.length <= options.maxStringLength 
-					? value 
+				return value.length <= options.maxStringLength
+					? value
 					: `${value.substring(0, options.maxStringLength)}... [truncated]`;
 			case 'number':
 				return isNaN(value) ? 'NaN' : value.toString();
@@ -388,16 +385,16 @@ class LogFormatter {
 
 	static formatLogLine(entry: LogEntry): string {
 		const levelMap: Record<LogLevel, string> = {
-			'ERROR': 'Error',
-			'WARN': 'Warning', 
-			'INFO': 'Info',
-			'DEBUG': 'Debug',
-			'TRACE': 'Trace'
+			ERROR: 'Error',
+			WARN: 'Warning',
+			INFO: 'Info',
+			DEBUG: 'Debug',
+			TRACE: 'Trace',
 		};
 
 		const processName = 'app';
 		const pid = Math.floor(Math.random() * 10000);
-		
+
 		return `${entry.timestamp} ${processName}[${pid}] <${levelMap[entry.level]}> ${entry.message}`;
 	}
 }
@@ -416,11 +413,11 @@ class LogFileManager {
 		return this.safeOperation(async () => {
 			const configPath = await getConfigPath();
 			const logsDir = path.join(path.dirname(configPath), 'logs');
-			
+
 			if (!(await shellFS.exists(logsDir))) {
 				await shellFS.createDirectory(logsDir);
 			}
-			
+
 			return logsDir;
 		}, 'Failed to setup log directory');
 	}
@@ -441,20 +438,24 @@ class LogFileManager {
 	}
 
 	static async ensureLogFile(logPath: string): Promise<boolean> {
-		return (await this.safeOperation(async () => {
-			if (!(await shellFS.exists(logPath))) {
-				await shellFS.writeFile(logPath, '');
-			}
-			return true;
-		}, `Failed to ensure log file exists: ${logPath}`)) !== null;
+		return (
+			(await this.safeOperation(async () => {
+				if (!(await shellFS.exists(logPath))) {
+					await shellFS.writeFile(logPath, '');
+				}
+				return true;
+			}, `Failed to ensure log file exists: ${logPath}`)) !== null
+		);
 	}
 
 	static async appendToLog(logPath: string, entry: LogEntry): Promise<boolean> {
-		return (await this.safeOperation(async () => {
-			const logLine = LogFormatter.formatLogLine(entry) + '\n';
-			await filesystem.appendFile(logPath, logLine);
-			return true;
-		}, `Failed to write to log file: ${logPath}`)) !== null;
+		return (
+			(await this.safeOperation(async () => {
+				const logLine = LogFormatter.formatLogLine(entry) + '\n';
+				await filesystem.appendFile(logPath, logLine);
+				return true;
+			}, `Failed to write to log file: ${logPath}`)) !== null
+		);
 	}
 }
 
@@ -466,8 +467,7 @@ class ConsoleManager {
 			} catch (error) {
 				try {
 					originalConsoleMethods.error?.call(console, 'Console function failed:', error);
-				} catch {
-				}
+				} catch {}
 			}
 
 			if (!state.isRedirectionEnabled || state.initializationError) {
@@ -495,8 +495,7 @@ class ConsoleManager {
 			} catch (error) {
 				try {
 					originalConsoleMethods.error?.call(console, 'Logger error:', error);
-				} catch {
-				}
+				} catch {}
 			}
 		};
 	}
@@ -573,14 +572,14 @@ export async function enableConsoleRedirection(): Promise<boolean> {
 	try {
 		const configPath = await getConfigPath();
 		const appleBloxDir = path.dirname(configPath);
-		
-		if (!await shellFS.exists(appleBloxDir)) {
+
+		if (!(await shellFS.exists(appleBloxDir))) {
 			await filesystem.createDirectory(appleBloxDir);
 		}
 
 		state.isRedirectionEnabled = true;
 		state.initializationError = null;
-		
+
 		state.logPath = await LogFileManager.createLogPath();
 		if (!state.logPath) {
 			state.initializationError = new Error('Failed to create log path');

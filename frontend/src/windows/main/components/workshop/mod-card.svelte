@@ -20,7 +20,7 @@
 	let imageLoaded = false;
 	let imageLoading = true;
 
-    let openAlert = false;
+	let openAlert = false;
 
 	// Installation state
 	let isInstalling = false;
@@ -98,7 +98,7 @@
 					throw error;
 				}
 			}
-			
+
 			const parsed = cache ? JSON.parse(cache) : {};
 
 			parsed[modId] = {
@@ -412,10 +412,10 @@
 				on:click={async () => {
 					const modExists = await checkModExists();
 					if (modExists) {
-                        openAlert = true;
+						openAlert = true;
 					} else {
-                        handleInstall();
-                    }
+						handleInstall();
+					}
 				}}
 				disabled={isInstalling || installSuccess}
 			>
@@ -434,16 +434,16 @@
 </Dialog.Root>
 
 <AlertDialog.Root bind:open={openAlert}>
-  <AlertDialog.Content>
-    <AlertDialog.Header>
-      <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-      <AlertDialog.Description class="text-red-300">
-        A mod with the same name is already installed. It will be overwritten.
-      </AlertDialog.Description>
-    </AlertDialog.Header>
-    <AlertDialog.Footer>
-      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-      <AlertDialog.Action on:click={handleInstall}>Continue</AlertDialog.Action>
-    </AlertDialog.Footer>
-  </AlertDialog.Content>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+			<AlertDialog.Description class="text-red-300">
+				A mod with the same name is already installed. It will be overwritten.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action on:click={handleInstall}>Continue</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
 </AlertDialog.Root>

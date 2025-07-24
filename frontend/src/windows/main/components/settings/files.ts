@@ -123,7 +123,7 @@ async function performSetValue(settingPath: `${string}.${string}.${string}`, val
 			throw new Error(`The panel '${panelId}' doesn't exist.`);
 		}
 	}
-	
+
 	if (!settings[categoryId]) {
 		if (createNew) {
 			settings[categoryId] = {};
@@ -131,20 +131,20 @@ async function performSetValue(settingPath: `${string}.${string}.${string}`, val
 			throw new Error(`The category '${categoryId}' doesn't exist.`);
 		}
 	}
-	
-	const category: {[key: string]: any} = settings[categoryId];
+
+	const category: { [key: string]: any } = settings[categoryId];
 	if (!Object.keys(category).includes(widgetId) && !createNew) {
 		throw new Error(`The widget '${widgetId}' doesn't exist.`);
 	}
-	
+
 	settings[categoryId][widgetId] = value;
-	
+
 	// Update cache with new data
-	settingsCache[panelId] = { 
-		data: settings, 
-		timestamp: Date.now() 
+	settingsCache[panelId] = {
+		data: settings,
+		timestamp: Date.now(),
 	};
-	
+
 	await saveSettings(panelId, settings);
 }
 
@@ -163,10 +163,13 @@ async function loadSettingsFromDisk(panelId: string): Promise<{ [key: string]: a
 }
 
 /** Set multiple values atomically to prevent race conditions */
-export async function setMultipleValues(updates: Array<{path: `${string}.${string}.${string}`, value: any}>, createNew = false): Promise<void> {
+export async function setMultipleValues(
+	updates: Array<{ path: `${string}.${string}.${string}`; value: any }>,
+	createNew = false
+): Promise<void> {
 	// Group updates by panel
-	const panelUpdates = new Map<string, Array<{categoryId: string, widgetId: string, value: any}>>();
-	
+	const panelUpdates = new Map<string, Array<{ categoryId: string; widgetId: string; value: any }>>();
+
 	for (const update of updates) {
 		const [panelId, categoryId, widgetId] = update.path.split('.');
 		if (!panelUpdates.has(panelId)) {
@@ -199,8 +202,8 @@ export async function setMultipleValues(updates: Array<{path: `${string}.${strin
 
 /** Internal function for batch setValue operations */
 async function performMultipleSetValues(
-	panelId: string, 
-	updates: Array<{categoryId: string, widgetId: string, value: any}>, 
+	panelId: string,
+	updates: Array<{ categoryId: string; widgetId: string; value: any }>,
 	createNew: boolean
 ): Promise<void> {
 	// Load fresh settings
@@ -216,7 +219,7 @@ async function performMultipleSetValues(
 	// Apply all updates to the same settings object
 	for (const update of updates) {
 		const { categoryId, widgetId, value } = update;
-		
+
 		if (!settings[categoryId]) {
 			if (createNew) {
 				settings[categoryId] = {};
@@ -224,21 +227,21 @@ async function performMultipleSetValues(
 				throw new Error(`The category '${categoryId}' doesn't exist.`);
 			}
 		}
-		
-		const category: {[key: string]: any} = settings[categoryId];
+
+		const category: { [key: string]: any } = settings[categoryId];
 		if (!Object.keys(category).includes(widgetId) && !createNew) {
 			throw new Error(`The widget '${widgetId}' doesn't exist.`);
 		}
-		
+
 		settings[categoryId][widgetId] = value;
 	}
 
 	// Update cache with new data
-	settingsCache[panelId] = { 
-		data: settings, 
-		timestamp: Date.now() 
+	settingsCache[panelId] = {
+		data: settings,
+		timestamp: Date.now(),
 	};
-	
+
 	await saveSettings(panelId, settings);
 }
 
@@ -285,7 +288,7 @@ export function cleanup(): void {
 		saveInterval = null;
 		hasInterval = false;
 	}
-	
+
 	// Clear all locks and cache
 	panelLocks.clear();
 	settingsCache = {};

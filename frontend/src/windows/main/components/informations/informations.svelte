@@ -12,7 +12,12 @@
 		},
 	];
 	const artists: Contributor[] = [
-		{ name: 'typeofnull', description: 'Maker of the current AppleBlox logo', avatar: 'https://i.imgur.com/caBlXK5.png', link: null },
+		{
+			name: 'typeofnull',
+			description: 'Maker of the current AppleBlox logo',
+			avatar: 'https://i.imgur.com/caBlXK5.png',
+			link: null,
+		},
 		{
 			name: 'abyzal.',
 			description: 'Maker of the first AppleBlox logo',

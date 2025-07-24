@@ -10,7 +10,7 @@
 
 	let mods: Mod[] = [];
 	let loadStatus = { error: false, loaded: false };
-	let searchTerm = "";
+	let searchTerm = '';
 	(async () => {
 		const loadModsResult = await loadMods();
 		if (!loadModsResult.success) {
@@ -28,8 +28,11 @@
 			class="fixed inset-0 bg-background bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center"
 			transition:fade={{ duration: 300, easing: quintOut }}
 		>
-			<div class="flex flex-col items-center space-y-4 text-center" transition:fade={{ duration: 500, delay: 200, easing: quintOut }}>
-				<TriangleAlert class="text-red-600 h-14 w-14"/>
+			<div
+				class="flex flex-col items-center space-y-4 text-center"
+				transition:fade={{ duration: 500, delay: 200, easing: quintOut }}
+			>
+				<TriangleAlert class="text-red-600 h-14 w-14" />
 				<h2 class="text-2xl font-bold text-foreground">Connection Error</h2>
 				<p class="text-muted-foreground max-w-md">
 					Unable to reach the marketplace API. Please check your internet connection and try again.
@@ -39,7 +42,7 @@
 					on:click={() => window.location.reload()}
 				>
 					Retry
-			</Button>
+				</Button>
 			</div>
 		</div>
 	{:else if loadStatus.loaded}
@@ -47,7 +50,7 @@
 		<div class="grid grid-cols-3 gap-5">
 			{#each mods as mod}
 				{#if searchTerm.length < 1 || mod.name.toLowerCase().includes(searchTerm.trim().toLowerCase())}
-				<ModCard {mod} />
+					<ModCard {mod} />
 				{/if}
 			{/each}
 		</div>

@@ -23,7 +23,7 @@ async function loadVersion() {
 	const plistPath = path.join(robloxPath, 'Contents/Info.plist');
 	const content = await shellFS.readFile(plistPath);
 	version = extractVersion(content);
-    console.info(`[Version] Found Roblox version "${version}"`);
+	console.info(`[Version] Found Roblox version "${version}"`);
 }
 
 loadVersion().catch(console.error);

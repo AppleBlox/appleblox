@@ -6,7 +6,7 @@
 	"url": "/",
 	"enableServer": true,
 	"enableNativeAPI": true,
-	"nativeAllowList": ["events.*", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*", "app.*","storage.*"],
+	"nativeAllowList": ["events.*", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*", "app.*", "storage.*"],
 	"exportAuthInfo": false,
 	"logging": {
 		"writeToLogFile": false,

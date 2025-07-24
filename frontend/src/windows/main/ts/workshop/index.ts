@@ -148,14 +148,14 @@ async function downloadAsset(modId: string, filename: string): Promise<ArrayBuff
 }
 
 async function downloadMod(
-	modId: string, 
-	downloadPath: string, 
+	modId: string,
+	downloadPath: string,
 	onProgress?: ProgressCallback
 ): Promise<{ success: boolean; error?: string }> {
 	if (mods.length < 1) await loadMods();
 	const modInfo = mods.find((m) => m.id === modId);
 	if (!modInfo) return { success: false, error: "Mod doesn't exist" };
-	
+
 	try {
 		console.log(`Starting download for mod: ${modId}`);
 		onProgress?.({ step: 'Initializing download...', progress: 0 });
@@ -168,7 +168,7 @@ async function downloadMod(
 		if (!cacheStatus.cached) {
 			console.log('Mod not cached, starting cache process...');
 			onProgress?.({ step: 'Starting server cache process...', progress: 10 });
-			
+
 			const cacheResult = await cacheModAssets(modId);
 			if (!cacheResult.success) {
 				return { success: false, error: cacheResult.error || 'Failed to cache mod' };
@@ -225,10 +225,10 @@ async function downloadMod(
 
 		for (const asset of assetsResponse.assets) {
 			const progressPercent = (downloadedCount / assetsResponse.totalAssets) * 80 + 20;
-			onProgress?.({ 
-				step: 'Downloading assets...', 
+			onProgress?.({
+				step: 'Downloading assets...',
 				progress: progressPercent,
-				currentAsset: asset.filename
+				currentAsset: asset.filename,
 			});
 
 			console.log(`Downloading asset: ${asset.filename} (${downloadedCount + 1}/${assetsResponse.totalAssets})`);

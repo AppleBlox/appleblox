@@ -22,7 +22,7 @@ class Roblox {
 	static Delegate = RobloxDelegate;
 	static launch = launchRoblox;
 	static path = robloxPath;
-	static Version = RobloxVersion
+	static Version = RobloxVersion;
 }
 
 export default Roblox;

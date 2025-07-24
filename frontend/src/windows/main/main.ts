@@ -37,7 +37,7 @@ async function quit() {
 			console.warn("[Main] Failed to write 'quit' to process output:", e);
 		}
 	}
-	await neuApp.exit().catch((e) => console.error('[Main] Error on neuApp.exit:', e));
+	await neuApp.exit(0).catch((e) => console.error('[Main] Error on neuApp.exit:', e));
 }
 
 events.on('ready', async () => {

@@ -11,7 +11,7 @@
 	export let onboardingLoaded = false;
 
 	let loadedSettings = false;
-	
+
 	// Initialize onboarding state
 	async function initOnboarding() {
 		try {
@@ -167,14 +167,14 @@
 		try {
 			// Collect all switch setting values
 			const values: Array<{ path: `${string}.${string}.${string}`; value: any }> = [];
-			
+
 			for (const step of steps) {
 				if (step.actions) {
 					for (const action of step.actions) {
 						if (action.type === 'switch' && action.settingKey && action.value !== undefined) {
-							values.push({ 
-								path: action.settingKey, 
-								value: action.value 
+							values.push({
+								path: action.settingKey,
+								value: action.value,
 							});
 						}
 					}
@@ -187,20 +187,19 @@
 			if (values.length > 0) {
 				await setMultipleValues(values, true);
 			}
-			
+
 			// Mark onboarding as complete
 			await saveSettings('onboarding_v2', { show: false });
-			
+
 			// Update UI state
 			onboardingLoaded = true;
-			
+
 			// Broadcast reload event
 			try {
 				events.broadcast('app:reload');
 			} catch (error) {
 				console.warn('Failed to broadcast reload event:', error);
 			}
-			
 		} catch (error) {
 			console.error('Failed to complete onboarding:', error);
 			// Still allow onboarding to complete even if settings fail
@@ -225,7 +224,7 @@
 		}
 
 		action.value = value;
-		
+
 		// Force reactivity by creating new array
 		steps = [...steps];
 	}
@@ -308,7 +307,9 @@
 											<h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight">
 												{currentStepData.title}
 											</h1>
-											<p class="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+											<p
+												class="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto"
+											>
 												{currentStepData.description}
 											</p>
 										</div>

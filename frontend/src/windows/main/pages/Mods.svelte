@@ -96,7 +96,7 @@
 			category
 				.setName('Custom Mods')
 				.setDescription(
-					"To install mods, drag files to the mods folder. Find mods in the AppleBlox discord server or Gamebanana."
+					'To install mods, drag files to the mods folder. Find mods in the AppleBlox discord server or Gamebanana.'
 				)
 				.setId('general')
 				.addButton({

@@ -7,12 +7,7 @@ let rpcOptions: RPCOptions = {
 	clientId: '1257650541677383721',
 };
 
-type GameMessage =
-	| string
-	| { data: RichPresence; command: 'SetRichPresence' }
-	| { data: SetWindowData; command: 'SetWindow' }
-	| { data: never; command: 'RestoreWindowState' | 'RestoreWindow' | 'ResetWindow' }
-	| { data: never; command: 'SaveWindowState' | 'SetWindowDefault' };
+type GameMessage = string | { data: RichPresence; command: 'SetRichPresence' };
 
 async function gameMessageEntry(messageData: GameEventInfo) {
 	if ((await getValue<boolean>('integrations.sdk.enabled')) !== true) return; // For now, game messages are only used for the SDK.
@@ -32,37 +27,6 @@ async function gameMessageEntry(messageData: GameEventInfo) {
 	if (typeof message === 'string') return; // We don't need to respond to messages so why bother continue :P
 	const { data, command } = message;
 	switch (command) {
-		// case 'SetWindow':
-		// 	if (data.reset) {
-		// 		RobloxWindow.reset();
-		// 		return;
-		// 	}
-
-		// 	let params: Partial<WindowData> = {};
-		// 	if (data.x) params.x = data.x;
-		// 	if (data.y) params.y = data.y;
-		// 	if (data.width) params.w = data.width;
-		// 	if (data.height) params.h = data.height;
-		// 	if (data.scaleWidth) params.screenScaleX = data.scaleWidth;
-		// 	if (data.scaleHeight) params.screenScaleY = data.scaleHeight;
-		// 	RobloxWindow.setWindow(params);
-		// 	break;
-		// case 'SetWindowDefault':
-		// 	// Exit fullscreen and maximize window
-		// 	RobloxWindow.setFullscreen(false).then(() => {
-		// 		sleep(500).then(() => {
-		// 			RobloxWindow.maximize();
-		// 		});
-		// 	});
-		// 	break;
-		// case 'RestoreWindow':
-		// case 'RestoreWindowState':
-		// case 'ResetWindow':
-		// 	RobloxWindow.reset();
-		// 	break;
-		// case 'SaveWindowState':
-		// 	RobloxWindow.saveState();
-		// 	break;
 		case 'SetRichPresence':
 			if (!((await getValue<boolean>('integrations.sdk.rpc')) === true)) return;
 			rpcOptions = {
