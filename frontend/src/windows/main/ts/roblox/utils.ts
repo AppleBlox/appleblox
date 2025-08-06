@@ -10,7 +10,7 @@ import { getMostRecentRoblox } from './path';
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
 	static async hasRoblox(popup = true): Promise<boolean> {
-		if (await shellFS.exists(path.join(await getMostRecentRoblox(), 'Contents/MacOS/RobloxPlayer'))) {
+		if (await shellFS.exists(await getMostRecentRoblox())) {
 			return true;
 		}
 		if (!popup) return false;
