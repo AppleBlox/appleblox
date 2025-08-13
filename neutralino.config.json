@@ -6,7 +6,16 @@
 	"url": "/",
 	"enableServer": true,
 	"enableNativeAPI": true,
-	"nativeAllowList": ["events.*", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*", "app.*", "storage.*"],
+	"nativeAllowList": [
+		"events.*",
+		"os.*",
+		"filesystem.*",
+		"window.*",
+		"clipboard.*",
+		"computer.*",
+		"app.*",
+		"storage.*"
+	],
 	"exportAuthInfo": false,
 	"logging": {
 		"writeToLogFile": false,
@@ -18,7 +27,7 @@
 			"hidden": true,
 			"title": "AppleBlox",
 			"width": 1150,
-			"height": 700,
+			"height": 720,
 			"minWidth": 400,
 			"minHeight": 200,
 			"icon": "/scripts/build/assets/mac.png",
@@ -33,8 +42,8 @@
 		"binaryName": "appleblox",
 		"resourcesPath": "/frontend/dist",
 		"extensionsPath": "/extensions/",
-		"binaryVersion": "5.1.0",
-		"clientVersion": "3.12.0",
+		"binaryVersion": "6.2.0",
+		"clientVersion": "6.2.0",
 		"frontendLibrary": {
 			"buildCommand": "true",
 			"patchFile": "/frontend/index.html",
