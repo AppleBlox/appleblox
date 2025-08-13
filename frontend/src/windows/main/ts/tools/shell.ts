@@ -251,7 +251,7 @@ export async function spawn(
 	let timeoutId: NodeJS.Timeout | null = null;
 
 	try {
-		const process = await os.spawnProcess(fullCommand, options.cwd);
+		const process = await os.spawnProcess(fullCommand, options);
 		const spawnedProcess = new SpawnedProcess(process.pid, process.id);
 		spawnedProcesses.set(process.id, spawnedProcess);
 
