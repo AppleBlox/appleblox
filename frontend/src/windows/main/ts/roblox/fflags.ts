@@ -19,12 +19,6 @@ export interface EditorFlag {
 	value: string;
 }
 
-let computerRefreshRate: number | null = null;
-async function getRefreshRate() {
-	computerRefreshRate = computerRefreshRate || (await computer.getDisplays())[0].refreshRate;
-	return computerRefreshRate;
-}
-
 /** Function used to build the flags list */
 async function buildFlagsList(): Promise<FastFlagsList> {
 	const flags = new FastFlagsList()
@@ -35,7 +29,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			flags: { DFIntTaskSchedulerTargetFps: '%s' },
 			path: 'fastflags.graphics.fps_target',
 			type: 'slider',
-			value: async (s) => (s as number[])[0] !== (await getRefreshRate()),
+			value: async (s) => ((s as number[])[0] !== 60) && (await getValue<SelectElement>('fastflags.graphics.engine')).value === 'vulkan',
 		})
 		// Graphics API
 		.addFlag({
