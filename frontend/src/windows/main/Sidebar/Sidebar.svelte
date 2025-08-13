@@ -22,6 +22,7 @@
 	import { getMode } from '../ts/utils';
 	import SidebarBtn from './sidebar-btn.svelte';
 	import ColorImage from '../components/color-image.svelte';
+	import * as Card from "$lib/components/ui/card/index";
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
@@ -79,9 +80,9 @@
 	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
 </script>
 
-<div class="h-full bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col" {id}>
+<Card.Root class="h-[96.5%] bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col my-3 ml-4" {id}>
 	<div class="flex flex-col">
-		<a
+		<!-- <a
 			href="https://github.com/AppleBlox/appleblox"
 			class="flex items-center justify-center mt-3"
 			target="_blank"
@@ -96,8 +97,8 @@
 		</a>
 		<div class="my-3 mx-3">
 			<Separator />
-		</div>
-		<div class="flex flex-col justify-start items-start flex-grow w-full">
+		</div> -->
+		<div class="flex flex-col justify-start items-start flex-grow w-full my-3">
 			{#each sidebarBtns as { label, id, icon }, index}
 				<SidebarBtn
 					position={{ total: sidebarBtns.length, index }}
@@ -130,4 +131,4 @@
 			</Button>
 		</div>
 	</div>
-</div>
+</Card.Root>
