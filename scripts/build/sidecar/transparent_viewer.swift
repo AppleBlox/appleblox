@@ -80,7 +80,7 @@ class ProcessMonitor {
                 let processes = output.components(separatedBy: .newlines)
                 return processes.contains { process in
                     let processName = process.lowercased()
-                    return processName.contains("appleblox") || processName.contains("ablox")
+                    return processName.contains("appleblox") || processName.contains("ablox") || processName.contains("neutralino")
                 }
             }
         } catch {
