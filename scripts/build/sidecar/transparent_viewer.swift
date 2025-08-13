@@ -28,12 +28,90 @@ class DraggableView: NSView {
     }
 }
 
+// Process monitoring utility
+class ProcessMonitor {
+    private var parentPID: pid_t
+    private var timer: Timer?
+    
+    init(parentPID: pid_t) {
+        self.parentPID = parentPID
+    }
+    
+    func startMonitoring() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            self.checkProcesses()
+        }
+    }
+    
+    func stopMonitoring() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    private func checkProcesses() {
+        // Check if parent process is still alive
+        if kill(parentPID, 0) != 0 {
+            print("Parent process (PID: \(parentPID)) is no longer running. Exiting...")
+            NSApp.terminate(nil)
+            return
+        }
+        
+        // Check if AppleBlox or ablox process exists
+        if !isTargetProcessRunning() {
+            print("No AppleBlox or ablox process detected. Exiting...")
+            NSApp.terminate(nil)
+        }
+    }
+    
+    private func isTargetProcessRunning() -> Bool {
+        let task = Process()
+        let pipe = Pipe()
+        
+        task.launchPath = "/bin/ps"
+        task.arguments = ["-axo", "comm"]
+        task.standardOutput = pipe
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                let processes = output.components(separatedBy: .newlines)
+                return processes.contains { process in
+                    let processName = process.lowercased()
+                    return processName.contains("appleblox") || processName.contains("ablox")
+                }
+            }
+        } catch {
+            print("Error checking processes: \(error)")
+        }
+        
+        return false
+    }
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKScriptMessageHandler {
     var window: NSWindow!
     var webView: WKWebView!
     var visualEffectView: NSVisualEffectView!
+    var processMonitor: ProcessMonitor?
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // Set up process monitoring
+        let parentPID = getppid()
+        processMonitor = ProcessMonitor(parentPID: parentPID)
+        
+        // Initial check - exit immediately if no target process found
+        if !isTargetProcessRunning() {
+            print("No AppleBlox or ablox process detected at startup. Exiting...")
+            NSApp.terminate(nil)
+            return
+        }
+        
+        // Start monitoring
+        processMonitor?.startMonitoring()
+        
         // Parse command line arguments for window size
         let args = CommandLine.arguments
         var windowWidth: CGFloat = 800
@@ -157,6 +235,34 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKScri
         
         // Prevent app from terminating when window closes
         NSApp.setActivationPolicy(.accessory)
+    }
+    
+    // Helper function to check if target process is running
+    private func isTargetProcessRunning() -> Bool {
+        let task = Process()
+        let pipe = Pipe()
+        
+        task.launchPath = "/bin/ps"
+        task.arguments = ["-axo", "comm"]
+        task.standardOutput = pipe
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                let processes = output.components(separatedBy: .newlines)
+                return processes.contains { process in
+                    let processName = process.lowercased()
+                    return processName.contains("appleblox") || processName.contains("ablox")
+                }
+            }
+        } catch {
+            print("Error checking processes: \(error)")
+        }
+        
+        return false
     }
     
     // MARK: - WKNavigationDelegate
@@ -392,12 +498,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKScri
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return false
+        return true // Changed to true so app exits when window closes
     }
     
-    // Override terminate to prevent standard quit behavior
+    // Allow terminate now since we have process monitoring
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        return .terminateCancel
+        processMonitor?.stopMonitoring()
+        return .terminateNow
+    }
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        processMonitor?.stopMonitoring()
     }
 }
 
