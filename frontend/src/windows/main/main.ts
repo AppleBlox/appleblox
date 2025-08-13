@@ -21,13 +21,30 @@ init();
 
 let isDeeplinkLaunch = false;
 let mainAppMounted = false;
+let isQuitting = false;
 
 async function quit() {
+	if (isQuitting) return; // Prevent multiple quit attempts
+	isQuitting = true;
+
 	console.info('[Main] Exiting app');
-	await RPCController.stop().catch((e) => console.warn('[Main] Error stopping RPC controller:', e));
-	await shell('pkill', ['-f', '_ablox'], { skipStderrCheck: true }).catch((e) =>
-		console.warn('[Main] Failed to pkill _ablox on quit:', e)
-	);
+
+	// Make quit operations non-blocking
+	setTimeout(async () => {
+		try {
+			await RPCController.stop();
+		} catch (e) {
+			console.warn('[Main] Error stopping RPC controller:', e);
+		}
+	}, 0);
+
+	setTimeout(async () => {
+		try {
+			await shell('pkill', ['-f', '_ablox'], { skipStderrCheck: true });
+		} catch (e) {
+			console.warn('[Main] Failed to pkill _ablox on quit:', e);
+		}
+	}, 0);
 
 	if (window.NL_ARGS.includes('--mode=browser') && mainAppMounted) {
 		// Only write quit if main app was potentially loaded
@@ -37,11 +54,26 @@ async function quit() {
 			console.warn("[Main] Failed to write 'quit' to process output:", e);
 		}
 	}
-	await neuApp.exit(0).catch((e) => console.error('[Main] Error on neuApp.exit:', e));
+
+	// Give background cleanup a moment, then exit
+	setTimeout(async () => {
+		try {
+			await neuApp.exit(0);
+		} catch (e) {
+			console.error('[Main] Error on neuApp.exit:', e);
+		}
+	}, 100);
 }
 
 events.on('ready', async () => {
-	await loadTheme();
+	// Make theme loading non-blocking
+	setTimeout(async () => {
+		try {
+			await loadTheme();
+		} catch (e) {
+			console.warn('[Main] Error loading theme:', e);
+		}
+	}, 0);
 
 	const deeplinkArg = window.NL_ARGS.find((arg) => arg.includes('--deeplink='));
 	isDeeplinkLaunch = !!deeplinkArg;
@@ -52,15 +84,33 @@ events.on('ready', async () => {
 
 		try {
 			console.info(`[Main] Deeplink: Initiating Roblox launch with URL: ${url}`);
-			await Roblox.launch(
-				(isConnected) => console.log(`[Main Deeplink] Roblox Connected: ${isConnected}`),
-				(isLaunching) => console.log(`[Main Deeplink] Launching Roblox State: ${isLaunching}`),
-				async (title, description, code, flagNames) => {},
-				url,
-				false
-			);
-			// AppleBlox will stay running in the background to manage Roblox process / RPC
-			// Main UI never loaded.
+
+			// Make deeplink launch non-blocking
+			setTimeout(async () => {
+				try {
+					await Roblox.launch(
+						(isConnected) => console.log(`[Main Deeplink] Roblox Connected: ${isConnected}`),
+						(isLaunching) => console.log(`[Main Deeplink] Launching Roblox State: ${isLaunching}`),
+						async (title, description, code, flagNames) => {},
+						url,
+						false
+					);
+					// AppleBlox will stay running in the background to manage Roblox process / RPC
+					// Main UI never loaded.
+				} catch (error) {
+					const errorMessage = `Critical error during deeplink launch: ${error instanceof Error ? error.message : String(error)}`;
+					console.error(`[Main] ${errorMessage}`);
+					try {
+						await os.showMessageBox('Deeplink Launch Failed', errorMessage, os.MessageBoxChoice.OK);
+					} catch (dialogError) {
+						console.error(
+							'[Main Deeplink] Failed to show native error dialog for critical launch failure:',
+							dialogError
+						);
+					}
+					await neuApp.exit(1); // Exit if deeplink launch fails critically
+				}
+			}, 0);
 		} catch (error) {
 			const errorMessage = `Critical error during deeplink launch: ${error instanceof Error ? error.message : String(error)}`;
 			console.error(`[Main] ${errorMessage}`);
@@ -74,42 +124,83 @@ events.on('ready', async () => {
 	} else {
 		// No deeplink: Normal application startup
 		console.info('[Main] No deeplink detected, loading main application UI.');
-		await neuWindow.show();
-		if (getMode() === 'prod') {
-			try {
-				await focusWindow();
-			} catch (e) {
-				console.warn('[Main] Failed to focus main window:', e);
-			}
-		}
 
-		const appTarget = document.getElementById('app');
-		if (appTarget) {
-			new App({
-				target: appTarget,
-			});
-			mainAppMounted = true;
-		} else {
-			console.error('[Main] Fatal: #app element not found in index.html for Svelte app mounting.');
-			await os.showMessageBox('Startup Error', 'Could not initialize the main application UI.', os.MessageBoxChoice.OK);
-			await neuApp.exit(1);
+		// Make window showing non-blocking
+		setTimeout(async () => {
+			try {
+				await neuWindow.show();
+				if (getMode() === 'prod') {
+					try {
+						await focusWindow();
+					} catch (e) {
+						console.warn('[Main] Failed to focus main window:', e);
+					}
+				}
+			} catch (e) {
+				console.warn('[Main] Error showing window:', e);
+			}
+		}, 0);
+
+		// Make app mounting non-blocking
+
+		try {
+			const appTarget = document.getElementById('app');
+			if (appTarget) {
+				new App({
+					target: appTarget,
+				});
+				mainAppMounted = true;
+				console.info('[Main] Main application UI mounted successfully.');
+			} else {
+				console.error('[Main] Fatal: #app element not found in index.html for Svelte app mounting.');
+				setTimeout(async () => {
+					try {
+						await os.showMessageBox(
+							'Startup Error',
+							'Could not initialize the main application UI.',
+							os.MessageBoxChoice.OK
+						);
+						await neuApp.exit(1);
+					} catch (e) {
+						console.error('[Main] Error showing startup error dialog:', e);
+					}
+				}, 0);
+			}
+		} catch (e) {
+			console.error('[Main] Error mounting Svelte app:', e);
 		}
 	}
 
-	setTimeout(async () => {
+	// Make debug logging non-blocking
+	try {
 		console.info(`NeutralinoJS: Running at http://localhost:${window.NL_PORT}`);
 		logDebugInfo();
-	}, 500);
+	} catch (e) {
+		console.warn('[Main] Error logging debug info:', e);
+	}
 });
 
-events.on('windowClose', quit);
-events.on('exitApp', quit);
+events.on('windowClose', () => {
+	// Make quit non-blocking
+	setTimeout(() => {
+		quit();
+	}, 0);
+});
+
+events.on('exitApp', () => {
+	// Make quit non-blocking
+	setTimeout(() => {
+		quit();
+	}, 0);
+});
 
 if (window.NL_ARGS.includes('--mode=browser')) {
 	window.addEventListener('beforeunload', () => {
-		if (mainAppMounted) {
+		if (mainAppMounted && !isQuitting) {
 			// Only attempt full quit if main app was likely running
-			quit();
+			setTimeout(() => {
+				quit();
+			}, 0);
 		}
 	});
 }
