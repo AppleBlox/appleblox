@@ -118,7 +118,7 @@ export class RobloxInstance {
 	private pollCount = 0;
 	private lastPerformanceLog = 0;
 	private readonly PERFORMANCE_LOG_INTERVAL = 5000; // Log performance stats every 5 seconds
-	
+
 	// Non-blocking processing queue
 	private processingQueue: string[][] = [];
 	private isProcessing = false;
@@ -162,7 +162,7 @@ export class RobloxInstance {
 			await shell('open', [url]);
 			console.info(`[Roblox.Instance] Opening Roblox from URL.`);
 		} else {
-			await shell('open', ['-b', 'com.roblox.RobloxPlayer']); // Experimental voice chat fix (we launch by bundle id instead of using roblox's binary path)
+			await shell('open', ['roblox-player:']); // Experimental voice chat fix (we launch by deeplink instead of binary path)
 			console.info(`[Roblox.Instance] Opening Roblox from path.`);
 		}
 
@@ -230,7 +230,9 @@ export class RobloxInstance {
 			// Log performance stats every 5 seconds
 			if (currentTime - this.lastPerformanceLog >= this.PERFORMANCE_LOG_INTERVAL) {
 				const pollRate = this.pollCount / (this.PERFORMANCE_LOG_INTERVAL / 1000);
-				console.debug(`[Roblox.Instance] Poll rate: ${pollRate.toFixed(1)}Hz, Queue size: ${this.processingQueue.length}`);
+				console.debug(
+					`[Roblox.Instance] Poll rate: ${pollRate.toFixed(1)}Hz, Queue size: ${this.processingQueue.length}`
+				);
 				this.pollCount = 0;
 				this.lastPerformanceLog = currentTime;
 			}
@@ -344,21 +346,21 @@ export class RobloxInstance {
 				// Read initial content in chunks to avoid blocking
 				const chunkSize = this.BATCH_SIZE;
 				let position = 0;
-				
+
 				while (position < initialStats.size) {
 					const readSize = Math.min(chunkSize, initialStats.size - position);
 					const chunk = await filesystem.readFile(this.latestLogPath, {
 						pos: position,
 						size: readSize,
 					});
-					
+
 					const lines = chunk.split('\n');
 					this.queueProcessing(lines);
-					
+
 					position += readSize;
-					
+
 					// Yield control to prevent blocking
-					await new Promise(resolve => setTimeout(resolve, 0));
+					await new Promise((resolve) => setTimeout(resolve, 0));
 				}
 
 				// Set position after processing initial content
