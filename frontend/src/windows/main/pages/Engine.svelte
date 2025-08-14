@@ -41,30 +41,31 @@
 						value: 'vulkan',
 					},
 				})
-				.addSelect({
-					label: 'Lighting Technology',
-					description: 'Override game lighting technology',
-					id: 'lightning',
-					items: [
-						{ label: 'Default', value: 'default' },
-						{ label: 'Voxel', value: 'voxel' },
-						{ label: 'ShadowMap', value: 'shadowmap' },
-						{ label: 'Future', value: 'future' },
-					],
-					default: 'default',
-				})
-				.addSwitch({
-					label: 'Disable Voxel Shadows',
-					description:
-						'Remove shadows when using Voxel lighting <br><span style="color: hsl(var(--warning));">Requires Voxel lightning (Option above).</span>',
-					id: 'disable_voxel_shadows',
-					default: false,
-					toggleable: {
-						id: 'lightning',
-						type: 'select',
-						value: 'voxel',
-					},
-				})
+				// Removed by Roblox
+				// .addSelect({
+				// 	label: 'Lighting Technology',
+				// 	description: 'Override game lighting technology',
+				// 	id: 'lightning',
+				// 	items: [
+				// 		{ label: 'Default', value: 'default' },
+				// 		{ label: 'Voxel', value: 'voxel' },
+				// 		{ label: 'ShadowMap', value: 'shadowmap' },
+				// 		{ label: 'Future', value: 'future' },
+				// 	],
+				// 	default: 'default',
+				// })
+				// .addSwitch({
+				// 	label: 'Disable Voxel Shadows',
+				// 	description:
+				// 		'Remove shadows when using Voxel lighting <br><span style="color: hsl(var(--warning));">Requires Voxel lightning (Option above).</span>',
+				// 	id: 'disable_voxel_shadows',
+				// 	default: false,
+				// 	toggleable: {
+				// 		id: 'lightning',
+				// 		type: 'select',
+				// 		value: 'voxel',
+				// 	},
+				// })
 				.addSwitch({
 					label: 'Separate Quality & Distance',
 					description:

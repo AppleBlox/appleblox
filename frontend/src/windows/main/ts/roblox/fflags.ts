@@ -57,36 +57,36 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			value: 'vulkan',
 		})
 		// Lightning
-		.addFlag({
-			name: 'Lightning Technology (Voxel)',
-			flags: { DFFlagDebugRenderForceTechnologyVoxel: true },
-			path: 'fastflags.graphics.lightning',
-			type: 'select',
-			value: 'voxel',
-		})
-		.addFlag({
-			name: 'Lightning Technology (Shadowmap)',
-			flags: { FFlagDebugForceFutureIsBrightPhase2: true },
-			path: 'fastflags.graphics.lightning',
-			type: 'select',
-			value: 'shadowmap',
-		})
-		.addFlag({
-			name: 'Lightning Technology (Future)',
-			flags: { FFlagDebugForceFutureIsBrightPhase3: true },
-			path: 'fastflags.graphics.lightning',
-			type: 'select',
-			value: 'future',
-		})
-		// Voxel shadow
-		.addFlag({
-			name: 'Disable Voxel shadows',
-			flags: { DFFlagDebugPauseVoxelizer: true },
-			path: 'fastflags.graphics.disable_voxel_shadows',
-			type: 'switch',
-			value: async (settingValue) =>
-				settingValue === true && (await getValue<SelectElement>('fastflags.graphics.lightning')).value === 'voxel',
-		})
+		// .addFlag({
+		// 	name: 'Lightning Technology (Voxel)',
+		// 	flags: { DFFlagDebugRenderForceTechnologyVoxel: true },
+		// 	path: 'fastflags.graphics.lightning',
+		// 	type: 'select',
+		// 	value: 'voxel',
+		// })
+		// .addFlag({
+		// 	name: 'Lightning Technology (Shadowmap)',
+		// 	flags: { FFlagDebugForceFutureIsBrightPhase2: true },
+		// 	path: 'fastflags.graphics.lightning',
+		// 	type: 'select',
+		// 	value: 'shadowmap',
+		// })
+		// .addFlag({
+		// 	name: 'Lightning Technology (Future)',
+		// 	flags: { FFlagDebugForceFutureIsBrightPhase3: true },
+		// 	path: 'fastflags.graphics.lightning',
+		// 	type: 'select',
+		// 	value: 'future',
+		// })
+		// // Voxel shadow
+		// .addFlag({
+		// 	name: 'Disable Voxel shadows',
+		// 	flags: { DFFlagDebugPauseVoxelizer: true },
+		// 	path: 'fastflags.graphics.disable_voxel_shadows',
+		// 	type: 'switch',
+		// 	value: async (settingValue) =>
+		// 		settingValue === true && (await getValue<SelectElement>('fastflags.graphics.lightning')).value === 'voxel',
+		// })
 		// Graphics w/ render distance
 		.addFlag({
 			name: 'Graphics Quality',
