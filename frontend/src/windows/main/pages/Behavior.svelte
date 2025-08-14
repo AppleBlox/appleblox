@@ -9,6 +9,7 @@
 	import Panel from '../components/settings/panel.svelte';
 	import type { SettingsOutput } from '../components/settings/types';
 	import Roblox from '../ts/roblox';
+	import MultiInstanceWarning from './Behavior/multi-instance-warning.svelte';
 
 	export let render = true;
 
@@ -55,33 +56,6 @@
 		.setId('roblox') // Not updating the ID to preserve old settings
 		.addCategory((category) =>
 			category
-				.setName('Multiple Instances')
-				.setDescription('Run multiple Roblox instances simultaneously')
-				.setId('multi_instances')
-				.addButton({
-					label: 'Enable Multi-Instance',
-					description: 'Update patch to allow multiple Roblox windows',
-					id: 'multi_roblox_btn',
-					variant: 'default',
-					icon: { component: CopyCheck },
-				})
-				.addButton({
-					label: 'New Instance',
-					description: 'Open an additional Roblox instance',
-					id: 'open_instance_btn',
-					variant: 'secondary',
-					icon: { component: PictureInPicture },
-				})
-				.addButton({
-					label: 'Close All',
-					description: 'Force close all Roblox windows (You should save your progress first)',
-					id: 'close_roblox_btn',
-					variant: 'destructive',
-					icon: { component: BugOff },
-				})
-		)
-		.addCategory((category) =>
-			category
 				.setName('Bootstrapper Behavior')
 				.setDescription('Control how Roblox launches and how AppleBlox should handle each instance')
 				.setId('behavior')
@@ -117,6 +91,39 @@
 					id: 'create_shortcut_btn',
 					variant: 'default',
 					icon: { component: Play },
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Multiple Instances')
+				.setDescription('Run multiple Roblox instances simultaneously')
+				.setId('multi_instances')
+				.addCustom({
+					component: MultiInstanceWarning,
+					id: 'multi_instance_warning',
+					label: '',
+					description: '',
+				})
+				.addButton({
+					label: 'Enable Multi-Instance',
+					description: 'Update patch to allow multiple Roblox windows',
+					id: 'multi_roblox_btn',
+					variant: 'default',
+					icon: { component: CopyCheck },
+				})
+				.addButton({
+					label: 'New Instance',
+					description: 'Open an additional Roblox instance',
+					id: 'open_instance_btn',
+					variant: 'secondary',
+					icon: { component: PictureInPicture },
+				})
+				.addButton({
+					label: 'Close All',
+					description: 'Force close all Roblox windows (You should save your progress first)',
+					id: 'close_roblox_btn',
+					variant: 'destructive',
+					icon: { component: BugOff },
 				})
 		)
 		.build();

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
@@ -13,7 +12,7 @@
 	import SillyCat from '@/assets/panel/silly.webp';
 	import { events, filesystem, os } from '@neutralinojs/lib';
 	import type { Selected } from 'bits-ui';
-	import { Gamepad2, Import, Plus, Trash2, TriangleAlert, Upload } from 'lucide-svelte';
+	import { Gamepad2, Import, Plus, Trash2, Upload } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import {
@@ -28,10 +27,10 @@
 	} from '.';
 	import { formatConsoleLog } from '../../ts/debugging';
 	import shellFS from '../../ts/tools/shellfs';
-	import Combox from '../combox.svelte';
 	import LoadingSpinner from '../loading-spinner.svelte';
 	import FlagTable from './flag-table.svelte';
 	import SmallButton from './small-button.svelte';
+	import Alert from '../alert.svelte';
 
 	type SelectElement = Selected<string>;
 
@@ -227,13 +226,11 @@
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
-	<Alert.Root variant="warning" class="mt-4">
-		<TriangleAlert class="h-5 w-5" />
-		<Alert.Title class="ml-2">Be careful</Alert.Title>
-		<Alert.Description class="ml-2"
-			>FastFlags are normally used by Roblox engineers. Don't paste anything you don't understand!</Alert.Description
-		>
-	</Alert.Root>
+	<Alert
+		description="FastFlags are normally used by Roblox engineers. Don't paste anything you don't understand!"
+		title="Be careful"
+		variant="warning"
+	/>
 
 	<div class="flex items-center justify-center mt-5">
 		<div class="flex justify-center items-center">
