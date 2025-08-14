@@ -49,6 +49,7 @@ async function main(downloadNeuBinaries = false, createBinaries = false) {
 	let bpath: string;
 	if (process.platform !== 'win32') {
 		bpath = resolve(`./bin/neutralino-${binaryOS}_${process.arch}`);
+
 		chmodSync(bpath, '755');
 	} else {
 		bpath = `start ${resolve(`./bin/neutralino-${binaryOS}_x64.exe`)}`;
@@ -64,7 +65,7 @@ async function main(downloadNeuBinaries = false, createBinaries = false) {
 }
 
 function checkSidecar(): boolean {
-	const files = ['alerter_ablox', 'discordrpc_ablox', 'urlscheme_ablox', 'window_manager_ablox', 'bootstrap_ablox'];
+	const files = ['alerter_ablox', 'discordrpc_ablox', 'urlscheme_ablox', 'bootstrap_ablox'];
 	for (const file of files) {
 		const filePath = resolve(join('bin', file));
 		if (!existsSync(filePath)) return false;

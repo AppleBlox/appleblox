@@ -2,53 +2,61 @@ import BuildConfig from '@root/build.config';
 import { $ } from 'bun';
 import { resolve } from 'node:path';
 import { Signale } from 'signale';
-import { linuxBuild } from './linux-bundle';
 import { macBuild } from './mac-bundle';
 import { buildSidecar } from './sidecar';
-import { buildViteAndNeu } from './utils';
-import { winBuild } from './win-bundle';
+import { buildViteAndNeu, getArchitectureFilter } from './utils';
 
 const { argv } = process;
 
 export async function build() {
 	$.cwd(process.cwd());
 	const initTime = performance.now();
-	const logger = new Signale();
-	await $`rm -rf "${resolve('dist')}"`;
-	await $`rm -rf "${resolve('.tmpbuild')}"`;
+	const logger = new Signale({ scope: 'sequential-build' });
+	
+	// Parse environment variables for selective building
+	const architectureFilter = getArchitectureFilter();
+	
+	logger.info(`Building AppleBlox for macOS${architectureFilter ? ` (${architectureFilter})` : ' (all architectures)'} - Sequential Mode`);
 
-	if (!BuildConfig.mac && !BuildConfig.win && !BuildConfig.linux) {
-		console.log('Skipping build, no target set in build.config.ts.');
-		return;
+	// Clean build directories
+	if (!argv.includes('--no-clean')) {
+		await $`rm -rf "${resolve('dist')}"`;
+		await $`rm -rf "${resolve('.tmpbuild')}"`;
 	}
 
-	await buildSidecar();
-	await buildViteAndNeu(!argv.includes('--no-vite'));
-
-	if (BuildConfig.mac) {
-		await macBuild();
-	}
-	if (BuildConfig.win) {
-		await winBuild();
-	}
-	if (BuildConfig.linux) {
-		await linuxBuild();
+	if (!BuildConfig.mac) {
+		logger.fatal('No macOS configuration found in build.config.ts');
+		process.exit(1);
 	}
 
+	// Build macOS sidecar binaries
+	if (!argv.includes('--no-sidecar')) {
+		await buildSidecar();
+	}
+
+	// Build Vite and Neutralino
+	if (!argv.includes('--no-vite')) {
+		await buildViteAndNeu(true);
+	}
+
+	// Build macOS app bundles
+	await macBuild(architectureFilter);
+
+	// Move build artifacts
 	await $`rm -rf "${resolve('dist')}"`;
 	await $`cp -r "${resolve('.tmpbuild')}" "${resolve('dist')}"`;
 	await $`rm -rf "${resolve('.tmpbuild')}"`;
-	logger.success(`Built in ${((performance.now() - initTime) / 1000).toFixed(3)}s`);
-	switch (process.platform) {
-		case 'linux':
-		case 'darwin':
-			await $`open ${resolve('./dist')}`;
-			break;
-		case 'win32':
-			await $`start ${resolve('./dist')}`;
-			break;
+	
+	logger.success(`Sequential macOS build completed in ${((performance.now() - initTime) / 1000).toFixed(3)}s`);
+	
+	// Open dist folder
+	if (!argv.includes('--no-open')) {
+		await $`open ${resolve('./dist')}`;
 	}
+	
 	process.exit(0);
 }
 
-build();
+if (import.meta.main) {
+	build();
+}
