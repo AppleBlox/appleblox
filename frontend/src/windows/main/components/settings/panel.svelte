@@ -193,7 +193,7 @@
 			</Card.Root>
 			<!-- Categories -->
 			{#each panel.categories || [] as category (category.id)}
-				<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-3 p-5 w-[95%]">
+				<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-4 p-5 w-[95%]">
 					<div>
 						<!-- Category Description -->
 						<p class="text-xl font-bold text-primary">{category.name}</p>
