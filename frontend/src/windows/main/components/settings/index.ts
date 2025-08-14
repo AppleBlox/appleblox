@@ -128,6 +128,8 @@ export interface PanelWidget {
 	options: WidgetOptions;
 	/** Toggleable option referencing another widget */
 	toggleable?: ToggleableOption;
+	/** Add a separator at the top */
+	separator?: boolean;
 }
 
 export interface Category {
@@ -342,6 +344,7 @@ class CategoryBuilder {
 		label: string;
 		description: string;
 		id: string;
+		separator?: boolean;
 		component: ComponentType<SvelteComponent>;
 		toggleable?: ToggleableOption;
 	}) {
@@ -350,6 +353,7 @@ class CategoryBuilder {
 			description: params.description,
 			id: params.id,
 			toggleable: params.toggleable,
+			separator: params.separator,
 			options: { type: 'custom', component: params.component },
 		};
 		this.category.widgets.push(widget);

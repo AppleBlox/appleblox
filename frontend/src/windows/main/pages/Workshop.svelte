@@ -12,7 +12,7 @@
 				.setName('')
 				.setDescription('')
 				.setId('general')
-				.addCustom({ label: '', description: '', id: 'theme_input', component: Workshop })
+				.addCustom({ label: '', description: '', id: 'theme_input', component: Workshop, separator: false })
 		)
 		.build();
 </script>

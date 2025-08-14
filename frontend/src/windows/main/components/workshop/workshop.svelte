@@ -46,7 +46,7 @@
 			</div>
 		</div>
 	{:else if loadStatus.loaded}
-		<Input type="text" placeholder="Search for mods..." class="pl-8 mt-2 mb-4" bind:value={searchTerm} />
+		<Input type="text" placeholder="Search for mods..." class="pl-8 mb-4" bind:value={searchTerm} />
 		<div class="grid grid-cols-3 gap-5">
 			{#each mods as mod}
 				{#if searchTerm.length < 1 || mod.name.toLowerCase().includes(searchTerm.trim().toLowerCase())}
