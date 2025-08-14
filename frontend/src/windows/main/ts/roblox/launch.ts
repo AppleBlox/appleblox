@@ -15,6 +15,7 @@ import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
 import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
+import { Notification } from '../tools/notifications';
 
 let allowFixedDelays = true;
 getValue<boolean>('misc.advanced.allow_fixed_loading_times')
@@ -75,12 +76,12 @@ async function validateFlags(showFlagErrorPopup: LaunchHandlers['showFlagErrorPo
 	if (allowFixedDelays) await sleep(300);
 
 	// Make flag parsing non-blocking
-	const presetFlags = await new Promise((resolve) => {
+	const presetFlags = (await new Promise((resolve) => {
 		setTimeout(async () => {
 			const result = await RobloxFFlags.parseFlags(true);
 			resolve(result);
 		}, 0);
-	}) as any;
+	})) as any;
 
 	if (Object.keys(presetFlags.invalidFlags).length > 0 && checkFlags) {
 		await showFlagErrorPopup(
@@ -95,12 +96,12 @@ async function validateFlags(showFlagErrorPopup: LaunchHandlers['showFlagErrorPo
 	if (allowFixedDelays) await sleep(300);
 
 	// Make flag parsing non-blocking
-	const editorFlags = await new Promise((resolve) => {
+	const editorFlags = (await new Promise((resolve) => {
 		setTimeout(async () => {
 			const result = await RobloxFFlags.parseFlags(false);
 			resolve(result);
 		}, 0);
-	}) as any;
+	})) as any;
 
 	if (editorFlags.invalidFlags.length > 0 && checkFlags) {
 		await showFlagErrorPopup(
@@ -245,7 +246,7 @@ async function prepareRobloxSettings(robloxPath: string, fflags: any): Promise<v
 				await updateBootstrapper('bootstrapper:progress', { progress: 50 });
 				if (allowFixedDelays) await sleep(300);
 				await shellFS.writeFile(settingsFile, JSON.stringify(fflags));
-				
+
 				resolve();
 			} catch (err) {
 				console.error('[Launch] Error preparing Roblox settings:', err);
@@ -283,7 +284,7 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 					if (allowFixedDelays) await sleep(350);
 					await sleep(500);
 				}
-				
+
 				resolve();
 			} catch (err) {
 				console.error('[Launch] Error applying mods:', err);
@@ -295,7 +296,7 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	await updateBootstrapper('bootstrapper:text', { text: 'Initializing Roblox instance...' });
 	await updateBootstrapper('bootstrapper:progress', { progress: 80 });
 	if (allowFixedDelays) await sleep(400);
-	
+
 	const robloxInstance = new RobloxInstance(true);
 	await robloxInstance.init();
 
@@ -304,7 +305,7 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	if (allowFixedDelays) await sleep(450);
 
 	await cleanupBootstrapper();
-	
+
 	// Make Roblox startup non-blocking
 	await new Promise<void>((resolve) => {
 		setTimeout(async () => {
@@ -343,7 +344,7 @@ async function setupRobloxInstance(
 	robloxInstance.on('gameEvent', onGameEvent);
 	robloxInstance.on('exit', async () => {
 		console.info('[Launch] Roblox instance exited');
-		
+
 		// Make cleanup operations non-blocking
 		setTimeout(async () => {
 			try {
@@ -357,7 +358,7 @@ async function setupRobloxInstance(
 				console.error('[Launch] Error during cleanup:', err);
 			}
 		}, 0);
-		
+
 		handlers.setRobloxConnected(false);
 		rbxInstance = null;
 		handlers.setLaunchingRoblox(false);
@@ -399,16 +400,8 @@ export async function launchRoblox(
 		console.info('[Launch] Preparing to launch Roblox...');
 
 		// Make flag validation non-blocking
-		const fflags = await new Promise((resolve) => {
-			setTimeout(async () => {
-				try {
-					const result = await validateFlags(showFlagErrorPopup, checkFlags);
-					resolve(result);
-				} catch (err) {
-					console.error('[Launch] Error validating flags:', err);
-					resolve({});
-				}
-			}, 0);
+		const fflags = await validateFlags(showFlagErrorPopup, checkFlags).catch((err) => {
+			console.error('[Launch] Error validating flags:', err);
 		});
 
 		if (!robloxUrl) await setWindowVisibility(false);
@@ -419,16 +412,9 @@ export async function launchRoblox(
 		if (allowFixedDelays) await sleep(250);
 
 		// Make Roblox check non-blocking
-		const hasRoblox = await new Promise<boolean>((resolve) => {
-			setTimeout(async () => {
-				try {
-					const result = await RobloxUtils.hasRoblox(!(robloxUrl !== null));
-					resolve(result);
-				} catch (err) {
-					console.error('[Launch] Error checking Roblox installation:', err);
-					resolve(false);
-				}
-			}, 0);
+		console.debug(`Has roblox: ${robloxUrl} ${robloxUrl === undefined}`);
+		const hasRoblox = await RobloxUtils.hasRoblox(robloxUrl === undefined).catch((err) => {
+			console.error('[Launch] Error checking Roblox installation:', err);
 		});
 
 		if (!hasRoblox) {
@@ -436,7 +422,22 @@ export async function launchRoblox(
 			await cleanupBootstrapper();
 			setLaunchingRoblox(false);
 			if (robloxUrl) {
-				await events.broadcast('exitApp');
+				const installNotif = new Notification({
+					title: 'Failed to launch',
+					content: 'AppleBlox could not find the Roblox installation. Make sure it is correctly installed.',
+					actions: [{ label: 'Download', value: 'download' }],
+					sound: 'hero',
+					timeout: 30,
+				});
+				const closeAppHandler = () => events.broadcast('exitApp');
+				installNotif.on('action', (action) => {
+					if (action.value == 'download') os.open('https://roblox.com/download');
+					events.broadcast('exitApp');
+				});
+				installNotif.on('closed', closeAppHandler);
+				installNotif.on('clicked', closeAppHandler);
+				installNotif.on('timeout', closeAppHandler);
+				installNotif.show();
 			} else {
 				neuWindow.show();
 			}
@@ -449,7 +450,7 @@ export async function launchRoblox(
 		try {
 			const robloxInstance = await applyModsAndLaunch(settings, robloxUrl);
 			await setupRobloxInstance(robloxInstance, settings, handlers);
-			console.info("[Launch] Set up roblox instance!")
+			console.info('[Launch] Set up roblox instance!');
 
 			// Schedule cleanup of settings file in background
 			setTimeout(async () => {
@@ -470,7 +471,7 @@ export async function launchRoblox(
 					console.error('[Launch] Error during error cleanup:', cleanupErr);
 				}
 			}, 0);
-			
+
 			console.error(err);
 			toast.error('An error occurred while starting Roblox.');
 
