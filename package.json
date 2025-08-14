@@ -17,6 +17,7 @@
 		"dmg:x64": "BUILD_ARCH=x64 bun run scripts/build/ts/dmg.ts",
 		"dmg:universal": "BUILD_ARCH=universal bun run scripts/build/ts/dmg.ts",
 		"release": "bun run build && bun run dmg",
+		"release:sequential": "bun run build:sequential && bun run dmg:arm64 && bun run dmg:x64 && bun run dmg:universal",
 		"release:arm64": "bun run build:arm64 && bun run dmg:arm64",
 		"release:x64": "bun run build:x64 && bun run dmg:x64",
 		"release:universal": "bun run build:universal && bun run dmg:universal",

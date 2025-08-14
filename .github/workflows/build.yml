@@ -37,7 +37,7 @@ jobs:
         continue-on-error: false
 
       - name: Build and package app
-        run: bun run release
+        run: bun run release:sequential
         continue-on-error: false
 
       - name: Get version from package.json
