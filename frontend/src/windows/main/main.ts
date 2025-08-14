@@ -24,12 +24,11 @@ let mainAppMounted = false;
 let isQuitting = false;
 
 async function quit() {
-	if (isQuitting) return; // Prevent multiple quit attempts
+	if (isQuitting) return;
 	isQuitting = true;
 
 	console.info('[Main] Exiting app');
 
-	// Make quit operations non-blocking
 	setTimeout(async () => {
 		try {
 			await RPCController.stop();
@@ -65,7 +64,7 @@ async function quit() {
 	}, 100);
 }
 
-events.on('ready', async () => {
+events.on('appReady', async () => {
 	// Make theme loading non-blocking
 	setTimeout(async () => {
 		try {
@@ -80,12 +79,12 @@ events.on('ready', async () => {
 
 	if (isDeeplinkLaunch && deeplinkArg) {
 		console.info('[Main] Deeplink detected:', deeplinkArg);
-		const url = deeplinkArg.slice(11);
-
+		let url = deeplinkArg.slice(11);
 		try {
 			console.info(`[Main] Deeplink: Initiating Roblox launch with URL: ${url}`);
-
-			// Make deeplink launch non-blocking
+			if (url === 'appleblox://launch') {
+				url = 'roblox-player:';
+			}
 			setTimeout(async () => {
 				try {
 					await Roblox.launch(
@@ -181,14 +180,12 @@ events.on('ready', async () => {
 });
 
 events.on('windowClose', () => {
-	// Make quit non-blocking
 	setTimeout(() => {
 		quit();
 	}, 0);
 });
 
 events.on('exitApp', () => {
-	// Make quit non-blocking
 	setTimeout(() => {
 		quit();
 	}, 0);
@@ -197,7 +194,6 @@ events.on('exitApp', () => {
 if (window.NL_ARGS.includes('--mode=browser')) {
 	window.addEventListener('beforeunload', () => {
 		if (mainAppMounted && !isQuitting) {
-			// Only attempt full quit if main app was likely running
 			setTimeout(() => {
 				quit();
 			}, 0);

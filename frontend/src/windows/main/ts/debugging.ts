@@ -1,4 +1,4 @@
-import { filesystem } from '@neutralinojs/lib';
+import { filesystem, events } from '@neutralinojs/lib';
 import { version } from '@root/package.json';
 import path from 'path-browserify';
 import { getConfigPath, loadSettings } from '../components/settings';
@@ -13,6 +13,8 @@ interface LoggerState {
 	overriddenConsoleFunctions: boolean;
 	logPath: string | null;
 	initializationError: Error | null;
+	isInitialized: boolean;
+	enabledByDefault: boolean;
 }
 
 interface LogEntry {
@@ -42,6 +44,8 @@ const state: LoggerState = {
 	overriddenConsoleFunctions: false,
 	logPath: null,
 	initializationError: null,
+	isInitialized: false,
+	enabledByDefault: true,
 };
 
 const originalConsoleMethods: Partial<Record<ConsoleMethod, Function>> = {
@@ -536,25 +540,81 @@ class ConsoleManager {
 
 (async () => {
 	try {
-		const settings = await loadSettings('misc');
-		if (!settings) return;
-
-		state.isRedirectionEnabled = settings.advanced.redirect_console;
-		if (state.isRedirectionEnabled) {
+		if (state.enabledByDefault) {
+			state.isRedirectionEnabled = true;
 			state.logPath = await LogFileManager.createLogPath();
+			
 			if (state.logPath) {
 				const success = await LogFileManager.ensureLogFile(state.logPath);
 				if (success) {
 					ConsoleManager.override();
+					console.info('[Logger] Console redirection enabled by default');
+					events.broadcast('appReady');
 				} else {
 					state.initializationError = new Error('Failed to ensure log file');
+					state.isRedirectionEnabled = false;
 				}
 			} else {
 				state.initializationError = new Error('Failed to create log path');
+				state.isRedirectionEnabled = false;
 			}
 		}
+
+		state.isInitialized = true;
+
+		setTimeout(async () => {
+			try {
+				const settings = await loadSettings('misc');
+				
+				if (settings) {
+					const shouldBeEnabled = settings.advanced.redirect_console;
+					
+					if (!shouldBeEnabled && state.isRedirectionEnabled) {
+						console.info('[Logger] Settings indicate console redirection should be disabled, disabling...');
+						disableConsoleRedirection();
+					}
+					else if (shouldBeEnabled && !state.isRedirectionEnabled) {
+						console.info('[Logger] Settings indicate console redirection should be enabled, attempting to enable...');
+						await enableConsoleRedirection();
+					}
+					else if (shouldBeEnabled === state.isRedirectionEnabled) {
+						console.info(`[Logger] Console redirection is ${state.isRedirectionEnabled ? 'enabled' : 'disabled'} as configured`);
+					}
+				} else {
+					console.info('[Logger] No settings found, console redirection status:', state.isRedirectionEnabled ? 'enabled' : 'disabled');
+				}
+				
+				setTimeout(() => {
+					if (state.isRedirectionEnabled && !state.initializationError) {
+						console.info('[Logger] Testing console redirection - this message should be logged to file');
+						
+						setTimeout(async () => {
+							try {
+								if (state.logPath) {
+									const testEntry = LogFormatter.formatLogEntry('INFO', ['[Logger] Redirection test successful']);
+									const success = await LogFileManager.appendToLog(state.logPath, testEntry);
+									
+									if (!success) {
+										console.warn('[Logger] Redirection test failed, disabling console redirection');
+										disableConsoleRedirection();
+									}
+								}
+							} catch (error) {
+								console.warn('[Logger] Redirection test error, disabling console redirection:', error);
+								disableConsoleRedirection();
+							}
+						}, 1000);
+					}
+				}, 500);
+				
+			} catch (error) {
+				console.warn('[Logger] Failed to load settings for console redirection check:', error);
+			}
+		}, 100);
+		
 	} catch (error) {
 		state.initializationError = error instanceof Error ? error : new Error('Unknown initialization error');
+		state.isInitialized = true;
 		originalConsoleMethods.error?.call(console, 'Logger initialization failed:', error);
 	}
 })();
@@ -583,20 +643,23 @@ export async function enableConsoleRedirection(): Promise<boolean> {
 		state.logPath = await LogFileManager.createLogPath();
 		if (!state.logPath) {
 			state.initializationError = new Error('Failed to create log path');
+			state.isRedirectionEnabled = false;
 			return false;
 		}
 
 		const success = await LogFileManager.ensureLogFile(state.logPath);
 		if (!success) {
 			state.initializationError = new Error('Failed to ensure log file');
+			state.isRedirectionEnabled = false;
 			return false;
 		}
 
 		ConsoleManager.override();
-		console.info('[Debugging] Enabled console redirection');
+		console.info('[Logger] Console redirection enabled');
 		return true;
 	} catch (error) {
 		state.initializationError = error instanceof Error ? error : new Error('Unknown error');
+		state.isRedirectionEnabled = false;
 		originalConsoleMethods.error?.call(console, 'Failed to enable console redirection:', error);
 		return false;
 	}
@@ -607,16 +670,24 @@ export function disableConsoleRedirection(): void {
 		state.isRedirectionEnabled = false;
 		state.initializationError = null;
 		ConsoleManager.restore();
-		console.info('[Debugging] Disabled console redirection');
+		console.info('[Logger] Console redirection disabled');
 	} catch (error) {
 		originalConsoleMethods.error?.call(console, 'Failed to disable console redirection:', error);
 	}
 }
 
-export function getLoggerStatus(): { enabled: boolean; error: string | null; logPath: string | null } {
+export function getLoggerStatus(): { 
+	enabled: boolean; 
+	error: string | null; 
+	logPath: string | null; 
+	initialized: boolean;
+	enabledByDefault: boolean;
+} {
 	return {
 		enabled: state.isRedirectionEnabled,
 		error: state.initializationError?.message || null,
 		logPath: state.logPath,
+		initialized: state.isInitialized,
+		enabledByDefault: state.enabledByDefault,
 	};
 }
