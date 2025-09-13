@@ -35,7 +35,7 @@
 		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },
 		{ label: 'Engine', id: 'engine', icon: EngineIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
-		{ label: 'Workshop', id: 'Workshop', icon: WorkshopIcon },
+		// { label: 'Workshop', id: 'Workshop', icon: WorkshopIcon },
 		{ label: 'Appearance', id: 'appearance', icon: AppearanceIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Info', id: 'info', icon: CreditsIcon },
