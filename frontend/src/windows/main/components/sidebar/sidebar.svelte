@@ -22,10 +22,13 @@
 	import SidebarBtn from './sidebar-btn.svelte';
 	import ColorImage from '../color-image.svelte';
 	import * as Card from '$lib/components/ui/card/index';
+	import Roblox from '../../ts/roblox';
+	import RobloxDownloadDialog from '../roblox/roblox-download-dialog.svelte';
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
 	export let id: string;
+	let showInstallDialog = false;
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
@@ -81,22 +84,6 @@
 
 <Card.Root class="h-[96.5%] bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col my-3 ml-4" {id}>
 	<div class="flex flex-col">
-		<!-- <a
-			href="https://github.com/AppleBlox/appleblox"
-			class="flex items-center justify-center mt-3"
-			target="_blank"
-			rel="noreferrer"
-			on:click={() => {
-				os.open('https://github.com/AppleBlox/appleblox').catch((err) => {
-					console.error('[UI.Sidebar] ', err);
-				});
-			}}
-		>
-			<p class="text-primary font-bold font-mono text-2xl">AppleBlox</p>
-		</a>
-		<div class="my-3 mx-3">
-			<Separator />
-		</div> -->
 		<div class="flex flex-col justify-start items-start flex-grow w-full my-3">
 			{#each sidebarBtns as { label, id, icon }, index}
 				<SidebarBtn
@@ -117,12 +104,18 @@
 		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
 			<Button
 				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0' : 'bg-green-500/85 hover:bg-green-500/60'} font-mono w-full transition-all duration-200 group`}
-				on:click={() => {
+				on:click={async () => {
 					if (isLaunched) {
 						events.broadcast('instance:quit').catch(console.error);
 						return;
 					}
-					dispatch('launchRoblox', true);
+
+					const robloxInstalled = await Roblox.Utils.hasRoblox();
+					if (robloxInstalled) {
+						dispatch('launchRoblox', true);
+					} else {
+						showInstallDialog = true;
+					}
 				}}
 			>
 				<ColorImage src={buttonIcon} alt="Button icon" class="w-5 h-5 mr-1 mt-[1px]" color="white" />
@@ -131,3 +124,5 @@
 		</div>
 	</div>
 </Card.Root>
+
+<RobloxDownloadDialog bind:open={showInstallDialog} />

@@ -413,7 +413,7 @@ export async function launchRoblox(
 
 		// Make Roblox check non-blocking
 		console.debug(`Has roblox: ${robloxUrl} ${robloxUrl === undefined}`);
-		const hasRoblox = await RobloxUtils.hasRoblox(robloxUrl === undefined).catch((err) => {
+		const hasRoblox = await RobloxUtils.hasRoblox().catch((err) => {
 			console.error('[Launch] Error checking Roblox installation:', err);
 		});
 
@@ -424,8 +424,7 @@ export async function launchRoblox(
 			if (robloxUrl) {
 				const installNotif = new Notification({
 					title: 'Failed to launch',
-					content: 'AppleBlox could not find the Roblox installation. Make sure it is correctly installed.',
-					actions: [{ label: 'Download', value: 'download' }],
+					content: 'AppleBlox could not find the Roblox installation. Launch Roblox from the AppleBlox app to try to resolve this issue.',
 					sound: 'hero',
 					timeout: 30,
 				});
