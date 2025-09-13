@@ -41,23 +41,20 @@ async function quit() {
 		console.warn('[Main] Failed to pkill _ablox on quit:', e);
 	}
 
-	// if (window.NL_ARGS.includes('--mode=browser') && mainAppMounted) {
-	// 	// Only write quit if main app was potentially loaded
-	try {
-		neuApp.writeProcessOutput('quit');
-	} catch (e) {
-		console.warn("[Main] Failed to write 'quit' to process output:", e);
-		await neuApp.exit(0);
+	if (window.NL_ARGS.includes('--mode=browser')) {
+		// 	// Only write quit if main app was potentially loaded
+		try {
+			neuApp.writeProcessOutput('quit');
+		} catch (e) {
+			console.warn("[Main] Failed to write 'quit' to process output:", e);
+			await neuApp.exit(0);
+		}
 	}
-	// }
-
-	// setTimeout(async () => {
-	// 	try {
-	// 		await neuApp.exit(0);
-	// 	} catch (e) {
-	// 		console.error('[Main] Error on neuApp.exit:', e);
-	// 	}
-	// }, 100);
+	if (getMode() === 'dev') {
+		await neuApp.exit(0);
+	} else {
+		shell(`osascript -e 'tell application id "ch.origaming.appleblox" to quit'`, [], { completeCommand: true });
+	}
 }
 
 events.on('appReady', async () => {
