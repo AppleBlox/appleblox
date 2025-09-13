@@ -12,7 +12,7 @@ import { loadTheme } from './components/theme-input/theme';
 import Roblox from './ts/roblox';
 import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
-import { getMode } from './ts/utils';
+import { getMode, sleep } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
 import { focusWindow } from './ts/window';
 
@@ -29,39 +29,35 @@ async function quit() {
 
 	console.info('[Main] Exiting app');
 
-	setTimeout(async () => {
-		try {
-			await RPCController.stop();
-		} catch (e) {
-			console.warn('[Main] Error stopping RPC controller:', e);
-		}
-	}, 0);
-
-	setTimeout(async () => {
-		try {
-			await shell('pkill', ['-f', '_ablox'], { skipStderrCheck: true });
-		} catch (e) {
-			console.warn('[Main] Failed to pkill _ablox on quit:', e);
-		}
-	}, 0);
-
-	if (window.NL_ARGS.includes('--mode=browser') && mainAppMounted) {
-		// Only write quit if main app was potentially loaded
-		try {
-			neuApp.writeProcessOutput('quit');
-		} catch (e) {
-			console.warn("[Main] Failed to write 'quit' to process output:", e);
-		}
+	try {
+		await RPCController.stop();
+	} catch (e) {
+		console.warn('[Main] Error stopping RPC controller:', e);
 	}
 
-	// Give background cleanup a moment, then exit
-	setTimeout(async () => {
-		try {
-			await neuApp.exit(0);
-		} catch (e) {
-			console.error('[Main] Error on neuApp.exit:', e);
-		}
-	}, 100);
+	try {
+		await shell('pkill', ['-f', '_ablox'], { skipStderrCheck: true });
+	} catch (e) {
+		console.warn('[Main] Failed to pkill _ablox on quit:', e);
+	}
+
+	// if (window.NL_ARGS.includes('--mode=browser') && mainAppMounted) {
+	// 	// Only write quit if main app was potentially loaded
+	try {
+		neuApp.writeProcessOutput('quit');
+	} catch (e) {
+		console.warn("[Main] Failed to write 'quit' to process output:", e);
+		await neuApp.exit(0);
+	}
+	// }
+
+	// setTimeout(async () => {
+	// 	try {
+	// 		await neuApp.exit(0);
+	// 	} catch (e) {
+	// 		console.error('[Main] Error on neuApp.exit:', e);
+	// 	}
+	// }, 100);
 }
 
 events.on('appReady', async () => {
@@ -139,8 +135,6 @@ events.on('appReady', async () => {
 				console.warn('[Main] Error showing window:', e);
 			}
 		}, 0);
-
-		// Make app mounting non-blocking
 
 		try {
 			const appTarget = document.getElementById('app');

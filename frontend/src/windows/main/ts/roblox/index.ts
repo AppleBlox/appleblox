@@ -1,4 +1,5 @@
 import { RobloxDelegate } from './delegate';
+import { RobloxDownloader } from './downloader';
 import { RobloxFFlags } from './fflags';
 import { RobloxInstance } from './instance';
 import { launchRoblox } from './launch';
@@ -23,6 +24,7 @@ class Roblox {
 	static launch = launchRoblox;
 	static path = robloxPath;
 	static Version = RobloxVersion;
+	static Downloader = RobloxDownloader;
 }
 
 export default Roblox;
