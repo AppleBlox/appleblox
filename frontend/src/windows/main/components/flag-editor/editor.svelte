@@ -214,7 +214,7 @@
 				<a
 					href="_blank"
 					on:click={() => {
-						events.dispatch('ui:change_page', { id: 'fastflags' });
+						events.dispatch('ui:change_page', { id: 'engine' });
 					}}
 				>
 					Fast Flags

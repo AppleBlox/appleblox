@@ -27,9 +27,9 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		.addFlag({
 			name: 'FPS Target',
 			flags: { DFIntTaskSchedulerTargetFps: '%s' },
-			path: 'fastflags.graphics.fps_target',
+			path: 'engine.graphics.fps_target',
 			type: 'slider',
-			value: async (s) => ((s as number[])[0] !== 60) && (await getValue<SelectElement>('fastflags.graphics.engine')).value === 'vulkan',
+			value: async (s) => ((s as number[])[0] !== 60) && (await getValue<SelectElement>('engine.graphics.engine')).value === 'vulkan',
 		})
 		// Graphics API
 		.addFlag({
@@ -38,21 +38,21 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 				FFlagDebugGraphicsDisableMetal: true,
 				FFlagDebugGraphicsPreferOpenGL: true,
 			},
-			path: 'fastflags.graphics.engine',
+			path: 'engine.graphics.engine',
 			type: 'select',
 			value: 'opengl',
 		})
 		.addFlag({
 			name: 'Graphics API (Metal)',
 			flags: { FFlagDebugGraphicsPreferMetal: true },
-			path: 'fastflags.graphics.engine',
+			path: 'engine.graphics.engine',
 			type: 'select',
 			value: 'metal',
 		})
 		.addFlag({
 			name: 'Graphics API (Vulkan)',
 			flags: { FFlagDebugGraphicsPreferVulkan: true, FFlagDebugGraphicsDisableMetal: true },
-			path: 'fastflags.graphics.engine',
+			path: 'engine.graphics.engine',
 			type: 'select',
 			value: 'vulkan',
 		})
@@ -60,21 +60,21 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		// .addFlag({
 		// 	name: 'Lightning Technology (Voxel)',
 		// 	flags: { DFFlagDebugRenderForceTechnologyVoxel: true },
-		// 	path: 'fastflags.graphics.lightning',
+		// 	path: 'engine.graphics.lightning',
 		// 	type: 'select',
 		// 	value: 'voxel',
 		// })
 		// .addFlag({
 		// 	name: 'Lightning Technology (Shadowmap)',
 		// 	flags: { FFlagDebugForceFutureIsBrightPhase2: true },
-		// 	path: 'fastflags.graphics.lightning',
+		// 	path: 'engine.graphics.lightning',
 		// 	type: 'select',
 		// 	value: 'shadowmap',
 		// })
 		// .addFlag({
 		// 	name: 'Lightning Technology (Future)',
 		// 	flags: { FFlagDebugForceFutureIsBrightPhase3: true },
-		// 	path: 'fastflags.graphics.lightning',
+		// 	path: 'engine.graphics.lightning',
 		// 	type: 'select',
 		// 	value: 'future',
 		// })
@@ -82,25 +82,25 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		// .addFlag({
 		// 	name: 'Disable Voxel shadows',
 		// 	flags: { DFFlagDebugPauseVoxelizer: true },
-		// 	path: 'fastflags.graphics.disable_voxel_shadows',
+		// 	path: 'engine.graphics.disable_voxel_shadows',
 		// 	type: 'switch',
 		// 	value: async (settingValue) =>
-		// 		settingValue === true && (await getValue<SelectElement>('fastflags.graphics.lightning')).value === 'voxel',
+		// 		settingValue === true && (await getValue<SelectElement>('engine.graphics.lightning')).value === 'voxel',
 		// })
 		// Graphics w/ render distance
 		.addFlag({
 			name: 'Graphics Quality',
 			flags: { DFIntDebugFRMQualityLevelOverride: '%s' },
-			path: 'fastflags.graphics.quality_distance',
+			path: 'engine.graphics.quality_distance',
 			type: 'slider',
 			value: async (settingValue) =>
-				settingValue === true && (await getValue<boolean>('fastflags.graphics.quality_distance_toggle')) === true,
+				settingValue === true && (await getValue<boolean>('engine.graphics.quality_distance_toggle')) === true,
 		})
 		// PostFX
 		.addFlag({
 			name: 'Visual Effects',
 			flags: { FFlagDisablePostFx: true },
-			path: 'fastflags.graphics.postfx',
+			path: 'engine.graphics.postfx',
 			type: 'switch',
 			value: false,
 		})
@@ -111,7 +111,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 				DFIntCSGLevelOfDetailSwitchingDistance: 0,
 				DFIntCSGLevelOfDetailSwitchingDistanceL12: 0,
 			},
-			path: 'fastflags.graphics.lod',
+			path: 'engine.graphics.lod',
 			type: 'switch',
 			value: true,
 		})
@@ -119,7 +119,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		.addFlag({
 			name: 'Fractional Scaling',
 			flags: { DFFlagDisableDPIScale: true },
-			path: 'fastflags.graphics.fracscaling',
+			path: 'engine.graphics.fracscaling',
 			type: 'switch',
 			value: true,
 		})
@@ -128,7 +128,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		.addFlag({
 			name: 'Player textures',
 			flags: { DFIntTextureCompositorActiveJobs: 0 },
-			path: 'fastflags.visual.player_textures',
+			path: 'engine.visual.player_textures',
 			type: 'switch',
 			value: false,
 		})
@@ -136,7 +136,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		.addFlag({
 			name: 'Debug Sky',
 			flags: { FFlagDebugSkyGray: true },
-			path: 'fastflags.visual.debug_sky',
+			path: 'engine.visual.debug_sky',
 			type: 'switch',
 			value: true,
 		})
@@ -152,7 +152,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 				FIntNewInGameMenuPercentRollout3: 100,
 				FFlagEnableInGameMenuChromeABTest4: false,
 			},
-			path: 'fastflags.ui.menu_version',
+			path: 'engine.ui.menu_version',
 			type: 'select',
 			value: 'v2',
 		})
@@ -161,7 +161,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		.addFlag({
 			name: 'Hide GUI',
 			flags: { DFIntCanHideGuiGroupId: 8699949 },
-			path: 'fastflags.utility.gui',
+			path: 'engine.utility.gui',
 			type: 'switch',
 			value: true,
 		})
@@ -177,7 +177,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 				FFlagDebugDisableTelemetryV2Event: true,
 				FFlagDebugDisableTelemetryV2Stat: true,
 			},
-			path: 'fastflags.utility.telemetry',
+			path: 'engine.utility.telemetry',
 			type: 'switch',
 			value: true,
 		});
