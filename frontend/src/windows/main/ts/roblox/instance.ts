@@ -156,9 +156,9 @@ export class RobloxInstance {
 		if (this.gameInstance) throw new Error('An instance is already running');
 
 		console.info('[Roblox.Instance] Opening Roblox instance');
-
+		await RobloxDelegate.toggle(false);
+		
 		if (url) {
-			await RobloxDelegate.toggle(false);
 			await shell('open', [url]);
 			console.info(`[Roblox.Instance] Opening Roblox from URL.`);
 		} else {
