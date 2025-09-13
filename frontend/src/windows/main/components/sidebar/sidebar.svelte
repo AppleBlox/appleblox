@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { os, events } from '@neutralinojs/lib';
 	import { createEventDispatcher } from 'svelte';
-	import { version } from '../../../../../package.json';
+	import { version } from '../../../../../../package.json';
 
 	import EngineIcon from '@/assets/sidebar/engine.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
@@ -11,18 +10,18 @@
 	import ModsIcon from '@/assets/sidebar/mods.png';
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
-	import WorkshopIcon from '@/assets/sidebar/Workshop.png';
+	import WorkshopIcon from '@/assets/sidebar/workshop.png';
 
 	import CreditsIcon from '@/assets/sidebar/info.png';
 	import MiscIcon from '@/assets/sidebar/misc.png';
 
 	import Button from '$lib/components/ui/button/button.svelte';
 	import path from 'path-browserify';
-	import shellFS from '../ts/tools/shellfs';
-	import { getMode } from '../ts/utils';
+	import shellFS from '../../ts/tools/shellfs';
+	import { getMode } from '../../ts/utils';
 	import SidebarBtn from './sidebar-btn.svelte';
-	import ColorImage from '../components/color-image.svelte';
-	import * as Card from "$lib/components/ui/card/index";
+	import ColorImage from '../color-image.svelte';
+	import * as Card from '$lib/components/ui/card/index';
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';

@@ -4,12 +4,13 @@
 	import { BugOff, CopyCheck, PictureInPicture, Play } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
-	import LoadingSpinner from '../components/loading-spinner.svelte';
-	import { SettingsPanelBuilder } from '../components/settings';
-	import Panel from '../components/settings/panel.svelte';
-	import type { SettingsOutput } from '../components/settings/types';
-	import Roblox from '../ts/roblox';
-	import MultiInstanceWarning from './Behavior/multi-instance-warning.svelte';
+	import LoadingSpinner from '../../components/loading-spinner.svelte';
+	import RobloxDownloadButton from '../../components/roblox/roblox-download-button.svelte';
+	import { SettingsPanelBuilder } from '../../components/settings';
+	import Panel from '../../components/settings/panel.svelte';
+	import type { SettingsOutput } from '../../components/settings/types';
+	import Roblox from '../../ts/roblox';
+	import MultiInstanceWarning from './multi-instance-warning.svelte';
 
 	export let render = true;
 
@@ -91,6 +92,12 @@
 					id: 'create_shortcut_btn',
 					variant: 'default',
 					icon: { component: Play },
+				}).addCustom({
+					label: "",
+					description: "",
+					id: "download_roblox",
+					component: RobloxDownloadButton,
+					separator: false
 				})
 		)
 		.addCategory((category) =>

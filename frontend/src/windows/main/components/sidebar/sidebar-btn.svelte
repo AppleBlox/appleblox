@@ -3,7 +3,7 @@
 	export let icon: string;
 	export let id: string;
 	import { createEventDispatcher } from 'svelte';
-	import ColorImage from '../components/color-image.svelte';
+	import ColorImage from '../color-image.svelte';
 
 	export let currentPage: string;
 	export let position: { total: number; index: number };

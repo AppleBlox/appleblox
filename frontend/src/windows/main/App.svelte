@@ -13,14 +13,14 @@
 	import Onboarding from './components/onboarding/onboarding.svelte';
 	import Updater from './components/updater.svelte';
 	import Appearance from './pages/Appearance.svelte';
-	import BehaviorPage from './pages/Behavior.svelte';
+	import BehaviorPage from './pages/Behavior/page.svelte';
 	import Dev from './pages/Dev.svelte';
 	import Engine from './pages/Engine.svelte';
 	import Support from './pages/Info.svelte';
 	import Integrations from './pages/Integrations.svelte';
 	import Misc from './pages/Misc.svelte';
 	import Mods from './pages/Mods.svelte';
-	import Sidebar from './sidebar/sidebar.svelte';
+	import Sidebar from './components/sidebar/sidebar.svelte';
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils/';
 	import Workshop from './pages/Workshop.svelte';
