@@ -171,6 +171,31 @@
 		selectedFlags = selectedFlags; // Trigger reactivity
 	}
 
+	// Batch enable/disable functions
+	function batchToggleEnabled(enableState: boolean): void {
+		if (selectedFlags.size < 1) return;
+		
+		let changedCount = 0;
+		for (const flagIndex of selectedFlags) {
+			if (flags[flagIndex].enabled !== enableState) {
+				flags[flagIndex].enabled = enableState;
+				changedCount++;
+			}
+		}
+		
+		if (changedCount > 0) {
+			flags = flags; // Trigger reactivity
+			dispatch('update', flags);
+			const action = enableState ? 'enabled' : 'disabled';
+		}
+	}
+
+	// Get the state of selected flags for batch control
+	$: selectedFlagStates = Array.from(selectedFlags).map(index => flags[index]?.enabled).filter(state => state !== undefined);
+	$: allSelectedEnabled = selectedFlagStates.length > 0 && selectedFlagStates.every(state => state === true);
+	$: allSelectedDisabled = selectedFlagStates.length > 0 && selectedFlagStates.every(state => state === false);
+	$: mixedSelectedStates = selectedFlagStates.length > 0 && !allSelectedEnabled && !allSelectedDisabled;
+
 	$: filteredFlags = flags
 		.filter((flag: EditorFlag) => flag.flag.toLowerCase().includes(searchTerm.toLowerCase()))
 		.sort((a: EditorFlag, b: EditorFlag) => {
@@ -190,7 +215,7 @@
 	}
 </script>
 
-<Card.Root class="p-4 w-full mr-[5px]">
+<Card.Root class="p-4 w-[95%] mr-8">
 	<div class="flex gap-2 mb-4">
 		<Button on:click={addFlag} variant="outline"><Plus class="h-5 w-5 mr-2" />Add Flag</Button>
 		<Button on:click={showImportFlagsDialog} variant="outline"><Braces class="h-5 w-5 mr-2" />Import</Button>
@@ -223,7 +248,24 @@
 				</Table.Head>
 				<Table.Head><div class="w-[100px]">Flag</div></Table.Head>
 				<Table.Head>Value</Table.Head>
-				<Table.Head class="w-[100px]">Enabled</Table.Head>
+				<Table.Head class="w-[100px]">
+					<div class="flex items-center gap-2">
+						<span>Enabled</span>
+						{#if selectedFlags.size > 0}
+							<div class="flex items-center gap-1 ml-2">
+								<Switch
+									checked={allSelectedEnabled}
+									onCheckedChange={(checked) => batchToggleEnabled(checked)}
+									class={`scale-75 ${mixedSelectedStates ? 'opacity-60' : ''}`}
+									disabled={selectedFlags.size === 0}
+								/>
+								<span class="text-xs text-muted-foreground">
+									({selectedFlags.size})
+								</span>
+							</div>
+						{/if}
+					</div>
+				</Table.Head>
 				<Table.Head class="w-[50px]"></Table.Head>
 			</Table.Row>
 		</Table.Header>
