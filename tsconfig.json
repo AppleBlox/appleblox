@@ -1,6 +1,7 @@
 {
 	"extends": "@tsconfig/svelte/tsconfig.json",
 	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
 		"target": "ESNext",
 		"lib": ["DOM", "ESNext"],
 		"useDefineForClassFields": true,
