@@ -91,11 +91,10 @@
 
 		{#if mods.length > 0}
 			{#each mods as mod (mod.filename)}
-				<Separator class="my-3" />
+				<Separator class="" />
 				<div class="flex items-center" transition:fade={{ duration: 100 }}>
 					<div>
-						<p class="font-semibold text-[#0a0808] dark:text-red-100">{mod.filename}</p>
-						<p class="text-[13px] text-neutral-700 dark:text-neutral-200">{mod.path}</p>
+						<p class="font-semibold text-[#0a0808] dark:text-red-100 text-2xl my-1">{mod.filename}</p>
 					</div>
 					<Switch
 						checked={mod.state}
@@ -118,5 +117,4 @@
 			</div>
 		{/if}
 	</Card.Header>
-	<Card.Footer class="flex justify-between"></Card.Footer>
 </Card.Root>
