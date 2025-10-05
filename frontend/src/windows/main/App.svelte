@@ -176,7 +176,7 @@
 				{/if}
 			</div>
 			<AlertDialog.Root bind:open={launchInfo.flagPopup.show}>
-				<AlertDialog.Content class="h-96 flex flex-col">
+				<AlertDialog.Content class="h-auto flex flex-col">
 					<AlertDialog.Header class="flex-shrink-0">
 						<AlertDialog.Title>{launchInfo.flagPopup.title}</AlertDialog.Title>
 					</AlertDialog.Header>
@@ -186,7 +186,7 @@
 						</div>
 						<Code code={launchInfo.flagPopup.code} class="mt-7 overflow-y-scroll max-h-36" />
 					</AlertDialog.Description>
-					<AlertDialog.Footer class="flex-shrink-0">
+					<AlertDialog.Footer class="">
 						<AlertDialog.Cancel
 							on:click={() => {
 								flagErrorPopupRemoveFlags = false;
