@@ -1,15 +1,36 @@
-import { computer, filesystem } from '@neutralinojs/lib';
+import { filesystem } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import { getAllProfiles, getSelectedProfile, writeProfile, type Profile } from '../../components/flag-editor';
 import { getConfigPath, getValue, loadSettings } from '../../components/settings';
-import type { SelectElement, SettingsOutput } from '../../components/settings/types';
-import { Curl } from '../tools/curl';
+import type { SettingsOutput } from '../../components/settings/types';
 import shellFS from '../tools/shellfs';
-import { isUrlReachable } from '../utils';
 import { getMostRecentRoblox } from './path';
 
-const FLAGS_WHITELIST = ['FFlagDebugGraphicsDisableMetal'];
+const ALLOWED_FLAGS = [
+	// Geometry
+	'DFIntCSGLevelOfDetailSwitchingDistance',
+	'DFIntCSGLevelOfDetailSwitchingDistanceL12',
+	'DFIntCSGLevelOfDetailSwitchingDistanceL23',
+	'DFIntCSGLevelOfDetailSwitchingDistanceL34',
+	// Rendering
+	'FFlagHandleAltEnterFullscreenManually',
+	'DFFlagTextureQualityOverrideEnabled',
+	'DFIntTextureQualityOverride',
+	'FIntDebugForceMSAASamples',
+	'DFFlagDisableDPIScale',
+	'FFlagDebugGraphicsPreferD3D11',
+	'FFlagDebugSkyGray',
+	'DFFlagDebugPauseVoxelizer',
+	'DFIntDebugFRMQualityLevelOverride',
+	'FIntFRMMaxGrassDistance',
+	'FIntFRMMinGrassDistance',
+	'FFlagDebugGraphicsPreferVulkan',
+	'FFlagDebugGraphicsPreferOpenGL',
+	'FFlagDebugGraphicsDisableMetal',
+	// User Interface
+	'FIntGrassMovementReducedMotionFactor',
+];
 
 export type FastFlag = string | boolean | null | number;
 export type FFs = { [key: string]: FastFlag };
@@ -24,13 +45,13 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 	const flags = new FastFlagsList()
 		// GRAPHICS
 		// Unlock FPS
-		.addFlag({
-			name: 'FPS Target',
-			flags: { DFIntTaskSchedulerTargetFps: '%s' },
-			path: 'engine.graphics.fps_target',
-			type: 'slider',
-			value: async (s) => ((s as number[])[0] !== 60) && (await getValue<SelectElement>('engine.graphics.engine')).value === 'vulkan',
-		})
+		// .addFlag({
+		// 	name: 'FPS Target',
+		// 	flags: { DFIntTaskSchedulerTargetFps: '%s' },
+		// 	path: 'engine.graphics.fps_target',
+		// 	type: 'slider',
+		// 	value: async (s) => ((s as number[])[0] !== 60) && (await getValue<SelectElement>('engine.graphics.engine')).value === 'vulkan',
+		// })
 		// Graphics API
 		.addFlag({
 			name: 'Graphics API (OpenGL)',
@@ -97,13 +118,13 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 				settingValue === true && (await getValue<boolean>('engine.graphics.quality_distance_toggle')) === true,
 		})
 		// PostFX
-		.addFlag({
-			name: 'Visual Effects',
-			flags: { FFlagDisablePostFx: true },
-			path: 'engine.graphics.postfx',
-			type: 'switch',
-			value: false,
-		})
+		// .addFlag({
+		// 	name: 'Visual Effects',
+		// 	flags: { FFlagDisablePostFx: true },
+		// 	path: 'engine.graphics.postfx',
+		// 	type: 'switch',
+		// 	value: false,
+		// })
 		// Level-of-detail
 		.addFlag({
 			name: 'Level-of-detail',
@@ -125,13 +146,13 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		})
 		// VISUAL
 		// Player textures
-		.addFlag({
-			name: 'Player textures',
-			flags: { DFIntTextureCompositorActiveJobs: 0 },
-			path: 'engine.visual.player_textures',
-			type: 'switch',
-			value: false,
-		})
+		// .addFlag({
+		// 	name: 'Player textures',
+		// 	flags: { DFIntTextureCompositorActiveJobs: 0 },
+		// 	path: 'engine.visual.player_textures',
+		// 	type: 'switch',
+		// 	value: false,
+		// })
 		// Debug Sky
 		.addFlag({
 			name: 'Debug Sky',
@@ -139,48 +160,48 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.visual.debug_sky',
 			type: 'switch',
 			value: true,
-		})
-		// UI
-		// Menu version
-		.addFlag({
-			name: 'Menu version (Version 2)',
-			flags: {
-				/* v2 */ FFlagDisableNewIGMinDUA: false,
-				FFlagEnableInGameMenuModernization: false,
-				/* Chrome */ FFlagEnableInGameMenuChrome: false,
-				FFlagFixReportButtonCutOff: false,
-				FIntNewInGameMenuPercentRollout3: 100,
-				FFlagEnableInGameMenuChromeABTest4: false,
-			},
-			path: 'engine.ui.menu_version',
-			type: 'select',
-			value: 'v2',
-		})
-		// UTILITY
-		// Hide GUI
-		.addFlag({
-			name: 'Hide GUI',
-			flags: { DFIntCanHideGuiGroupId: 8699949 },
-			path: 'engine.utility.gui',
-			type: 'switch',
-			value: true,
-		})
-		// Disable telemetry
-		.addFlag({
-			name: 'Disable telemetry',
-			flags: {
-				FFlagDebugDisableTelemetryEphemeralCounter: true,
-				FFlagDebugDisableTelemetryEphemeralStat: true,
-				FFlagDebugDisableTelemetryEventIngest: true,
-				FFlagDebugDisableTelemetryPoint: true,
-				FFlagDebugDisableTelemetryV2Counter: true,
-				FFlagDebugDisableTelemetryV2Event: true,
-				FFlagDebugDisableTelemetryV2Stat: true,
-			},
-			path: 'engine.utility.telemetry',
-			type: 'switch',
-			value: true,
 		});
+	// UI
+	// Menu version
+	// .addFlag({
+	// 	name: 'Menu version (Version 2)',
+	// 	flags: {
+	// 		/* v2 */ FFlagDisableNewIGMinDUA: false,
+	// 		FFlagEnableInGameMenuModernization: false,
+	// 		/* Chrome */ FFlagEnableInGameMenuChrome: false,
+	// 		FFlagFixReportButtonCutOff: false,
+	// 		FIntNewInGameMenuPercentRollout3: 100,
+	// 		FFlagEnableInGameMenuChromeABTest4: false,
+	// 	},
+	// 	path: 'engine.ui.menu_version',
+	// 	type: 'select',
+	// 	value: 'v2',
+	// })
+	// UTILITY
+	// Hide GUI
+	// .addFlag({
+	// 	name: 'Hide GUI',
+	// 	flags: { DFIntCanHideGuiGroupId: 8699949 },
+	// 	path: 'engine.utility.gui',
+	// 	type: 'switch',
+	// 	value: true,
+	// })
+	// Disable telemetry
+	// .addFlag({
+	// 	name: 'Disable telemetry',
+	// 	flags: {
+	// 		FFlagDebugDisableTelemetryEphemeralCounter: true,
+	// 		FFlagDebugDisableTelemetryEphemeralStat: true,
+	// 		FFlagDebugDisableTelemetryEventIngest: true,
+	// 		FFlagDebugDisableTelemetryPoint: true,
+	// 		FFlagDebugDisableTelemetryV2Counter: true,
+	// 		FFlagDebugDisableTelemetryV2Event: true,
+	// 		FFlagDebugDisableTelemetryV2Stat: true,
+	// 	},
+	// 	path: 'engine.utility.telemetry',
+	// 	type: 'switch',
+	// 	value: true,
+	// });
 	return flags;
 }
 
@@ -385,53 +406,13 @@ export class FastFlagsList {
 	private async validateFlags(flags: string[]): Promise<Set<string>> {
 		if (!flags.length) return new Set();
 
-		const isReachable = await isUrlReachable('https://flagsman.appleblox.com', 3000);
-		if (!isReachable) {
-			console.warn(
-				'[FastFlags] Flagsman API (https://flagsman.appleblox.com) is unreachable. Skipping validation and treating all flags as valid. This may cause issues if invalid flags are used.'
-			);
-			return new Set(flags);
-		}
+		console.info('[FastFlags] Validating flags against allowed list...');
+		const allowedSet = new Set(ALLOWED_FLAGS);
+		const validFlags = flags.filter((flag) => allowedSet.has(flag));
 
-		try {
-			const req = await Curl.post(
-				'https://flagsman.appleblox.com/api/check',
-				{
-					flags,
-					applications: [
-						'PCDesktopClient',
-						'MacDesktopClient',
-						'XboxClient',
-						'iOSApp',
-						'UWPApp',
-						'AndroidApp',
-						'PCStudioApp',
-						'MacStudioApp',
-					],
-				},
-				{ headers: { 'Content-Type': 'application/json' } }
-			);
+		console.info(`[FastFlags] Validation complete. ${validFlags.length}/${flags.length} flags are allowed.`);
 
-			if (!req.body) {
-				throw new Error(
-					'[FastFlags] Flagsman API response body was empty. This could indicate a network issue or API malfunction.'
-				);
-			}
-
-			const res = JSON.parse(req.body);
-			if (res.error) {
-				throw new Error(
-					`[FastFlags] Flagsman API returned error: ${res.error}. Please check your flag configurations and try again.`
-				);
-			}
-
-			return new Set([...res.valid, ...FLAGS_WHITELIST]);
-		} catch (error) {
-			console.error('[FastFlags] Failed to validate flags through Flagsman API:', error);
-			console.error('[FastFlags] Stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
-			console.error('[FastFlags] Attempted to validate flags:', flags);
-			return new Set();
-		}
+		return new Set(validFlags);
 	}
 
 	public async validateBatch(flags: FFs): Promise<{ validFlags: FFs; invalidFlags: FFs }> {
@@ -532,7 +513,7 @@ export class FastFlagsList {
 			Object.keys(opt.flags).forEach((flag) => allFlags.add(flag));
 		});
 
-		// Validate all flags in a single API call
+		// Validate all flags in a single call
 		this.validFlagsCache = await this.validateFlags([...allFlags]);
 
 		const validFlags: FFs = {};

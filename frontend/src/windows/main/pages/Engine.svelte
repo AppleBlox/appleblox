@@ -7,7 +7,7 @@
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Engine')
-		.setDescription('Advanced Roblox engine and interface settings')
+		.setDescription('Advanced Roblox engine and interface settings. <span style="color: hsl(var(--destructive));">Note: Many presets were removed due to the recent introduction of a fast flags allowlist by Roblox.</span>')
 		.setId('engine')
 		.addCategory((category) =>
 			category
@@ -28,17 +28,16 @@
 				})
 				.addSlider({
 					label: 'Frame rate',
-					description:
-						'Sets the maximum number of frames per second. <br><span style="color: hsl(var(--warning));">Requires the Vulkan graphics API (Option above).</span>',
+					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
 					id: 'fps_target',
 					default: [60],
 					min: 1,
 					max: 240,
 					step: 1,
 					toggleable: {
-						id: 'engine',
-						type: 'select',
-						value: 'vulkan',
+						id: 'none',
+						type: 'switch',
+						value: true,
 					},
 				})
 				// Removed by Roblox
@@ -89,9 +88,14 @@
 				})
 				.addSwitch({
 					label: 'Visual Effects',
-					description: 'Enable post-processing effects',
+					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
 					id: 'postfx',
 					default: true,
+					toggleable: {
+						id: 'none',
+						type: 'switch',
+						value: true,
+					},
 				})
 				.addSwitch({
 					label: 'Level-of-detail',
@@ -113,9 +117,14 @@
 				.setId('visual')
 				.addSwitch({
 					label: 'Character Textures',
-					description: 'Enable player textures',
+					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
 					id: 'player_textures',
 					default: true,
+					toggleable: {
+						id: 'none',
+						type: 'switch',
+						value: true,
+					},
 				})
 				.addSwitch({
 					label: 'Debug Skybox',
@@ -131,13 +140,18 @@
 				.setId('ui')
 				.addSelect({
 					label: 'Menu Style',
-					description: 'Choose in-game menu version',
+					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
 					id: 'menu_version',
 					items: [
 						{ label: 'Version 2 (2020)', value: 'v2' },
 						{ label: 'Default (Chrome)', value: 'default' },
 					],
 					default: 'default',
+					toggleable: {
+						id: 'none',
+						type: 'switch',
+						value: true,
+					},
 				})
 		)
 		.addCategory((category) =>
@@ -147,19 +161,25 @@
 				.setId('utility')
 				.addSwitch({
 					label: 'GUI Shortcuts',
-					description: `Keyboard shortcuts to toggle UI elements (You need to be in the <a href="https://www.roblox.com/groups/8699949/AppleBlox-enjoyers#!/about">AppleBlox group</a>):
-                   </br>&nbspCMD + Shift + B: Toggles GUIs in 3D space (BillboardGuis, etc)
-					</br>&nbspCMD + Shift + C: Toggles game-defined ScreenGuis
-					</br>&nbspCMD + Shift + G: Toggles Roblox CoreGuis
-					</br>&nbspCMD + Shift + N: Toggles player names, and other that shows...`,
+					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
 					id: 'gui',
 					default: false,
+					toggleable: {
+						id: 'none',
+						type: 'switch',
+						value: true,
+					},
 				})
 				.addSwitch({
 					label: 'Disable Telemetry',
-					description: 'Disable Roblox analytics collection',
+					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
 					id: 'telemetry',
 					default: false,
+					toggleable: {
+						id: 'none',
+						type: 'switch',
+						value: true,
+					},
 				})
 		)
 		.addCategory(
