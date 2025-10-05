@@ -3,7 +3,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import { events, os } from '@neutralinojs/lib';
-	import { Activity, ChevronLeft, ChevronRight, Rocket, Settings, Users, ExternalLink, BookOpen } from 'lucide-svelte';
+	import { Activity, ChevronLeft, ChevronRight, Rocket, Settings, Users, ExternalLink, BookOpen, FileWarning } from 'lucide-svelte';
 	import { quartInOut, quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import { loadSettings, saveSettings, setMultipleValues } from '../settings/files';
@@ -128,16 +128,23 @@
 						os.open('https://appleblox.com/discord');
 					},
 				},
-				{
-					type: 'button',
-					label: 'View Documentation',
-					description: 'Learn more about AppleBlox features and troubleshooting',
-					variant: 'outline',
-					icon: BookOpen,
-					action: () => {
-						os.open('https://docs.appleblox.com');
-					},
-				},
+				// {
+				// 	type: 'button',
+				// 	label: 'View Documentation',
+				// 	description: 'Learn more about AppleBlox features and troubleshooting',
+				// 	variant: 'outline',
+				// 	icon: BookOpen,
+				// 	action: () => {
+				// 		os.open('https://docs.appleblox.com');
+				// 	},
+				// },
+			],
+		},
+		{
+			title: 'Note: About recent "Fast flags" changes',
+			description: 'Roblox has implemented a whitelist system that restricts which fast flags can be modified. As a result, many engine settings (including frame rate caps, lighting technology, and others) are no longer configurable. Custom flag profiles may also be affected. Please do not create GitHub issues or Discord support threads about this limitation. It\'s a Roblox-side restriction that cannot (and shouldn\'t) be bypassed.',
+			icon: FileWarning,
+			actions: [
 			],
 		},
 	];
@@ -403,14 +410,14 @@
 
 						<div class="flex items-center justify-end mt-8 pt-6 border-t border-border/30 flex-shrink-0">
 							<div class="flex items-center space-x-3">
-								<Button
+								<!-- <Button
 									variant="ghost"
 									size="lg"
 									on:click={handleComplete}
 									class="flex items-center space-x-2 focus:outline-none select-none"
 								>
 									<span>Skip</span>
-								</Button>
+								</Button> -->
 
 								{#if currentStep > 0}
 									<Button
