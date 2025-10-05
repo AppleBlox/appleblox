@@ -4,10 +4,10 @@
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book } from 'lucide-svelte';
 	import path from 'path-browserify';
+	import ModsUi from '../components/mods-ui.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import shellFS from '../ts/tools/shellfs';
-	import ModsUi from '../components/mods-ui.svelte';
 
 	export let render = true;
 

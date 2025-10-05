@@ -92,12 +92,13 @@
 					id: 'create_shortcut_btn',
 					variant: 'default',
 					icon: { component: Play },
-				}).addCustom({
-					label: "",
-					description: "",
-					id: "download_roblox",
+				})
+				.addCustom({
+					label: '',
+					description: '',
+					id: 'download_roblox',
 					component: RobloxDownloadButton,
-					separator: false
+					separator: false,
 				})
 		)
 		.addCategory((category) =>

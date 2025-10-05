@@ -2,7 +2,7 @@ import { os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { Curl } from '../tools/curl';
 import { shell } from '../tools/shell';
-import shellFS, { zip } from '../tools/shellfs';
+import shellFS from '../tools/shellfs';
 
 /**
  * Binary types supported for Mac downloads

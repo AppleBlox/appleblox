@@ -5,7 +5,6 @@ import { Notification } from '../tools/notifications';
 import { shell } from '../tools/shell';
 import { isProcessAlive, sleep } from '../utils';
 import { RobloxDelegate } from './delegate';
-import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
 
 type EventHandler = (data?: any) => void;
@@ -157,7 +156,7 @@ export class RobloxInstance {
 
 		console.info('[Roblox.Instance] Opening Roblox instance');
 		await RobloxDelegate.toggle(false);
-		
+
 		if (url) {
 			await shell('open', [url]);
 			console.info(`[Roblox.Instance] Opening Roblox from URL.`);

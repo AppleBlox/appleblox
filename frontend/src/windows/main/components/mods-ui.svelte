@@ -9,10 +9,10 @@
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
-	import { getConfigPath } from './settings';
 	import Roblox from '../ts/roblox';
 	import shellFS from '../ts/tools/shellfs';
 	import { sleep } from '../ts/utils';
+	import { getConfigPath } from './settings';
 
 	let mods: { filename: string; path: string; state: boolean }[] = [];
 	Roblox.Mods.loadMods().then((m) => (mods = m));

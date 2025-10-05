@@ -9,13 +9,13 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';
 	import * as Table from '$lib/components/ui/table';
+	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import { clipboard } from '@neutralinojs/lib';
 	import beautify from 'json-beautify';
 	import { Braces, Clipboard, Delete, Ellipsis, Plus, Search } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { correctAndParseJSON } from '../../ts/utils/json';
-	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 
 	type FastFlag = string | boolean | null | number;
 	interface EditorFlag {
@@ -174,7 +174,7 @@
 	// Batch enable/disable functions
 	function batchToggleEnabled(enableState: boolean): void {
 		if (selectedFlags.size < 1) return;
-		
+
 		let changedCount = 0;
 		for (const flagIndex of selectedFlags) {
 			if (flags[flagIndex].enabled !== enableState) {
@@ -182,7 +182,7 @@
 				changedCount++;
 			}
 		}
-		
+
 		if (changedCount > 0) {
 			flags = flags; // Trigger reactivity
 			dispatch('update', flags);
@@ -191,9 +191,11 @@
 	}
 
 	// Get the state of selected flags for batch control
-	$: selectedFlagStates = Array.from(selectedFlags).map(index => flags[index]?.enabled).filter(state => state !== undefined);
-	$: allSelectedEnabled = selectedFlagStates.length > 0 && selectedFlagStates.every(state => state === true);
-	$: allSelectedDisabled = selectedFlagStates.length > 0 && selectedFlagStates.every(state => state === false);
+	$: selectedFlagStates = Array.from(selectedFlags)
+		.map((index) => flags[index]?.enabled)
+		.filter((state) => state !== undefined);
+	$: allSelectedEnabled = selectedFlagStates.length > 0 && selectedFlagStates.every((state) => state === true);
+	$: allSelectedDisabled = selectedFlagStates.length > 0 && selectedFlagStates.every((state) => state === false);
 	$: mixedSelectedStates = selectedFlagStates.length > 0 && !allSelectedEnabled && !allSelectedDisabled;
 
 	$: filteredFlags = flags

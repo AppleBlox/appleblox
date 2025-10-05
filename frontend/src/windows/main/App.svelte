@@ -11,6 +11,7 @@
 	import Code from './components/code.svelte';
 	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
 	import Onboarding from './components/onboarding/onboarding.svelte';
+	import Sidebar from './components/sidebar/sidebar.svelte';
 	import Updater from './components/updater.svelte';
 	import Appearance from './pages/Appearance.svelte';
 	import BehaviorPage from './pages/Behavior/page.svelte';
@@ -20,10 +21,9 @@
 	import Integrations from './pages/Integrations.svelte';
 	import Misc from './pages/Misc.svelte';
 	import Mods from './pages/Mods.svelte';
-	import Sidebar from './components/sidebar/sidebar.svelte';
+	import Workshop from './pages/Workshop.svelte';
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils/';
-	import Workshop from './pages/Workshop.svelte';
 
 	let currentPage: string;
 	let onboardingLoaded: boolean = false;

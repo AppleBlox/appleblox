@@ -15,11 +15,10 @@
 	import SliderWidget from './widgets/slider.svelte';
 	import SwitchWidget from './widgets/switch.svelte';
 
+	import { cn } from '$lib/utils';
 	import path from 'path-browserify';
 	import { fade } from 'svelte/transition';
 	import ShellFS from '../../ts/tools/shellfs';
-	import { cn } from '$lib/utils';
-	import { Root } from '$lib/components/ui/accordion';
 
 	// Panel props
 	export let panel: SettingsPanel;

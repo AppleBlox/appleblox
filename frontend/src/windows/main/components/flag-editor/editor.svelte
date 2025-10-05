@@ -27,10 +27,10 @@
 	} from '.';
 	import { formatConsoleLog } from '../../ts/debugging';
 	import shellFS from '../../ts/tools/shellfs';
+	import Alert from '../alert.svelte';
 	import LoadingSpinner from '../loading-spinner.svelte';
 	import FlagTable from './flag-table.svelte';
 	import SmallButton from './small-button.svelte';
-	import Alert from '../alert.svelte';
 
 	type SelectElement = Selected<string>;
 

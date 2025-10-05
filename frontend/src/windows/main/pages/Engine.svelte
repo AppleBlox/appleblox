@@ -7,7 +7,9 @@
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Engine')
-		.setDescription('Advanced Roblox engine and interface settings. <span style="color: hsl(var(--destructive));">Note: Many presets were removed due to the recent introduction of a fast flags allowlist by Roblox.</span>')
+		.setDescription(
+			'Advanced Roblox engine and interface settings. <span style="color: hsl(var(--destructive));">Note: Many presets were removed due to the recent introduction of a fast flags allowlist by Roblox.</span>'
+		)
 		.setId('engine')
 		.addCategory((category) =>
 			category

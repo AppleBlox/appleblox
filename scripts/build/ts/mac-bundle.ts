@@ -5,19 +5,19 @@ import { $, sleep } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
-import { 
-	copyWithProgress, 
-	createProgressLogger, 
-	ensureDirectory, 
-	executeWithRetry, 
+import {
+	copyWithProgress,
+	createProgressLogger,
+	ensureDirectory,
+	executeWithRetry,
 	filterArchitectures,
 	getMacExecutableArchs,
-	validateMacExecutable
+	validateMacExecutable,
 } from './utils';
 
 export async function macBuild(architectureFilter?: string | null) {
 	const logger = new Signale({ scope: 'mac-build' });
-	
+
 	if (!BuildConfig.mac) {
 		logger.fatal('No macOS configuration found in build.config.ts');
 		return;
@@ -25,7 +25,7 @@ export async function macBuild(architectureFilter?: string | null) {
 
 	// Filter architectures based on environment variable
 	const targetArchs = filterArchitectures(BuildConfig.mac.architecture, architectureFilter);
-	
+
 	if (targetArchs.length === 0) {
 		logger.warn(`No valid architectures found for filter: ${architectureFilter}`);
 		return;
@@ -40,7 +40,7 @@ export async function macBuild(architectureFilter?: string | null) {
 	for (const arch of targetArchs) {
 		await macBuildSingle(arch, Dist);
 	}
-	
+
 	logger.success(`macOS build completed for ${targetArchs.length} architecture(s)`);
 }
 
@@ -93,7 +93,6 @@ export async function macBuildSingle(arch: string, distPath: string) {
 		await verifyAppBundle(appDist, logger);
 
 		logger.complete(`mac_${arch} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
-		
 	} catch (error) {
 		logger.fatal(`Failed to build mac_${arch}: ${error}`);
 		throw error;
@@ -126,25 +125,25 @@ async function createAppDirectoryStructure(appDist: string, logger: Signale) {
 	await ensureDirectory(Contents);
 	await ensureDirectory(MacOS);
 	await ensureDirectory(Resources);
-	
+
 	logger.success('Created app bundle directory structure');
 }
 
 async function generateInfoPlist(appDist: string, logger: Signale) {
 	const appBundle = `${BuildConfig.appName}.app`;
 	const InfoPlist = resolve(appDist, appBundle, 'Contents', 'Info.plist');
-	
+
 	if (!BuildConfig.mac) {
 		throw new Error('macOS config not found');
 	}
-	
+
 	const InfoPlistTemplate = (await Bun.file(resolve(__dirname, '../templates/mac/Info.plist')).text())
 		.replace('{APP_NAME}', BuildConfig.appName)
 		.replace('{APP_ID}', neuConfig.applicationId)
 		.replace('{APP_BUNDLE}', BuildConfig.appBundleName)
 		.replace('{APP_MIN_OS}', BuildConfig.mac.minimumOS)
 		.replace('{APP_VERSION}', version);
-		
+
 	await Bun.write(InfoPlist, InfoPlistTemplate);
 	logger.success('Generated Info.plist');
 }
@@ -157,17 +156,25 @@ async function copyExecutables(appDist: string, executable: string, logger: Sign
 	const bootstrapSource = resolve('bin/bootstrap');
 
 	// Copy main executable with retry
-	await executeWithRetry(async () => {
-		await $`cp "${executable}" "${mainPath}"`;
-	}, 3, 1000);
+	await executeWithRetry(
+		async () => {
+			await $`cp "${executable}" "${mainPath}"`;
+		},
+		3,
+		1000
+	);
 	chmodSync(mainPath, '755');
 	logger.success('Copied main executable');
 
 	// Copy bootstrap executable
 	if (existsSync(bootstrapSource)) {
-		await executeWithRetry(async () => {
-			await $`cp "${bootstrapSource}" "${bootstrapPath}"`;
-		}, 3, 1000);
+		await executeWithRetry(
+			async () => {
+				await $`cp "${bootstrapSource}" "${bootstrapPath}"`;
+			},
+			3,
+			1000
+		);
 		chmodSync(bootstrapPath, '755');
 		logger.success('Copied bootstrap executable');
 	} else {
@@ -178,12 +185,8 @@ async function copyExecutables(appDist: string, executable: string, logger: Sign
 async function copyResources(appDist: string, neuResources: string, logger: Signale) {
 	const appBundle = `${BuildConfig.appName}.app`;
 	const Resources = resolve(appDist, appBundle, 'Contents', 'Resources');
-	
-	await copyWithProgress(
-		neuResources,
-		resolve(Resources, 'resources.neu'),
-		logger
-	);
+
+	await copyWithProgress(neuResources, resolve(Resources, 'resources.neu'), logger);
 }
 
 async function copyAssets(appDist: string, logger: Signale) {
@@ -194,24 +197,15 @@ async function copyAssets(appDist: string, logger: Signale) {
 
 	const appBundle = `${BuildConfig.appName}.app`;
 	const Resources = resolve(appDist, appBundle, 'Contents', 'Resources');
-	
+
 	if (existsSync(BuildConfig.mac.appIcon)) {
-		await copyWithProgress(
-			BuildConfig.mac.appIcon,
-			resolve(Resources, 'icon.icns'),
-			logger
-		);
+		await copyWithProgress(BuildConfig.mac.appIcon, resolve(Resources, 'icon.icns'), logger);
 	} else {
 		logger.warn(`App icon not found at ${BuildConfig.mac.appIcon}`);
 	}
 }
 
-async function handleLibraries(
-	appDist: string,
-	librariesPath: string,
-	librariesBlacklist: string[],
-	logger: Signale
-) {
+async function handleLibraries(appDist: string, librariesPath: string, librariesBlacklist: string[], logger: Signale) {
 	if (!existsSync(librariesPath)) {
 		logger.info('No libraries directory found, skipping');
 		return;
@@ -220,22 +214,22 @@ async function handleLibraries(
 	const appBundle = `${BuildConfig.appName}.app`;
 	const Resources = resolve(appDist, appBundle, 'Contents', 'Resources');
 	const libPath = resolve(Resources, 'lib');
-	
+
 	// Copy libraries
 	await copyWithProgress(librariesPath, libPath, logger);
-	
+
 	// Remove blacklisted files
 	try {
 		const blacklistPattern = librariesBlacklist.join('|');
 		const files = (await $`ls ${librariesPath} | grep -E '${blacklistPattern}'`.text()).split('\n');
 		files.pop(); // Remove empty last element
-		
+
 		for (const file of files) {
 			if (file.trim()) {
 				await $`rm -rf "${join(libPath, file.trim())}"`;
 			}
 		}
-		
+
 		logger.success('Processed libraries');
 	} catch (error) {
 		logger.info('No blacklisted files found or libraries processed successfully');
@@ -245,25 +239,21 @@ async function handleLibraries(
 async function verifyAppBundle(appDist: string, logger: Signale) {
 	const appBundle = `${BuildConfig.appName}.app`;
 	const appPath = resolve(appDist, appBundle);
-	
+
 	// Check if app bundle exists
 	if (!existsSync(appPath)) {
 		throw new Error('App bundle was not created');
 	}
-	
+
 	// Check essential files
-	const essentialFiles = [
-		'Contents/Info.plist',
-		'Contents/MacOS/main',
-		'Contents/Resources/resources.neu'
-	];
-	
+	const essentialFiles = ['Contents/Info.plist', 'Contents/MacOS/main', 'Contents/Resources/resources.neu'];
+
 	for (const file of essentialFiles) {
 		const filePath = resolve(appPath, file);
 		if (!existsSync(filePath)) {
 			throw new Error(`Essential file missing: ${file}`);
 		}
 	}
-	
+
 	logger.success('App bundle verification passed');
 }

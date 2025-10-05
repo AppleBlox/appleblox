@@ -12,7 +12,7 @@ import { loadTheme } from './components/theme-input/theme';
 import Roblox from './ts/roblox';
 import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
-import { getMode, sleep } from './ts/utils';
+import { getMode } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
 import { focusWindow } from './ts/window';
 

@@ -2,14 +2,7 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
-	import {
-		Dialog,
-		DialogContent,
-		DialogDescription,
-		DialogHeader,
-		DialogTitle,
-		DialogTrigger,
-	} from '$lib/components/ui/dialog/index.js';
+	import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '$lib/components/ui/dialog/index.js';
 	import { Progress } from '$lib/components/ui/progress/index.js';
 
 	import {
@@ -18,10 +11,10 @@
 		type MacBinaryType,
 		type ProgressInfo,
 	} from '@/windows/main/ts/roblox/downloader';
+	import path from 'path-browserify';
 	import { createEventDispatcher } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import shellFS from '../../ts/tools/shellfs';
-	import path from 'path-browserify';
 	import Alert from '../alert.svelte';
 
 	export let binaryType: MacBinaryType = 'MacPlayer';

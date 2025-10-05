@@ -1,12 +1,11 @@
-import { custom, events, filesystem, os } from '@neutralinojs/lib';
+import { events, filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import Roblox from '.';
 import { getValue } from '../../components/settings';
 import { Notification } from '../tools/notifications';
-import { shell, type ExecutionResult } from '../tools/shell';
+import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
-import { sleep } from '../utils';
 import { getMostRecentRoblox } from './path';
 
 export class RobloxMods {

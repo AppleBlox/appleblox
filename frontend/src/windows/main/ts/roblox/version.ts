@@ -1,6 +1,6 @@
 import path from 'path-browserify';
-import { getMostRecentRoblox } from './path';
 import shellFS from '../tools/shellfs';
+import { getMostRecentRoblox } from './path';
 
 export let version: string | null = null;
 

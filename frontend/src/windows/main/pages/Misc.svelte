@@ -4,6 +4,7 @@
 	import { version } from '@root/package.json';
 	import { FileArchive, FolderCog, FolderOpen } from 'lucide-svelte';
 	import path from 'path-browserify';
+	import { getContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { SettingsPanelBuilder, getConfigPath } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
@@ -11,7 +12,6 @@
 	import Roblox from '../ts/roblox';
 	import { shell } from '../ts/tools/shell';
 	import shellFS from '../ts/tools/shellfs';
-	import { getContext } from 'svelte';
 
 	const { getCurrentPage } = getContext('pageData') as { getCurrentPage: () => string };
 

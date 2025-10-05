@@ -17,10 +17,14 @@ export async function getMostRecentRoblox(): Promise<string> {
 	// 		mostRecentPath = info.name;
 	// 	}
 	// }
-	const mdfindPath = await shell(`find /Applications "$HOME/Applications" -maxdepth 1 -iname '*roblox*.app' -exec stat -f '%a %N' {} + 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-`, [], {
-		completeCommand: true,
-		skipStderrCheck: true,
-	});
+	const mdfindPath = await shell(
+		`find /Applications "$HOME/Applications" -maxdepth 1 -iname '*roblox*.app' -exec stat -f '%a %N' {} + 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-`,
+		[],
+		{
+			completeCommand: true,
+			skipStderrCheck: true,
+		}
+	);
 	mostRecentPath = mdfindPath.stdOut.includes('/Roblox.app') ? mdfindPath.stdOut.trim() : '/Applications/Roblox.app';
 	console.info(`[Roblox.Path] Most recently opened Roblox app is at: "${mostRecentPath}"`);
 	return mostRecentPath;

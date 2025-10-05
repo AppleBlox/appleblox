@@ -1,8 +1,8 @@
+import type { Subprocess } from 'bun';
 import { $, sleep } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
 import { createServer } from 'node:net';
-import type { Subprocess } from 'bun';
+import { join, resolve } from 'node:path';
 import { buildSidecar } from '../build/ts/sidecar';
 import { checkNeutralino } from '../build/ts/utils';
 
@@ -25,13 +25,13 @@ async function findAvailablePort(preferredPort: number, maxRetries = 10): Promis
 function isPortAvailable(port: number): Promise<boolean> {
 	return new Promise((resolve) => {
 		const server = createServer();
-		
+
 		server.once('error', () => resolve(false));
 		server.once('listening', () => {
 			server.close();
 			resolve(true);
 		});
-		
+
 		server.listen(port);
 	});
 }
@@ -47,11 +47,11 @@ function isPortAvailable(port: number): Promise<boolean> {
 // 		} catch {
 // 			// Server not ready yet
 // 		}
-		
+
 // 		console.log(`Waiting for server... (${attempt}/${maxAttempts})`);
 // 		await Bun.sleep(interval);
 // 	}
-	
+
 // 	console.error(`Server failed to start at ${url} after ${maxAttempts} attempts`);
 // 	return false;
 // }
@@ -64,17 +64,17 @@ function getBinaryPath(): string {
 	// Since this is Mac exclusive, simplify the logic
 	const binaryName = `neutralino-mac_${process.arch}`;
 	const binaryPath = resolve(`./bin/${binaryName}`);
-	
+
 	if (!existsSync(binaryPath)) {
 		throw new Error(`Binary not found: ${binaryPath}`);
 	}
-	
+
 	return binaryPath;
 }
 
 function checkSidecar(): boolean {
 	const requiredFiles = ['alerter_ablox', 'discordrpc_ablox', 'urlscheme_ablox', 'bootstrap_ablox'];
-	
+
 	for (const file of requiredFiles) {
 		const filePath = resolve(join('bin', file));
 		if (!existsSync(filePath)) {
@@ -82,20 +82,20 @@ function checkSidecar(): boolean {
 			return false;
 		}
 	}
-	
+
 	console.log('All sidecar files present');
 	return true;
 }
 
 async function setupEnvironment(downloadNeuBinaries: boolean, buildSidecarBinaries: boolean): Promise<void> {
 	console.log('Setting up development environment...');
-	
+
 	if (downloadNeuBinaries) {
 		console.log('Downloading Neutralino binaries...');
 		await $`bunx neu update`;
 		console.log('Neutralino binaries updated');
 	}
-	
+
 	if (buildSidecarBinaries) {
 		console.log('Building sidecar binaries...');
 		await buildSidecar();
@@ -106,15 +106,15 @@ async function setupEnvironment(downloadNeuBinaries: boolean, buildSidecarBinari
 async function startViteServer(preferredPort: number = 5173): Promise<ServerInfo> {
 	const vitePort = await findAvailablePort(preferredPort);
 	const viteUrl = `http://localhost:${vitePort}`;
-	
+
 	console.log(`Starting Vite dev server on port ${vitePort}...`);
-	
+
 	const viteProcess = Bun.spawn({
 		cmd: ['bunx', 'vite', 'dev', '--port', vitePort.toString(), '--host'],
 		stdout: 'inherit',
 		stderr: 'inherit',
 	});
-	
+
 	// Wait for Vite to be ready
 	// const serverReady = await waitForServer(viteUrl);
 	// if (!serverReady) {
@@ -122,23 +122,23 @@ async function startViteServer(preferredPort: number = 5173): Promise<ServerInfo
 	// 	throw new Error('Failed to start Vite server');
 	// }
 
-	await sleep(5000)
-	
+	await sleep(5000);
+
 	return {
 		process: viteProcess,
 		port: vitePort,
-		url: viteUrl
+		url: viteUrl,
 	};
 }
 
 async function startNeutralinoApp(viteUrl: string, preferredPort: number = 5174): Promise<Subprocess> {
 	const neutralinoPort = await findAvailablePort(preferredPort);
 	const binaryPath = getBinaryPath();
-	
+
 	// Make binary executable
 	chmodSync(binaryPath, '755');
 	console.log(`Binary permissions set: ${binaryPath}`);
-	
+
 	const args = [
 		'--window-enable-inspector=true',
 		'--load-dir-res',
@@ -147,44 +147,43 @@ async function startNeutralinoApp(viteUrl: string, preferredPort: number = 5174)
 		`--url=${viteUrl}`,
 		`--port=${neutralinoPort}`,
 	];
-	
+
 	console.log(`Starting Neutralino app on port ${neutralinoPort}...`);
 	console.log(`App will connect to: ${viteUrl}`);
-	
+
 	const neutralinoProcess = Bun.spawn([binaryPath, ...args], {
 		cwd: process.cwd(),
 		stdout: 'inherit',
 		stderr: 'inherit',
 	});
-	
+
 	return neutralinoProcess;
 }
 
 async function main(downloadNeuBinaries = false, createBinaries = false): Promise<void> {
 	let viteServer: ServerInfo | null = null;
 	let neutralinoProcess: Subprocess | null = null;
-	
+
 	try {
 		clearTerminal();
 		console.log('Starting Mac development workflow...\n');
-		
+
 		// Setup phase
 		await setupEnvironment(downloadNeuBinaries, createBinaries);
-		
+
 		// Start Vite server and wait for it to be ready
 		viteServer = await startViteServer();
-		
+
 		// Start Neutralino app
 		neutralinoProcess = await startNeutralinoApp(viteServer.url);
-		
+
 		console.log('\nDevelopment environment ready!');
 		console.log(`   Vite: ${viteServer.url}`);
 		console.log(`   Neutralino: Running with PID ${neutralinoProcess.pid}`);
 		console.log('\nPress Ctrl+C to stop all processes\n');
-		
 	} catch (error) {
 		console.error('Failed to start development environment:', error);
-		
+
 		// Cleanup on error
 		if (neutralinoProcess?.pid) {
 			try {
@@ -193,7 +192,7 @@ async function main(downloadNeuBinaries = false, createBinaries = false): Promis
 				console.error('Error stopping Neutralino:', killError);
 			}
 		}
-		
+
 		if (viteServer?.process?.pid) {
 			try {
 				viteServer.process.kill();
@@ -201,14 +200,14 @@ async function main(downloadNeuBinaries = false, createBinaries = false): Promis
 				console.error('Error stopping Vite:', killError);
 			}
 		}
-		
+
 		process.exit(1);
 	}
-	
+
 	// Cleanup handler
 	const cleanup = () => {
 		console.log('\nShutting down development environment...');
-		
+
 		if (neutralinoProcess?.pid) {
 			try {
 				neutralinoProcess.kill();
@@ -217,7 +216,7 @@ async function main(downloadNeuBinaries = false, createBinaries = false): Promis
 				console.error('Error stopping Neutralino:', error);
 			}
 		}
-		
+
 		if (viteServer?.process?.pid) {
 			try {
 				viteServer.process.kill();
@@ -226,24 +225,26 @@ async function main(downloadNeuBinaries = false, createBinaries = false): Promis
 				console.error('Error stopping Vite:', error);
 			}
 		}
-		
+
 		console.log('Goodbye!');
 		process.exit(0);
 	};
-	
+
 	// Handle process termination
 	process.on('SIGINT', cleanup);
 	process.on('SIGTERM', cleanup);
-	
+
 	// Wait for Neutralino process to exit
 	if (neutralinoProcess) {
-		neutralinoProcess.exited.then(() => {
-			console.log('Neutralino app closed');
-			cleanup();
-		}).catch((error) => {
-			console.error('Error waiting for Neutralino exit:', error);
-			cleanup();
-		});
+		neutralinoProcess.exited
+			.then(() => {
+				console.log('Neutralino app closed');
+				cleanup();
+			})
+			.catch((error) => {
+				console.error('Error waiting for Neutralino exit:', error);
+				cleanup();
+			});
 	}
 }
 
@@ -252,10 +253,10 @@ async function main(downloadNeuBinaries = false, createBinaries = false): Promis
 	try {
 		const neutralinoExists = await checkNeutralino();
 		const sidecarExists = checkSidecar();
-		
+
 		console.log(`Neutralino binaries: ${neutralinoExists ? 'Found' : 'Missing'}`);
 		console.log(`Sidecar binaries: ${sidecarExists ? 'Found' : 'Missing'}\n`);
-		
+
 		await main(!neutralinoExists, !sidecarExists);
 	} catch (error) {
 		console.error('Initialization failed:', error);

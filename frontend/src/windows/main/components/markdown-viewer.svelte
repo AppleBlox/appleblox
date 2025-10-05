@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { marked } from 'marked';
-	import DOMPurify from 'dompurify';
-	import { os } from '@neutralinojs/lib';
 	import { cn } from '$lib/utils';
+	import { os } from '@neutralinojs/lib';
+	import DOMPurify from 'dompurify';
+	import { marked } from 'marked';
 
 	export let content: string = '';
 	let className: string = '';

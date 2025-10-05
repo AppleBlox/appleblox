@@ -12,11 +12,13 @@ export async function build() {
 	$.cwd(process.cwd());
 	const initTime = performance.now();
 	const logger = new Signale({ scope: 'sequential-build' });
-	
+
 	// Parse environment variables for selective building
 	const architectureFilter = getArchitectureFilter();
-	
-	logger.info(`Building AppleBlox for macOS${architectureFilter ? ` (${architectureFilter})` : ' (all architectures)'} - Sequential Mode`);
+
+	logger.info(
+		`Building AppleBlox for macOS${architectureFilter ? ` (${architectureFilter})` : ' (all architectures)'} - Sequential Mode`
+	);
 
 	// Clean build directories
 	if (!argv.includes('--no-clean')) {
@@ -46,14 +48,14 @@ export async function build() {
 	await $`rm -rf "${resolve('dist')}"`;
 	await $`cp -r "${resolve('.tmpbuild')}" "${resolve('dist')}"`;
 	await $`rm -rf "${resolve('.tmpbuild')}"`;
-	
+
 	logger.success(`Sequential macOS build completed in ${((performance.now() - initTime) / 1000).toFixed(3)}s`);
-	
+
 	// Open dist folder
 	if (!argv.includes('--no-open')) {
 		await $`open ${resolve('./dist')}`;
 	}
-	
+
 	process.exit(0);
 }
 

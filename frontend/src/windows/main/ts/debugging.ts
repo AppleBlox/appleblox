@@ -1,4 +1,4 @@
-import { filesystem, events } from '@neutralinojs/lib';
+import { events, filesystem } from '@neutralinojs/lib';
 import { version } from '@root/package.json';
 import path from 'path-browserify';
 import { getConfigPath, loadSettings } from '../components/settings';
@@ -543,7 +543,7 @@ class ConsoleManager {
 		if (state.enabledByDefault) {
 			state.isRedirectionEnabled = true;
 			state.logPath = await LogFileManager.createLogPath();
-			
+
 			if (state.logPath) {
 				const success = await LogFileManager.ensureLogFile(state.logPath);
 				if (success) {
@@ -565,35 +565,40 @@ class ConsoleManager {
 		setTimeout(async () => {
 			try {
 				const settings = await loadSettings('misc');
-				
+
 				if (settings) {
 					const shouldBeEnabled = settings.advanced.redirect_console;
-					
+
 					if (!shouldBeEnabled && state.isRedirectionEnabled) {
 						console.info('[Logger] Settings indicate console redirection should be disabled, disabling...');
 						disableConsoleRedirection();
-					}
-					else if (shouldBeEnabled && !state.isRedirectionEnabled) {
+					} else if (shouldBeEnabled && !state.isRedirectionEnabled) {
 						console.info('[Logger] Settings indicate console redirection should be enabled, attempting to enable...');
 						await enableConsoleRedirection();
-					}
-					else if (shouldBeEnabled === state.isRedirectionEnabled) {
-						console.info(`[Logger] Console redirection is ${state.isRedirectionEnabled ? 'enabled' : 'disabled'} as configured`);
+					} else if (shouldBeEnabled === state.isRedirectionEnabled) {
+						console.info(
+							`[Logger] Console redirection is ${state.isRedirectionEnabled ? 'enabled' : 'disabled'} as configured`
+						);
 					}
 				} else {
-					console.info('[Logger] No settings found, console redirection status:', state.isRedirectionEnabled ? 'enabled' : 'disabled');
+					console.info(
+						'[Logger] No settings found, console redirection status:',
+						state.isRedirectionEnabled ? 'enabled' : 'disabled'
+					);
 				}
-				
+
 				setTimeout(() => {
 					if (state.isRedirectionEnabled && !state.initializationError) {
 						console.info('[Logger] Testing console redirection - this message should be logged to file');
-						
+
 						setTimeout(async () => {
 							try {
 								if (state.logPath) {
-									const testEntry = LogFormatter.formatLogEntry('INFO', ['[Logger] Redirection test successful']);
+									const testEntry = LogFormatter.formatLogEntry('INFO', [
+										'[Logger] Redirection test successful',
+									]);
 									const success = await LogFileManager.appendToLog(state.logPath, testEntry);
-									
+
 									if (!success) {
 										console.warn('[Logger] Redirection test failed, disabling console redirection');
 										disableConsoleRedirection();
@@ -606,12 +611,10 @@ class ConsoleManager {
 						}, 1000);
 					}
 				}, 500);
-				
 			} catch (error) {
 				console.warn('[Logger] Failed to load settings for console redirection check:', error);
 			}
 		}, 100);
-		
 	} catch (error) {
 		state.initializationError = error instanceof Error ? error : new Error('Unknown initialization error');
 		state.isInitialized = true;
@@ -676,10 +679,10 @@ export function disableConsoleRedirection(): void {
 	}
 }
 
-export function getLoggerStatus(): { 
-	enabled: boolean; 
-	error: string | null; 
-	logPath: string | null; 
+export function getLoggerStatus(): {
+	enabled: boolean;
+	error: string | null;
+	logPath: string | null;
 	initialized: boolean;
 	enabledByDefault: boolean;
 } {

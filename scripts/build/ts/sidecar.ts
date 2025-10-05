@@ -10,12 +10,12 @@ const ALERTER_RELEASE = 'https://github.com/vjeantet/alerter/releases/download/1
 export async function buildSidecar() {
 	const logger = new Signale({ scope: 'sidecar' });
 
-	const sidecarFiles: { 
-		name: string; 
-		filename: string; 
-		args: string[]; 
-		includeSuffix?: boolean; 
-		isSwift?: boolean 
+	const sidecarFiles: {
+		name: string;
+		filename: string;
+		args: string[];
+		includeSuffix?: boolean;
+		isSwift?: boolean;
 	}[] = [
 		{
 			name: 'Bootstrap',
@@ -38,16 +38,16 @@ export async function buildSidecar() {
 	];
 
 	await $`mkdir -p bin`;
-	
+
 	// Compile sidecar binaries in parallel for better performance
 	const compilePromises = sidecarFiles.map(async (file) => {
 		const fileLogger = new Signale({ scope: `compile-${file.name.toLowerCase().replace(/\s+/g, '-')}` });
 		fileLogger.await(`Compiling "${file.name}"`);
 		const perf = performance.now();
-		
+
 		const outPath = resolve(join('bin', `${file.filename.split('.')[0]}${file.includeSuffix === true ? '_ablox' : ''}`));
 		const filePath = resolve(join('scripts/build/sidecar', file.filename));
-		
+
 		let args: string[];
 		if (file.isSwift) {
 			args = ['swiftc', filePath, '-o', outPath, ...file.args];
@@ -70,7 +70,7 @@ export async function buildSidecar() {
 				outPath,
 			];
 		}
-		
+
 		try {
 			await Bun.spawn(args).exited;
 			chmodSync(outPath, 0o755);
@@ -91,10 +91,9 @@ export async function buildSidecar() {
 			(async () => {
 				const drpcLogger = new Signale({ scope: 'download-drpc' });
 				drpcLogger.await('Downloading Discord RPC CLI binary...');
-				
+
 				try {
-					const file = await fetch(DRPC_RELEASE, { method: 'GET' })
-						.then((res) => res.blob());
+					const file = await fetch(DRPC_RELEASE, { method: 'GET' }).then((res) => res.blob());
 					await Bun.write(drpcPath, file);
 					chmodSync(drpcPath, 0o755);
 					drpcLogger.complete('Downloaded discordrpc_ablox');
@@ -113,7 +112,7 @@ export async function buildSidecar() {
 			(async () => {
 				const alerterLogger = new Signale({ scope: 'download-alerter' });
 				alerterLogger.await('Downloading Alerter binary...');
-				
+
 				try {
 					const file = await fetch(ALERTER_RELEASE, { method: 'GET' })
 						.then((res) => res.arrayBuffer())
@@ -122,15 +121,15 @@ export async function buildSidecar() {
 					const zipPath = resolve('bin/.temp/alerter.tar.gz');
 					await $`mkdir -p ${resolve('bin/.temp')}`;
 					await Bun.write(zipPath, file);
-					
+
 					await extract({
 						file: zipPath,
 						cwd: resolve('bin/'),
 					});
-					
+
 					await $`mv bin/alerter bin/alerter_ablox`;
 					chmodSync(alerterPath, 0o755);
-					
+
 					alerterLogger.complete('Downloaded alerter_ablox');
 				} catch (error) {
 					alerterLogger.fatal(`Failed to download Alerter: ${error}`);

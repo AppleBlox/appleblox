@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Contributor } from './types';
-	import * as Card from '$lib/components/ui/card';
-	import * as Avatar from '$lib/components/ui/avatar';
-	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { AspectRatio } from '$lib/components/ui/aspect-ratio';
+	import * as Avatar from '$lib/components/ui/avatar';
+	import * as Card from '$lib/components/ui/card';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { os } from '@neutralinojs/lib';
+	import type { Contributor } from './types';
 
 	export let contributors: Contributor[];
 </script>

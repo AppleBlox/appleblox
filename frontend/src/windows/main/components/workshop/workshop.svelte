@@ -1,12 +1,12 @@
 <script lang="ts">
+	import Button from '$lib/components/ui/button/button.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
+	import Cat from '@/assets/panel/cat.gif';
+	import { TriangleAlert } from 'lucide-svelte';
+	import { quintOut } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
 	import { loadMods, type Mod } from '../../ts/workshop';
 	import ModCard from './mod-card.svelte';
-	import Cat from '@/assets/panel/cat.gif';
-	import { quintOut } from 'svelte/easing';
-	import Input from '$lib/components/ui/input/input.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { TriangleAlert } from 'lucide-svelte';
 
 	let mods: Mod[] = [];
 	let loadStatus = { error: false, loaded: false };

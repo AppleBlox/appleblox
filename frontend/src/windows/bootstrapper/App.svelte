@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { events, init as neuInit } from '@neutralinojs/lib';
-	import { onMount } from 'svelte';
-	import { Progress } from '@/lib/components/ui/progress';
 	import Logo from '@/assets/appleblox.svg';
-	import { mode, ModeWatcher, setMode } from 'mode-watcher';
+	import { Progress } from '@/lib/components/ui/progress';
+	import { events, init as neuInit } from '@neutralinojs/lib';
+	import { ModeWatcher, setMode } from 'mode-watcher';
+	import { onMount } from 'svelte';
 
 	let progress = 0;
 	let text = 'Initializing...';

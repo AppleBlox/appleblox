@@ -2,16 +2,16 @@ import BuildConfig from '@root/build.config';
 import { $ } from 'bun';
 import { resolve } from 'node:path';
 import { Signale } from 'signale';
-import { buildSidecar } from './sidecar';
-import { buildViteAndNeu, getArchitectureFilter, filterArchitectures } from './utils';
 import { macBuildSingle } from './mac-bundle';
+import { buildSidecar } from './sidecar';
+import { buildViteAndNeu, filterArchitectures, getArchitectureFilter } from './utils';
 
 const { argv } = process;
 
 async function parallelBuild() {
 	const initTime = performance.now();
 	const logger = new Signale({ scope: 'parallel-build' });
-	
+
 	if (!BuildConfig.mac) {
 		logger.fatal('No macOS configuration found in build.config.ts');
 		return;
@@ -26,7 +26,9 @@ async function parallelBuild() {
 		return;
 	}
 
-	logger.info(`Starting parallel build for macOS${architectureFilter ? ` (${architectureFilter})` : ` (${targetArchs.join(', ')})`}`);
+	logger.info(
+		`Starting parallel build for macOS${architectureFilter ? ` (${architectureFilter})` : ` (${targetArchs.join(', ')})`}`
+	);
 
 	// Clean directories first
 	if (!argv.includes('--no-clean')) {
@@ -49,11 +51,11 @@ async function parallelBuild() {
 	} else {
 		// Run parallel builds for multiple architectures
 		logger.info(`Building ${targetArchs.length} architectures in parallel`);
-		
+
 		const buildPromises = targetArchs.map(async (arch) => {
 			const archLogger = new Signale({ scope: `build-${arch}`, interactive: false });
 			archLogger.await(`Building ${arch} in parallel`);
-			
+
 			try {
 				await macBuildSingle(arch, resolve('.tmpbuild'));
 				archLogger.success(`${arch} build completed`);
@@ -65,16 +67,16 @@ async function parallelBuild() {
 		});
 
 		const results = await Promise.allSettled(buildPromises);
-		
+
 		// Check results and report
-		const successful = results.filter(r => r.status === 'fulfilled' && r.value.success);
-		const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success));
-		
+		const successful = results.filter((r) => r.status === 'fulfilled' && r.value.success);
+		const failed = results.filter((r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success));
+
 		if (failed.length > 0) {
 			logger.error(`${failed.length} build(s) failed, ${successful.length} succeeded`);
 			process.exit(1);
 		}
-		
+
 		logger.success(`All ${successful.length} parallel builds completed successfully`);
 	}
 
@@ -82,9 +84,9 @@ async function parallelBuild() {
 	await $`rm -rf "${resolve('dist')}"`;
 	await $`cp -r "${resolve('.tmpbuild')}" "${resolve('dist')}"`;
 	await $`rm -rf "${resolve('.tmpbuild')}"`;
-	
+
 	logger.success(`Parallel build completed in ${((performance.now() - initTime) / 1000).toFixed(3)}s`);
-	
+
 	// Open dist folder
 	if (!argv.includes('--no-open')) {
 		await $`open ${resolve('./dist')}`;

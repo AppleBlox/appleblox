@@ -3,7 +3,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import { events, os } from '@neutralinojs/lib';
-	import { Activity, ChevronLeft, ChevronRight, Rocket, Settings, Users, ExternalLink, BookOpen, FileWarning } from 'lucide-svelte';
+	import { Activity, ChevronLeft, ChevronRight, ExternalLink, FileWarning, Rocket, Settings, Users } from 'lucide-svelte';
 	import { quartInOut, quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import { loadSettings, saveSettings, setMultipleValues } from '../settings/files';
@@ -142,10 +142,10 @@
 		},
 		{
 			title: 'Note: About recent "Fast flags" changes',
-			description: 'Roblox has implemented a whitelist system that restricts which fast flags can be modified. As a result, many engine settings (including frame rate caps, lighting technology, and others) are no longer configurable. Custom flag profiles may also be affected. Please do not create GitHub issues or Discord support threads about this limitation. It\'s a Roblox-side restriction that cannot (and shouldn\'t) be bypassed.',
+			description:
+				"Roblox has implemented a whitelist system that restricts which fast flags can be modified. As a result, many engine settings (including frame rate caps, lighting technology, and others) are no longer configurable. Custom flag profiles may also be affected. Please do not create GitHub issues or Discord support threads about this limitation. It's a Roblox-side restriction that cannot (and shouldn't) be bypassed.",
 			icon: FileWarning,
-			actions: [
-			],
+			actions: [],
 		},
 	];
 

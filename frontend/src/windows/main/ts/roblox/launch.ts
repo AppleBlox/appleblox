@@ -4,6 +4,7 @@ import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
+import { Notification } from '../tools/notifications';
 import { RPCController } from '../tools/rpc';
 import { shell, spawn, type SpawnEventEmitter } from '../tools/shell';
 import shellFS from '../tools/shellfs';
@@ -15,7 +16,6 @@ import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
 import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
-import { Notification } from '../tools/notifications';
 
 let allowFixedDelays = true;
 getValue<boolean>('misc.advanced.allow_fixed_loading_times')
@@ -424,7 +424,8 @@ export async function launchRoblox(
 			if (robloxUrl) {
 				const installNotif = new Notification({
 					title: 'Failed to launch',
-					content: 'AppleBlox could not find the Roblox installation. Launch Roblox from the AppleBlox app to try to resolve this issue.',
+					content:
+						'AppleBlox could not find the Roblox installation. Launch Roblox from the AppleBlox app to try to resolve this issue.',
 					sound: 'hero',
 					timeout: 30,
 				});

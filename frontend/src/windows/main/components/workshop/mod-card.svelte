@@ -9,10 +9,10 @@
 	import { onMount } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
-	import type { Mod } from '../../ts/workshop';
-	import { downloadMod, type ProgressUpdate } from '../../ts/workshop';
 	import Roblox from '../../ts/roblox';
 	import shellFS from '../../ts/tools/shellfs';
+	import type { Mod } from '../../ts/workshop';
+	import { downloadMod, type ProgressUpdate } from '../../ts/workshop';
 
 	export let mod: Mod;
 	let thumbnailUrl = `https://66.33.22.138/api/v1/mods/${mod.id}/image`;

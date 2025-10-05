@@ -274,16 +274,16 @@ async function downloadMod(
 }
 
 export {
-	loadMods,
 	cacheModAssets,
-	getCacheStatus,
-	getModAssets,
 	downloadAsset,
 	downloadMod,
-	type Mod,
-	type CacheStatus,
+	getCacheStatus,
+	getModAssets,
+	loadMods,
 	type AssetInfo,
 	type AssetsResponse,
-	type ProgressUpdate,
+	type CacheStatus,
+	type Mod,
 	type ProgressCallback,
+	type ProgressUpdate,
 };

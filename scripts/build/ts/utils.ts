@@ -16,10 +16,10 @@ export async function buildViteAndNeu(buildVite = true) {
 	if (buildVite) {
 		frontBuildLog.await('Building with Vite');
 		await $`rm -rf "${resolve('frontend/dist')}"`;
-		
+
 		try {
 			await $`bunx vite build`;
-			
+
 			// Wait for build completion
 			let attempts = 0;
 			const maxAttempts = 30;
@@ -27,7 +27,7 @@ export async function buildViteAndNeu(buildVite = true) {
 				await sleep(1000);
 				attempts++;
 			}
-			
+
 			if (attempts >= maxAttempts) {
 				throw new Error('Vite build timeout');
 			}
@@ -44,7 +44,7 @@ export async function buildViteAndNeu(buildVite = true) {
 
 	frontBuildLog.await('Building with Neutralino');
 	await sleep(500);
-	
+
 	try {
 		await $`bunx neu build`;
 	} catch (err) {
@@ -111,21 +111,17 @@ export function filterArchitectures(
 	if (!filter || filter === 'all') {
 		return architectures;
 	}
-	
+
 	if (filter === 'universal' && architectures.includes('universal')) {
 		return ['universal'];
 	}
-	
-	return architectures.filter(arch => arch === filter);
+
+	return architectures.filter((arch) => arch === filter);
 }
 
-export async function executeWithRetry<T>(
-	operation: () => Promise<T>,
-	maxRetries: number = 3,
-	delay: number = 1000
-): Promise<T> {
+export async function executeWithRetry<T>(operation: () => Promise<T>, maxRetries: number = 3, delay: number = 1000): Promise<T> {
 	let lastError: Error;
-	
+
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {
 		try {
 			return await operation();
@@ -137,7 +133,7 @@ export async function executeWithRetry<T>(
 			}
 		}
 	}
-	
+
 	throw lastError!;
 }
 
@@ -149,17 +145,13 @@ export async function ensureDirectory(path: string): Promise<void> {
 	await $`mkdir -p "${path}"`;
 }
 
-export async function copyWithProgress(
-	source: string,
-	destination: string,
-	logger?: Signale
-): Promise<void> {
+export async function copyWithProgress(source: string, destination: string, logger?: Signale): Promise<void> {
 	if (logger) {
 		logger.await(`Copying ${source.split('/').pop()} to destination`);
 	}
-	
+
 	await $`cp -r "${source}" "${destination}"`;
-	
+
 	if (logger) {
 		logger.success(`Copied ${source.split('/').pop()}`);
 	}
@@ -183,15 +175,12 @@ export async function getMacExecutableArchs(executablePath: string): Promise<str
 	}
 }
 
-export async function runConcurrently<T>(
-	tasks: (() => Promise<T>)[],
-	maxConcurrency: number = 3
-): Promise<T[]> {
+export async function runConcurrently<T>(tasks: (() => Promise<T>)[], maxConcurrency: number = 3): Promise<T[]> {
 	const results: T[] = [];
 	const executing: Promise<void>[] = [];
 
 	for (const task of tasks) {
-		const promise = task().then(result => {
+		const promise = task().then((result) => {
 			results.push(result);
 		});
 

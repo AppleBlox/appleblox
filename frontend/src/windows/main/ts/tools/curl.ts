@@ -1,4 +1,4 @@
-import { shell, spawn, type ExecuteOptions, type ExecutionResult, type SpawnEventEmitter } from './shell';
+import { shell, spawn, type ExecuteOptions, type ExecutionResult } from './shell';
 
 interface CurlOptions extends ExecuteOptions {
 	method?: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -89,7 +89,7 @@ export class Curl {
 
 	private static parseCurlStats(output: string): Partial<CurlResponse> {
 		const stats: Partial<CurlResponse> = {};
-		
+
 		// Parse various curl statistics from verbose output
 		const lines = output.split('\n');
 		for (const line of lines) {
@@ -106,7 +106,7 @@ export class Curl {
 				if (match) stats.avgUploadSpeed = parseFloat(match[1]);
 			}
 		}
-		
+
 		return stats;
 	}
 
@@ -114,30 +114,33 @@ export class Curl {
 		// Parse curl progress output: % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
 		//                                Dload  Upload   Total   Spent    Left  Speed
 		// Example: 42 34567    42 14567     0     0   1234     0  0:00:28  0:00:12  0:00:16  1456
-		
-		const progressMatch = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+[\d:]+\s+([\d:]+)\s+([\d:]+)\s+(\d+)/);
-		
+
+		const progressMatch = line.match(
+			/^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+[\d:]+\s+([\d:]+)\s+([\d:]+)\s+(\d+)/
+		);
+
 		if (progressMatch) {
-			const [, percentage, totalSize, downloadedPercentage, downloadedSize, , , downloadSpeed, , , timeLeft, currentSpeed] = progressMatch;
-			
+			const [, percentage, totalSize, downloadedPercentage, downloadedSize, , , downloadSpeed, , , timeLeft, currentSpeed] =
+				progressMatch;
+
 			const timeLeftSeconds = this.parseTimeToSeconds(timeLeft);
-			
+
 			return {
 				totalSize: parseInt(totalSize) || undefined,
 				downloadedSize: parseInt(downloadedSize),
 				downloadSpeed: parseInt(currentSpeed),
 				percentage: parseInt(percentage),
 				timeRemaining: timeLeftSeconds,
-				elapsedTime: 0 // Will be calculated separately
+				elapsedTime: 0, // Will be calculated separately
 			};
 		}
-		
+
 		return null;
 	}
 
 	private static parseTimeToSeconds(timeStr: string): number | undefined {
 		if (timeStr === '--:--:--') return undefined;
-		
+
 		const parts = timeStr.split(':').map(Number);
 		if (parts.length === 3) {
 			return parts[0] * 3600 + parts[1] * 60 + parts[2];
@@ -230,7 +233,10 @@ export class Curl {
 
 		// Add verbose output for statistics
 		args.push('-w', '@-');
-		args.push('--write-out', 'CURL_STATS_START\\nurl_effective: %{url_effective}\\nhttp_code: %{http_code}\\ntime_total: %{time_total}\\ntime_namelookup: %{time_namelookup}\\ntime_connect: %{time_connect}\\ntime_pretransfer: %{time_pretransfer}\\ntime_starttransfer: %{time_starttransfer}\\nsize_download: %{size_download}\\nsize_upload: %{size_upload}\\nspeed_download: %{speed_download}\\nspeed_upload: %{speed_upload}\\nCURL_STATS_END\\n');
+		args.push(
+			'--write-out',
+			'CURL_STATS_START\\nurl_effective: %{url_effective}\\nhttp_code: %{http_code}\\ntime_total: %{time_total}\\ntime_namelookup: %{time_namelookup}\\ntime_connect: %{time_connect}\\ntime_pretransfer: %{time_pretransfer}\\ntime_starttransfer: %{time_starttransfer}\\nsize_download: %{size_download}\\nsize_upload: %{size_upload}\\nspeed_download: %{speed_download}\\nspeed_upload: %{speed_upload}\\nCURL_STATS_END\\n'
+		);
 
 		// Add URL
 		args.push(url);
@@ -301,7 +307,7 @@ export class Curl {
 				headers,
 				body,
 				raw: result,
-				...stats
+				...stats,
 			};
 		} catch (error) {
 			return {
@@ -338,13 +344,13 @@ export class Curl {
 		if (options.compressed) args.push('--compressed');
 		if (options.followRedirects !== false) args.push('-L');
 		if (options.maxRedirects) args.push('--max-redirs', options.maxRedirects.toString());
-		
+
 		// Progress bar
 		args.push('--progress-bar');
-		
+
 		// Output file
 		args.push('-o', options.outputPath);
-		
+
 		// Resume if requested
 		if (options.resume) args.push('-C', '-');
 
@@ -382,7 +388,7 @@ export class Curl {
 				downloadedSize: 0,
 				downloadSpeed: 0,
 				percentage: 0,
-				elapsedTime: 0
+				elapsedTime: 0,
 			};
 
 			// Listen for stderr output (where curl progress goes)
@@ -413,7 +419,7 @@ export class Curl {
 							raw: { stdOut: '', stdErr: '', exitCode },
 							downloadSize: lastProgress.downloadedSize,
 							totalTime: lastProgress.elapsedTime,
-							avgDownloadSpeed: lastProgress.downloadSpeed
+							avgDownloadSpeed: lastProgress.downloadSpeed,
 						});
 					} else {
 						resolve({
@@ -424,7 +430,6 @@ export class Curl {
 					}
 				});
 			});
-
 		} catch (error) {
 			return {
 				success: false,
@@ -511,7 +516,7 @@ export class Curl {
 		if (response.success) {
 			return {
 				downloadSpeed: response.avgDownloadSpeed || 0,
-				uploadSpeed: response.avgUploadSpeed || 0
+				uploadSpeed: response.avgUploadSpeed || 0,
 			};
 		}
 		return null;
