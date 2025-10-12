@@ -6,9 +6,10 @@
 	import { toast } from 'svelte-sonner';
 	import { version } from '../../../../../package.json';
 	import { shell } from '../ts/tools/shell';
-	import { curlGet } from '../ts/utils';
 	import { loadSettings, saveSettings } from './settings';
 	import MarkdownViewer from './markdown-viewer.svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
+	import { Curl } from '../ts/tools/curl';
 
 	let showUpdatePopup = false;
 	let updateVersion = version;
@@ -22,11 +23,12 @@
 			toast.error('Could not connect to internet');
 			return;
 		}
-		const releases = await curlGet('https://api.github.com/repos/AppleBlox/appleblox/releases').catch((err) => {
-			console.error('[Updater] ', err);
-			return;
-		});
-		if (releases.message) return;
+		const response = await Curl.get('https://api.github.com/repos/AppleBlox/appleblox/releases');
+		if (!response.success || !response.body) {
+			throw new Error(`Failed to fetch version info: ${response.error || 'No response body'}`);
+		}
+		const releases = JSON.parse(response.body);
+		if (releases) return;
 		for (const re of releases) {
 			if (compare(re.tag_name, updateVersion) === 1) {
 				updateVersion = re.tag_name;
@@ -35,7 +37,7 @@
 		}
 		if (updateVersion === version) return;
 		if (compare(updateVersion, version) === 1) {
-			console.info(`[Updater] A new release is available: ${updateVersion}`);
+			Logger.info(`A new release is available: ${updateVersion}`);
 			const settings = await loadSettings('updating');
 			if (settings) {
 				// Last asked date is newer than 7 days

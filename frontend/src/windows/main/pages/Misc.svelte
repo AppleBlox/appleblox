@@ -8,7 +8,6 @@
 	import { toast } from 'svelte-sonner';
 	import { SettingsPanelBuilder, getConfigPath } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
-	import { disableConsoleRedirection, enableConsoleRedirection } from '../ts/debugging';
 	import Roblox from '../ts/roblox';
 	import { shell } from '../ts/tools/shell';
 	import shellFS from '../ts/tools/shellfs';
@@ -61,10 +60,6 @@
 	async function buttonClicked(e: CustomEvent) {
 		const { id } = e.detail;
 		switch (id) {
-			case 'redirect_console':
-				enableConsoleRedirection();
-				toast.success('Console redirection enabled', { duration: 1000 });
-				break;
 			case 'open_logs': {
 				const logPath = path.join(path.dirname(await getConfigPath()), 'logs');
 				if (!(await shellFS.exists(logPath))) {
@@ -82,19 +77,6 @@
 				break;
 			case 'export_config':
 				exportSettingsPopup = true;
-				break;
-		}
-	}
-
-	async function switchClicked(e: CustomEvent) {
-		const { id, state } = e.detail;
-		switch (id) {
-			case 'redirect_console':
-				if (state) {
-					enableConsoleRedirection();
-				} else {
-					disableConsoleRedirection();
-				}
 				break;
 		}
 	}
@@ -126,12 +108,6 @@
 					description:
 						'Set a minimal time for loading steps during Roblox launching. That way, you can better see the bootstrapper.',
 					id: 'allow_fixed_loading_times',
-					default: true,
-				})
-				.addSwitch({
-					label: 'Log to File',
-					description: 'Save all console output to log files (Recommended)',
-					id: 'redirect_console',
 					default: true,
 				})
 				.addButton({
@@ -170,7 +146,7 @@
 		.build();
 </script>
 
-<Panel {panel} on:button={buttonClicked} on:switch={switchClicked} {render} />
+<Panel {panel} on:button={buttonClicked} {render} />
 <AlertDialog.Root bind:open={exportSettingsPopup}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>

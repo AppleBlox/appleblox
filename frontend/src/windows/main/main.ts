@@ -1,7 +1,6 @@
 // Init imports
 import '@/theme.css';
 import './app.css';
-import './ts/debugging';
 import './ts/roblox';
 import './ts/window';
 
@@ -14,6 +13,7 @@ import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
 import { getMode } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
+import Logger, { initializeLogger } from '@/windows/main/ts/utils/logger';
 import { focusWindow } from './ts/window';
 
 // Initialize NeutralinoJS
@@ -27,18 +27,18 @@ async function quit() {
 	if (isQuitting) return;
 	isQuitting = true;
 
-	console.info('[Main] Exiting app');
+	Logger.info('Exiting app');
 
 	try {
 		await RPCController.stop();
 	} catch (e) {
-		console.warn('[Main] Error stopping RPC controller:', e);
+		Logger.warn('Error stopping RPC controller:', e);
 	}
 
 	try {
 		await shell('pkill', ['-f', '_ablox'], { skipStderrCheck: true });
 	} catch (e) {
-		console.warn('[Main] Failed to pkill _ablox on quit:', e);
+		Logger.warn('Failed to pkill _ablox on quit:', e);
 	}
 
 	if (window.NL_ARGS.includes('--mode=browser')) {
@@ -46,7 +46,7 @@ async function quit() {
 		try {
 			neuApp.writeProcessOutput('quit');
 		} catch (e) {
-			console.warn("[Main] Failed to write 'quit' to process output:", e);
+			Logger.warn("Failed to write 'quit' to process output:", e);
 			await neuApp.exit(0);
 		}
 	}
@@ -57,13 +57,16 @@ async function quit() {
 	}
 }
 
-events.on('appReady', async () => {
+events.on('ready', async () => {
+	// Initialize the logger as the first, non-blocking step.
+	setTimeout(initializeLogger, 0);
+
 	// Make theme loading non-blocking
 	setTimeout(async () => {
 		try {
 			await loadTheme();
 		} catch (e) {
-			console.warn('[Main] Error loading theme:', e);
+			Logger.warn('Error loading theme:', e);
 		}
 	}, 0);
 
@@ -71,18 +74,19 @@ events.on('appReady', async () => {
 	isDeeplinkLaunch = !!deeplinkArg;
 
 	if (isDeeplinkLaunch && deeplinkArg) {
-		console.info('[Main] Deeplink detected:', deeplinkArg);
+		Logger.info('Deeplink detected:', deeplinkArg);
 		let url = deeplinkArg.slice(11);
+		let deeplinkLogger = Logger.withContext('deeplink');
 		try {
-			console.info(`[Main] Deeplink: Initiating Roblox launch with URL: ${url}`);
+			Logger.info(`Deeplink: Initiating Roblox launch with URL: ${url}`);
 			if (url === 'appleblox://launch') {
 				url = 'roblox-player:';
 			}
 			setTimeout(async () => {
 				try {
 					await Roblox.launch(
-						(isConnected) => console.log(`[Main Deeplink] Roblox Connected: ${isConnected}`),
-						(isLaunching) => console.log(`[Main Deeplink] Launching Roblox State: ${isLaunching}`),
+						(isConnected) => deeplinkLogger.info(`Roblox Connected: ${isConnected}`),
+						(isLaunching) => deeplinkLogger.info(`Launching Roblox State: ${isLaunching}`),
 						async (title, description, code, flagNames) => {},
 						url,
 						false
@@ -91,31 +95,28 @@ events.on('appReady', async () => {
 					// Main UI never loaded.
 				} catch (error) {
 					const errorMessage = `Critical error during deeplink launch: ${error instanceof Error ? error.message : String(error)}`;
-					console.error(`[Main] ${errorMessage}`);
+					Logger.error(`${errorMessage}`);
 					try {
 						await os.showMessageBox('Deeplink Launch Failed', errorMessage, os.MessageBoxChoice.OK);
 					} catch (dialogError) {
-						console.error(
-							'[Main Deeplink] Failed to show native error dialog for critical launch failure:',
-							dialogError
-						);
+						deeplinkLogger.error('Failed to show native error dialog for critical launch failure:', dialogError);
 					}
 					await neuApp.exit(1); // Exit if deeplink launch fails critically
 				}
 			}, 0);
 		} catch (error) {
 			const errorMessage = `Critical error during deeplink launch: ${error instanceof Error ? error.message : String(error)}`;
-			console.error(`[Main] ${errorMessage}`);
+			Logger.error(`${errorMessage}`);
 			try {
 				await os.showMessageBox('Deeplink Launch Failed', errorMessage, os.MessageBoxChoice.OK);
 			} catch (dialogError) {
-				console.error('[Main Deeplink] Failed to show native error dialog for critical launch failure:', dialogError);
+				deeplinkLogger.error('Failed to show native error dialog for critical launch failure:', dialogError);
 			}
 			await neuApp.exit(1); // Exit if deeplink launch fails critically
 		}
 	} else {
 		// No deeplink: Normal application startup
-		console.info('[Main] No deeplink detected, loading main application UI.');
+		Logger.info('No deeplink detected, loading main application UI.');
 
 		// Make window showing non-blocking
 		setTimeout(async () => {
@@ -125,11 +126,11 @@ events.on('appReady', async () => {
 					try {
 						await focusWindow();
 					} catch (e) {
-						console.warn('[Main] Failed to focus main window:', e);
+						Logger.warn('Failed to focus main window:', e);
 					}
 				}
 			} catch (e) {
-				console.warn('[Main] Error showing window:', e);
+				Logger.warn('Error showing window:', e);
 			}
 		}, 0);
 
@@ -140,9 +141,9 @@ events.on('appReady', async () => {
 					target: appTarget,
 				});
 				mainAppMounted = true;
-				console.info('[Main] Main application UI mounted successfully.');
+				Logger.info('Main application UI mounted successfully.');
 			} else {
-				console.error('[Main] Fatal: #app element not found in index.html for Svelte app mounting.');
+				Logger.error('Fatal: #app element not found in index.html for Svelte app mounting.');
 				setTimeout(async () => {
 					try {
 						await os.showMessageBox(
@@ -152,21 +153,21 @@ events.on('appReady', async () => {
 						);
 						await neuApp.exit(1);
 					} catch (e) {
-						console.error('[Main] Error showing startup error dialog:', e);
+						Logger.error('Error showing startup error dialog:', e);
 					}
 				}, 0);
 			}
 		} catch (e) {
-			console.error('[Main] Error mounting Svelte app:', e);
+			Logger.error('Error mounting Svelte app:', e);
 		}
 	}
 
 	// Make debug logging non-blocking
 	try {
-		console.info(`NeutralinoJS: Running at http://localhost:${window.NL_PORT}`);
+		Logger.info(`NeutralinoJS: Running at http://localhost:${window.NL_PORT}`);
 		logDebugInfo();
 	} catch (e) {
-		console.warn('[Main] Error logging debug info:', e);
+		Logger.warn('Error logging debug info:', e);
 	}
 });
 

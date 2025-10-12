@@ -1,6 +1,7 @@
 import path from 'path-browserify';
 import shellFS from '../tools/shellfs';
 import { getMostRecentRoblox } from './path';
+import Logger from '@/windows/main/ts/utils/logger';
 
 export let version: string | null = null;
 
@@ -23,7 +24,7 @@ async function loadVersion() {
 	const plistPath = path.join(robloxPath, 'Contents/Info.plist');
 	const content = await shellFS.readFile(plistPath);
 	version = extractVersion(content);
-	console.info(`[Version] Found Roblox version "${version}"`);
+	Logger.info(`Found Roblox version "${version}"`);
 }
 
-loadVersion().catch(console.error);
+loadVersion().catch(Logger.error);

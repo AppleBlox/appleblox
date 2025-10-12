@@ -13,6 +13,7 @@
 	import shellFS from '../../ts/tools/shellfs';
 	import type { Mod } from '../../ts/workshop';
 	import { downloadMod, type ProgressUpdate } from '../../ts/workshop';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let mod: Mod;
 	let thumbnailUrl = `https://66.33.22.138/api/v1/mods/${mod.id}/image`;
@@ -82,7 +83,7 @@
 			if (error?.code === 'NE_ST_NOSTKEX') {
 				return null;
 			}
-			console.warn('Failed to get cached image:', error);
+			Logger.warn('Failed to get cached image:', error);
 			return null;
 		}
 	}
@@ -108,7 +109,7 @@
 
 			await storage.setData(CACHE_KEY, JSON.stringify(parsed));
 		} catch (error: any) {
-			console.warn('Failed to cache image:', error);
+			Logger.warn('Failed to cache image:', error);
 			// Ignore cache errors
 		}
 	}
@@ -156,7 +157,7 @@
 
 			reader.readAsDataURL(blob);
 		} catch (error: any) {
-			console.warn('Failed to load image from network:', error);
+			Logger.warn('Failed to load image from network:', error);
 			// If image fails to load, show gradient instead
 			imageLoaded = false;
 			imageLoading = false;
@@ -222,7 +223,7 @@
 			const modPath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/mods', mod.name);
 			return await shellFS.exists(modPath);
 		} catch (error: any) {
-			console.warn('Failed to check if mod exists:', error);
+			Logger.warn('Failed to check if mod exists:', error);
 			return false;
 		}
 	}

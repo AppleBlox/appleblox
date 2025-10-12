@@ -7,6 +7,7 @@
 	import { quartInOut, quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import { loadSettings, saveSettings, setMultipleValues } from '../settings/files';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let onboardingLoaded = false;
 
@@ -26,7 +27,7 @@
 				loadedSettings = true;
 			}
 		} catch (error) {
-			console.error('Failed to initialize onboarding:', error);
+			Logger.error('Failed to initialize onboarding:', error);
 			// Fallback to showing onboarding
 			loadedSettings = true;
 		}
@@ -188,7 +189,7 @@
 				}
 			}
 
-			console.log('Saving settings:', values);
+			Logger.info('Saving settings:', values);
 
 			// Save all settings atomically
 			if (values.length > 0) {
@@ -205,10 +206,10 @@
 			try {
 				events.broadcast('app:reload');
 			} catch (error) {
-				console.warn('Failed to broadcast reload event:', error);
+				Logger.warn('Failed to broadcast reload event:', error);
 			}
 		} catch (error) {
-			console.error('Failed to complete onboarding:', error);
+			Logger.error('Failed to complete onboarding:', error);
 			// Still allow onboarding to complete even if settings fail
 			onboardingLoaded = true;
 		}
@@ -220,13 +221,13 @@
 
 	function handleSwitchChange(stepIndex: number, actionIndex: number, value: boolean) {
 		if (!steps[stepIndex]?.actions?.[actionIndex]) {
-			console.warn('Invalid step or action index:', stepIndex, actionIndex);
+			Logger.warn('Invalid step or action index:', stepIndex, actionIndex);
 			return;
 		}
 
 		const action = steps[stepIndex].actions[actionIndex];
 		if (action.type !== 'switch') {
-			console.warn('Attempted to change non-switch action');
+			Logger.warn('Attempted to change non-switch action');
 			return;
 		}
 

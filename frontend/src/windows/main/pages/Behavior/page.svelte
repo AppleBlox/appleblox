@@ -11,6 +11,7 @@
 	import type { SettingsOutput } from '../../components/settings/types';
 	import Roblox from '../../ts/roblox';
 	import MultiInstanceWarning from './multi-instance-warning.svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let render = true;
 
@@ -32,7 +33,7 @@
 				try {
 					await Roblox.Utils.createShortcut();
 				} catch (err) {
-					console.error('[RobloxPanel] ', err);
+					Logger.error(err);
 					toast.error('An error occured while trying to save the shortcut', {
 						duration: 2000,
 					});
@@ -145,7 +146,7 @@
 				},
 			};
 		} catch (err) {
-			console.warn("Couldn't load overrides:", err);
+			Logger.warn("Couldn't load overrides:", err);
 		}
 	}
 </script>

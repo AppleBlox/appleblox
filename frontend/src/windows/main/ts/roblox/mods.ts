@@ -6,7 +6,10 @@ import { getValue } from '../../components/settings';
 import { Notification } from '../tools/notifications';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
+import Logger from '../utils/logger';
 import { getMostRecentRoblox } from './path';
+
+const logger = Logger.withContext('Mods');
 
 export class RobloxMods {
 	/** Load mods from the AppleBlox/mods folder */
@@ -35,7 +38,7 @@ export class RobloxMods {
 		const resBackupFolder = path.join(modsCacheFolder, 'Resources');
 		if (await shellFS.exists(resBackupFolder)) {
 			if (!force) return;
-			console.info('[Roblox.Mods] Replacing old backup with a new one.');
+			logger.info('Replacing old backup with a new one.');
 		}
 		const robloxResFolder = path.join(Roblox.path, 'Contents', 'Resources');
 		await shellFS.copy(robloxResFolder, modsCacheFolder, true);
@@ -45,9 +48,9 @@ export class RobloxMods {
 	static async copyToFiles() {
 		// Load the mods.
 		const mods = (await RobloxMods.loadMods()).filter((m) => m.state);
-		console.info('[Roblox.Mods] Loading mods:', mods);
+		logger.info('Loading mods:', mods);
 		if (mods.length < 1) {
-			console.info('[Roblox.Mods] No mods to apply.');
+			logger.info('No mods to apply.');
 			return;
 		}
 
@@ -103,7 +106,7 @@ export class RobloxMods {
 		const fontValue = (await getValue('mods.builtin.custom_font')) as string | null;
 		if (!fontValue) return;
 
-		console.info('[Mods] Applying custom font...');
+		logger.info('Applying custom font...');
 
 		const fontExt = path.extname(fontValue);
 		const fontPath = path.join(
@@ -111,12 +114,12 @@ export class RobloxMods {
 			`Library/Application Support/AppleBlox/cache/fonts/CustomFont${fontExt}`
 		);
 		if (!(await shellFS.exists(fontPath))) {
-			console.error('[Mods] Could not find the path to the custom font file.');
+			logger.error('Could not find the path to the custom font file.');
 			return;
 		}
 		const robloxFontsPath = path.join(Roblox.path, 'Contents/Resources/content/fonts');
 		if (!(await shellFS.exists(robloxFontsPath))) {
-			console.error('[Mods] Could not find the roblox fonts folder.');
+			logger.error('Could not find the roblox fonts folder.');
 			return;
 		}
 		const fontFamiliesPath = path.join(robloxFontsPath, 'families');
@@ -140,11 +143,11 @@ export class RobloxMods {
 				}
 				await filesystem.writeFile(file.path, JSON.stringify(jsonContent));
 			} catch (err) {
-				console.error(`[Mods] Error when applying custom font to: "${file.path}"`);
+				logger.error(`Error when applying custom font to: "${file.path}"`);
 			}
 		}
 
-		console.info('[Mods] Added custom font');
+		logger.info('Added custom font');
 	}
 
 	/** Removes the custom font */
@@ -197,7 +200,7 @@ export class RobloxMods {
 		await shellFS.copy(cacheDir, fontsFolderPath, true);
 		await shellFS.remove(cacheDir);
 
-		console.info('[Mods] Removed custom font');
+		logger.info('Removed custom font');
 		if (customFont) {
 			new Notification({
 				title: 'Removed custom font',
@@ -214,6 +217,6 @@ export class RobloxMods {
 		await shell(`/usr/libexec/PlistBuddy -c "Set :NSHighResolutionCapable ${state}" "${plistPath}"`, [], {
 			completeCommand: true,
 		});
-		console.info(`[Roblox.Mods] Set NSHighResolutionCapable to ${state}`);
+		logger.info(`Set NSHighResolutionCapable to ${state}`);
 	}
 }

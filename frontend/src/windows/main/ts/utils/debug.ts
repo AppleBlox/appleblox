@@ -1,6 +1,7 @@
 import { app, computer } from '@neutralinojs/lib';
 import { version } from '@root/package.json';
 import { shell } from '../tools/shell';
+import Logger from '@/windows/main/ts/utils/logger';
 
 export async function logDebugInfo() {
 	try {
@@ -50,8 +51,8 @@ export async function logDebugInfo() {
 		debugInfo += `  Version: ${window.NL_VERSION}\n\n`;
 
 		// Log the debug info
-		console.info('AppleBlox Debug Information:\n\n' + debugInfo);
+		Logger.info('AppleBlox Debug Information:\n\n' + debugInfo);
 	} catch (error: any) {
-		console.error('Error collecting debug information:', error.message);
+		Logger.error('Error collecting debug information:', error.message);
 	}
 }

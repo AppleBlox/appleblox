@@ -5,6 +5,7 @@
 	import path from 'path-browserify';
 	import { createEventDispatcher } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let file: string | null = null;
 	export let extensions: string[] | null = null;
@@ -29,7 +30,7 @@
 				dispatch('fileChosen', { path: entries[0] });
 			}
 		} catch (err) {
-			console.error('[Panel.filepicker] ', err);
+			Logger.withContext("panel").error(err);
 			toast.error(String(err));
 		}
 	}

@@ -2,6 +2,7 @@ import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import shellFS from '../../ts/tools/shellfs';
 import type { SettingsOutput } from './types';
+import Logger from '@/windows/main/ts/utils/logger';
 
 export async function getConfigPath(): Promise<string> {
 	return path.join(await os.getPath('data'), 'AppleBlox', 'config');
@@ -19,7 +20,7 @@ function initSaveInterval() {
 		saveInterval = setInterval(() => {
 			for (const [path, data] of Object.entries(saveQueue)) {
 				filesystem.writeFile(path, data).catch((err) => {
-					console.error('[Settings] ', err);
+					Logger.error(err);
 				});
 				delete saveQueue[path];
 			}
@@ -53,7 +54,7 @@ export async function saveSettings(panelId: string, data: Object): Promise<void>
 		try {
 			saveQueue[`${savePath}/${panelId}.json`] = JSON.stringify(data);
 		} catch (err) {
-			console.error('[Settings] ', err);
+			Logger.error(err);
 		}
 	} catch (err) {
 		throw err;
@@ -69,7 +70,7 @@ export async function loadSettings(panelId: string): Promise<{ [key: string]: an
 		}
 		return JSON.parse(await filesystem.readFile(filepath));
 	} catch (err) {
-		console.error('[Settings] ', err);
+		Logger.error(err);
 	}
 }
 
@@ -157,7 +158,7 @@ async function loadSettingsFromDisk(panelId: string): Promise<{ [key: string]: a
 		}
 		return JSON.parse(await filesystem.readFile(filepath));
 	} catch (err) {
-		console.error('[Settings] ', err);
+		Logger.error('', err);
 		return undefined;
 	}
 }

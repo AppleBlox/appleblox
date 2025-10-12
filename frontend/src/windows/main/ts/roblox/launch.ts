@@ -16,6 +16,9 @@ import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
 import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
+import Logger from '../utils/logger';
+
+const logger = Logger.withContext('Launch');
 
 let allowFixedDelays = true;
 getValue<boolean>('misc.advanced.allow_fixed_loading_times')
@@ -23,7 +26,7 @@ getValue<boolean>('misc.advanced.allow_fixed_loading_times')
 		allowFixedDelays = value;
 	})
 	.catch((err) => {
-		console.error("[Launch] Couldn't determine if loading times should have a min value:", err);
+		logger.error("Couldn't determine loading time settings:", err);
 	});
 
 let rbxInstance: RobloxInstance | null = null;
@@ -57,9 +60,7 @@ async function validateAndCleanup(): Promise<boolean> {
 		try {
 			const oldPid = await shellFS.readFile('/tmp/appleblox_bootstrapper.pid');
 			await os.execCommand(`kill ${oldPid.trim()}`);
-		} catch (e) {
-			// ignore
-		}
+		} catch {}
 		await shellFS.remove('/tmp/appleblox_bootstrapper.pid');
 	}
 
@@ -75,18 +76,12 @@ async function validateFlags(showFlagErrorPopup: LaunchHandlers['showFlagErrorPo
 	await updateBootstrapper('bootstrapper:progress', { progress: 15 });
 	if (allowFixedDelays) await sleep(300);
 
-	// Make flag parsing non-blocking
-	const presetFlags = (await new Promise((resolve) => {
-		setTimeout(async () => {
-			const result = await RobloxFFlags.parseFlags(true);
-			resolve(result);
-		}, 0);
-	})) as any;
+	const presetFlags = await RobloxFFlags.parseFlags(true);
 
 	if (Object.keys(presetFlags.invalidFlags).length > 0 && checkFlags) {
 		await showFlagErrorPopup(
 			'Outdated presets',
-			'Some preset flags are no longer valid and may not work as intended. This issue requires AppleBlox to be updated by the devlopers. Make sure you are on the latest version of the app.',
+			'Some preset flags are no longer valid. Make sure you are on the latest version of AppleBlox.',
 			presetFlags.nameMap.join(', ')
 		);
 	}
@@ -95,18 +90,12 @@ async function validateFlags(showFlagErrorPopup: LaunchHandlers['showFlagErrorPo
 	await updateBootstrapper('bootstrapper:progress', { progress: 25 });
 	if (allowFixedDelays) await sleep(300);
 
-	// Make flag parsing non-blocking
-	const editorFlags = (await new Promise((resolve) => {
-		setTimeout(async () => {
-			const result = await RobloxFFlags.parseFlags(false);
-			resolve(result);
-		}, 0);
-	})) as any;
+	const editorFlags = await RobloxFFlags.parseFlags(false);
 
 	if (editorFlags.invalidFlags.length > 0 && checkFlags) {
 		await showFlagErrorPopup(
 			'Invalid flags in selected profile',
-			'The following flags in your current profile are invalid meaning they will have no effect on your game. You can choose to ignore this warning or remove the problematic flags.',
+			'The following flags in your current profile are invalid and will have no effect.',
 			editorFlags.invalidFlags.join(', '),
 			editorFlags.invalidFlags
 		);
@@ -123,7 +112,7 @@ async function validateFlags(showFlagErrorPopup: LaunchHandlers['showFlagErrorPo
 		);
 		await showFlagErrorPopup(
 			'Invalid flags in game profile(s)',
-			'Some game-specific profiles contain invalid flags that will have no effect on your game. You can choose to ignore this warning or remove the problematic flags.',
+			'Some game-specific profiles contain invalid flags that will have no effect.',
 			editorFlags.invalidProfileFlags
 				.map((pf: any) => `${pf.name.toUpperCase()}:\n ${beautify(pf.flags, null, 2, 100)}`)
 				.join('<br><br>'),
@@ -133,9 +122,7 @@ async function validateFlags(showFlagErrorPopup: LaunchHandlers['showFlagErrorPo
 
 	return {
 		...editorFlags.validFlags,
-		...editorFlags.invalidFlags,
 		...presetFlags.validFlags,
-		...presetFlags.invalidFlags,
 	};
 }
 
@@ -154,15 +141,15 @@ async function setupBootstrapper(): Promise<void> {
 
 	const viewerArgs = ['--width', windowWidth.toString(), '--height', windowHeight.toString(), '--url', bootstrapperHtmlUrl];
 
-	console.info(`[Launch] Spawning transparent_viewer: ${viewerPath} ${viewerArgs.join(' ')}`);
+	logger.info(`Spawning transparent_viewer: ${viewerPath} ${viewerArgs.join(' ')}`);
 	bootstrapperProcess = await spawn(viewerPath, viewerArgs, { skipStderrCheck: true });
 
 	await shellFS.writeFile('/tmp/appleblox_bootstrapper.pid', bootstrapperProcess.pid?.toString() || '');
 
-	bootstrapperProcess.on('stdOut', (data) => console.info('[Bootstrapper Out]', data));
-	bootstrapperProcess.on('stdErr', (data) => console.error('[Bootstrapper Err]', data));
+	bootstrapperProcess.on('stdOut', (data) => logger.info('[Bootstrapper]', data));
+	bootstrapperProcess.on('stdErr', (data) => logger.error('[Bootstrapper]', data));
 	bootstrapperProcess.on('exit', (code) => {
-		console.info(`[Launch] Bootstrapper process exited with code ${code}.`);
+		logger.info(`Bootstrapper exited with code ${code}`);
 		if (bootstrapperProcess) {
 			bootstrapperProcess = null;
 			if (!rbxInstance) {
@@ -172,7 +159,6 @@ async function setupBootstrapper(): Promise<void> {
 	});
 
 	initialProgressListener = events.on('bootstrapper:ready', async () => {
-		console.info('[Launch] Bootstrapper reported ready. Sending initial state.');
 		await updateBootstrapper('bootstrapper:text', { text: 'Initializing launch sequence...' });
 		await updateBootstrapper('bootstrapper:progress', { progress: 5 });
 	});
@@ -182,34 +168,30 @@ async function setupBootstrapper(): Promise<void> {
 
 async function updateBootstrapper(event: string, data: any): Promise<void> {
 	try {
-		// Make bootstrapper updates non-blocking
 		setTimeout(async () => {
 			try {
 				await events.broadcast(event, data);
 			} catch (e) {
-				console.warn(`Failed to broadcast ${event} to bootstrapper:`, e);
+				logger.warn(`Failed to broadcast ${event}:`, e);
 			}
 		}, 0);
 	} catch (e) {
-		console.warn(`Failed to schedule broadcast for ${event}:`, e);
+		logger.warn(`Failed to schedule broadcast for ${event}:`, e);
 	}
 }
 
 async function cleanupBootstrapper(): Promise<void> {
-	if (initialProgressListener && typeof initialProgressListener === 'function') {
+	if (initialProgressListener) {
 		try {
 			await events.off('bootstrapper:ready', initialProgressListener);
-		} catch (e) {
-			console.warn('Failed to unregister initialProgressListener', e);
-		}
+		} catch {}
 		initialProgressListener = null;
 	}
 	if (bootstrapperProcess) {
 		try {
 			await bootstrapperProcess.kill(true);
-			console.info('[Launch] Bootstrapper process terminated.');
 		} catch (e) {
-			console.error('[Launch] Error terminating bootstrapper process:', e);
+			logger.error('Error terminating bootstrapper:', e);
 		}
 		bootstrapperProcess = null;
 		if (await shellFS.exists('/tmp/appleblox_bootstrapper.pid')) {
@@ -226,72 +208,47 @@ async function prepareRobloxSettings(robloxPath: string, fflags: any): Promise<v
 	const settingsPath = path.join(robloxPath, 'Contents/MacOS/ClientSettings/');
 	const settingsFile = path.join(settingsPath, 'ClientAppSettings.json');
 
-	// Make file operations non-blocking
-	await new Promise<void>((resolve) => {
-		setTimeout(async () => {
-			try {
-				if (await shellFS.exists(settingsFile)) {
-					await updateBootstrapper('bootstrapper:text', { text: 'Removing old settings...' });
-					await updateBootstrapper('bootstrapper:progress', { progress: 40 });
-					if (allowFixedDelays) await sleep(250);
-					await shellFS.remove(settingsPath);
-				}
+	if (await shellFS.exists(settingsFile)) {
+		await updateBootstrapper('bootstrapper:text', { text: 'Removing old settings...' });
+		await updateBootstrapper('bootstrapper:progress', { progress: 40 });
+		if (allowFixedDelays) await sleep(250);
+		await shellFS.remove(settingsPath);
+	}
 
-				await updateBootstrapper('bootstrapper:text', { text: 'Creating settings directory...' });
-				await updateBootstrapper('bootstrapper:progress', { progress: 45 });
-				if (allowFixedDelays) await sleep(200);
-				await shellFS.createDirectory(settingsPath);
+	await updateBootstrapper('bootstrapper:text', { text: 'Creating settings directory...' });
+	await updateBootstrapper('bootstrapper:progress', { progress: 45 });
+	if (allowFixedDelays) await sleep(200);
+	await shellFS.createDirectory(settingsPath);
 
-				await updateBootstrapper('bootstrapper:text', { text: 'Writing FastFlags configuration...' });
-				await updateBootstrapper('bootstrapper:progress', { progress: 50 });
-				if (allowFixedDelays) await sleep(300);
-				await shellFS.writeFile(settingsFile, JSON.stringify(fflags));
-
-				resolve();
-			} catch (err) {
-				console.error('[Launch] Error preparing Roblox settings:', err);
-				resolve();
-			}
-		}, 0);
-	});
+	await updateBootstrapper('bootstrapper:text', { text: 'Writing FastFlags configuration...' });
+	await updateBootstrapper('bootstrapper:progress', { progress: 50 });
+	if (allowFixedDelays) await sleep(300);
+	await shellFS.writeFile(settingsFile, JSON.stringify(fflags));
 }
 
 async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string): Promise<RobloxInstance> {
-	// Make mod operations non-blocking
-	await new Promise<void>((resolve) => {
-		setTimeout(async () => {
-			try {
-				if (settings.areModsEnabled) {
-					await updateBootstrapper('bootstrapper:text', { text: 'Copying mod files...' });
-					await updateBootstrapper('bootstrapper:progress', { progress: 55 });
-					if (allowFixedDelays) await sleep(350);
-					await RobloxMods.copyToFiles();
-				}
+	if (settings.areModsEnabled) {
+		await updateBootstrapper('bootstrapper:text', { text: 'Copying mod files...' });
+		await updateBootstrapper('bootstrapper:progress', { progress: 55 });
+		if (allowFixedDelays) await sleep(350);
+		await RobloxMods.copyToFiles();
+	}
 
-				await updateBootstrapper('bootstrapper:text', { text: 'Applying custom fonts...' });
-				await updateBootstrapper('bootstrapper:progress', { progress: 60 });
-				if (allowFixedDelays) await sleep(250);
-				await RobloxMods.applyCustomFont();
+	await updateBootstrapper('bootstrapper:text', { text: 'Applying custom fonts...' });
+	await updateBootstrapper('bootstrapper:progress', { progress: 60 });
+	if (allowFixedDelays) await sleep(250);
+	await RobloxMods.applyCustomFont();
 
-				await updateBootstrapper('bootstrapper:text', { text: 'Configuring graphics settings...' });
-				await updateBootstrapper('bootstrapper:progress', { progress: 65 });
-				if (allowFixedDelays) await sleep(300);
-				await RobloxMods.toggleHighRes(!settings.fixResolution);
+	await updateBootstrapper('bootstrapper:text', { text: 'Configuring graphics settings...' });
+	await updateBootstrapper('bootstrapper:progress', { progress: 65 });
+	if (allowFixedDelays) await sleep(300);
+	await RobloxMods.toggleHighRes(!settings.fixResolution);
 
-				if (settings.areModsEnabled && settings.fixResolution) {
-					await updateBootstrapper('bootstrapper:text', { text: 'Optimizing resolution settings...' });
-					await updateBootstrapper('bootstrapper:progress', { progress: 70 });
-					if (allowFixedDelays) await sleep(350);
-					await sleep(500);
-				}
-
-				resolve();
-			} catch (err) {
-				console.error('[Launch] Error applying mods:', err);
-				resolve();
-			}
-		}, 0);
-	});
+	if (settings.areModsEnabled && settings.fixResolution) {
+		await updateBootstrapper('bootstrapper:text', { text: 'Optimizing resolution settings...' });
+		await updateBootstrapper('bootstrapper:progress', { progress: 70 });
+		if (allowFixedDelays) await sleep(350);
+	}
 
 	await updateBootstrapper('bootstrapper:text', { text: 'Initializing Roblox instance...' });
 	await updateBootstrapper('bootstrapper:progress', { progress: 80 });
@@ -305,19 +262,7 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	if (allowFixedDelays) await sleep(450);
 
 	await cleanupBootstrapper();
-
-	// Make Roblox startup non-blocking
-	await new Promise<void>((resolve) => {
-		setTimeout(async () => {
-			try {
-				await robloxInstance.start(robloxUrl);
-				resolve();
-			} catch (err) {
-				console.error('[Launch] Error starting Roblox instance:', err);
-				throw err;
-			}
-		}, 0);
-	});
+	await robloxInstance.start(robloxUrl);
 
 	return robloxInstance;
 }
@@ -330,34 +275,20 @@ async function setupRobloxInstance(
 	handlers.setRobloxConnected(true);
 	rbxInstance = robloxInstance;
 
-	// Make RPC setup non-blocking
-	setTimeout(async () => {
-		try {
-			if ((await getValue('integrations.rpc.enabled')) === true) {
-				RPCController.preset('inRobloxApp');
-			}
-		} catch (err) {
-			console.error('[Launch] Error setting up RPC:', err);
-		}
-	}, 0);
+	if ((await getValue('integrations.rpc.enabled')) === true) {
+		RPCController.preset('inRobloxApp');
+	}
 
 	robloxInstance.on('gameEvent', onGameEvent);
 	robloxInstance.on('exit', async () => {
-		console.info('[Launch] Roblox instance exited');
+		logger.info('Roblox instance exited');
 
-		// Make cleanup operations non-blocking
-		setTimeout(async () => {
-			try {
-				if (settings.returnToWebsite) {
-					os.open('https://www.roblox.com');
-				}
-				await RobloxMods.restoreRobloxFolders(settings.areModsEnabled);
-				await RobloxMods.toggleHighRes(true);
-				RPCController.stop();
-			} catch (err) {
-				console.error('[Launch] Error during cleanup:', err);
-			}
-		}, 0);
+		if (settings.returnToWebsite) {
+			os.open('https://www.roblox.com');
+		}
+		await RobloxMods.restoreRobloxFolders(settings.areModsEnabled);
+		await RobloxMods.toggleHighRes(true);
+		RPCController.stop();
 
 		handlers.setRobloxConnected(false);
 		rbxInstance = null;
@@ -397,12 +328,7 @@ export async function launchRoblox(
 	setLaunchingRoblox(true);
 
 	try {
-		console.info('[Launch] Preparing to launch Roblox...');
-
-		// Make flag validation non-blocking
-		const fflags = await validateFlags(showFlagErrorPopup, checkFlags).catch((err) => {
-			console.error('[Launch] Error validating flags:', err);
-		});
+		const fflags = await validateFlags(showFlagErrorPopup, checkFlags);
 
 		if (!robloxUrl) await setWindowVisibility(false);
 		await setupBootstrapper();
@@ -411,21 +337,15 @@ export async function launchRoblox(
 		await updateBootstrapper('bootstrapper:progress', { progress: 10 });
 		if (allowFixedDelays) await sleep(250);
 
-		// Make Roblox check non-blocking
-		console.debug(`Has roblox: ${robloxUrl} ${robloxUrl === undefined}`);
-		const hasRoblox = await RobloxUtils.hasRoblox().catch((err) => {
-			console.error('[Launch] Error checking Roblox installation:', err);
-		});
+		const hasRoblox = await RobloxUtils.hasRoblox();
 
 		if (!hasRoblox) {
-			console.info('[Launch] Roblox is not installed. Exiting launch process.');
 			await cleanupBootstrapper();
 			setLaunchingRoblox(false);
 			if (robloxUrl) {
 				const installNotif = new Notification({
 					title: 'Failed to launch',
-					content:
-						'AppleBlox could not find the Roblox installation. Launch Roblox from the AppleBlox app to try to resolve this issue.',
+					content: 'AppleBlox could not find Roblox. Launch Roblox from the AppleBlox app to resolve this.',
 					sound: 'hero',
 					timeout: 30,
 				});
@@ -450,29 +370,26 @@ export async function launchRoblox(
 		try {
 			const robloxInstance = await applyModsAndLaunch(settings, robloxUrl);
 			await setupRobloxInstance(robloxInstance, settings, handlers);
-			console.info('[Launch] Set up roblox instance!');
 
-			// Schedule cleanup of settings file in background
 			setTimeout(async () => {
 				try {
 					await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
 				} catch (err) {
-					console.warn('[Launch] Failed to cleanup settings directory:', err);
+					logger.warn('Failed to cleanup settings:', err);
 				}
 			}, 5_000);
 		} catch (err) {
-			// Make error cleanup non-blocking
 			setTimeout(async () => {
 				try {
 					await RobloxMods.restoreRobloxFolders(settings.areModsEnabled);
 					await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
 					await RobloxMods.toggleHighRes(true);
 				} catch (cleanupErr) {
-					console.error('[Launch] Error during error cleanup:', cleanupErr);
+					logger.error('Error during error cleanup:', cleanupErr);
 				}
 			}, 0);
 
-			console.error(err);
+			logger.error(err);
 			toast.error('An error occurred while starting Roblox.');
 
 			await cleanupBootstrapper();
@@ -481,7 +398,7 @@ export async function launchRoblox(
 			return;
 		}
 	} catch (err) {
-		console.error('[Launch] Critical error during launch sequence:', err);
+		logger.error('Critical error during launch:', err);
 		await cleanupBootstrapper();
 		await neuWindow.show();
 		focusWindow();

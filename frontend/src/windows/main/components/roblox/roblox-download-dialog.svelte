@@ -16,6 +16,7 @@
 	import { toast } from 'svelte-sonner';
 	import shellFS from '../../ts/tools/shellfs';
 	import Alert from '../alert.svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let binaryType: MacBinaryType = 'MacPlayer';
 	export let channel: string = 'LIVE';
@@ -82,7 +83,7 @@
 				return;
 			}
 
-			console.error('Download failed:', error);
+			Logger.error('Download failed:', error);
 
 			toast.error('Download failed', {
 				description: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -109,7 +110,7 @@
 					});
 				}
 			} catch (error) {
-				console.warn('Failed to clean up partial file:', error);
+				Logger.warn('Failed to clean up partial file:', error);
 			}
 			currentDownloadPath = null;
 		}

@@ -1,6 +1,7 @@
 import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import shellFS from '../tools/shellfs';
+import Logger from '@/windows/main/ts/utils/logger';
 
 const API_URL = 'https://marketplace.appleblox.com';
 
@@ -61,7 +62,7 @@ async function loadMods(): Promise<{ success: boolean; mods: Mod[] }> {
 		const result: ApiResponse<Mod[]> = await response.json();
 
 		if (!result.success || !result.data) {
-			console.error('Failed to load mods:', result.error);
+			Logger.error('Failed to load mods:', result.error);
 			return { success: false, mods: [] };
 		}
 
@@ -70,7 +71,7 @@ async function loadMods(): Promise<{ success: boolean; mods: Mod[] }> {
 
 		return { success: true, mods };
 	} catch (error) {
-		console.error('Error loading mods:', error);
+		Logger.error('Error loading mods:', error);
 		return { success: false, mods: [] };
 	}
 }
@@ -92,7 +93,7 @@ async function cacheModAssets(modId: string): Promise<{ success: boolean; messag
 
 		return { success: true, message: result.message };
 	} catch (error) {
-		console.error('Error caching mod assets:', error);
+		Logger.error('Error caching mod assets:', error);
 		return { success: false, error: 'Network error' };
 	}
 }
@@ -103,13 +104,13 @@ async function getCacheStatus(modId: string): Promise<CacheStatus | null> {
 		const result: ApiResponse<CacheStatus> = await response.json();
 
 		if (!result.success || !result.data) {
-			console.error('Failed to get cache status:', result.error);
+			Logger.error('Failed to get cache status:', result.error);
 			return null;
 		}
 
 		return result.data;
 	} catch (error) {
-		console.error('Error getting cache status:', error);
+		Logger.error('Error getting cache status:', error);
 		return null;
 	}
 }
@@ -120,13 +121,13 @@ async function getModAssets(modId: string): Promise<AssetsResponse | null> {
 		const result: ApiResponse<AssetsResponse> = await response.json();
 
 		if (!result.success || !result.data) {
-			console.error('Failed to get mod assets:', result.error);
+			Logger.error('Failed to get mod assets:', result.error);
 			return null;
 		}
 
 		return result.data;
 	} catch (error) {
-		console.error('Error getting mod assets:', error);
+		Logger.error('Error getting mod assets:', error);
 		return null;
 	}
 }
@@ -136,13 +137,13 @@ async function downloadAsset(modId: string, filename: string): Promise<ArrayBuff
 		const response = await fetch(`${API_URL}/api/v1/mods/${modId}/assets/${filename}`);
 
 		if (!response.ok) {
-			console.error('Failed to download asset:', response.statusText);
+			Logger.error('Failed to download asset:', response.statusText);
 			return null;
 		}
 
 		return await response.arrayBuffer();
 	} catch (error) {
-		console.error('Error downloading asset:', error);
+		Logger.error('Error downloading asset:', error);
 		return null;
 	}
 }
@@ -157,7 +158,7 @@ async function downloadMod(
 	if (!modInfo) return { success: false, error: "Mod doesn't exist" };
 
 	try {
-		console.log(`Starting download for mod: ${modId}`);
+		Logger.info(`Starting download for mod: ${modId}`);
 		onProgress?.({ step: 'Initializing download...', progress: 0 });
 
 		const cacheStatus = await getCacheStatus(modId);
@@ -166,7 +167,7 @@ async function downloadMod(
 		}
 
 		if (!cacheStatus.cached) {
-			console.log('Mod not cached, starting cache process...');
+			Logger.info('Mod not cached, starting cache process...');
 			onProgress?.({ step: 'Starting server cache process...', progress: 10 });
 
 			const cacheResult = await cacheModAssets(modId);
@@ -187,7 +188,7 @@ async function downloadMod(
 				}
 
 				if (status.cached) {
-					console.log('Mod caching completed');
+					Logger.info('Mod caching completed');
 					onProgress?.({ step: 'Server preparation complete!', progress: 100 });
 					break;
 				}
@@ -199,7 +200,7 @@ async function downloadMod(
 				attempts++;
 				const cacheProgress = 20 + (attempts / maxAttempts) * 70;
 				onProgress?.({ step: `Waiting for server preparation... (${attempts}/${maxAttempts})`, progress: cacheProgress });
-				console.log(`Waiting for cache completion... (${attempts}/${maxAttempts})`);
+				Logger.info(`Waiting for cache completion... (${attempts}/${maxAttempts})`);
 			}
 
 			if (attempts >= maxAttempts) {
@@ -220,7 +221,7 @@ async function downloadMod(
 		if (await shellFS.exists(modPath)) await shellFS.remove(modPath);
 		await shellFS.createDirectory(modPath);
 
-		console.log(`Downloading ${assetsResponse.totalAssets} assets...`);
+		Logger.info(`Downloading ${assetsResponse.totalAssets} assets...`);
 		let downloadedCount = 0;
 
 		for (const asset of assetsResponse.assets) {
@@ -231,11 +232,11 @@ async function downloadMod(
 				currentAsset: asset.filename,
 			});
 
-			console.log(`Downloading asset: ${asset.filename} (${downloadedCount + 1}/${assetsResponse.totalAssets})`);
+			Logger.info(`Downloading asset: ${asset.filename} (${downloadedCount + 1}/${assetsResponse.totalAssets})`);
 
 			const assetData = await downloadAsset(modId, asset.filename);
 			if (!assetData) {
-				console.warn(`Failed to download asset: ${asset.filename}`);
+				Logger.warn(`Failed to download asset: ${asset.filename}`);
 				continue;
 			}
 
@@ -261,14 +262,14 @@ async function downloadMod(
 				await filesystem.writeBinaryFile(imagePath, uint8Array.buffer);
 			}
 		} catch (error) {
-			console.warn('Failed to download mod image:', error);
+			Logger.warn('Failed to download mod image:', error);
 		}
 
 		onProgress?.({ step: 'Installation complete!', progress: 100 });
-		console.log(`Mod download completed: ${downloadedCount} assets downloaded`);
+		Logger.info(`Mod download completed: ${downloadedCount} assets downloaded`);
 		return { success: true };
 	} catch (error) {
-		console.error('Error downloading mod:', error);
+		Logger.error('Error downloading mod:', error);
 		return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
 	}
 }

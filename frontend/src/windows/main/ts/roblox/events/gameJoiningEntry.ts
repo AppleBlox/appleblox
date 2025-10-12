@@ -2,6 +2,7 @@ import { getValue } from '@/windows/main/components/settings';
 import { RPCController, type RPCOptions } from '../../tools/rpc';
 import { curlGet } from '../../utils';
 import type { GameEventInfo } from '../instance';
+import Logger from '@/windows/main/ts/utils/logger';
 
 interface RobloxGame {
 	id: number;
@@ -55,12 +56,12 @@ async function gameJoiningEntry(data: GameEventInfo) {
 	// Fetch game information using the Roblox API
 	const placeMatch = data.data.match(/place\s+(\d+)\s+/); // placeID
 	if (placeMatch == null) {
-		console.error(`[Activity] Couldn't retrieve the placeId from the logs: ${data.data}`);
+		Logger.error(`Couldn't retrieve the placeId from the logs: ${data.data}`);
 		return;
 	}
 	const jobMatch = data.data.match(/\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/g); // jobID (current server ID)
 	if (!jobMatch) {
-		console.error("[Activity] Couldn't retrieve the jobID");
+		Logger.error("Couldn't retrieve the jobID");
 	}
 
 	// Fetch the universeId and gameInfo, then init the DiscordRPC
@@ -69,16 +70,16 @@ async function gameJoiningEntry(data: GameEventInfo) {
 
 	const universeIdReq = await curlGet(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
 	const universeId = universeIdReq.universeId;
-	console.info(`[Activity] Joining PlaceID: ${placeId}, UniverseID: ${universeId}, JobID: ${jobId}`);
+	Logger.info(`Joining PlaceID: ${placeId}, UniverseID: ${universeId}, JobID: ${jobId}`);
 
 	const gameInfoReq = await curlGet(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
 	const gameInfo: RobloxGame = gameInfoReq.data[0];
-	console.info('[Activity] Game Info:', gameInfo);
+	Logger.info('Game Info:', gameInfo);
 
 	const gameImageReq = await curlGet(
 		`https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`
 	);
-	console.info('[Activity] Game Image: ', gameImageReq);
+	Logger.info('Game Image: ', gameImageReq);
 	const gameImage: GameImageRes = gameImageReq.data[0];
 
 	const joinLink = `roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}`;

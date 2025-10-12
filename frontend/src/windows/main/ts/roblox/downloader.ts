@@ -3,6 +3,7 @@ import path from 'path-browserify';
 import { Curl } from '../tools/curl';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
+import Logger from '@/windows/main/ts/utils/logger';
 
 /**
  * Binary types supported for Mac downloads
@@ -236,7 +237,7 @@ export class RobloxDownloader {
 				const dirExists = await shellFS.exists(directory);
 				if (!dirExists) {
 					await shell('mkdir', ['-p', directory]);
-					console.info(`Created directory: ${directory}`);
+					Logger.info(`Created directory: ${directory}`);
 				}
 
 				// Check if we can write to the directory
@@ -252,7 +253,7 @@ export class RobloxDownloader {
 			const fileExists = await shellFS.exists(savePath);
 			if (fileExists) {
 				await shellFS.remove(savePath);
-				console.info(`Removed existing file: ${savePath}`);
+				Logger.info(`Removed existing file: ${savePath}`);
 			}
 		} catch (error) {
 			throw new Error(`Path validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -328,7 +329,7 @@ export class RobloxDownloader {
 						}
 
 						if (expectedSize && Math.abs(fileSize - expectedSize) > 1024) {
-							console.warn(`File size mismatch. Expected: ${expectedSize}, Got: ${fileSize}`);
+							Logger.warn(`File size mismatch. Expected: ${expectedSize}, Got: ${fileSize}`);
 						}
 
 						this.emitProgress({
@@ -423,7 +424,7 @@ export class RobloxDownloader {
 		try {
 			this.onProgress(progress);
 		} catch (error) {
-			console.warn('Progress callback error:', error);
+			Logger.warn('Progress callback error:', error);
 		}
 	}
 

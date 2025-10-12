@@ -2,6 +2,9 @@
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
 import { buildCommand, escapeShellArg, shell, spawn } from './shell';
+import Logger from '../utils/logger';
+
+const logger = Logger.withContext('RPC');
 
 /**
  * Options for configuring the Discord Rich Presence
@@ -106,7 +109,7 @@ export class DiscordRPC {
 		};
 
 		if (await this.isRunning()) {
-			console.info('[RPC] Already running. Updating options.');
+			logger.info('Already running. Updating options.');
 			await this.update(options);
 			return;
 		}
@@ -116,12 +119,12 @@ export class DiscordRPC {
 		// Kill any existing discordrpc processes
 		await shell('pkill', ['-f', 'discordrpc_ablox'], {
 			skipStderrCheck: true,
-		}).catch(console.error);
+		}).catch(Logger.error);
 
-		console.info(`[RPC] Starting with command: ${buildCommand(DiscordRPC.binaryPath, args)}`);
+		logger.info(`Starting with command: ${buildCommand(DiscordRPC.binaryPath, args)}`);
 		const rpcProcess = await spawn(DiscordRPC.binaryPath, args);
 		rpcProcess.on('stdErr', (data: string) => {
-			console.error('[RPC] Process emitted stdErr:', data);
+			logger.error('Process emitted stdErr:', data);
 		});
 		DiscordRPC.currentOptions = options;
 	}
@@ -235,7 +238,7 @@ export class DiscordRPC {
 	destroy(): void {
 		DiscordRPC.instances.delete(this);
 		if (DiscordRPC.instances.size === 0) {
-			this.stop().catch(console.error);
+			this.stop().catch(Logger.error);
 		}
 	}
 

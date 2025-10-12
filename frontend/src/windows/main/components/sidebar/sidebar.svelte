@@ -2,6 +2,7 @@
 	import { os, events } from '@neutralinojs/lib';
 	import { createEventDispatcher } from 'svelte';
 	import { version } from '../../../../../../package.json';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	import EngineIcon from '@/assets/sidebar/engine.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
@@ -106,7 +107,7 @@
 				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0' : 'bg-green-500/85 hover:bg-green-500/60'} font-mono w-full transition-all duration-200 group`}
 				on:click={async () => {
 					if (isLaunched) {
-						events.broadcast('instance:quit').catch(console.error);
+						events.broadcast('instance:quit').catch(Logger.error);
 						return;
 					}
 

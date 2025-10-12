@@ -1,6 +1,7 @@
 import path from 'path-browserify';
 import shellFS from '../../ts/tools/shellfs';
 import { getConfigPath } from '../settings';
+import Logger from '@/windows/main/ts/utils/logger';
 
 export async function readCssFile(): Promise<string> {
 	const cssFilePath = path.join(path.dirname(await getConfigPath()), 'theme.css');
@@ -26,7 +27,7 @@ export async function loadTheme() {
 		}
 		styleElement.innerHTML = cssContent;
 	} catch (err) {
-		console.error("Couldn't load CSS theme:", err);
+		Logger.error("Couldn't load CSS theme:", err);
 	}
 }
 

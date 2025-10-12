@@ -19,6 +19,7 @@
 	import path from 'path-browserify';
 	import { fade } from 'svelte/transition';
 	import ShellFS from '../../ts/tools/shellfs';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	// Panel props
 	export let panel: SettingsPanel;
@@ -85,7 +86,7 @@
 			for (const category of panel.categories) {
 				// Skip category if it changed
 				if (!currentSettings[category.id]) {
-					console.warn(`Skipped category ${panel.id}.${category.id} as it doesn't exist anymore.`);
+					Logger.warn(`Skipped category ${panel.id}.${category.id} as it doesn't exist anymore.`);
 					saveNewPanel = true;
 					continue;
 				}
@@ -107,7 +108,7 @@
 							) {
 								settings[category.id][widget.id] = currentSettings[category.id][widget.id];
 							} else {
-								console.warn(
+								Logger.warn(
 									`Value type has changed for ${panel.id}.${category.id}.${widget.id}. Fallback to default.`
 								);
 								saveNewPanel = true;
@@ -117,7 +118,7 @@
 				}
 			}
 			if (saveNewPanel) {
-				console.warn('Detected panel changes, saving fixed panel');
+				Logger.warn('Detected panel changes, saving fixed panel');
 				updateSettings();
 			}
 		}
@@ -140,7 +141,7 @@
 		// Generate config files if the panel hasn't been generated yet and it's set to not render
 		const panelExists = await ShellFS.exists(path.join(await getConfigPath(), `${panel.id}.json`));
 		if (!render && !panelExists) {
-			console.info(`[Panel] Generated config file for "${panel.id}"`);
+			Logger.info(`Generated config file for "${panel.id}"`);
 			updateSettings();
 		}
 	})();
@@ -160,7 +161,7 @@
 		const targetCategory = settings[category.id];
 		const targetWidget = settings[category.id][widget.toggleable.id];
 		if (!(widget.toggleable.id in targetCategory)) {
-			console.error(
+			Logger.error(
 				`Couldn't check toggle state of ${category.id}.${widget.id} because target widget doesn't exist (${category.id}.${widget.toggleable.id})`
 			);
 			return false;

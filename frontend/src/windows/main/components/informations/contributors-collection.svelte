@@ -5,6 +5,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { os } from '@neutralinojs/lib';
 	import type { Contributor } from './types';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let contributors: Contributor[];
 </script>
@@ -15,7 +16,7 @@
 			class={contributor.link ? 'cursor-pointer' : 'cursor-default'}
 			on:click={() => {
 				if (!contributor.link) return;
-				os.open(contributor.link).catch(console.error);
+				os.open(contributor.link).catch(Logger.error);
 			}}
 		>
 			<Card.Root class="rounded-sm hover:brightness-110 transition-all mr-4 mb-4">

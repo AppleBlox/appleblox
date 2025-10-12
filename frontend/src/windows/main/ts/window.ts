@@ -2,6 +2,7 @@
 import { events } from '@neutralinojs/lib';
 import hotkeys from 'hotkeys-js';
 import { shell } from './tools/shell';
+import Logger from '@/windows/main/ts/utils/logger';
 
 // Shortcuts like copy, paste, quit, etc... (they are unimplemented by default in NeuJS)
 hotkeys.filter = () => true;
@@ -54,7 +55,7 @@ export async function focusWindow() {
 			{ skipStderrCheck: true, completeCommand: true }
 		);
 	} catch (err) {
-		console.error(err);
+		Logger.error(err);
 	}
 }
 
@@ -66,6 +67,6 @@ export async function setWindowVisibility(state: boolean) {
 			{ skipStderrCheck: true, completeCommand: true }
 		);
 	} catch (err) {
-		console.error(err);
+		Logger.error(err);
 	}
 }

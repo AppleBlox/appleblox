@@ -24,6 +24,7 @@
 	import Workshop from './pages/Workshop.svelte';
 	import Roblox from './ts/roblox';
 	import { sleep } from './ts/utils/';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	let currentPage: string;
 	let onboardingLoaded: boolean = false;
@@ -85,7 +86,7 @@
 			event.preventDefault();
 			const url = targetElement.getAttribute('href');
 			if (url && !url.includes('localhost')) {
-				os.open(url).catch((err) => console.error('Failed to open external link:', err));
+				os.open(url).catch((err) => Logger.error('Failed to open external link:', err));
 			}
 		}
 	});

@@ -16,6 +16,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { correctAndParseJSON } from '../../ts/utils/json';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	type FastFlag = string | boolean | null | number;
 	interface EditorFlag {
@@ -74,7 +75,7 @@
 		}
 		let flagToModifyIndex = flags.findIndex((f) => f.flag === flag);
 		if (flagToModifyIndex === -1) {
-			console.error(`Couldn't find the flag "${flag}" to edit.`);
+			Logger.error(`Couldn't find the flag "${flag}" to edit.`);
 			return;
 		}
 		const currentFlag = flags[flagToModifyIndex];
@@ -88,14 +89,14 @@
 	async function contextMenuCopy(flag: string): Promise<void> {
 		const flagToCopy = flags.find((f) => f.flag === flag);
 		if (!flagToCopy) {
-			console.error(`Couldn't find the flag "${flag}" to copy.`);
+			Logger.error(`Couldn't find the flag "${flag}" to copy.`);
 			return;
 		}
 		const flagJsonString = beautify({ [flagToCopy.flag]: flagToCopy.value }, null, 1, 100);
 		try {
 			await clipboard.writeText(flagJsonString);
 		} catch (err) {
-			console.error("Couldn't write to clipboard:", err);
+			Logger.error("Couldn't write to clipboard:", err);
 		}
 		toast.success('Flag copied to clipboard', { duration: 750 });
 	}
@@ -142,7 +143,7 @@
 			toast.success('Selected flag(s) copied to clipboard!', { duration: 1000 });
 		} catch (err) {
 			toast.error("Couldn't copy flags to the clipboard");
-			console.error("Couldn't copy flags to the clipboard:", err);
+			Logger.error("Couldn't copy flags to the clipboard:", err);
 		}
 	}
 
@@ -453,7 +454,7 @@
 							return true;
 						})
 						.catch((err) => {
-							console.error(err);
+							Logger.error(err);
 							toast.error(err.toString());
 							return false;
 						});

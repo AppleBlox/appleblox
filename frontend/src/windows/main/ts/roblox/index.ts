@@ -7,12 +7,13 @@ import { RobloxMods } from './mods';
 import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
 import * as RobloxVersion from './version';
+import Logger from '@/windows/main/ts/utils/logger';
 
 let robloxPath = '/Applications/Roblox.app'; // Most common path
 getMostRecentRoblox()
 	.then((path) => (robloxPath = path))
 	.catch((err) => {
-		console.error("An error occured while trying to get Roblox's most recent path:", err);
+		Logger.error("An error occured while trying to get Roblox's most recent path:", err);
 	});
 
 class Roblox {

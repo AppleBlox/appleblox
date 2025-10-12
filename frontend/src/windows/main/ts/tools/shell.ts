@@ -1,5 +1,6 @@
 // Safe shell executer & spawn children
 import { events, os } from '@neutralinojs/lib';
+import Logger from '@/windows/main/ts/utils/logger';
 
 /**
  * Represents the result of a shell command execution.
@@ -81,8 +82,8 @@ export async function shell(
 				}
 			})
 			.catch((error) => {
-				console.error(`Error executing command: ${fullCommand}`);
-				console.error(error);
+				Logger.error(`Error executing command: ${fullCommand}`);
+				Logger.error(error);
 				reject(
 					new Error(`Command execution failed: ${(error as any).message ? (error as any).message : 'No error message'}`)
 				);

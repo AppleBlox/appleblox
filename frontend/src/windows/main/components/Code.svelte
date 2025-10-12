@@ -4,6 +4,7 @@
 	import { clipboard } from '@neutralinojs/lib';
 	import { ClipboardCopy } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let code = '';
 	let className = '';
@@ -18,7 +19,7 @@
 		on:click={() => {
 			toast.info('Copied to clipboard!', { duration: 1000 });
 			clipboard.writeText(code).catch((err) => {
-				console.error('[FastFlags] Failed to write to clipboard:', err);
+				Logger.error('Failed to write to clipboard:', err);
 			});
 		}}
 	>

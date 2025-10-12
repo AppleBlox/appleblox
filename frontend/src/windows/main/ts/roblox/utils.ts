@@ -6,6 +6,7 @@ import { toast } from 'svelte-sonner';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
 import { getMostRecentRoblox } from './path';
+import Logger from '@/windows/main/ts/utils/logger';
 
 export class RobloxUtils {
 	/** Checks if roblox is installed, and if not show a popup */
@@ -29,32 +30,32 @@ export class RobloxUtils {
 			if (!(await RobloxUtils.hasRoblox())) return;
 			if (await RobloxUtils.isRobloxOpen()) {
 				toast.info('Closing Roblox...', { duration: 1000 });
-				console.info('[Roblox.Utils] Closing Roblox...');
+				Logger.info('Closing Roblox...');
 				await shell('pkill', ['-9', 'Roblox'], { skipStderrCheck: true });
 				await sleep(2000);
 			}
 
 			toast.info('Opening Roblox...', { duration: 1000 });
-			console.info('[Roblox.Utils] Opening Roblox...');
+			Logger.info('Opening Roblox...');
 			await shellFS.open(await getMostRecentRoblox());
 
 			await sleep(1000);
 
 			toast.info('Terminating all processes...', { duration: 1000 });
-			console.info('[Roblox.Utils] Terminating all Roblox processes...');
+			Logger.info('Terminating all Roblox processes...');
 			const result = await shell("ps aux | grep -i roblox | grep -v grep | awk '{print $2}' | xargs", [], {
 				completeCommand: true,
 				skipStderrCheck: true,
 			});
-			console.info('[Roblox.Utils] Termination result: ', result);
+			Logger.info('Termination result: ', result);
 			const processes = result.stdOut.trim().split(' ');
 			for (const proc of processes) {
-				console.info(`[Roblox.Utils] Terminating Roblox Process (PID: ${proc})`);
+				Logger.info(`Terminating Roblox Process (PID: ${proc})`);
 
 				try {
 					await shell('kill', ['-9', proc], { skipStderrCheck: true });
 				} catch (err) {
-					console.error(`[Roblox.Utils] Error terminating process ${proc}: ${err}`);
+					Logger.error(`Error terminating process ${proc}: ${err}`);
 					toast.error(`Error terminating process ${proc}: ${err}`);
 				}
 			}
@@ -62,8 +63,8 @@ export class RobloxUtils {
 			toast.success('Multi-instance should now be working!');
 		} catch (err) {
 			toast.error('An error occured while enabling MultiInstance');
-			console.error('[Roblox.Utils] An error occured while enabling MultiInstance');
-			console.error(err);
+			Logger.error('An error occured while enabling MultiInstance');
+			Logger.error(err);
 		}
 	}
 
@@ -73,7 +74,7 @@ export class RobloxUtils {
 			.showFolderDialog('Where should the shortcut be created?', {
 				defaultPath: '/Applications/',
 			})
-			.catch(console.error);
+			.catch(Logger.error);
 		if (!savePath) {
 			return;
 		}

@@ -2,6 +2,7 @@ import { getValue } from '@/windows/main/components/settings';
 import { RPCController, type RPCOptions } from '../../tools/rpc';
 import type { GameEventInfo } from '../instance';
 import type { RichPresence } from './types';
+import Logger from '@/windows/main/ts/utils/logger';
 
 let rpcOptions: RPCOptions = {
 	clientId: '1257650541677383721',
@@ -15,7 +16,7 @@ async function gameMessageEntry(messageData: GameEventInfo) {
 	// Retrieve the message potential JSON
 	const json = messageData.data.match(/\{.*\}/);
 	if (!json) {
-		console.error("[Activity] Couldn't retrieve GameMessage json");
+		Logger.error("Couldn't retrieve GameMessage json");
 		return;
 	}
 	let message: GameMessage = messageData.data;

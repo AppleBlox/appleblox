@@ -6,6 +6,7 @@ import { shell } from '../tools/shell';
 import { isProcessAlive, sleep } from '../utils';
 import { RobloxDelegate } from './delegate';
 import { RobloxUtils } from './utils';
+import Logger from '@/windows/main/ts/utils/logger';
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';
@@ -154,15 +155,15 @@ export class RobloxInstance {
 	public async start(url?: string) {
 		if (this.gameInstance) throw new Error('An instance is already running');
 
-		console.info('[Roblox.Instance] Opening Roblox instance');
+		Logger.info('Opening Roblox instance');
 		await RobloxDelegate.toggle(false);
 
 		if (url) {
 			await shell('open', [url]);
-			console.info(`[Roblox.Instance] Opening Roblox from URL.`);
+			Logger.info(`Opening Roblox from URL.`);
 		} else {
 			await shell('open', ['roblox-player:']); // Experimental voice chat fix (we launch by deeplink instead of binary path)
-			console.info(`[Roblox.Instance] Opening Roblox from path.`);
+			Logger.info(`Opening Roblox from path.`);
 		}
 
 		await sleep(1000);
@@ -198,7 +199,7 @@ export class RobloxInstance {
 		this.isWatching = true;
 		if (this.watchLogs) {
 			await this.setupLogsWatcher().catch(async (err) => {
-				console.error("[Roblox.Instance] Couldn't start logs watcher:", err);
+				Logger.error("Couldn't start logs watcher:", err);
 				new Notification({
 					title: 'Unable to start Roblox',
 					content: 'AppleBlox was unable to monitor your logs due to an error. Roblox has been closed.',
@@ -214,7 +215,7 @@ export class RobloxInstance {
 			if (this.gameInstance && !(await isProcessAlive(this.gameInstance))) {
 				this.emit('exit');
 				await this.cleanup();
-				console.info('[Roblox.Instance] Instance is null, stopping.');
+				Logger.info('Instance is null, stopping.');
 				clearInterval(intervalId);
 			}
 		}, 500);
@@ -267,7 +268,7 @@ export class RobloxInstance {
 				}
 			}
 		} catch (err) {
-			console.error('[Roblox.Instance] Error checking log file:', err);
+			Logger.error('Error checking log file:', err);
 		}
 	}
 
@@ -276,7 +277,7 @@ export class RobloxInstance {
 		if (this.processingQueue.length < this.PROCESSING_QUEUE_SIZE) {
 			this.processingQueue.push(lines);
 		} else {
-			console.warn('[Roblox.Instance] Processing queue full, dropping lines');
+			Logger.warn('Processing queue full, dropping lines');
 		}
 
 		// Start processing if not already running
@@ -327,11 +328,11 @@ export class RobloxInstance {
 			const createdAt = (await filesystem.getStats(latestFilePath)).createdAt;
 			const timeDifference = (Date.now() - createdAt) / 1000;
 			if (timeDifference < 3) {
-				console.info(`[Roblox.Instance] Found latest log file: "${latestFilePath}"`);
+				Logger.info(`Found latest log file: "${latestFilePath}"`);
 				this.latestLogPath = latestFilePath;
 			} else {
 				tries--;
-				console.info(
+				Logger.info(
 					`[Roblox.Instance] Couldn't find a .log file created less than 3 seconds ago in "${this.logsDirectory}" (${tries}). Retrying in 1 second.`
 				);
 				await sleep(1000);
@@ -370,7 +371,7 @@ export class RobloxInstance {
 				this.lastFileSize = 0;
 			}
 		} catch (err) {
-			console.error('[Roblox.Instance] Error reading initial log content:', err);
+			Logger.error('Error reading initial log content:', err);
 			this.lastPosition = 0;
 			this.lastFileSize = 0;
 		}
@@ -383,13 +384,13 @@ export class RobloxInstance {
 		// Set up 60fps polling interval
 		this.pollInterval = setInterval(() => {
 			this.checkForNewContent().catch((err) => {
-				console.error('[Roblox.Instance] Error in poll interval:', err);
+				Logger.error('Error in poll interval:', err);
 			});
 		}, this.POLL_INTERVAL);
 
 		// Set up directory watcher as backup
 		this.watcherId = await filesystem.createWatcher(this.logsDirectory);
-		console.info(`[Roblox.Instance] Created directory watcher with ID: ${this.watcherId}`);
+		Logger.info(`Created directory watcher with ID: ${this.watcherId}`);
 
 		this.watchHandler = async (evt: any) => {
 			if (!this.isWatching || !this.latestLogPath || evt.detail.id !== this.watcherId) return;
@@ -398,7 +399,7 @@ export class RobloxInstance {
 			if (evt.detail.path === this.latestLogPath) {
 				// Use setTimeout to make it non-blocking
 				setTimeout(() => {
-					this.checkForNewContent().catch(console.error);
+					this.checkForNewContent().catch(Logger.error);
 				}, 0);
 			}
 		};
@@ -450,7 +451,7 @@ export class RobloxInstance {
 				}
 			}
 		} catch (err) {
-			console.error('[Roblox.Instance] Error processing lines:', err);
+			Logger.error('Error processing lines:', err);
 		}
 	}
 
@@ -474,7 +475,7 @@ export class RobloxInstance {
 				await filesystem.removeWatcher(this.watcherId);
 				events.off('watchFile', this.watchHandler);
 			} catch (err) {
-				console.error('[Roblox.Instance] Error removing file watcher:', err);
+				Logger.error('Error removing file watcher:', err);
 			}
 			this.watcherId = null;
 		}
@@ -493,9 +494,9 @@ export class RobloxInstance {
 		const gameInstancePid = this.gameInstance;
 		await this.cleanup();
 		if (withoutRoblox) {
-			console.info('[Roblox.Instance] Closing this instance');
+			Logger.info('Closing this instance');
 		} else {
-			console.info('[Roblox.Instance] Quitting Roblox');
+			Logger.info('Quitting Roblox');
 			await shell('kill', ['-9', gameInstancePid]);
 		}
 	}

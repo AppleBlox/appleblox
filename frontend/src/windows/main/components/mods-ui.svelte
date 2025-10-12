@@ -13,6 +13,7 @@
 	import shellFS from '../ts/tools/shellfs';
 	import { sleep } from '../ts/utils';
 	import { getConfigPath } from './settings';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	let mods: { filename: string; path: string; state: boolean }[] = [];
 	Roblox.Mods.loadMods().then((m) => (mods = m));
@@ -41,7 +42,7 @@
 			}
 		} catch (err) {
 			toast.error(`An error occured while enabling/disabling mod: ${err}`);
-			console.error('[Panel.ModsUI] ', err);
+			Logger.withContext('mods-ui').error(err);
 		}
 	}
 
@@ -68,7 +69,7 @@
 						await shellFS.open(folderPath);
 					} catch (err) {
 						toast.error(`An error occured: ${err}`);
-						console.error('[ModsPanel]', err);
+						Logger.withContext('mods-panel').error(err);
 					}
 				}}><FolderOpen class="mr-3" />Open folder</Button
 			>

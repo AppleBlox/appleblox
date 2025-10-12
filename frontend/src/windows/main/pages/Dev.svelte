@@ -6,6 +6,7 @@
 	import Panel from '../components/settings/panel.svelte';
 	import Roblox from '../ts/roblox';
 	import { Notification } from '../ts/tools/notifications';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let render = true;
 
@@ -60,7 +61,7 @@
 			toast.success('Backup created successfully', { duration: 3000 });
 		} catch (error) {
 			toast.error('Failed to create backup', { duration: 3000 });
-			console.error('Backup creation failed:', error);
+			Logger.error('Backup creation failed:', error);
 		}
 	}
 

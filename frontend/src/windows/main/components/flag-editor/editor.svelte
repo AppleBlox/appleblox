@@ -25,12 +25,12 @@
 		writeProfile,
 		type Profile,
 	} from '.';
-	import { formatConsoleLog } from '../../ts/debugging';
 	import shellFS from '../../ts/tools/shellfs';
 	import Alert from '../alert.svelte';
 	import LoadingSpinner from '../loading-spinner.svelte';
 	import FlagTable from './flag-table.svelte';
 	import SmallButton from './small-button.svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	type SelectElement = Selected<string>;
 
@@ -125,8 +125,8 @@
 			shellFS.open(savePath, { reveal: true });
 			toast.success(`Exported to "${savePath}"`);
 		} catch (err) {
-			console.error("[FastFlags] Couldn't export profile:", err);
-			toast.error(formatConsoleLog("[FastFlags] Couldn't export profile:", err));
+			Logger.error("Couldn't export profile:", err);
+			toast.error(`Couldn't export profile: ${err}`);
 		}
 	}
 
@@ -151,7 +151,7 @@
 			gameIds = data.games || [];
 			((currentProfile as Profile | null)?.games || []).join(', ');
 		} catch (err) {
-			console.error("Couldn't import profile:", err);
+			Logger.error("Couldn't import profile:", err);
 			toast.error("Couldn't import profile");
 		}
 	}
@@ -315,7 +315,7 @@
 		{:catch error}
 			<img src={SillyCat} alt="silly cat nono" class="rounded-sm h-20" />
 			<h2 class="text-red-500">An error happened while loading profiles</h2>
-			<h2 class="text-red-400">{formatConsoleLog(error)}</h2>
+			<h2 class="text-red-400">{`${error}`}</h2>
 		{/await}
 	</div>
 </div>
