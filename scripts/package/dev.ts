@@ -137,7 +137,6 @@ async function startNeutralinoApp(viteUrl: string, preferredPort: number = 5174)
 
 	// Make binary executable
 	chmodSync(binaryPath, '755');
-	console.log(`Binary permissions set: ${binaryPath}`);
 
 	const args = [
 		'--window-enable-inspector=true',
@@ -166,7 +165,6 @@ async function main(downloadNeuBinaries = false, createBinaries = false): Promis
 
 	try {
 		clearTerminal();
-		console.log('Starting Mac development workflow...\n');
 
 		// Setup phase
 		await setupEnvironment(downloadNeuBinaries, createBinaries);

@@ -10,6 +10,7 @@ export default defineConfig({
 	// publicDir: path.resolve("./frontend/public"),
 	plugins: [svelte(), checker({ typescript: true }), neutralino()],
 	build: {
+		target: ['safari12', 'safari13', 'safari14', 'safari15', 'safari16', 'safari17', 'safari18'],
 		outDir: path.resolve('./frontend/dist'),
 		rollupOptions: {
 			external: ['/__neutralino_globals.js'],
@@ -18,7 +19,7 @@ export default defineConfig({
 				bootstraper: path.resolve('frontend', 'bootstrapper.html'),
 			},
 		},
-		sourcemap: true,
+		sourcemap: "inline",
 	},
 	resolve: {
 		alias: {
