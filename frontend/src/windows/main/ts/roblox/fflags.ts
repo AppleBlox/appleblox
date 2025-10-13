@@ -53,7 +53,9 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			},
 			path: 'engine.graphics.engine',
 			type: 'select',
-			value: 'opengl',
+			value: async (settingValue) => {
+				return settingValue === 'opengl' || (await getValue<boolean>('engine.graphics.fps_cap')) === true;
+			},
 		})
 		.addFlag({
 			name: 'Graphics API (Metal)',

@@ -27,46 +27,18 @@
 						{ label: 'Vulkan', value: 'vulkan' },
 						{ label: 'OpenGL', value: 'opengl' },
 					],
-				})
-				.addSlider({
-					label: 'Frame rate',
-					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
-					id: 'fps_target',
-					default: [60],
-					min: 1,
-					max: 240,
-					step: 1,
 					toggleable: {
-						id: 'none',
-						type: 'switch',
-						value: true,
-					},
+						id: "fps_cap",
+						type: "switch",
+						value: false
+					}
 				})
-				// Removed by Roblox
-				// .addSelect({
-				// 	label: 'Lighting Technology',
-				// 	description: 'Override game lighting technology',
-				// 	id: 'lightning',
-				// 	items: [
-				// 		{ label: 'Default', value: 'default' },
-				// 		{ label: 'Voxel', value: 'voxel' },
-				// 		{ label: 'ShadowMap', value: 'shadowmap' },
-				// 		{ label: 'Future', value: 'future' },
-				// 	],
-				// 	default: 'default',
-				// })
-				// .addSwitch({
-				// 	label: 'Disable Voxel Shadows',
-				// 	description:
-				// 		'Remove shadows when using Voxel lighting <br><span style="color: hsl(var(--warning));">Requires Voxel lightning (Option above).</span>',
-				// 	id: 'disable_voxel_shadows',
-				// 	default: false,
-				// 	toggleable: {
-				// 		id: 'lightning',
-				// 		type: 'select',
-				// 		value: 'voxel',
-				// 	},
-				// })
+				.addSwitch({
+					label: 'Remove frame rate limit',
+					description: 'Removes the limit of 60 frames per second imposed by MacOS (You will have to use the built-in FPS changer in Roblox in addition of this option). <br><span style="color: hsl(var(--warning));">This option is unstable as it requires the old and unspported OpenGL graphics API.</span>',
+					id: 'fps_cap',
+					default: false,
+				})
 				.addSwitch({
 					label: 'Separate Quality & Distance',
 					description:
@@ -84,17 +56,6 @@
 					step: 1,
 					toggleable: {
 						id: 'quality_distance_toggle',
-						type: 'switch',
-						value: true,
-					},
-				})
-				.addSwitch({
-					label: 'Visual Effects',
-					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
-					id: 'postfx',
-					default: true,
-					toggleable: {
-						id: 'none',
 						type: 'switch',
 						value: true,
 					},
@@ -118,70 +79,10 @@
 				.setDescription('Texture and visual enhancement settings')
 				.setId('visual')
 				.addSwitch({
-					label: 'Character Textures',
-					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
-					id: 'player_textures',
-					default: true,
-					toggleable: {
-						id: 'none',
-						type: 'switch',
-						value: true,
-					},
-				})
-				.addSwitch({
 					label: 'Debug Skybox',
 					description: 'Use simple gray sky for testing',
 					id: 'debug_sky',
 					default: false,
-				})
-		)
-		.addCategory((category) =>
-			category
-				.setName('Interface')
-				.setDescription('UI customization options')
-				.setId('ui')
-				.addSelect({
-					label: 'Menu Style',
-					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
-					id: 'menu_version',
-					items: [
-						{ label: 'Version 2 (2020)', value: 'v2' },
-						{ label: 'Default (Chrome)', value: 'default' },
-					],
-					default: 'default',
-					toggleable: {
-						id: 'none',
-						type: 'switch',
-						value: true,
-					},
-				})
-		)
-		.addCategory((category) =>
-			category
-				.setName('Features')
-				.setDescription('Additional functionality')
-				.setId('utility')
-				.addSwitch({
-					label: 'GUI Shortcuts',
-					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
-					id: 'gui',
-					default: false,
-					toggleable: {
-						id: 'none',
-						type: 'switch',
-						value: true,
-					},
-				})
-				.addSwitch({
-					label: 'Disable Telemetry',
-					description: '<span style="color: hsl(var(--destructive));">Removed by Roblox</span>',
-					id: 'telemetry',
-					default: false,
-					toggleable: {
-						id: 'none',
-						type: 'switch',
-						value: true,
-					},
 				})
 		)
 		.addCategory(
