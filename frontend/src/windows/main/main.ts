@@ -5,7 +5,7 @@ import './ts/roblox';
 import './ts/window';
 
 // Imports
-import { events, init, app as neuApp, window as neuWindow, os } from '@neutralinojs/lib';
+import { events, init, MessageBoxChoice, app as neuApp, window as neuWindow, os } from '@neutralinojs/lib';
 import App from './App.svelte';
 import { loadTheme } from './components/theme-input/theme';
 import Roblox from './ts/roblox';
@@ -97,7 +97,7 @@ events.on('ready', async () => {
 					const errorMessage = `Critical error during deeplink launch: ${error instanceof Error ? error.message : String(error)}`;
 					Logger.error(`${errorMessage}`);
 					try {
-						await os.showMessageBox('Deeplink Launch Failed', errorMessage, os.MessageBoxChoice.OK);
+						await os.showMessageBox('Deeplink Launch Failed', errorMessage, MessageBoxChoice.OK);
 					} catch (dialogError) {
 						deeplinkLogger.error('Failed to show native error dialog for critical launch failure:', dialogError);
 					}
@@ -108,7 +108,7 @@ events.on('ready', async () => {
 			const errorMessage = `Critical error during deeplink launch: ${error instanceof Error ? error.message : String(error)}`;
 			Logger.error(`${errorMessage}`);
 			try {
-				await os.showMessageBox('Deeplink Launch Failed', errorMessage, os.MessageBoxChoice.OK);
+				await os.showMessageBox('Deeplink Launch Failed', errorMessage, MessageBoxChoice.OK);
 			} catch (dialogError) {
 				deeplinkLogger.error('Failed to show native error dialog for critical launch failure:', dialogError);
 			}
@@ -149,7 +149,7 @@ events.on('ready', async () => {
 						await os.showMessageBox(
 							'Startup Error',
 							'Could not initialize the main application UI.',
-							os.MessageBoxChoice.OK
+							MessageBoxChoice.OK
 						);
 						await neuApp.exit(1);
 					} catch (e) {
