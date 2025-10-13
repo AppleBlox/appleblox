@@ -120,6 +120,8 @@ async function validateFlags(showFlagErrorPopup: LaunchHandlers['showFlagErrorPo
 		);
 	}
 
+	Logger.info('Using FastFlags: ', { ...editorFlags.validFlags, ...presetFlags.validFlags });
+
 	return {
 		...editorFlags.validFlags,
 		...presetFlags.validFlags,
