@@ -104,7 +104,7 @@
 		showMainContent = false;
 		setTimeout(() => {
 			showMainContent = true;
-		}, 100);
+		}, 10);
 	});
 </script>
 

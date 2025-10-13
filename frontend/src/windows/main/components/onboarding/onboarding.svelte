@@ -3,11 +3,13 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import { events, os } from '@neutralinojs/lib';
-	import { Activity, ChevronLeft, ChevronRight, ExternalLink, FileWarning, Rocket, Settings, Users } from 'lucide-svelte';
+	import { Activity, ChevronLeft, ChevronRight, ExternalLink, FileWarning, Rocket, Rss, Settings, Users } from 'lucide-svelte';
 	import { quartInOut, quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
-	import { loadSettings, saveSettings, setMultipleValues } from '../settings/files';
+	import { loadSettings, saveSettings, setMultipleValues, setValue } from '../settings/files';
 	import Logger from '@/windows/main/ts/utils/logger';
+	import Roblox from '../../ts/roblox';
+	import { toast } from 'svelte-sonner';
 
 	export let onboardingLoaded = false;
 
@@ -91,6 +93,25 @@
 			description: 'Define how AppleBlox interacts with Roblox.',
 			icon: Settings,
 			actions: [
+				{
+					type: 'button',
+					label: 'Enable background Roblox updates',
+					description:
+						'Roblox will automatically get updated in the background, without needing AppleBlox or Roblox to be opened <span style="color: hsl(var(--warning));">(Admin permissions needed)</span>',
+					variant: 'default',
+					icon: Rss,
+					action: () => {
+						try {
+							Roblox.Updates.setLaunchAgentState(true);
+							setValue('roblox.background.background_updates', true);
+						} catch (err) {
+							setValue('roblox.background.background_updates', false);
+							if ((err as Error).message.includes('-128')) return;
+							toast.error('An error ocurred while setting Roblox background updates state');
+							Logger.error('An error ocurred while setting Roblox background updates state:', err);
+						}
+					},
+				},
 				{
 					type: 'switch',
 					label: 'Delegate Launching',
@@ -341,12 +362,12 @@
 														{#if action.type === 'switch'}
 															<div class="flex items-center justify-between">
 																<div class="space-y-1 flex-1 mr-4">
-																	<label class="text-sm font-medium text-foreground">
+																	<p class="text-sm font-medium text-foreground">
 																		{action.label}
-																	</label>
+																	</p>
 																	{#if action.description}
 																		<p class="text-xs text-muted-foreground">
-																			{action.description}
+																			{@html action.description}
 																		</p>
 																	{/if}
 																</div>
@@ -364,25 +385,23 @@
 																	</h4>
 																	{#if action.description}
 																		<p class="text-xs text-muted-foreground">
-																			{action.description}
+																			{@html action.description}
 																		</p>
 																	{/if}
 																</div>
 																<Button
 																	variant={action.variant || 'outline'}
 																	size="lg"
-																	class="w-full justify-between text-sm focus:outline-none select-none group hover:scale-[1.02] transition-all duration-200"
+																	class="justify-between text-sm focus:outline-none select-none group hover:scale-[1.02] transition-all duration-200"
 																	on:click={action.action}
 																>
-																	<span class="flex items-center gap-2">
-																		{action.label}
-																	</span>
 																	{#if action.icon}
 																		<svelte:component
 																			this={action.icon}
-																			class="w-4 h-4 transition-transform group-hover:translate-x-1"
+																			class="w-4 h-4 transition-transform group-hover:translate-x-1 mr-2"
 																		/>
 																	{/if}
+																	{action.label}
 																</Button>
 															</div>
 														{:else if action.type === 'info'}

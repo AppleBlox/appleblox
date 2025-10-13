@@ -5,6 +5,7 @@ import { RobloxInstance } from './instance';
 import { launchRoblox } from './launch';
 import { RobloxMods } from './mods';
 import { getMostRecentRoblox } from './path';
+import { RobloxUpdates } from './updates';
 import { RobloxUtils } from './utils';
 import * as RobloxVersion from './version';
 import Logger from '@/windows/main/ts/utils/logger';
@@ -26,6 +27,7 @@ class Roblox {
 	static path = robloxPath;
 	static Version = RobloxVersion;
 	static Downloader = RobloxDownloader;
+	static Updates = RobloxUpdates;
 }
 
 export default Roblox;

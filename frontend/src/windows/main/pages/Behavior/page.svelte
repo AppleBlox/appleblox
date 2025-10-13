@@ -1,12 +1,12 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import { os } from '@neutralinojs/lib';
+	import { events, os } from '@neutralinojs/lib';
 	import { BugOff, CopyCheck, PictureInPicture, Play } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import LoadingSpinner from '../../components/loading-spinner.svelte';
 	import RobloxDownloadButton from '../../components/roblox/roblox-download-button.svelte';
-	import { SettingsPanelBuilder } from '../../components/settings';
+	import { SettingsPanelBuilder, setValue } from '../../components/settings';
 	import Panel from '../../components/settings/panel.svelte';
 	import type { SettingsOutput } from '../../components/settings/types';
 	import Roblox from '../../ts/roblox';
@@ -49,6 +49,16 @@
 			case 'delegate':
 				await Roblox.Delegate.toggle(state);
 				break;
+			case 'background_updates':
+				try {
+					await Roblox.Updates.setLaunchAgentState(state);
+				} catch (err) {
+					await setValue('roblox.background.background_updates', !state);
+					events.broadcast('app:reload');
+					if ((err as Error).message.includes('-128')) return;
+					toast.error('An error ocurred while setting Roblox background updates state');
+					Logger.error('An error ocurred while setting Roblox background updates state:', err);
+				}
 		}
 	}
 
@@ -56,6 +66,19 @@
 		.setName('Roblox')
 		.setDescription('Roblox application settings and other bootstrapper behavior')
 		.setId('roblox') // Not updating the ID to preserve old settings
+		.addCategory((category) =>
+			category
+				.setName('Background Processes')
+				.setDescription('Control background processes related to Roblox')
+				.setId('background')
+				.addSwitch({
+					label: 'Background updates',
+					description:
+						'Automatically update Roblox without needing AppleBlox or Roblox to opened. <br><span style="color: hsl(var(--warning));">(Requires administrator permissions)</span>',
+					default: false,
+					id: 'background_updates',
+				})
+		)
 		.addCategory((category) =>
 			category
 				.setName('Bootstrapper Behavior')
