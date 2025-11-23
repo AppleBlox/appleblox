@@ -23,3 +23,14 @@ export interface SetWindowData {
 	scaleHeight?: number;
 	reset?: boolean;
 }
+
+export interface ThumbnailResponse {
+	targetId: number;
+	state: 'Error' | 'Completed' | 'InReview' | 'Pending' | 'Blocked' | 'TemporarilyUnavailable';
+	imageUrl: string;
+	version: string;
+}
+
+export interface ThumbnailApiResponse {
+	data: ThumbnailResponse[];
+}
