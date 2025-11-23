@@ -183,7 +183,7 @@
 {#if render}
 	{#if settingsLoaded}
 		<div transition:fade={{ duration: fadeIn ? 200 : 0 }}>
-			<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-3 p-5 w-[95%] hover:bg-muted/30 border-border/50">
+			<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-3 p-5 w-[95%] border-border/50">
 				<!-- <div> -->
 				<!-- Title + Description -->
 				<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
@@ -193,7 +193,7 @@
 			</Card.Root>
 			<!-- Categories -->
 			{#each panel.categories || [] as category (category.id)}
-				<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-4 p-5 w-[95%] hover:bg-muted/30 border-border/50">
+				<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-4 p-5 w-[95%] border-border/50">
 					<div>
 						<!-- Category Description -->
 						<p class="text-xl font-bold text-primary">{category.name}</p>
