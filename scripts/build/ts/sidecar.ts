@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 import { extract } from 'tar';
 
-const DRPC_RELEASE = 'https://github.com/AppleBlox/Discord-RPC-cli/releases/download/1.0.0/discord-rpc-cli';
+const DRPC_RELEASE = 'https://github.com/AppleBlox/Discord-RPC-cli/releases/download/1.0.2/discord-rpc-cli';
 const ALERTER_RELEASE = 'https://github.com/vjeantet/alerter/releases/download/1.0.1/alerter_v1.0.1_darwin_amd64.zip';
 
 type BaseFile = {
