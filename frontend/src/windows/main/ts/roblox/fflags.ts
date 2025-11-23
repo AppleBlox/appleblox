@@ -54,7 +54,10 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.engine',
 			type: 'select',
 			value: async (settingValue) => {
-				return settingValue === 'opengl' || (await getValue<boolean>('engine.graphics.fps_cap')) === true;
+				return (
+					(settingValue as { label: string; value: string }).value === 'opengl' ||
+					(await getValue<boolean>('engine.graphics.fps_cap')) === true
+				);
 			},
 		})
 		.addFlag({
@@ -62,14 +65,24 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			flags: { FFlagDebugGraphicsPreferMetal: true },
 			path: 'engine.graphics.engine',
 			type: 'select',
-			value: 'metal',
+			value: async (settingValue) => {
+				return (
+					(settingValue as { label: string; value: string }).value === 'metal' &&
+					!((await getValue<boolean>('engine.graphics.fps_cap')) === true)
+				);
+			},
 		})
 		.addFlag({
 			name: 'Graphics API (Vulkan)',
 			flags: { FFlagDebugGraphicsPreferVulkan: true, FFlagDebugGraphicsDisableMetal: true },
 			path: 'engine.graphics.engine',
 			type: 'select',
-			value: 'vulkan',
+			value: async (settingValue) => {
+				return (
+					(settingValue as { label: string; value: string }).value === 'vulkan' &&
+					!((await getValue<boolean>('engine.graphics.fps_cap')) === true)
+				);
+			},
 		})
 		.addFlag({
 			name: 'Graphics Quality',
