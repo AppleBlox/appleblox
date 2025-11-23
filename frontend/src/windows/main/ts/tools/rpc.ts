@@ -1,7 +1,7 @@
 // Discord RPC wrapper & controller
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
-import { buildCommand, escapeShellArg, shell, spawn } from './shell';
+import { buildCommand, spawn, type SpawnEventEmitter } from './shell';
 import Logger from '../utils/logger';
 
 const logger = Logger.withContext('RPC');
@@ -48,21 +48,60 @@ export interface RPCOptions {
 	spectateId?: string;
 	/** Whether to enable time counting from the current time (Optional) */
 	enableTime?: boolean;
-	/** Whether to enable AFK RPC or not (Optional) */
-	afk?: boolean;
-	/** How many minutes should pass before the AFK RPC is started (Optional, default: 5) */
-	afkAfter?: number;
-	/** How often to check whether the user is idle, in seconds (Optional, default: 20) */
-	afkUpdate?: number;
-	/** Exit after a given time in seconds (Optional, default: -1 means don't exit) */
-	exitAfter?: number;
 	/** Whether to disable colors in the output (Optional) */
 	disableColor?: boolean;
 }
 
-/** Escape shell argument but without the quotes */
-function escapeText(str: string): string {
-	return escapeShellArg(str).slice(1, -1);
+/**
+ * Maps RPCOptions to JSON format expected by the CLI's update mode
+ */
+interface RPCUpdateJSON {
+	state?: string;
+	details?: string;
+	large_image?: string;
+	large_text?: string;
+	small_image?: string;
+	small_text?: string;
+	button_text_1?: string;
+	button_url_1?: string;
+	button_text_2?: string;
+	button_url_2?: string;
+	party_size?: [number, number];
+	party_id?: string;
+	match_id?: string;
+	join_id?: string;
+	spectate_id?: string;
+	enable_time?: boolean;
+	start_time?: number;
+	end_time?: number;
+}
+
+/**
+ * Converts RPCOptions to the JSON format expected by CLI update mode
+ */
+function optionsToUpdateJSON(options: Partial<RPCOptions>): RPCUpdateJSON {
+	const json: RPCUpdateJSON = {};
+
+	if (options.state !== undefined) json.state = options.state;
+	if (options.details !== undefined) json.details = options.details;
+	if (options.largeImage !== undefined) json.large_image = options.largeImage;
+	if (options.largeImageText !== undefined) json.large_text = options.largeImageText;
+	if (options.smallImage !== undefined) json.small_image = options.smallImage;
+	if (options.smallImageText !== undefined) json.small_text = options.smallImageText;
+	if (options.buttonText1 !== undefined) json.button_text_1 = options.buttonText1;
+	if (options.buttonUrl1 !== undefined) json.button_url_1 = options.buttonUrl1;
+	if (options.buttonText2 !== undefined) json.button_text_2 = options.buttonText2;
+	if (options.buttonUrl2 !== undefined) json.button_url_2 = options.buttonUrl2;
+	if (options.partySize !== undefined) json.party_size = options.partySize;
+	if (options.partyId !== undefined) json.party_id = options.partyId;
+	if (options.matchId !== undefined) json.match_id = options.matchId;
+	if (options.joinId !== undefined) json.join_id = options.joinId;
+	if (options.spectateId !== undefined) json.spectate_id = options.spectateId;
+	if (options.enableTime !== undefined) json.enable_time = options.enableTime;
+	if (options.startTime !== undefined) json.start_time = options.startTime;
+	if (options.endTime !== undefined) json.end_time = options.endTime;
+
+	return json;
 }
 
 /**
@@ -73,8 +112,10 @@ export class DiscordRPC {
 	private static binaryPath = `${libraryPath('discordrpc')}`;
 	/** Set of all DiscordRPC instances */
 	private static instances: Set<DiscordRPC> = new Set();
-	/** Current RPC options being used */
-	private static currentOptions: RPCOptions | null = null;
+	/** Current RPC process */
+	private static rpcProcess: SpawnEventEmitter | null = null;
+	/** Current client ID being used */
+	private static currentClientId: string | null = null;
 
 	/**
 	 * Creates a new DiscordRPC instance
@@ -85,48 +126,54 @@ export class DiscordRPC {
 
 	/**
 	 * Checks if the Discord RPC process is running
-	 * @returns A promise that resolves to a boolean indicating if the process is running
+	 * @returns Whether the process is running
 	 */
-	private async isRunning(): Promise<boolean> {
-		try {
-			const result = await shell('pgrep', ['-f', 'discordrpc_ablox']);
-			return result.stdOut.split('\n').length > 2;
-		} catch (err) {
-			return false;
-		}
+	private isRunning(): boolean {
+		return DiscordRPC.rpcProcess !== null;
 	}
 
 	/**
-	 * Starts the Discord RPC process if it's not already running
+	 * Starts the Discord RPC process in update mode
 	 * @param options - The RPC options
 	 * @returns A promise that resolves when the process is started
 	 */
 	async start(options: RPCOptions): Promise<void> {
 		if (!(await getValue('integrations.rpc.enabled'))) return;
-		const rpcOptions = {
-			...options,
-			state: options.state || '',
-		};
 
-		if (await this.isRunning()) {
+		// If already running with same client ID, just update
+		if (this.isRunning() && DiscordRPC.currentClientId === options.clientId) {
 			logger.info('Already running. Updating options.');
 			await this.update(options);
 			return;
 		}
 
-		const args = DiscordRPC.buildArgs(rpcOptions);
+		// Stop existing process if running with different client ID
+		if (this.isRunning()) {
+			await this.stop();
+		}
 
-		// Kill any existing discordrpc processes
-		await shell('pkill', ['-f', 'discordrpc_ablox'], {
-			skipStderrCheck: true,
-		}).catch(Logger.error);
+		const args = ['-c', options.clientId, '--update'];
+		if (options.disableColor) {
+			args.push('-C');
+		}
 
 		logger.info(`Starting with command: ${buildCommand(DiscordRPC.binaryPath, args)}`);
-		const rpcProcess = await spawn(DiscordRPC.binaryPath, args);
-		rpcProcess.on('stdErr', (data: string) => {
+		
+		DiscordRPC.rpcProcess = await spawn(DiscordRPC.binaryPath, args);
+		DiscordRPC.currentClientId = options.clientId;
+
+		DiscordRPC.rpcProcess.on('stdErr', (data: string) => {
 			logger.error('Process emitted stdErr:', data);
 		});
-		DiscordRPC.currentOptions = options;
+
+		DiscordRPC.rpcProcess.on('exit', (exitCode: number) => {
+			logger.info(`Process exited with code ${exitCode}`);
+			DiscordRPC.rpcProcess = null;
+			DiscordRPC.currentClientId = null;
+		});
+
+		// Send initial update with all options
+		await this.update(options);
 	}
 
 	/**
@@ -134,25 +181,37 @@ export class DiscordRPC {
 	 * @returns A promise that resolves when the process is stopped
 	 */
 	async stop(): Promise<void> {
-		if (await this.isRunning()) {
-			await shell('pkill', ['-f', 'discordrpc_ablox'], {
-				skipStderrCheck: true,
-			});
-			DiscordRPC.currentOptions = null;
+		if (DiscordRPC.rpcProcess) {
+			try {
+				await DiscordRPC.rpcProcess.kill();
+			} catch (err) {
+				logger.error('Error killing process:', err);
+			}
+			DiscordRPC.rpcProcess = null;
+			DiscordRPC.currentClientId = null;
 		}
 	}
 
 	/**
-	 * Updates the Discord RPC with new options
+	 * Updates the Discord RPC with new options via stdin
 	 * @param options - The new RPC options
 	 * @returns A promise that resolves when the update is complete
 	 */
 	async update(options: Partial<RPCOptions>): Promise<void> {
-		await this.stop();
-		await this.start({
-			...DiscordRPC.currentOptions,
-			...options,
-		} as RPCOptions);
+		if (!this.isRunning()) {
+			logger.error('Cannot update: RPC process is not running');
+			return;
+		}
+
+		const updateJSON = optionsToUpdateJSON(options);
+		const jsonString = JSON.stringify(updateJSON) + '\n';
+
+		try {
+			await DiscordRPC.rpcProcess!.writeStdin(jsonString);
+			logger.info('Sent update:', updateJSON);
+		} catch (err) {
+			logger.error('Error sending update:', err);
+		}
 	}
 
 	/**
@@ -241,42 +300,6 @@ export class DiscordRPC {
 			this.stop().catch(Logger.error);
 		}
 	}
-
-	/**
-	 * Builds command-line arguments from RPC options
-	 * @param options - The RPC options
-	 * @returns An array of command-line arguments
-	 */
-	private static buildArgs(options: RPCOptions): string[] {
-		const args: string[] = [];
-
-		if (options.clientId) args.push('-c', options.clientId);
-		if (options.details) args.push('-d', escapeText(options.details)); // Remove quotes
-		if (options.state) args.push('-s', escapeText(options.state));
-		if (options.largeImage) args.push('-N', options.largeImage);
-		if (options.largeImageText) args.push('-I', options.largeImageText);
-		if (options.smallImage) args.push('-n', options.smallImage);
-		if (options.smallImageText) args.push('-i', options.smallImageText);
-		if (options.buttonUrl1) args.push('-U', options.buttonUrl1);
-		if (options.buttonText1) args.push('-B', options.buttonText1);
-		if (options.buttonUrl2) args.push('-u', options.buttonUrl2);
-		if (options.buttonText2) args.push('-b', options.buttonText2);
-		if (options.startTime) args.push('-S', options.startTime.toString());
-		if (options.endTime) args.push('-E', options.endTime.toString());
-		if (options.partySize) args.push('-P', `${options.partySize[0]},${options.partySize[1]}`);
-		if (options.partyId) args.push('-p', options.partyId);
-		if (options.matchId) args.push('-m', options.matchId);
-		if (options.joinId) args.push('-j', options.joinId);
-		if (options.spectateId) args.push('-y', options.spectateId);
-		if (options.enableTime) args.push('-t');
-		if (options.afk) args.push('-a');
-		if (options.afkAfter) args.push('-f', options.afkAfter.toString());
-		if (options.afkUpdate) args.push('-k', options.afkUpdate.toString());
-		if (options.exitAfter) args.push('-e', options.exitAfter.toString());
-		if (options.disableColor) args.push('-C');
-
-		return args;
-	}
 }
 
 /** Global instance of DiscordRPC */
@@ -297,6 +320,9 @@ const presets: { [key: string]: RPCOptions } = {
  * Controller class for managing Discord RPC
  */
 export class RPCController {
+	private static lastUpdate: number = 0;
+	private static cooldownMs: number = 1000;
+
 	/**
 	 * Sets the RPC options to a preset configuration
 	 * @param preset - The name of the preset to use
@@ -313,14 +339,17 @@ export class RPCController {
 	 * @returns A promise that resolves when the RPC is set
 	 */
 	public static async set(options: RPCOptions): Promise<void> {
-		if (discordRPC) {
-			await discordRPC.stop();
-		} else {
-			await shell('pkill', ['-f', 'discordrpc_ablox'], {
-				skipStderrCheck: true,
-			});
+		const now = Date.now();
+		if (now - RPCController.lastUpdate < RPCController.cooldownMs) {
+			logger.info('RPC update ignored due to cooldown');
+			return;
 		}
-		discordRPC = new DiscordRPC();
+
+		RPCController.lastUpdate = now;
+
+		if (!discordRPC) {
+			discordRPC = new DiscordRPC();
+		}
 		await discordRPC.start(options);
 	}
 
@@ -330,10 +359,9 @@ export class RPCController {
 	 */
 	public static async stop(): Promise<void> {
 		if (discordRPC) {
-			await discordRPC.destroy();
+			await discordRPC.stop();
+			discordRPC.destroy();
+			discordRPC = null;
 		}
-		const kill = await shell('pkill', ['-f', 'discordrpc_ablox'], {
-			skipStderrCheck: true,
-		});
 	}
 }
