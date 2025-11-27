@@ -26,7 +26,8 @@
 			"useSavedState": false,
 			"extendUserAgentWith": "AppleBlox",
 			"resizable": false,
-			"center": true
+			"center": true,
+			"skipTaskbar": true
 		}
 	},
 	"cli": {

@@ -14,10 +14,16 @@ import { shell } from './ts/tools/shell';
 import { getMode } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
 import Logger, { initializeLogger } from '@/windows/main/ts/utils/logger';
+import { initializeDataDirectory } from './ts/utils/paths';
 import { focusWindow } from './ts/window';
 
 // Initialize NeutralinoJS
 init();
+
+// Initialize data directory (must be done after init())
+initializeDataDirectory().catch((err) => {
+	Logger.error('Failed to initialize data directory:', err);
+});
 
 let isDeeplinkLaunch = false;
 let mainAppMounted = false;

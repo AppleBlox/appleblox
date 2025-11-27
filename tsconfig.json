@@ -29,5 +29,6 @@
 		}
 	},
 	"include": ["frontend/src/**/*.ts", "frontend/src/**/*.js", "frontend/src/**/*.svelte"],
+	"exclude": ["**/*.test.ts", "**/*.spec.ts", "tests/**/*"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

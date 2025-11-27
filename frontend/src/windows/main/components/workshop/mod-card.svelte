@@ -14,6 +14,7 @@
 	import type { Mod } from '../../ts/workshop';
 	import { downloadMod, type ProgressUpdate } from '../../ts/workshop';
 	import Logger from '@/windows/main/ts/utils/logger';
+	import { getModsDir } from '../../ts/utils/paths';
 
 	export let mod: Mod;
 	let thumbnailUrl = `https://66.33.22.138/api/v1/mods/${mod.id}/image`;
@@ -220,7 +221,7 @@
 
 	async function checkModExists(): Promise<boolean> {
 		try {
-			const modPath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/mods', mod.name);
+			const modPath = path.join(await getModsDir(), mod.name);
 			return await shellFS.exists(modPath);
 		} catch (error: any) {
 			Logger.warn('Failed to check if mod exists:', error);
