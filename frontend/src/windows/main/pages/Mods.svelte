@@ -9,6 +9,7 @@
 	import Panel from '../components/settings/panel.svelte';
 	import shellFS from '../ts/tools/shellfs';
 	import Logger from '@/windows/main/ts/utils/logger';
+	import { getFontsCacheDir } from '../ts/utils/paths';
 
 	export let render = true;
 
@@ -31,7 +32,7 @@
 		const { id, file } = e.detail;
 		switch (id) {
 			case 'custom_font': {
-				const cachePath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/cache/fonts');
+				const cachePath = await getFontsCacheDir();
 				await shellFS.createDirectory(cachePath);
 				await filesystem.copy(file, path.join(cachePath, `CustomFont${path.extname(file)}`)).catch(Logger.error);
 				break;

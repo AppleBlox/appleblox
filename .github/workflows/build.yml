@@ -36,6 +36,10 @@ jobs:
           brew install create-dmg
         continue-on-error: false
 
+      - name: Run tests
+        run: bun test
+        continue-on-error: false
+
       - name: Build and package app
         run: bun run release:sequential
         continue-on-error: false

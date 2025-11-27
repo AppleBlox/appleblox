@@ -2,6 +2,7 @@ import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import shellFS from '../tools/shellfs';
 import Logger from '@/windows/main/ts/utils/logger';
+import { getModsDir } from '../utils/paths';
 
 const API_URL = 'https://marketplace.appleblox.com';
 
@@ -217,7 +218,7 @@ async function downloadMod(
 		}
 
 		onProgress?.({ step: 'Creating mod directory...', progress: 10 });
-		const modPath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/mods', modInfo.name);
+		const modPath = path.join(await getModsDir(), modInfo.name);
 		if (await shellFS.exists(modPath)) await shellFS.remove(modPath);
 		await shellFS.createDirectory(modPath);
 
