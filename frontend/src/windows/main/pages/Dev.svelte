@@ -94,10 +94,25 @@
 		}
 	}
 
+	// Get launch arguments from Neutralino
+	const launchArgs = window.NL_ARGS ? window.NL_ARGS.join(' ') : 'No arguments';
+
 	const developmentPanel = new SettingsPanelBuilder()
 		.setName('Development Panel')
 		.setDescription('Tools and utilities for development and testing.')
 		.setId('development')
+		.addCategory((category) =>
+			category
+				.setName('Application Info')
+				.setDescription('Information about the running application')
+				.setId('appinfo')
+				.addInput({
+					label: 'Launch Arguments',
+					description: 'Command-line arguments passed to Neutralino (read-only)',
+					id: 'launch_args',
+					default: launchArgs,
+				})
+		)
 		.addCategory((category) =>
 			category
 				.setName('Interface Components')

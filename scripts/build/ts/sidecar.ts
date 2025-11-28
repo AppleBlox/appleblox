@@ -40,6 +40,7 @@ const sidecarFiles: SidecarFile[] = [
 		filename: 'bootstrap.m',
 		type: 'objective-c',
 		args: ['-framework', 'Cocoa'],
+		includeSuffix: true,
 	},
 	{
 		name: 'URL Scheme Handler',
@@ -59,19 +60,19 @@ const sidecarFiles: SidecarFile[] = [
 		name: 'Roblox Updater Script',
 		filename: 'roblox_updater.sh',
 		type: 'copy',
-		includeSuffix: false,
+		includeSuffix: true,
 	},
 	{
 		name: 'Roblox Updater Manager Script',
 		filename: 'roblox_updater_manager.sh',
 		type: 'copy',
-		includeSuffix: false,
+		includeSuffix: true,
 	},
 	{
 		name: 'Roblox Updater Script Plist',
 		filename: 'rbxupdater.plist',
 		type: 'copy',
-		includeSuffix: false,
+		includeSuffix: true,
 	},
 ];
 
@@ -124,12 +125,10 @@ function getSourcePath(filename: string): string {
 	return resolve(join('scripts/build/sidecar', filename));
 }
 
-async function compileFile(file: CompilableFile): Promise<void> {
-	const fileLogger = new Signale({ scope: `compile-${file.name.toLowerCase().replace(/\s+/g, '-')}` });
-	fileLogger.await(`Compiling "${file.name}"`);
+async function compileFile(file: CompilableFile, logger: Signale): Promise<{ name: string; time: number; output: string }> {
 	const perf = performance.now();
 
-	const outPath = getOutputPath(file.filename, file.includeSuffix);
+	const outPath = getOutputPath(file.filename, file.includeSuffix, false); // Don't preserve extension for compiled files
 	const filePath = getSourcePath(file.filename);
 
 	let args: string[];
@@ -145,41 +144,43 @@ async function compileFile(file: CompilableFile): Promise<void> {
 	try {
 		await Bun.spawn(args).exited;
 		chmodSync(outPath, 0o755);
-		fileLogger.complete(`Compiled "${file.name}" in ${((performance.now() - perf) / 1000).toFixed(3)}s`);
+		const time = (performance.now() - perf) / 1000;
+		const outputName = outPath.split('/').pop() || '';
+		return { name: file.name, time, output: outputName };
 	} catch (error) {
-		fileLogger.fatal(`Failed to compile "${file.name}": ${error}`);
+		logger.fatal(`Failed to compile "${file.name}": ${error}`);
 		throw error;
 	}
 }
 
-async function copyFile(file: CopyFile): Promise<void> {
-	const fileLogger = new Signale({ scope: `copy-${file.name.toLowerCase().replace(/\s+/g, '-')}` });
-	fileLogger.await(`Copying "${file.name}"`);
+async function copyFile(file: CopyFile, logger: Signale): Promise<{ name: string; time: number; output: string }> {
 	const perf = performance.now();
 
-	const outPath = getOutputPath(file.filename, file.includeSuffix);
+	const outPath = getOutputPath(file.filename, file.includeSuffix, true); // Preserve extension for copied files
 	const filePath = getSourcePath(file.filename);
 
 	try {
 		await Bun.write(outPath, Bun.file(filePath));
 		chmodSync(outPath, 0o755);
-		fileLogger.complete(`Copied "${file.name}" in ${((performance.now() - perf) / 1000).toFixed(3)}s`);
+		const time = (performance.now() - perf) / 1000;
+		const outputName = outPath.split('/').pop() || '';
+		return { name: file.name, time, output: outputName };
 	} catch (error) {
-		fileLogger.fatal(`Failed to copy "${file.name}": ${error}`);
+		logger.fatal(`Failed to copy "${file.name}": ${error}`);
 		throw error;
 	}
 }
 
-async function downloadFile(file: DownloadFile): Promise<void> {
-	const fileLogger = new Signale({ scope: `download-${file.name.toLowerCase().replace(/\s+/g, '-')}` });
+async function downloadFile(
+	file: DownloadFile,
+	logger: Signale
+): Promise<{ name: string; time: number; output: string; skipped?: boolean }> {
+	const perf = performance.now();
 	const outPath = resolve(join('bin', file.outputName));
 
 	if (await Bun.file(outPath).exists()) {
-		fileLogger.info(`"${file.name}" already exists, skipping`);
-		return;
+		return { name: file.name, time: 0, output: file.outputName, skipped: true };
 	}
-
-	fileLogger.await(`Downloading "${file.name}"`);
 
 	try {
 		const response = await fetch(file.url, { method: 'GET' });
@@ -221,32 +222,56 @@ async function downloadFile(file: DownloadFile): Promise<void> {
 		}
 
 		chmodSync(outPath, 0o755);
-		fileLogger.complete(`Downloaded "${file.name}"`);
+		const time = (performance.now() - perf) / 1000;
+		return { name: file.name, time, output: file.outputName };
 	} catch (error) {
-		fileLogger.fatal(`Failed to download "${file.name}": ${error}`);
+		logger.fatal(`Failed to download "${file.name}": ${error}`);
 		throw error;
-	}
-}
-
-async function processSidecarFile(file: SidecarFile): Promise<void> {
-	if (file.type === 'copy') {
-		return copyFile(file);
-	} else {
-		return compileFile(file);
 	}
 }
 
 export async function buildSidecar() {
 	const logger = new Signale({ scope: 'sidecar' });
+	const startTime = performance.now();
 
 	await $`mkdir -p bin`;
 
-	const sidecarPromises = sidecarFiles.map(processSidecarFile);
-	const downloadPromises = downloadFiles.map(downloadFile);
+	// Separate files by type for organized output
+	const compileFiles = sidecarFiles.filter((f) => f.type !== 'copy') as CompilableFile[];
+	const copyFiles = sidecarFiles.filter((f) => f.type === 'copy') as CopyFile[];
+
+	logger.info(`Building ${sidecarFiles.length} sidecar binaries + ${downloadFiles.length} downloads`);
 
 	try {
-		await Promise.all([...sidecarPromises, ...downloadPromises]);
-		logger.success('All sidecar binaries built successfully');
+		// Process all files in parallel
+		const [compileResults, copyResults, downloadResults] = await Promise.all([
+			Promise.all(compileFiles.map((f) => compileFile(f, logger))),
+			Promise.all(copyFiles.map((f) => copyFile(f, logger))),
+			Promise.all(downloadFiles.map((f) => downloadFile(f, logger))),
+		]);
+
+		// Display summary
+		if (compileResults.length > 0) {
+			logger.success(`Compiled ${compileResults.length} binary(ies): ${compileResults.map((r) => r.output).join(', ')}`);
+		}
+
+		if (copyResults.length > 0) {
+			logger.success(`Copied ${copyResults.length} file(s): ${copyResults.map((r) => r.output).join(', ')}`);
+		}
+
+		const downloaded = downloadResults.filter((r) => !r.skipped);
+		const skipped = downloadResults.filter((r) => r.skipped);
+
+		if (downloaded.length > 0) {
+			logger.success(`Downloaded ${downloaded.length} file(s): ${downloaded.map((r) => r.output).join(', ')}`);
+		}
+
+		if (skipped.length > 0) {
+			logger.info(`Skipped ${skipped.length} existing file(s): ${skipped.map((r) => r.output).join(', ')}`);
+		}
+
+		const totalTime = ((performance.now() - startTime) / 1000).toFixed(3);
+		logger.complete(`All sidecar binaries ready (${totalTime}s)`);
 	} catch (error) {
 		logger.fatal('Failed to build sidecar binaries');
 		throw error;

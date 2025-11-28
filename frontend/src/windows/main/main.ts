@@ -5,17 +5,66 @@ import './ts/roblox';
 import './ts/window';
 
 // Imports
-import { events, init, MessageBoxChoice, app as neuApp, window as neuWindow, os } from '@neutralinojs/lib';
+import { events, init, MessageBoxChoice, app as neuApp, window as neuWindow, os, filesystem } from '@neutralinojs/lib';
 import App from './App.svelte';
 import { loadTheme } from './components/theme-input/theme';
 import Roblox from './ts/roblox';
 import { RPCController } from './ts/tools/rpc';
 import { shell } from './ts/tools/shell';
-import { getMode } from './ts/utils';
+import { getMode, sleep } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
 import Logger, { initializeLogger } from '@/windows/main/ts/utils/logger';
 import { initializeDataDirectory } from './ts/utils/paths';
-import { focusWindow } from './ts/window';
+import { focusWindow, setWindowVisibility } from './ts/window';
+
+const COMMAND_FILE = '/tmp/appleblox-bootstrap-command';
+let lastCommandTimestamp = 0;
+
+async function handleBootstrapCommand(command: string) {
+	const cmd = command.trim();
+	Logger.info(`Bootstrap command received: ${cmd}`);
+
+	try {
+		switch (cmd) {
+			case 'hide':
+				await setWindowVisibility(false);
+				Logger.info('Window hidden via bootstrap command');
+				break;
+			case 'show':
+				await setWindowVisibility(true);
+				await focusWindow();
+				Logger.info('Window shown via bootstrap command');
+				break;
+			default:
+				Logger.warn(`Unknown bootstrap command: ${cmd}`);
+		}
+	} catch (error) {
+		Logger.error(`Error executing bootstrap command "${cmd}":`, error);
+	}
+}
+
+async function pollBootstrapCommands() {
+	try {
+		// Check if command file exists and read it
+		const stats = await filesystem.getStats(COMMAND_FILE);
+		const modTime = stats.modifiedAt;
+
+		// Only process if file was modified since last check
+		if (modTime > lastCommandTimestamp) {
+			lastCommandTimestamp = modTime;
+			const content = await filesystem.readFile(COMMAND_FILE);
+			const command = content.trim();
+
+			if (command) {
+				await handleBootstrapCommand(command);
+				// Clear the file after processing
+				await filesystem.writeFile(COMMAND_FILE, '');
+			}
+		}
+	} catch (error) {}
+
+	setTimeout(pollBootstrapCommands, 100);
+}
 
 // Initialize NeutralinoJS
 init();
@@ -66,6 +115,9 @@ async function quit() {
 events.on('ready', async () => {
 	// Initialize the logger as the first, non-blocking step.
 	setTimeout(initializeLogger, 0);
+
+	// Start polling for bootstrap commands
+	setTimeout(pollBootstrapCommands, 100);
 
 	// Make theme loading non-blocking
 	setTimeout(async () => {

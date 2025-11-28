@@ -158,7 +158,7 @@ export class DiscordRPC {
 		}
 
 		logger.info(`Starting with command: ${buildCommand(DiscordRPC.binaryPath, args)}`);
-		
+
 		DiscordRPC.rpcProcess = await spawn(DiscordRPC.binaryPath, args);
 		DiscordRPC.currentClientId = options.clientId;
 

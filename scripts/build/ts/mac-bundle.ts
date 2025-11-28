@@ -153,7 +153,7 @@ async function copyExecutables(appDist: string, executable: string, logger: Sign
 	const MacOS = resolve(appDist, appBundle, 'Contents', 'MacOS');
 	const mainPath = resolve(MacOS, 'main');
 	const bootstrapPath = resolve(MacOS, 'bootstrap');
-	const bootstrapSource = resolve('bin/bootstrap');
+	const bootstrapSource = resolve('bin/bootstrap_ablox');
 
 	// Copy main executable with retry
 	await executeWithRetry(
@@ -218,9 +218,9 @@ async function handleLibraries(appDist: string, librariesPath: string, libraries
 	// Copy libraries
 	await copyWithProgress(librariesPath, libPath, logger);
 
-	// Remove blacklisted files
+	// Remove blacklisted files (bootstrap_ablox and neutralino binaries)
 	try {
-		const blacklistPattern = librariesBlacklist.join('|');
+		const blacklistPattern = librariesBlacklist.map((pattern) => `${pattern}_ablox|${pattern}`).join('|');
 		const files = (await $`ls ${librariesPath} | grep -E '${blacklistPattern}'`.text()).split('\n');
 		files.pop(); // Remove empty last element
 

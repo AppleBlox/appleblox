@@ -28,14 +28,15 @@
 						{ label: 'OpenGL', value: 'opengl' },
 					],
 					toggleable: {
-						id: "fps_cap",
-						type: "switch",
-						value: false
-					}
+						id: 'fps_cap',
+						type: 'switch',
+						value: false,
+					},
 				})
 				.addSwitch({
 					label: 'Remove frame rate limit',
-					description: 'Removes the limit of 60 frames per second imposed by MacOS (You will have to use the built-in FPS changer in Roblox in addition of this option). <br><span style="color: hsl(var(--warning));">This option is unstable as it requires the old and unspported OpenGL graphics API. You will probably get worse performance than when using Metal.</span>',
+					description:
+						'Removes the limit of 60 frames per second imposed by MacOS (You will have to use the built-in FPS changer in Roblox in addition of this option). <br><span style="color: hsl(var(--warning));">This option is unstable as it requires the old and unspported OpenGL graphics API. You will probably get worse performance than when using Metal.</span>',
 					id: 'fps_cap',
 					default: false,
 				})

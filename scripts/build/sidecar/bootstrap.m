@@ -6,6 +6,7 @@
 @property (nonatomic, strong) NSFileHandle *logFileHandle;
 @property (nonatomic, strong) NSString *deeplinkArgument;
 @property (nonatomic, assign) BOOL isRequestingPermission;
+@property (nonatomic, assign) pid_t childPid;
 @end
 
 @implementation AppDelegate
@@ -46,9 +47,22 @@
     }
 }
 
+- (BOOL)useNativeBootstrapIcon {
+    // Check if bootstrap_native file exists in Resources
+    NSString *resourcesPath = [[NSBundle mainBundle] resourcePath];
+    NSString *flagPath = [resourcesPath stringByAppendingPathComponent:@"bootstrap_native"];
+    return [[NSFileManager defaultManager] fileExistsAtPath:flagPath];
+}
+
 - (void)setupActivationPolicy:(BOOL)browserMode {
-    if (browserMode) {
+    if ([self useNativeBootstrapIcon]) {
+        // Show bootstrap dock icon, hide Neutralino icon
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        [self logMessage:@"Using native bootstrap icon (Neutralino hidden)"];
+    } else {
+        // Hide bootstrap dock icon, show Neutralino icon
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
+        [self logMessage:@"Using Neutralino icon (bootstrap hidden)"];
     }
 }
 
@@ -142,11 +156,20 @@
                                      @"--enable-extensions=true",
                                      @"--window-enable-inspector=true",
                                      nil];
-    
+
+    // Add skipTaskbar flag based on mode
+    if ([self useNativeBootstrapIcon]) {
+        // Hide Neutralino's dock icon
+        [taskArguments addObject:@"--window-skip-taskbar=true"];
+    } else {
+        // Show Neutralino's dock icon
+        [taskArguments addObject:@"--window-skip-taskbar=false"];
+    }
+
     if (browserMode) {
         [taskArguments addObject:@"--mode=browser"];
     }
-    
+
     if (self.deeplinkArgument) {
         [taskArguments addObject:self.deeplinkArgument];
     }
@@ -154,27 +177,28 @@
     self.mainTask.arguments = taskArguments;
     
     [self logMessage:[NSString stringWithFormat:@"Launching main executable with arguments: %@", taskArguments]];
-    
+
     self.outputPipe = [NSPipe pipe];
     self.mainTask.standardOutput = self.outputPipe;
     self.mainTask.standardError = self.outputPipe;
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleTaskOutput:)
                                                  name:NSFileHandleReadCompletionNotification
                                                object:[self.outputPipe fileHandleForReading]];
-    
+
     [[self.outputPipe fileHandleForReading] readInBackgroundAndNotify];
-    
+
     @try {
         [self.mainTask launch];
-        [self logMessage:@"Main executable launched successfully"];
+        self.childPid = [self.mainTask processIdentifier];
+        [self logMessage:[NSString stringWithFormat:@"Main executable launched successfully (PID: %d)", self.childPid]];
     } @catch (NSException *exception) {
         [self logMessage:[NSString stringWithFormat:@"ERROR: Failed to launch main executable: %@", exception.reason]];
         [NSApp terminate:nil];
         return;
     }
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(taskDidTerminate:)
                                                  name:NSTaskDidTerminateNotification
@@ -237,6 +261,86 @@
 - (void)taskDidTerminate:(NSNotification *)notification {
     [self logMessage:@"Main executable terminated, quitting bootstrap"];
     [NSApp terminate:nil];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    // Only focus child window in native bootstrap icon mode
+    if ([self useNativeBootstrapIcon]) {
+        // When app becomes active (Command+Tab, dock click, etc.), focus child window
+        [self logMessage:@"App became active, focusing child window"];
+        [self focusChildWindow];
+    }
+}
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag {
+    // Dock icon clicked - handled by applicationDidBecomeActive
+    return YES;
+}
+
+- (void)focusChildWindow {
+    if (self.childPid <= 0) {
+        [self logMessage:@"No child process to focus"];
+        return;
+    }
+
+    NSString *script = [NSString stringWithFormat:
+        @"tell application \"System Events\"\n"
+        @"    set procList to every process whose unix id is %d\n"
+        @"    if (count of procList) > 0 then\n"
+        @"        set frontmost of item 1 of procList to true\n"
+        @"    end if\n"
+        @"end tell", self.childPid];
+
+    NSAppleScript *appleScript = [[NSAppleScript alloc] initWithSource:script];
+    NSDictionary *errorDict = nil;
+    [appleScript executeAndReturnError:&errorDict];
+
+    if (errorDict) {
+        [self logMessage:[NSString stringWithFormat:@"Error focusing child window: %@", errorDict]];
+    } else {
+        [self logMessage:@"Child window focused successfully"];
+    }
+}
+
+- (void)applicationDidHide:(NSNotification *)notification {
+    // Only manage window in native bootstrap icon mode
+    if ([self useNativeBootstrapIcon]) {
+        [self logMessage:@"Bootstrap hidden, sending hide command"];
+        [self sendCommandToChild:@"hide"];
+    }
+}
+
+- (void)applicationDidUnhide:(NSNotification *)notification {
+    // Only manage window in native bootstrap icon mode
+    if ([self useNativeBootstrapIcon]) {
+        [self logMessage:@"Bootstrap unhidden, sending show command"];
+        [self sendCommandToChild:@"show"];
+
+        // Also focus the window using AppleScript
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self focusChildWindow];
+        });
+    }
+}
+
+- (void)sendCommandToChild:(NSString *)command {
+    @try {
+        // Write command to temp file for IPC
+        NSString *commandFile = @"/tmp/appleblox-bootstrap-command";
+        NSString *commandWithNewline = [NSString stringWithFormat:@"%@\n", command];
+        NSError *error = nil;
+        BOOL success = [commandWithNewline writeToFile:commandFile
+                                            atomically:YES
+                                              encoding:NSUTF8StringEncoding
+                                                 error:&error];
+        if (success) {
+            [self logMessage:[NSString stringWithFormat:@"Sent command to child: %@", command]];
+        } else {
+            [self logMessage:[NSString stringWithFormat:@"Error writing command file: %@", error.localizedDescription]];
+        }
+    } @catch (NSException *exception) {
+        [self logMessage:[NSString stringWithFormat:@"Error sending command: %@", exception.reason]];
+    }
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

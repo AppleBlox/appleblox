@@ -19,7 +19,7 @@ export default defineConfig({
 				bootstraper: path.resolve('frontend', 'bootstrapper.html'),
 			},
 		},
-		sourcemap: "inline",
+		sourcemap: 'inline',
 	},
 	resolve: {
 		alias: {

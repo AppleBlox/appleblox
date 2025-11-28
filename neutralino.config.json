@@ -15,7 +15,7 @@
 	"tokenSecurity": "none",
 	"modes": {
 		"window": {
-			"hidden": true,
+			"hidden": false,
 			"title": "AppleBlox",
 			"width": 1150,
 			"height": 720,
@@ -26,16 +26,15 @@
 			"useSavedState": false,
 			"extendUserAgentWith": "AppleBlox",
 			"resizable": false,
-			"center": true,
-			"skipTaskbar": true
+			"center": true
 		}
 	},
 	"cli": {
 		"binaryName": "appleblox",
 		"resourcesPath": "/frontend/dist",
 		"extensionsPath": "/extensions/",
-		"binaryVersion": "6.2.0",
-		"clientVersion": "6.2.0",
+		"binaryVersion": "6.3.0",
+		"clientVersion": "6.3.0",
 		"frontendLibrary": {
 			"buildCommand": "true",
 			"patchFile": "/frontend/index.html",

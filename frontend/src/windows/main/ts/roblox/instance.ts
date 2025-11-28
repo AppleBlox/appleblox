@@ -230,9 +230,7 @@ export class RobloxInstance {
 			// Log performance stats every 5 seconds
 			if (currentTime - this.lastPerformanceLog >= this.PERFORMANCE_LOG_INTERVAL) {
 				const pollRate = this.pollCount / (this.PERFORMANCE_LOG_INTERVAL / 1000);
-				Logger.debug(
-					`Poll rate: ${pollRate.toFixed(1)}Hz, Queue size: ${this.processingQueue.length}`
-				);
+				Logger.debug(`Poll rate: ${pollRate.toFixed(1)}Hz, Queue size: ${this.processingQueue.length}`);
 				this.pollCount = 0;
 				this.lastPerformanceLog = currentTime;
 			}

@@ -30,7 +30,7 @@
 				dispatch('fileChosen', { path: entries[0] });
 			}
 		} catch (err) {
-			Logger.withContext("panel").error(err);
+			Logger.withContext('panel').error(err);
 			toast.error(String(err));
 		}
 	}

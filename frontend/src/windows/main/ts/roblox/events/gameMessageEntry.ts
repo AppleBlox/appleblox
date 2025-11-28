@@ -19,7 +19,7 @@ async function fetchThumbnail(assetId: number): Promise<string | null> {
 
 	try {
 		const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&returnPolicy=PlaceHolder&size=30x30&format=png&isCircular=false`;
-		console.debug(url)
+		console.debug(url);
 		const response = await Curl.get(url);
 
 		if (!response.body) {
@@ -41,7 +41,7 @@ async function fetchThumbnail(assetId: number): Promise<string | null> {
 			return null;
 		}
 
-		return thumbnail.imageUrl.replace("30/30","1024/1024");
+		return thumbnail.imageUrl.replace('30/30', '1024/1024');
 	} catch (err) {
 		Logger.error('Failed to fetch thumbnail:', err);
 		return null;

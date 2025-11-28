@@ -3,8 +3,8 @@
 set -euo pipefail
 
 BUNDLE_ID="ch.origaming.appleblox"
-SCRIPT_NAME="roblox_updater"
-PLIST_NAME="rbxupdater"
+SCRIPT_NAME="roblox_updater_ablox.sh"
+PLIST_NAME="rbxupdater_ablox.plist"
 INSTALL_DIR="$HOME/bin"
 LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
 SCRIPT_INSTALL_PATH="$INSTALL_DIR/$SCRIPT_NAME"

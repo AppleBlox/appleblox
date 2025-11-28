@@ -27,7 +27,10 @@ if (typeof window === 'undefined') {
 			close() {}
 		},
 		CustomEvent: class MockCustomEvent {
-			constructor(public type: string, public detail: any) {}
+			constructor(
+				public type: string,
+				public detail: any
+			) {}
 		},
 	};
 }

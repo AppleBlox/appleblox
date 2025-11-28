@@ -83,7 +83,10 @@
 	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
 </script>
 
-<Card.Root class="h-[96.5%] bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col my-3 ml-4 border-border/50 hover:bg-muted/30" {id}>
+<Card.Root
+	class="h-[96.5%] bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col my-3 ml-4 border-border/50 hover:bg-muted/30"
+	{id}
+>
 	<div class="flex flex-col">
 		<div class="flex flex-col justify-start items-start flex-grow w-full my-3">
 			{#each sidebarBtns as { label, id, icon }, index}
