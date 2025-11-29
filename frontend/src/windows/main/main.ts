@@ -16,6 +16,7 @@ import { logDebugInfo } from './ts/utils/debug';
 import Logger, { initializeLogger } from '@/windows/main/ts/utils/logger';
 import { initializeDataDirectory } from './ts/utils/paths';
 import { focusWindow, setWindowVisibility } from './ts/window';
+import { extractBundledIcons } from './ts/utils/bundled-icons';
 
 const COMMAND_FILE = '/tmp/appleblox-bootstrap-command';
 let lastCommandTimestamp = 0;
@@ -118,6 +119,15 @@ events.on('ready', async () => {
 
 	// Start polling for bootstrap commands
 	setTimeout(pollBootstrapCommands, 100);
+
+	// Extract bundled icons (non-blocking)
+	setTimeout(async () => {
+		try {
+			await extractBundledIcons();
+		} catch (e) {
+			Logger.warn('Error extracting bundled icons:', e);
+		}
+	}, 0);
 
 	// Make theme loading non-blocking
 	setTimeout(async () => {

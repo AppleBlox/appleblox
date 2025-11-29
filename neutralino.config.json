@@ -6,7 +6,7 @@
 	"url": "/",
 	"enableServer": true,
 	"enableNativeAPI": true,
-	"nativeAllowList": ["events.*", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*", "app.*", "storage.*"],
+	"nativeAllowList": ["server.*","events.*", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*", "app.*", "storage.*"],
 	"exportAuthInfo": false,
 	"logging": {
 		"writeToLogFile": false,
@@ -15,13 +15,12 @@
 	"tokenSecurity": "none",
 	"modes": {
 		"window": {
-			"hidden": false,
+			"hidden": true,
 			"title": "AppleBlox",
 			"width": 1150,
 			"height": 720,
 			"minWidth": 400,
 			"minHeight": 200,
-			"icon": "/scripts/build/assets/mac.png",
 			"exitProcessOnClose": false,
 			"useSavedState": false,
 			"extendUserAgentWith": "AppleBlox",

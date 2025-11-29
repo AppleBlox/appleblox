@@ -86,6 +86,9 @@ export async function macBuildSingle(arch: string, distPath: string) {
 		// Copy assets
 		await copyAssets(appDist, logger);
 
+		// Bundle icons
+		await bundleIcons(appDist, logger);
+
 		// Handle libraries
 		await handleLibraries(appDist, Libraries, LibrariesBlacklist, logger);
 
@@ -202,6 +205,50 @@ async function copyAssets(appDist: string, logger: Signale) {
 		await copyWithProgress(BuildConfig.mac.appIcon, resolve(Resources, 'icon.icns'), logger);
 	} else {
 		logger.warn(`App icon not found at ${BuildConfig.mac.appIcon}`);
+	}
+}
+
+async function bundleIcons(appDist: string, logger: Signale) {
+	const bundledIconsPath = resolve('scripts/build/assets/bundled-icons');
+
+	if (!existsSync(bundledIconsPath)) {
+		logger.info('No bundled-icons directory found, skipping');
+		return;
+	}
+
+	const appBundle = `${BuildConfig.appName}.app`;
+	const Resources = resolve(appDist, appBundle, 'Contents', 'Resources');
+	const bundledIconsDestPath = resolve(Resources, 'bundled-icons');
+
+	try {
+		// Get list of .icns files
+		const icnsFiles = await $`find ${bundledIconsPath} -name "*.icns" -type f`.text();
+		const files = icnsFiles.trim().split('\n').filter(f => f);
+
+		if (files.length === 0) {
+			logger.info('No .icns files found in bundled-icons directory');
+			return;
+		}
+
+		// Create destination directory
+		await ensureDirectory(bundledIconsDestPath);
+
+		// Gzip each icon and copy to Resources
+		for (const file of files) {
+			const fileName = file.split('/').pop();
+			if (!fileName) continue;
+
+			const gzippedName = `${fileName}.gz`;
+			const destPath = resolve(bundledIconsDestPath, gzippedName);
+
+			// Gzip the file
+			await $`gzip -c ${file} > ${destPath}`;
+			logger.info(`Bundled icon: ${fileName} (gzipped)`);
+		}
+
+		logger.success(`Bundled ${files.length} icon(s)`);
+	} catch (error) {
+		logger.warn('Failed to bundle icons:', error);
 	}
 }
 

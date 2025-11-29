@@ -95,7 +95,7 @@
 	}
 
 	// Get launch arguments from Neutralino
-	const launchArgs = window.NL_ARGS ? window.NL_ARGS.join(' ') : 'No arguments';
+	const launchArgs = window.NL_ARGS.join(' ')
 
 	const developmentPanel = new SettingsPanelBuilder()
 		.setName('Development Panel')

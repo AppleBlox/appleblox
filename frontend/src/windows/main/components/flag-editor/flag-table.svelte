@@ -218,121 +218,134 @@
 	}
 </script>
 
-<Card.Root class="p-4 w-[95%] mr-8">
-	<div class="flex gap-2 mb-4">
-		<Button on:click={addFlag} variant="outline"><Plus class="h-5 w-5 mr-2" />Add Flag</Button>
-		<Button on:click={showImportFlagsDialog} variant="outline"><Braces class="h-5 w-5 mr-2" />Import</Button>
+<Card.Root class="flag-editor-card p-6 w-[95%] mr-8">
+	<div class="flex flex-wrap gap-2 mb-4">
+		<Button on:click={addFlag} variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />Add Flag</Button>
+		<Button on:click={showImportFlagsDialog} variant="outline" size="sm"><Braces class="h-4 w-4 mr-2" />Import</Button>
 		<Button
 			on:click={copyFlags}
 			variant="outline"
-			class={`duration-100 transition-opacity ${selectedFlags.size < 1 ? 'opacity-50 cursor-not-allowed border-none' : ''}`}
-			><Clipboard class="h-5 w-5 mr-2" />Export</Button
+			size="sm"
+			disabled={selectedFlags.size < 1}
+			class={selectedFlags.size < 1 ? 'opacity-50' : ''}
+			><Clipboard class="h-4 w-4 mr-2" />Export</Button
 		>
 		<Button
 			on:click={removeSelected}
 			variant="outline"
-			class={`hover:border-red-500 border-[1px] duration-100 transition ${selectedFlags.size < 1 ? 'opacity-50 cursor-not-allowed border-none' : ''}`}
-			><Delete class="h-5 w-5 mr-2" />Remove Selected</Button
+			size="sm"
+			disabled={selectedFlags.size < 1}
+			class={`hover:border-red-500 ${selectedFlags.size < 1 ? 'opacity-50' : ''}`}
+			><Delete class="h-4 w-4 mr-2" />Remove Selected</Button
 		>
-		<div class="flex-grow"></div>
-		<div class="relative">
-			<Search class="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-			<Input type="text" placeholder="Search flags..." class="pl-8" bind:value={searchTerm} />
+		<div class="flex-grow min-w-[200px]"></div>
+		<div class="relative min-w-[250px] flex-shrink-0">
+			<Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+			<Input type="text" placeholder="Search flags..." class="pl-9 h-9" bind:value={searchTerm} />
 		</div>
 	</div>
-	<Table.Root>
-		<Table.Header>
-			<Table.Row>
-				<Table.Head class="w-[50px]">
-					<Checkbox
-						checked={selectedFlags.size === filteredFlags.length && filteredFlags.length > 0}
-						onCheckedChange={(checked) => toggleSelectAll(checked === 'indeterminate' ? null : checked)}
-					/>
-				</Table.Head>
-				<Table.Head><div class="w-[100px]">Flag</div></Table.Head>
-				<Table.Head>Value</Table.Head>
-				<Table.Head class="w-[100px]">
-					<div class="flex items-center gap-2">
-						<span>Enabled</span>
-						{#if selectedFlags.size > 0}
-							<div class="flex items-center gap-1 ml-2">
-								<Switch
-									checked={allSelectedEnabled}
-									onCheckedChange={(checked) => batchToggleEnabled(checked)}
-									class={`scale-75 ${mixedSelectedStates ? 'opacity-60' : ''}`}
-									disabled={selectedFlags.size === 0}
-								/>
-								<span class="text-xs text-muted-foreground">
-									({selectedFlags.size})
-								</span>
-							</div>
-						{/if}
-					</div>
-				</Table.Head>
-				<Table.Head class="w-[50px]"></Table.Head>
-			</Table.Row>
-		</Table.Header>
-		<Table.Body>
-			{#each filteredFlags as flag, index (flag.flag)}
-				<Table.Row
-					class="cursor-pointer {selectedFlags.has(flags.indexOf(flag)) ? 'bg-muted' : ''}"
-					on:click={(event) => handleRowClick(flags.indexOf(flag), event)}
-				>
-					<Table.Cell class="w-[50px]">
+	<div class="overflow-x-auto">
+		<Table.Root>
+			<Table.Header>
+				<Table.Row>
+					<Table.Head class="w-12">
 						<Checkbox
-							checked={selectedFlags.has(flags.indexOf(flag))}
-							onCheckedChange={() => toggleSelection(flags.indexOf(flag))}
+							checked={selectedFlags.size === filteredFlags.length && filteredFlags.length > 0}
+							onCheckedChange={(checked) => toggleSelectAll(checked === 'indeterminate' ? null : checked)}
 						/>
-					</Table.Cell>
-					<Table.Cell class="min-w-64">
-						<div class="flex w-full h-full justify-center text-foreground font-mono">
-							<Label class="text-start w-full text-ellipsis overflow-x-hidden select-none">{flag.flag}</Label>
+					</Table.Head>
+					<Table.Head class="min-w-[200px]">Flag Name</Table.Head>
+					<Table.Head class="min-w-[200px]">Value</Table.Head>
+					<Table.Head class="w-32">
+						<div class="flex items-center gap-2">
+							<span>Enabled</span>
+							{#if selectedFlags.size > 0}
+								<div class="flex items-center gap-1 ml-1">
+									<Switch
+										checked={allSelectedEnabled}
+										onCheckedChange={(checked) => batchToggleEnabled(checked)}
+										class={`scale-75 ${mixedSelectedStates ? 'opacity-60' : ''}`}
+										disabled={selectedFlags.size === 0}
+									/>
+									<span class="text-xs text-muted-foreground">
+										({selectedFlags.size})
+									</span>
+								</div>
+							{/if}
 						</div>
-					</Table.Cell>
-					<Table.Cell>
-						<Input
-							bind:value={flag.value}
-							on:input={() => updateFlag(flags.indexOf(flag), 'value', flag.value)}
-							placeholder="Flag value"
-							on:click={(e) => e.stopPropagation()}
-						/>
-					</Table.Cell>
-					<Table.Cell class="w-[100px]">
-						<Switch
-							checked={flag.enabled}
-							onCheckedChange={(checked) => updateFlag(flags.indexOf(flag), 'enabled', checked)}
-							on:click={(e) => e.stopPropagation()}
-						/>
-					</Table.Cell>
-					<Table.Cell class="w-[50px]">
-						<DropdownMenu.Root>
-							<DropdownMenu.Trigger><Ellipsis /></DropdownMenu.Trigger>
-							<DropdownMenu.Content>
-								<DropdownMenu.Item
-									class="cursor-pointer"
-									on:click={() => {
-										showRenameFlagDialog(flag.flag);
-									}}>Rename</DropdownMenu.Item
-								>
-								<DropdownMenu.Item
-									class="cursor-pointer"
-									on:click={() => {
-										contextMenuCopy(flag.flag);
-									}}>Copy</DropdownMenu.Item
-								>
-								<DropdownMenu.Item
-									class="cursor-pointer text-red-500"
-									on:click={() => {
-										contextMenuRemove(flag.flag);
-									}}>Delete</DropdownMenu.Item
-								>
-							</DropdownMenu.Content>
-						</DropdownMenu.Root>
-					</Table.Cell>
+					</Table.Head>
+					<Table.Head class="w-12"></Table.Head>
 				</Table.Row>
-			{/each}
-		</Table.Body>
-	</Table.Root>
+			</Table.Header>
+			<Table.Body>
+				{#each filteredFlags as flag, index (flag.flag)}
+					<Table.Row
+						class="cursor-pointer transition-colors {selectedFlags.has(flags.indexOf(flag)) ? 'bg-muted' : ''}"
+						on:click={(event) => handleRowClick(flags.indexOf(flag), event)}
+					>
+						<Table.Cell class="w-12">
+							<Checkbox
+								checked={selectedFlags.has(flags.indexOf(flag))}
+								onCheckedChange={() => toggleSelection(flags.indexOf(flag))}
+							/>
+						</Table.Cell>
+						<Table.Cell class="min-w-[200px]">
+							<div class="flex items-center text-foreground font-mono">
+								<Label class="text-start truncate select-none">{flag.flag}</Label>
+							</div>
+						</Table.Cell>
+						<Table.Cell class="min-w-[200px]">
+							<Input
+								bind:value={flag.value}
+								on:input={() => updateFlag(flags.indexOf(flag), 'value', flag.value)}
+								placeholder="Flag value"
+								on:click={(e) => e.stopPropagation()}
+								class="font-mono"
+							/>
+						</Table.Cell>
+						<Table.Cell class="w-32">
+							<div class="flex items-center">
+								<Switch
+									checked={flag.enabled}
+									onCheckedChange={(checked) => updateFlag(flags.indexOf(flag), 'enabled', checked)}
+									on:click={(e) => e.stopPropagation()}
+								/>
+							</div>
+						</Table.Cell>
+						<Table.Cell class="w-12">
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger asChild let:builder>
+									<Button variant="ghost" size="icon" builders={[builder]} class="h-8 w-8">
+										<Ellipsis class="h-4 w-4" />
+									</Button>
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Content>
+									<DropdownMenu.Item
+										class="cursor-pointer"
+										on:click={() => {
+											showRenameFlagDialog(flag.flag);
+										}}>Rename</DropdownMenu.Item
+									>
+									<DropdownMenu.Item
+										class="cursor-pointer"
+										on:click={() => {
+											contextMenuCopy(flag.flag);
+										}}>Copy</DropdownMenu.Item
+									>
+									<DropdownMenu.Item
+										class="cursor-pointer text-red-500"
+										on:click={() => {
+											contextMenuRemove(flag.flag);
+										}}>Delete</DropdownMenu.Item
+									>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
+						</Table.Cell>
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
+	</div>
 </Card.Root>
 
 <Dialog.Root bind:open={showFlagDialog}>
@@ -467,3 +480,14 @@
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
+
+<style>
+	:global(.flag-editor-card) {
+		background: hsl(var(--card));
+		box-shadow:
+			0 10px 30px -5px rgba(0, 0, 0, 0.3),
+			0 5px 15px -3px rgba(0, 0, 0, 0.2);
+		transform: perspective(1000px) rotateX(2deg);
+		transition: all 0.3s ease;
+	}
+</style>

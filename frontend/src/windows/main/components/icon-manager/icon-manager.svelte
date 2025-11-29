@@ -2,8 +2,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '$lib/components/ui/dialog';
-	import { os, server, MessageBoxChoice } from '@neutralinojs/lib';
-	import { RefreshCw, Upload } from 'lucide-svelte';
+	import { os, server } from '@neutralinojs/lib';
+	import { Trash2, Upload, Pin } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import Logger from '../../ts/utils/logger';
@@ -11,12 +11,14 @@
 	import { getValue, setValue } from '../settings/files';
 	import { shell } from '../../ts/tools/shell';
 	import * as shellfs from '../../ts/tools/shellfs';
+	import { getBundledIconNames } from '../../ts/utils/bundled-icons';
 
 	interface IconEntry {
 		name: string;
 		path: string;
 		displayUrl: string;
 		isOriginal?: boolean;
+		isBundled?: boolean;
 	}
 
 	let icons: IconEntry[] = [];
@@ -31,6 +33,15 @@
 		await checkCurrentIcon();
 	});
 
+	/**
+	 * Check if we're running in production (from app bundle) or dev mode
+	 */
+	function isProductionMode(): boolean {
+		// In production, NL_PATH points to the Resources directory inside any .app bundle
+		// In dev mode, NL_PATH points to the project directory
+		return window.NL_PATH.includes('.app/Contents/Resources');
+	}
+
 	async function convertIconToPNG(icnsPath: string, pngPath: string): Promise<void> {
 		// Convert .icns to PNG using sips at 256x256
 		await shell('sips', ['-s', 'format', 'png', icnsPath, '--out', pngPath, '--resampleWidth', '256'], {
@@ -40,9 +51,15 @@
 
 	async function loadIcons() {
 		try {
+			// Icon customization only works in production mode (running from app bundle)
+			if (!isProductionMode()) {
+				Logger.info('Icon manager disabled in dev mode');
+				return;
+			}
+
 			const dataDir = await getDataDir();
 			iconsDir = `${dataDir}/icons`;
-			// window.NL_PATH already points to Resources directory
+			// In production, NL_PATH points to the Resources directory
 			appResourcesPath = window.NL_PATH;
 
 			// Ensure icons directory exists
@@ -52,9 +69,13 @@
 			const cacheDir = `${dataDir}/cache/icon-previews`;
 			await shellfs.createDirectory(cacheDir);
 
+			// Create cache directory for original icon backup
+			const originalIconCacheDir = `${dataDir}/cache/original-icon`;
+			await shellfs.createDirectory(originalIconCacheDir);
+
 			// Mount cache directory to serve files
 			try {
-				await server.mount(cacheDir, '/icon-previews/');
+				await server.mount('/icon-previews/', cacheDir);
 			} catch (e) {
 				Logger.warn('Icon previews directory already mounted or failed to mount:', e);
 			}
@@ -62,22 +83,53 @@
 			// Use window.location.origin to get the base URL with correct port
 			const baseUrl = window.location.origin;
 
-			// Convert and add original icon
+			// Paths for original icon
+			const originalIconPath = `${appResourcesPath}/icon.icns`;
+			const originalIconBackupPath = `${originalIconCacheDir}/original.icns`;
 			const originalPngPath = `${cacheDir}/original.png`;
+
+			// Automatically backup the original icon if not already backed up
 			try {
-				await convertIconToPNG(`${appResourcesPath}/icon.icns`, originalPngPath);
+				await shell('test', ['-f', originalIconPath], { skipStderrCheck: true });
+				// Original icon exists in Resources
+
+				// Check if we already have a backup in cache
+				const backupExists = await shellfs.exists(originalIconBackupPath);
+				if (!backupExists) {
+					// No backup exists, create one
+					await shellfs.copy(originalIconPath, originalIconBackupPath);
+					Logger.info('Automatically backed up original icon to cache');
+				}
+			} catch (e) {
+				Logger.warn('Could not backup original icon:', e);
+			}
+
+			// Load the original icon for display (from cache if it exists, otherwise from Resources)
+			let originalIconDisplayPath = originalIconPath;
+			try {
+				const backupExists = await shellfs.exists(originalIconBackupPath);
+				if (backupExists) {
+					// Use the cached backup for display
+					originalIconDisplayPath = originalIconBackupPath;
+				}
+
+				// Convert to PNG for preview
+				await convertIconToPNG(originalIconDisplayPath, originalPngPath);
 				icons = [
 					{
-						name: 'AppleBlox Original',
-						path: `${appResourcesPath}/icon.icns`,
-						displayUrl: `${baseUrl}/icon-previews/original.png`,
+						name: 'Default',
+						path: originalIconBackupPath, // Always point to the cached backup
+						displayUrl: `${baseUrl}/icon-previews/original.png?t=${Date.now()}`,
 						isOriginal: true,
 					},
 				];
 			} catch (e) {
-				Logger.warn('Could not convert original icon:', e);
+				Logger.error('Could not load original icon:', e);
 				icons = [];
 			}
+
+			// Get list of bundled icons
+			const bundledIconNames = await getBundledIconNames();
 
 			// Load custom icons from library using shell
 			try {
@@ -93,10 +145,13 @@
 								// Convert icns to png for display
 								await convertIconToPNG(`${iconsDir}/${file}`, pngPath);
 
+								const isBundled = bundledIconNames.includes(file);
+
 								icons.push({
 									name: file.replace('.icns', ''),
 									path: `${iconsDir}/${file}`,
-									displayUrl: `${baseUrl}/icon-previews/${pngFileName}`,
+									displayUrl: `${baseUrl}/icon-previews/${pngFileName}?t=${Date.now()}`,
+									isBundled,
 								});
 							} catch (e) {
 								Logger.warn(`Could not convert icon ${file}:`, e);
@@ -129,13 +184,19 @@
 	async function uploadIcon() {
 		try {
 			const selection = await os.showOpenDialog('Select Icon File', {
-				filters: [{ name: 'Icon Files', extensions: ['icns'] }],
 				multiSelections: false,
 			});
 
 			if (!selection || selection.length === 0) return;
 
 			const sourcePath = selection[0];
+
+			// Validate that the file is an .icns file
+			if (!sourcePath.toLowerCase().endsWith('.icns')) {
+				toast.error('Please select a valid .icns file');
+				return;
+			}
+
 			const fileName = sourcePath.split('/').pop() || 'custom.icns';
 			const destPath = `${iconsDir}/${fileName}`;
 
@@ -159,87 +220,80 @@
 		if (!pendingIcon) return;
 
 		try {
-			// Backup original icon if not already backed up
-			const backupPath = `${iconsDir}/original_backup.icns`;
-
-			// Check if backup exists
-			try {
-				await shell('test', ['-f', backupPath], { skipStderrCheck: true });
-			} catch {
-				// Backup doesn't exist, create it
-				await shellfs.copy(`${appResourcesPath}/icon.icns`, backupPath);
-				Logger.info('Backed up original icon');
-			}
+			// The original icon is already backed up automatically in loadIcons()
+			// to cache/original-icon/original.icns, so we can directly apply the new icon
 
 			// Copy selected icon to Resources
 			await shellfs.copy(pendingIcon.path, `${appResourcesPath}/icon.icns`);
 
-			// Save preference
-			await setValue('appearance.icon.selected', pendingIcon.path);
+			// Save preference (createNew = true because 'selected' widget doesn't exist in panel definition)
+			await setValue('appearance.icon.selected', pendingIcon.path, true);
 			selectedIcon = pendingIcon.path;
-
-			toast.success('Icon applied successfully! Restart AppleBlox to see changes.');
-
-			// Ask about enabling native dock mode
-			const nativeMode = await getValue('appearance.dock.native_mode');
-			if (!nativeMode) {
-				setTimeout(askAboutNativeMode, 1000);
-			}
 
 			showConfirmDialog = false;
 			pendingIcon = null;
+
+			// Refresh macOS icon cache
+			toast.success('Icon applied successfully!');
+			Logger.info('Applied icon, refreshing icon cache');
+
+			try {
+				// Force macOS to refresh icon cache for the app bundle
+				// Touch the app bundle to invalidate the icon cache
+				const appBundlePath = window.NL_PATH.replace('/Contents/Resources', '');
+				await shell('touch', [appBundlePath], { skipStderrCheck: true });
+
+				// Clear Launch Services database for this app
+				await shell('killall', ['Dock'], { skipStderrCheck: true });
+
+				Logger.info('Icon cache refreshed');
+			} catch (error) {
+				Logger.warn('Failed to refresh icon cache:', error);
+			}
 		} catch (error) {
 			Logger.error('Failed to apply icon:', error);
 			toast.error('Failed to apply icon. Make sure AppleBlox has write permissions.');
 		}
 	}
 
-	async function askAboutNativeMode() {
-		const result = await os.showMessageBox(
-			'Enable Native Dock Mode?',
-			'Custom icons work best with Native Dock Mode enabled. This will show the bootstrap icon in the dock and hide the Neutralino window.\n\nWould you like to enable it now?',
-			MessageBoxChoice.YES_NO
-		);
+	async function deleteIcon(icon: IconEntry, event: Event) {
+		event.stopPropagation();
 
-		if (result === 'YES') {
-			await setValue('appearance.dock.native_mode', true);
-			await enableNativeMode();
-			toast.success('Native dock mode enabled! Restart AppleBlox for changes to take effect.');
-		}
-	}
+		// Don't allow deleting the original icon
+		if (icon.isOriginal) return;
 
-	async function enableNativeMode() {
 		try {
-			// Create bootstrap_native file
-			await shellfs.writeFile(`${appResourcesPath}/bootstrap_native`, '');
-			Logger.info('Enabled native dock mode');
-		} catch (error) {
-			Logger.error('Failed to enable native dock mode:', error);
-			toast.error('Failed to enable native dock mode');
-		}
-	}
+			// Delete the .icns file
+			await shellfs.remove(icon.path);
 
-	async function restoreOriginal() {
-		try {
-			const backupPath = `${iconsDir}/original_backup.icns`;
+			// If this was the selected icon, clear the selection and restore original
+			if (selectedIcon === icon.path) {
+				const dataDir = await getDataDir();
+				const originalIconCacheDir = `${dataDir}/cache/original-icon`;
+				const backupPath = `${originalIconCacheDir}/original.icns`;
 
-			// Check if backup exists
-			try {
-				await shell('test', ['-f', backupPath], { skipStderrCheck: true });
-				// Backup exists, restore from it
-				await shellfs.copy(backupPath, `${appResourcesPath}/icon.icns`);
-			} catch {
-				// No backup, use original from resources (which might be already modified)
-				Logger.warn('No backup found, icon may already be original');
+				try {
+					const backupExists = await shellfs.exists(backupPath);
+					if (backupExists) {
+						await shellfs.copy(backupPath, `${appResourcesPath}/icon.icns`);
+						Logger.info('Restored original icon from cache');
+					} else {
+						Logger.warn('No original icon backup found in cache');
+						toast.error('Could not restore original icon - backup not found');
+					}
+				} catch (error) {
+					Logger.error('Failed to restore original icon:', error);
+					toast.error('Failed to restore original icon');
+				}
+				await setValue('appearance.icon.selected', null, true);
+				selectedIcon = null;
 			}
 
-			await setValue('appearance.icon.selected', null);
-			selectedIcon = null;
-
-			toast.success('Original icon restored! Restart AppleBlox to see changes.');
+			toast.success('Icon deleted successfully');
+			await loadIcons();
 		} catch (error) {
-			Logger.error('Failed to restore original icon:', error);
-			toast.error('Failed to restore original icon');
+			Logger.error('Failed to delete icon:', error);
+			toast.error('Failed to delete icon');
 		}
 	}
 
@@ -280,20 +334,22 @@
 			<h3 class="text-lg font-semibold">App Icon Library</h3>
 			<p class="text-sm text-muted-foreground">Customize your AppleBlox app icon</p>
 		</div>
-		<div class="flex gap-2">
-			<Button variant="outline" size="sm" on:click={uploadIcon}>
-				<Upload class="mr-2 h-4 w-4" />
-				Upload Icon
-			</Button>
-			<Button variant="outline" size="sm" on:click={restoreOriginal}>
-				<RefreshCw class="mr-2 h-4 w-4" />
-				Restore Original
-			</Button>
-		</div>
+		<Button variant="outline" size="sm" on:click={uploadIcon} disabled={!isProductionMode()}>
+			<Upload class="mr-2 h-4 w-4" />
+			Upload Icon
+		</Button>
 	</div>
 
-	<div class="grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-5">
-		{#each icons as icon}
+	{#if !isProductionMode()}
+		<Alert>
+			<AlertDescription>
+				<strong>Dev Mode:</strong> Icon customization is only available when running AppleBlox from the built app bundle.
+				To use this feature, build the app with <code>bun run build</code> and run the built application.
+			</AlertDescription>
+		</Alert>
+	{:else}
+		<div class="grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-5">
+			{#each icons as icon}
 			<div
 				class="icon-card {selectedIcon === icon.path ? 'selected' : ''}"
 				on:click={() => applyIcon(icon)}
@@ -305,17 +361,26 @@
 			>
 				<div class="icon-wrapper">
 					<img src={icon.displayUrl} alt={icon.name} class="icon-image" />
+					{#if !icon.isOriginal && !icon.isBundled}
+						<button
+							class="delete-button"
+							on:click={(e) => deleteIcon(icon, e)}
+							aria-label="Delete icon"
+							title="Delete icon"
+						>
+							<Trash2 class="h-4 w-4" />
+						</button>
+					{:else if icon.isBundled}
+						<div class="pin-indicator" title="Bundled icon">
+							<Pin class="h-4 w-4" />
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/each}
 	</div>
 
-	<Alert>
-		<AlertDescription>
-			<strong>Note:</strong> Custom icons work best with Native Dock Mode enabled. This allows support for liquid glass icons,
-			custom shapes, and better macOS integration. Enable it in the "Dock & Window" section above.
-		</AlertDescription>
-	</Alert>
+	{/if}
 </div>
 
 <Dialog bind:open={showConfirmDialog}>
@@ -323,8 +388,7 @@
 		<DialogHeader>
 			<DialogTitle>Apply Custom Icon?</DialogTitle>
 			<DialogDescription>
-				This will replace the current app icon. You can restore the original icon at any time. AppleBlox needs to be
-				restarted for changes to take effect.
+				This will replace the current app icon. You can restore the original icon at any time.
 			</DialogDescription>
 		</DialogHeader>
 		<div class="flex justify-end gap-2">
@@ -376,7 +440,54 @@
 	.icon-image {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
+		object-fit: contain;
 		display: block;
+		padding: 0.75rem;
+	}
+
+	.delete-button {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+		background: hsl(var(--destructive));
+		color: hsl(var(--destructive-foreground));
+		border: none;
+		border-radius: 0.375rem;
+		padding: 0.5rem;
+		cursor: pointer;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10;
+	}
+
+	.icon-card:hover .delete-button {
+		opacity: 1;
+	}
+
+	.delete-button:hover {
+		background: hsl(var(--destructive) / 0.9);
+	}
+
+	.pin-indicator {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+		background: hsl(var(--primary));
+		color: hsl(var(--primary-foreground));
+		border-radius: 0.375rem;
+		padding: 0.5rem;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10;
+	}
+
+	.icon-card:hover .pin-indicator {
+		opacity: 1;
 	}
 </style>

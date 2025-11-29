@@ -192,7 +192,6 @@ export class RobloxDownloader {
 
 		this.checkAborted();
 
-		// Start the actual download with progress tracking
 		const downloadResult = await this.downloadBinaryWithProgress(downloadUrl, savePath, totalSize || undefined);
 
 		const downloadTime = (Date.now() - this.downloadStartTime) / 1000;
@@ -269,23 +268,22 @@ export class RobloxDownloader {
 		expectedSize?: number
 	): Promise<{ fileSize: number }> {
 		return new Promise((resolve, reject) => {
-			// Use the enhanced curl with progress tracking
 			Curl.downloadWithProgress(url, {
 				outputPath: savePath,
-				resume: false, // Don't resume for fresh downloads
+				resume: false,
 				followRedirects: true,
 				maxRedirects: 5,
 				connectTimeout: 30,
-				maxTime: 3600, // 1 hour max
+				maxTime: 3600,
+				expectedSize,
 				onProgress: (progress) => {
 					this.checkAborted();
 
-					// Map curl progress to our progress format
-					const percentage = Math.min(20 + progress.percentage * 0.75, 95); // Scale to 20-95%
+					const scaledPercentage = 20 + (progress.percentage * 0.8);
 
 					this.emitProgress({
 						message: `Downloading... ${progress.percentage.toFixed(1)}%`,
-						percentage,
+						percentage: scaledPercentage,
 						downloadedBytes: progress.downloadedSize,
 						totalBytes: progress.totalSize || expectedSize,
 						speed: progress.downloadSpeed,
@@ -310,7 +308,7 @@ export class RobloxDownloader {
 
 					this.emitProgress({
 						message: 'Verifying downloaded file...',
-						percentage: 96,
+						percentage: 98,
 					});
 
 					// Verify the file was created and get its size
@@ -334,7 +332,7 @@ export class RobloxDownloader {
 
 						this.emitProgress({
 							message: `File verified: ${this.formatBytes(fileSize)}`,
-							percentage: 98,
+							percentage: 99,
 						});
 
 						resolve({ fileSize });

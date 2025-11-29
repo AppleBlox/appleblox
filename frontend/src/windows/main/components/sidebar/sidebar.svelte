@@ -30,6 +30,13 @@
 	export let currentPage = 'integrations';
 	export let id: string;
 	let showInstallDialog = false;
+	let robloxInstalled = true; // Assume installed until checked
+
+	// Check if Roblox is installed on mount
+	import { onMount } from 'svelte';
+	onMount(async () => {
+		robloxInstalled = await Roblox.Utils.hasRoblox();
+	});
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
@@ -62,8 +69,12 @@
 
 	// Play button text and color
 	let isHovering = false;
-	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : 'Play';
-	$: buttonIcon = buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
+	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : robloxInstalled ? 'Play' : 'Install';
+	$: buttonIcon =
+		buttonState === 'Install' ? RobloxIcon :
+		buttonState === 'Play' ? PlayIcon :
+		buttonState === 'Active' ? RobloxIcon :
+		KillIcon;
 
 	function handleMouseEnter() {
 		isHovering = true;
@@ -107,15 +118,21 @@
 
 		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
 			<Button
-				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0' : 'bg-green-500/85 hover:bg-green-500/60'} font-mono w-full transition-all duration-200 group`}
+				class={`${
+					isLaunched
+						? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0'
+						: buttonState === 'Install'
+							? 'bg-blue-500/85 hover:bg-blue-500/60'
+							: 'bg-green-500/85 hover:bg-green-500/60'
+				} font-mono w-full transition-all duration-200 group`}
 				on:click={async () => {
 					if (isLaunched) {
 						events.broadcast('instance:quit').catch(Logger.error);
 						return;
 					}
 
-					const robloxInstalled = await Roblox.Utils.hasRoblox();
-					if (robloxInstalled) {
+					const isInstalled = await Roblox.Utils.hasRoblox();
+					if (isInstalled) {
 						dispatch('launchRoblox', true);
 					} else {
 						showInstallDialog = true;
@@ -129,4 +146,11 @@
 	</div>
 </Card.Root>
 
-<RobloxDownloadDialog bind:open={showInstallDialog} />
+<RobloxDownloadDialog
+	bind:open={showInstallDialog}
+	on:downloadComplete={async () => {
+		// Re-check Roblox installation status after download completes
+		robloxInstalled = await Roblox.Utils.hasRoblox();
+		showInstallDialog = false;
+	}}
+/>

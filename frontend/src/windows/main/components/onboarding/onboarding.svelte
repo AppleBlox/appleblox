@@ -3,7 +3,6 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import { events, os } from '@neutralinojs/lib';
-	import * as shellfs from '../../ts/tools/shellfs';
 	import {
 		Activity,
 		ChevronLeft,
@@ -14,7 +13,6 @@
 		Rss,
 		Settings,
 		Users,
-		AppWindow,
 	} from 'lucide-svelte';
 	import { quartInOut, quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
@@ -148,27 +146,6 @@
 			],
 		},
 		{
-			title: 'Dock & Icon Customization',
-			description: 'Choose how AppleBlox appears in your dock and customize its icon.',
-			icon: AppWindow,
-			actions: [
-				{
-					type: 'switch',
-					label: 'Enable Native Dock Mode',
-					description:
-						"<strong>Benefits:</strong> Custom icons, liquid glass effects, better icon control<br/><strong>Trade-offs:</strong> Window won't appear in Mission Control (F3)",
-					value: false,
-					settingKey: 'appearance.dock.native_mode',
-				},
-				{
-					type: 'info',
-					label: 'About Custom Icons',
-					description:
-						'With Native Dock Mode enabled, you can upload custom .icns files in Appearance settings. This allows you to personalize AppleBlox with unique icons, including liquid glass styles and custom designs.',
-				},
-			],
-		},
-		{
 			title: 'Join Our Community',
 			description: 'Get help, share feedback, and stay updated with the latest AppleBlox news.',
 			icon: Users,
@@ -248,28 +225,6 @@
 			// Save all settings atomically
 			if (values.length > 0) {
 				await setMultipleValues(values, true);
-			}
-
-			// Handle native dock mode toggle
-			const nativeModeEnabled = values.find((v) => v.path === 'appearance.dock.native_mode')?.value;
-			if (nativeModeEnabled !== undefined) {
-				try {
-					// window.NL_PATH already points to Resources directory
-					const flagPath = `${window.NL_PATH}/bootstrap_native`;
-					if (nativeModeEnabled) {
-						await shellfs.writeFile(flagPath, '');
-						Logger.info('Enabled native dock mode from onboarding');
-					} else {
-						try {
-							await shellfs.remove(flagPath);
-							Logger.info('Disabled native dock mode from onboarding');
-						} catch (e) {
-							// File might not exist
-						}
-					}
-				} catch (error) {
-					Logger.error('Failed to toggle native dock mode during onboarding:', error);
-				}
 			}
 
 			// Mark onboarding as complete

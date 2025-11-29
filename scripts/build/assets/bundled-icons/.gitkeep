@@ -1,0 +1,16 @@
+# Bundled Icons Directory
+#
+# Location: scripts/build/assets/bundled-icons/
+#
+# Place .icns files here to bundle them with AppleBlox.
+#
+# During the build process:
+# 1. All .icns files in this directory will be gzipped
+# 2. The gzipped icons (.icns.gz) will be copied to the app bundle's Resources/bundled-icons directory
+#
+# On app launch:
+# 1. AppleBlox checks if the bundled icons have been extracted to ~/Library/Application Support/AppleBlox/icons
+# 2. If not, it extracts them automatically (gunzip)
+# 3. Users can then select these icons from the Icon Manager in the Appearance settings
+#
+# This ensures bundled icons are only extracted once and don't require app restarts.

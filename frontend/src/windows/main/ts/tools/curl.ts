@@ -1,4 +1,5 @@
 import { shell, spawn, type ExecuteOptions, type ExecutionResult } from './shell';
+import { filesystem } from '@neutralinojs/lib';
 
 interface CurlOptions extends ExecuteOptions {
 	method?: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -64,6 +65,8 @@ interface ProgressiveDownloadOptions extends Omit<CurlOptions, 'progressCallback
 	outputPath: string;
 	/** Whether to resume partial downloads */
 	resume?: boolean;
+	/** Expected file size (if known ahead of time) */
+	expectedSize?: number;
 }
 
 export class Curl {
@@ -345,9 +348,6 @@ export class Curl {
 		if (options.followRedirects !== false) args.push('-L');
 		if (options.maxRedirects) args.push('--max-redirs', options.maxRedirects.toString());
 
-		// Progress bar
-		args.push('--progress-bar');
-
 		// Output file
 		args.push('-o', options.outputPath);
 
@@ -378,6 +378,18 @@ export class Curl {
 
 		args.push(url);
 
+		let totalSize: number | undefined = options.expectedSize;
+		try {
+			const headResponse = await this.request(url, { method: 'HEAD', silent: true });
+			if (headResponse.headers?.['content-length']) {
+				totalSize = parseInt(headResponse.headers['content-length']);
+			}
+		} catch (e) {
+			if (!totalSize) {
+				totalSize = options.expectedSize;
+			}
+		}
+
 		try {
 			const process = await spawn('curl', args, {
 				timeoutMs: options.timeoutMs,
@@ -391,25 +403,48 @@ export class Curl {
 				elapsedTime: 0,
 			};
 
-			// Listen for stderr output (where curl progress goes)
-			process.on('stdErr', (data: string) => {
-				const lines = data.split('\n');
-				for (const line of lines) {
-					if (line.trim()) {
-						// Try to parse progress from the line
-						const progress = this.parseProgressLine(line);
-						if (progress) {
-							progress.elapsedTime = (Date.now() - startTime) / 1000;
-							lastProgress = progress;
-							options.onProgress(progress);
-						}
-					}
+			let lastDownloadedSize = 0;
+			let lastCheckTime = startTime;
+
+			const progressInterval = setInterval(async () => {
+				try {
+					const stat = await filesystem.getStats(options.outputPath);
+					const downloadedSize = stat.size;
+					const currentTime = Date.now();
+					const elapsedTime = (currentTime - startTime) / 1000;
+					const timeSinceLastCheck = (currentTime - lastCheckTime) / 1000;
+
+					const bytesSinceLastCheck = downloadedSize - lastDownloadedSize;
+					const speed = timeSinceLastCheck > 0 ? bytesSinceLastCheck / timeSinceLastCheck : 0;
+
+					const percentage = totalSize ? Math.min((downloadedSize / totalSize) * 100, 100) : 0;
+
+					const timeRemaining = totalSize && speed > 0 ? (totalSize - downloadedSize) / speed : undefined;
+
+					const progress: DownloadProgress = {
+						downloadedSize,
+						totalSize,
+						downloadSpeed: speed,
+						percentage,
+						timeRemaining,
+						elapsedTime,
+					};
+
+					lastProgress = progress;
+					lastDownloadedSize = downloadedSize;
+					lastCheckTime = currentTime;
+
+					options.onProgress(progress);
+				} catch (e) {
 				}
+			}, 500);
+
+			process.on('stdErr', (data: string) => {
 			});
 
-			// Wait for process to complete
 			return new Promise<CurlResponse>((resolve) => {
 				process.on('exit', (exitCode: number) => {
+					clearInterval(progressInterval);
 					if (exitCode === 0) {
 						resolve({
 							success: true,
