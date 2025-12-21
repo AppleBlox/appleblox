@@ -24,10 +24,7 @@
 				os.open('https://appleblox.com/discord');
 				break;
 			case 'mods_help':
-				os.open('https://github.com/pizzaboxer/bloxstrap/wiki/Adding-custom-mods');
-				break;
-                        case 'update_mods':
-				os.open('https://verdant-comet-741.notion.site/Updating-Mods-for-Roblox-on-macOS-21d37a6450cd808f8122f021c418cae6');
+				os.open('https://bloxstraplabs.com/wiki/features/modding/');
 				break;
 		}
 	}
@@ -125,14 +122,7 @@
 					id: 'open_gamebanana',
 					variant: 'outline',
 					icon: { src: GamebananaIcon },
-                                })
-				.addButton({
-					label: 'Updating Mods',
-					description: 'Update mods (atlas) yourself on macOS',
-					id: 'update_mods',
-					variant: 'outline',
-					icon: { src: UpdateMods },
-				})
+                })
 				.addSwitch({
 					label: 'Enable Mods',
 					description: 'Apply installed mods to Roblox',
