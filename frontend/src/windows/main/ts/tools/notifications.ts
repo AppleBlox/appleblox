@@ -1,6 +1,7 @@
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
 import { buildCommand, spawn, type SpawnEventEmitter } from './shell';
+import Logger from '@/windows/main/ts/utils/logger';
 
 /**
  * Represents an action that can be associated with a notification.
@@ -194,7 +195,7 @@ export class Notification {
 			}
 
 			this.process = await spawn(alerter, args);
-			console.info(`Spawning notification: ${buildCommand(alerter, args)}`);
+			Logger.info(`Spawning notification: ${buildCommand(alerter, args)}`);
 
 			this.process.on('stdOut', (data) => {
 				const trimmedData = data.trim();
@@ -224,7 +225,7 @@ export class Notification {
 
 			await this.process;
 		} catch (err) {
-			console.error('Error showing notification:', err);
+			Logger.error('Error showing notification:', err);
 			throw err;
 		}
 	}

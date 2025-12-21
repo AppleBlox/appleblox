@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { toast } from 'svelte-sonner';
-	import { loadTheme, readCssFile, revealCssFile, setTheme } from './theme';
+	import { FilePenLine, PaintBucket, RefreshCcw } from 'lucide-svelte';
 	import LoadingSpinner from '../loading-spinner.svelte';
-	import { PaintBucket, FilePenLine, RefreshCcw } from 'lucide-svelte';
+	import { loadTheme, readCssFile, revealCssFile, setTheme } from './theme';
 
 	let cssInputValue: string;
 	async function loadCurrentFile() {

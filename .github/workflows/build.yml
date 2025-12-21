@@ -2,17 +2,18 @@ name: Build and Create DMG
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [main, dev]
   pull_request:
-    branches:
-      - main
-      - dev
+    types: [opened, synchronize]
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13
     outputs:
       version: ${{ env.VERSION }}
 
@@ -35,8 +36,12 @@ jobs:
           brew install create-dmg
         continue-on-error: false
 
+      - name: Run tests
+        run: bun test
+        continue-on-error: false
+
       - name: Build and package app
-        run: bun run release
+        run: bun run release:sequential
         continue-on-error: false
 
       - name: Get version from package.json

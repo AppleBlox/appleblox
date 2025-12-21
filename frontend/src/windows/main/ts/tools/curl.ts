@@ -1,4 +1,5 @@
-import { shell, type ExecuteOptions, type ExecutionResult } from './shell';
+import { shell, spawn, type ExecuteOptions, type ExecutionResult } from './shell';
+import { filesystem } from '@neutralinojs/lib';
 
 interface CurlOptions extends ExecuteOptions {
 	method?: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -9,6 +10,18 @@ interface CurlOptions extends ExecuteOptions {
 	silent?: boolean;
 	insecure?: boolean;
 	compressed?: boolean;
+	userAgent?: string;
+	referer?: string;
+	cookies?: Record<string, string>;
+	proxy?: string;
+	connectTimeout?: number;
+	maxTime?: number;
+	retries?: number;
+	retryDelay?: number;
+	outputFile?: string;
+	resumeFrom?: number;
+	maxFileSize?: number;
+	progressCallback?: (progress: DownloadProgress) => void;
 }
 
 interface CurlResponse {
@@ -18,6 +31,42 @@ interface CurlResponse {
 	body?: string;
 	error?: string;
 	raw: ExecutionResult;
+	finalUrl?: string;
+	totalTime?: number;
+	downloadSize?: number;
+	uploadSize?: number;
+	avgDownloadSpeed?: number;
+	avgUploadSpeed?: number;
+}
+
+interface DownloadProgress {
+	/** Total file size in bytes (if known) */
+	totalSize?: number;
+	/** Downloaded bytes so far */
+	downloadedSize: number;
+	/** Upload size (for uploads) */
+	uploadedSize?: number;
+	/** Download speed in bytes per second */
+	downloadSpeed: number;
+	/** Upload speed in bytes per second */
+	uploadSpeed?: number;
+	/** Progress percentage (0-100) */
+	percentage: number;
+	/** Estimated time remaining in seconds */
+	timeRemaining?: number;
+	/** Elapsed time in seconds */
+	elapsedTime: number;
+}
+
+interface ProgressiveDownloadOptions extends Omit<CurlOptions, 'progressCallback'> {
+	/** Callback function called with progress updates */
+	onProgress: (progress: DownloadProgress) => void;
+	/** Path where to save the downloaded file */
+	outputPath: string;
+	/** Whether to resume partial downloads */
+	resume?: boolean;
+	/** Expected file size (if known ahead of time) */
+	expectedSize?: number;
 }
 
 export class Curl {
@@ -41,6 +90,69 @@ export class Curl {
 		return match ? parseInt(match[1], 10) : undefined;
 	}
 
+	private static parseCurlStats(output: string): Partial<CurlResponse> {
+		const stats: Partial<CurlResponse> = {};
+
+		// Parse various curl statistics from verbose output
+		const lines = output.split('\n');
+		for (const line of lines) {
+			if (line.includes('Total time:')) {
+				const match = line.match(/Total time:\s*([\d.]+)/);
+				if (match) stats.totalTime = parseFloat(match[1]);
+			}
+			if (line.includes('Average download speed:')) {
+				const match = line.match(/Average download speed:\s*([\d.]+)/);
+				if (match) stats.avgDownloadSpeed = parseFloat(match[1]);
+			}
+			if (line.includes('Average upload speed:')) {
+				const match = line.match(/Average upload speed:\s*([\d.]+)/);
+				if (match) stats.avgUploadSpeed = parseFloat(match[1]);
+			}
+		}
+
+		return stats;
+	}
+
+	private static parseProgressLine(line: string): DownloadProgress | null {
+		// Parse curl progress output: % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+		//                                Dload  Upload   Total   Spent    Left  Speed
+		// Example: 42 34567    42 14567     0     0   1234     0  0:00:28  0:00:12  0:00:16  1456
+
+		const progressMatch = line.match(
+			/^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+[\d:]+\s+([\d:]+)\s+([\d:]+)\s+(\d+)/
+		);
+
+		if (progressMatch) {
+			const [, percentage, totalSize, downloadedPercentage, downloadedSize, , , downloadSpeed, , , timeLeft, currentSpeed] =
+				progressMatch;
+
+			const timeLeftSeconds = this.parseTimeToSeconds(timeLeft);
+
+			return {
+				totalSize: parseInt(totalSize) || undefined,
+				downloadedSize: parseInt(downloadedSize),
+				downloadSpeed: parseInt(currentSpeed),
+				percentage: parseInt(percentage),
+				timeRemaining: timeLeftSeconds,
+				elapsedTime: 0, // Will be calculated separately
+			};
+		}
+
+		return null;
+	}
+
+	private static parseTimeToSeconds(timeStr: string): number | undefined {
+		if (timeStr === '--:--:--') return undefined;
+
+		const parts = timeStr.split(':').map(Number);
+		if (parts.length === 3) {
+			return parts[0] * 3600 + parts[1] * 60 + parts[2];
+		} else if (parts.length === 2) {
+			return parts[0] * 60 + parts[1];
+		}
+		return undefined;
+	}
+
 	static async request(url: string, options: CurlOptions = {}): Promise<CurlResponse> {
 		try {
 			// Validate URL
@@ -60,7 +172,31 @@ export class Curl {
 		if (options.insecure) args.push('-k');
 		if (options.compressed) args.push('--compressed');
 		if (options.followRedirects !== false) args.push('-L');
-		if (options.maxRedirects) args.push('-max-redirs', options.maxRedirects.toString());
+		if (options.maxRedirects) args.push('--max-redirs', options.maxRedirects.toString());
+
+		// Timeouts and limits
+		if (options.connectTimeout) args.push('--connect-timeout', options.connectTimeout.toString());
+		if (options.maxTime) args.push('--max-time', options.maxTime.toString());
+		if (options.maxFileSize) args.push('--max-filesize', options.maxFileSize.toString());
+
+		// Retry options
+		if (options.retries) {
+			args.push('--retry', options.retries.toString());
+			if (options.retryDelay) args.push('--retry-delay', options.retryDelay.toString());
+		}
+
+		// User agent and referer
+		if (options.userAgent) args.push('-A', options.userAgent);
+		if (options.referer) args.push('-e', options.referer);
+
+		// Proxy
+		if (options.proxy) args.push('--proxy', options.proxy);
+
+		// Resume from position
+		if (options.resumeFrom) args.push('-C', options.resumeFrom.toString());
+
+		// Output file
+		if (options.outputFile) args.push('-o', options.outputFile);
 
 		// Method
 		if (options.method) {
@@ -74,6 +210,14 @@ export class Curl {
 			});
 		}
 
+		// Cookies
+		if (options.cookies) {
+			const cookieString = Object.entries(options.cookies)
+				.map(([key, value]) => `${key}=${value}`)
+				.join('; ');
+			args.push('-b', cookieString);
+		}
+
 		// Data
 		if (options.data) {
 			const data = typeof options.data === 'string' ? options.data : JSON.stringify(options.data);
@@ -83,11 +227,19 @@ export class Curl {
 			if (typeof options.data !== 'string' && (!options.headers || !options.headers['Content-Type'])) {
 				if (!options.headers) options.headers = {};
 				options.headers['Content-Type'] = 'application/json';
+				args.push('-H', 'Content-Type: application/json');
 			}
 		}
 
-		// Include headers in output
-		args.push('-i');
+		// Include headers in output (unless outputting to file)
+		if (!options.outputFile) args.push('-i');
+
+		// Add verbose output for statistics
+		args.push('-w', '@-');
+		args.push(
+			'--write-out',
+			'CURL_STATS_START\\nurl_effective: %{url_effective}\\nhttp_code: %{http_code}\\ntime_total: %{time_total}\\ntime_namelookup: %{time_namelookup}\\ntime_connect: %{time_connect}\\ntime_pretransfer: %{time_pretransfer}\\ntime_starttransfer: %{time_starttransfer}\\nsize_download: %{size_download}\\nsize_upload: %{size_upload}\\nspeed_download: %{speed_download}\\nspeed_upload: %{speed_upload}\\nCURL_STATS_END\\n'
+		);
 
 		// Add URL
 		args.push(url);
@@ -107,16 +259,212 @@ export class Curl {
 				};
 			}
 
-			const [headers, ...bodyParts] = result.stdOut.split('\r\n\r\n');
-			const body = bodyParts.join('\r\n\r\n');
+			const output = result.stdOut;
+			let headers: Record<string, string> = {};
+			let body = '';
+			let stats: Partial<CurlResponse> = {};
+
+			// Parse statistics from write-out
+			const statsMatch = output.match(/CURL_STATS_START\n(.*?)\nCURL_STATS_END/s);
+			if (statsMatch) {
+				const statsLines = statsMatch[1].split('\n');
+				for (const line of statsLines) {
+					const [key, value] = line.split(': ');
+					switch (key) {
+						case 'url_effective':
+							stats.finalUrl = value;
+							break;
+						case 'http_code':
+							stats.statusCode = parseInt(value);
+							break;
+						case 'time_total':
+							stats.totalTime = parseFloat(value);
+							break;
+						case 'size_download':
+							stats.downloadSize = parseInt(value);
+							break;
+						case 'size_upload':
+							stats.uploadSize = parseInt(value);
+							break;
+						case 'speed_download':
+							stats.avgDownloadSpeed = parseFloat(value);
+							break;
+						case 'speed_upload':
+							stats.avgUploadSpeed = parseFloat(value);
+							break;
+					}
+				}
+			}
+
+			// Parse headers and body if not writing to file
+			if (!options.outputFile) {
+				const cleanOutput = output.replace(/CURL_STATS_START\n.*?\nCURL_STATS_END\n?/s, '');
+				const [headersStr, ...bodyParts] = cleanOutput.split('\r\n\r\n');
+				headers = this.parseHeaders(headersStr);
+				body = bodyParts.join('\r\n\r\n').trim();
+			}
 
 			return {
 				success: true,
-				statusCode: this.parseStatusCode(headers),
-				headers: this.parseHeaders(headers),
-				body: body.trim(),
+				statusCode: stats.statusCode || this.parseStatusCode(output),
+				headers,
+				body,
 				raw: result,
+				...stats,
 			};
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error occurred',
+				raw: {
+					stdOut: '',
+					stdErr: error instanceof Error ? error.message : 'Unknown error',
+					exitCode: 1,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Downloads a file with progress tracking
+	 */
+	static async downloadWithProgress(url: string, options: ProgressiveDownloadOptions): Promise<CurlResponse> {
+		try {
+			new URL(url);
+		} catch (error) {
+			return {
+				success: false,
+				error: 'Invalid URL format',
+				raw: { stdOut: '', stdErr: 'Invalid URL format', exitCode: 1 },
+			};
+		}
+
+		const args: string[] = [];
+		const startTime = Date.now();
+
+		// Basic curl options
+		if (options.insecure) args.push('-k');
+		if (options.compressed) args.push('--compressed');
+		if (options.followRedirects !== false) args.push('-L');
+		if (options.maxRedirects) args.push('--max-redirs', options.maxRedirects.toString());
+
+		// Output file
+		args.push('-o', options.outputPath);
+
+		// Resume if requested
+		if (options.resume) args.push('-C', '-');
+
+		// Other options
+		if (options.connectTimeout) args.push('--connect-timeout', options.connectTimeout.toString());
+		if (options.maxTime) args.push('--max-time', options.maxTime.toString());
+		if (options.userAgent) args.push('-A', options.userAgent);
+		if (options.referer) args.push('-e', options.referer);
+		if (options.proxy) args.push('--proxy', options.proxy);
+
+		// Headers
+		if (options.headers) {
+			Object.entries(options.headers).forEach(([key, value]) => {
+				args.push('-H', `${key}: ${value}`);
+			});
+		}
+
+		// Cookies
+		if (options.cookies) {
+			const cookieString = Object.entries(options.cookies)
+				.map(([key, value]) => `${key}=${value}`)
+				.join('; ');
+			args.push('-b', cookieString);
+		}
+
+		args.push(url);
+
+		let totalSize: number | undefined = options.expectedSize;
+		try {
+			const headResponse = await this.request(url, { method: 'HEAD', silent: true });
+			if (headResponse.headers?.['content-length']) {
+				totalSize = parseInt(headResponse.headers['content-length']);
+			}
+		} catch (e) {
+			if (!totalSize) {
+				totalSize = options.expectedSize;
+			}
+		}
+
+		try {
+			const process = await spawn('curl', args, {
+				timeoutMs: options.timeoutMs,
+				cwd: options.cwd,
+			});
+
+			let lastProgress: DownloadProgress = {
+				downloadedSize: 0,
+				downloadSpeed: 0,
+				percentage: 0,
+				elapsedTime: 0,
+			};
+
+			let lastDownloadedSize = 0;
+			let lastCheckTime = startTime;
+
+			const progressInterval = setInterval(async () => {
+				try {
+					const stat = await filesystem.getStats(options.outputPath);
+					const downloadedSize = stat.size;
+					const currentTime = Date.now();
+					const elapsedTime = (currentTime - startTime) / 1000;
+					const timeSinceLastCheck = (currentTime - lastCheckTime) / 1000;
+
+					const bytesSinceLastCheck = downloadedSize - lastDownloadedSize;
+					const speed = timeSinceLastCheck > 0 ? bytesSinceLastCheck / timeSinceLastCheck : 0;
+
+					const percentage = totalSize ? Math.min((downloadedSize / totalSize) * 100, 100) : 0;
+
+					const timeRemaining = totalSize && speed > 0 ? (totalSize - downloadedSize) / speed : undefined;
+
+					const progress: DownloadProgress = {
+						downloadedSize,
+						totalSize,
+						downloadSpeed: speed,
+						percentage,
+						timeRemaining,
+						elapsedTime,
+					};
+
+					lastProgress = progress;
+					lastDownloadedSize = downloadedSize;
+					lastCheckTime = currentTime;
+
+					options.onProgress(progress);
+				} catch (e) {
+				}
+			}, 500);
+
+			process.on('stdErr', (data: string) => {
+			});
+
+			return new Promise<CurlResponse>((resolve) => {
+				process.on('exit', (exitCode: number) => {
+					clearInterval(progressInterval);
+					if (exitCode === 0) {
+						resolve({
+							success: true,
+							statusCode: 200,
+							headers: {},
+							body: '',
+							raw: { stdOut: '', stdErr: '', exitCode },
+							downloadSize: lastProgress.downloadedSize,
+							totalTime: lastProgress.elapsedTime,
+							avgDownloadSpeed: lastProgress.downloadSpeed,
+						});
+					} else {
+						resolve({
+							success: false,
+							error: `Download failed with exit code ${exitCode}`,
+							raw: { stdOut: '', stdErr: '', exitCode },
+						});
+					}
+				});
+			});
 		} catch (error) {
 			return {
 				success: false,
@@ -154,5 +502,58 @@ export class Curl {
 
 	static async head(url: string, options: Omit<CurlOptions, 'method'> = {}): Promise<CurlResponse> {
 		return this.request(url, { ...options, method: 'HEAD' });
+	}
+
+	static async put(
+		url: string,
+		data?: CurlOptions['data'],
+		options: Omit<CurlOptions, 'method' | 'data'> = {}
+	): Promise<CurlResponse> {
+		return this.request(url, { ...options, method: 'PUT', data });
+	}
+
+	static async delete(url: string, options: Omit<CurlOptions, 'method'> = {}): Promise<CurlResponse> {
+		return this.request(url, { ...options, method: 'DELETE' });
+	}
+
+	static async patch(
+		url: string,
+		data?: CurlOptions['data'],
+		options: Omit<CurlOptions, 'method' | 'data'> = {}
+	): Promise<CurlResponse> {
+		return this.request(url, { ...options, method: 'PATCH', data });
+	}
+
+	/**
+	 * Download a file and return the file path
+	 */
+	static async download(url: string, outputPath: string, options: Omit<CurlOptions, 'outputFile'> = {}): Promise<CurlResponse> {
+		return this.request(url, { ...options, outputFile: outputPath });
+	}
+
+	/**
+	 * Get file size without downloading
+	 */
+	static async getFileSize(url: string, options: Omit<CurlOptions, 'method'> = {}): Promise<number | null> {
+		const response = await this.head(url, options);
+		if (response.success && response.headers) {
+			const contentLength = response.headers['content-length'];
+			return contentLength ? parseInt(contentLength) : null;
+		}
+		return null;
+	}
+
+	/**
+	 * Test download speed to a URL
+	 */
+	static async testSpeed(url: string, maxTime = 10): Promise<{ downloadSpeed: number; uploadSpeed: number } | null> {
+		const response = await this.request(url, { maxTime, outputFile: '/dev/null' });
+		if (response.success) {
+			return {
+				downloadSpeed: response.avgDownloadSpeed || 0,
+				uploadSpeed: response.avgUploadSpeed || 0,
+			};
+		}
+		return null;
 	}
 }

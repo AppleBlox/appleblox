@@ -1,6 +1,7 @@
 import { getValue } from '@/windows/main/components/settings';
 import { events } from '@neutralinojs/lib';
 import { Notification } from '../../tools/notifications';
+import Logger from '@/windows/main/ts/utils/logger';
 
 // Debounce
 let latestReturnEvent: null | number = null;
@@ -15,7 +16,7 @@ async function returnToLuaApp() {
 			content: 'Disable desktop app setting is enabled.',
 			timeout: 3000,
 		}).show();
-		console.info('[Activity] Disabling desktop app by terminating.');
+		Logger.info('Disabling desktop app by terminating.');
 		await events.broadcast('instance:quit');
 	}
 }

@@ -2,6 +2,7 @@ import { toast } from 'svelte-sonner';
 import { getValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
 import { shell } from '../tools/shell';
+import Logger from '@/windows/main/ts/utils/logger';
 
 const urlscheme = libraryPath('urlscheme');
 
@@ -39,14 +40,14 @@ export class RobloxDelegate {
 			const toggleApp = await setUrlscheme('roblox', 'ch.origaming.appleblox');
 			if (!toggledPlayer.toggled || !toggleApp.toggled) {
 				toast.error("Couldn't set Roblox's URI");
-				console.error("Couldn't set Roblox's URI:", { app: toggleApp, player: toggledPlayer });
+				Logger.error("Couldn't set Roblox's URI:", { app: toggleApp, player: toggledPlayer });
 			}
 		} else {
 			const toggledPlayer = await setUrlscheme('roblox-player', 'com.roblox.RobloxPlayer');
 			const toggleApp = await setUrlscheme('roblox', 'com.roblox.RobloxPlayer');
 			if (!toggledPlayer.toggled || !toggleApp.toggled) {
 				toast.error("Couldn't set Roblox's URI");
-				console.error("Couldn't set Roblox's URI:", { app: toggleApp, player: toggledPlayer });
+				Logger.error("Couldn't set Roblox's URI:", { app: toggleApp, player: toggledPlayer });
 			}
 		}
 	}

@@ -2,6 +2,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { events, os } from '@neutralinojs/lib';
 	import { ExternalLink, FileCode2 } from 'lucide-svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
 </script>
 
 <div>
@@ -10,7 +11,7 @@
 		class="ml-autow"
 		on:click={async () => {
 			await events.dispatch('ui:change_page', { id: 'flags_editor' }).catch((err) => {
-				console.error('An error occured while sending event broadcast:', err);
+				Logger.error('An error occured while sending event broadcast:', err);
 			});
 		}}
 	>

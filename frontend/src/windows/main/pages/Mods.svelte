@@ -1,14 +1,16 @@
 <script lang="ts">
-	import ApplebloxIcon from '@/assets/favicon.png';
+	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import GamebananaIcon from '@/assets/panel/gamebanana.png';
         import UpdateMods from '@/assets/panel/updatemods.png';
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book } from 'lucide-svelte';
 	import path from 'path-browserify';
+	import ModsUi from '../components/mods-ui.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import shellFS from '../ts/tools/shellfs';
-	import ModsUi from '../components/mods-ui.svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
+	import { getFontsCacheDir } from '../ts/utils/paths';
 
 	export let render = true;
 
@@ -34,9 +36,9 @@
 		const { id, file } = e.detail;
 		switch (id) {
 			case 'custom_font': {
-				const cachePath = path.join(await os.getEnv('HOME'), 'Library/Application Support/AppleBlox/cache/fonts');
+				const cachePath = await getFontsCacheDir();
 				await shellFS.createDirectory(cachePath);
-				await filesystem.copy(file, path.join(cachePath, `CustomFont${path.extname(file)}`)).catch(console.error);
+				await filesystem.copy(file, path.join(cachePath, `CustomFont${path.extname(file)}`)).catch(Logger.error);
 				break;
 			}
 		}
@@ -100,7 +102,7 @@
 			category
 				.setName('Custom Mods')
 				.setDescription(
-					"To install mods, drag files to the mods folder. Find mods in the AppleBlox discord server or Gamebanana."
+					'To install mods, drag files to the mods folder. Find mods in the AppleBlox discord server or Gamebanana.'
 				)
 				.setId('general')
 				.addButton({

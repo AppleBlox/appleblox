@@ -15,10 +15,11 @@
 	import SliderWidget from './widgets/slider.svelte';
 	import SwitchWidget from './widgets/switch.svelte';
 
+	import { cn } from '$lib/utils';
 	import path from 'path-browserify';
 	import { fade } from 'svelte/transition';
 	import ShellFS from '../../ts/tools/shellfs';
-	import { cn } from '$lib/utils';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	// Panel props
 	export let panel: SettingsPanel;
@@ -85,7 +86,7 @@
 			for (const category of panel.categories) {
 				// Skip category if it changed
 				if (!currentSettings[category.id]) {
-					console.warn(`Skipped category ${panel.id}.${category.id} as it doesn't exist anymore.`);
+					Logger.warn(`Skipped category ${panel.id}.${category.id} as it doesn't exist anymore.`);
 					saveNewPanel = true;
 					continue;
 				}
@@ -107,7 +108,7 @@
 							) {
 								settings[category.id][widget.id] = currentSettings[category.id][widget.id];
 							} else {
-								console.warn(
+								Logger.warn(
 									`Value type has changed for ${panel.id}.${category.id}.${widget.id}. Fallback to default.`
 								);
 								saveNewPanel = true;
@@ -117,7 +118,7 @@
 				}
 			}
 			if (saveNewPanel) {
-				console.warn('Detected panel changes, saving fixed panel');
+				Logger.warn('Detected panel changes, saving fixed panel');
 				updateSettings();
 			}
 		}
@@ -140,7 +141,7 @@
 		// Generate config files if the panel hasn't been generated yet and it's set to not render
 		const panelExists = await ShellFS.exists(path.join(await getConfigPath(), `${panel.id}.json`));
 		if (!render && !panelExists) {
-			console.info(`[Panel] Generated config file for "${panel.id}"`);
+			Logger.info(`Generated config file for "${panel.id}"`);
 			updateSettings();
 		}
 	})();
@@ -157,9 +158,10 @@
 	/** Checks if the widget is in toggled state */
 	function isToggled(category: Category, widget: PanelWidget, _reactive: any) {
 		if (!widget.toggleable) return true;
+		const targetCategory = settings[category.id];
 		const targetWidget = settings[category.id][widget.toggleable.id];
-		if (!targetWidget) {
-			console.error(
+		if (!(widget.toggleable.id in targetCategory)) {
+			Logger.error(
 				`Couldn't check toggle state of ${category.id}.${widget.id} because target widget doesn't exist (${category.id}.${widget.toggleable.id})`
 			);
 			return false;
@@ -181,141 +183,144 @@
 {#if render}
 	{#if settingsLoaded}
 		<div transition:fade={{ duration: fadeIn ? 200 : 0 }}>
-			<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-3 my-3 p-5">
-				<div>
-					<!-- Title + Description -->
-					<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
-					<p class="text-[13px] text-neutral-700 dark:text-neutral-300">
-						{@html panel.description}
-					</p>
-					<!-- Categories -->
-					{#each panel.categories || [] as category (category.id)}
-						<div class="mt-5">
-							<!-- Category Description -->
-							<p class="text-xl font-bold text-primary">{category.name}</p>
-							<p class="text-[13px] text-primary saturate-[20%] brightness-200 font-semibold">
-								{category.description}
-							</p>
-							{#each category.widgets || [] as widget (widget.id)}
-								<!-- Separator for the widgets (except button) -->
-								{#if widget.options.type !== 'button' && widget.options.type !== 'separator'}
-									<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
-								{/if}
-								<!-- Disable the widget if the button it is linked to is disabled -->
-								<div
-									class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-30 select-one group pointer-events-none'}`}
-								>
-									<!-- Description of the widget (except button) -->
-									{#if widget.options.type !== 'button'}
-										<div class={widget.options.type === 'slider' ? 'w-[500px]' : ''}>
-											<p class="font-bold text-foreground">
-												{widget.label}
-											</p>
-											<p class="text-[13px] text-foreground opacity-85">
-												{@html widget.description}
-											</p>
-										</div>
-									{/if}
-
-									<!-- Button widget -->
-									{#if widget.options.type == 'button'}
-										<ButtonWidget
-											label={widget.label}
-											description={widget.description}
-											variant={widget.options.variant}
-											icon={widget.options.icon || null}
-											on:click={() => {
-												dispatch('button', { id: widget.id });
-											}}
-										/>
-										<!-- Switch Widget -->
-									{:else if widget.options.type === 'switch'}
-										<SwitchWidget
-											defaultValue={settings[category.id][widget.id]}
-											on:clicked={(e) => {
-												const { state } = e.detail;
-												settings[category.id][widget.id] = state;
-												dispatch('switch', { id: widget.id, state });
-												updateSettings();
-											}}
-										/>
-									{:else if widget.options.type === 'separator'}
-										<Separator
-											orientation={widget.options.orientation}
-											class={cn('mt-3 mb-2 bg-gray-300 opacity-25', widget.options.class)}
-										/>
-										<!-- Input widget -->
-									{:else if widget.options.type === 'input'}
-										<div class="flex flex-1 justify-end">
-											<InputWidget
-												defaultValue={settings[category.id][widget.id]}
-												placeholder={widget.options.default}
-												whitelist={widget.options.whitelist}
-												blacklist={widget.options.blacklist}
-												on:inputChanged={(e) => {
-													const { input } = e.detail;
-													settings[category.id][widget.id] = input;
-													dispatch('input', { input });
-													updateSettings();
-												}}
-											/>
-										</div>
-										<!-- Filepicker widget -->
-									{:else if widget.options.type === 'filepicker'}
-										<FilepickerWidget
-											file={settings[category.id][widget.id]}
-											extensions={widget.options.extensions || null}
-											on:fileChosen={(e) => {
-												const filePath = e.detail.path;
-												settings[category.id][widget.id] = filePath;
-												dispatch('fileChosen', { id: widget.id, file: filePath });
-												updateSettings();
-											}}
-											on:fileRemoved={() => {
-												settings[category.id][widget.id] = null;
-												dispatch('fileRemoved', { id: widget.id });
-												updateSettings();
-											}}
-										/>
-										<!-- Dropdown Widget -->
-									{:else if widget.options.type === 'select'}
-										<SelectWidget
-											items={widget.options.items.sort((a, b) =>
-												a.value === 'default' ? -1 : b.value === 'default' ? 1 : 0
-											)}
-											defaultItem={settings[category.id][widget.id]}
-											on:itemSelected={(e) => {
-												const { item } = e.detail;
-												settings[category.id][widget.id] = item;
-												dispatch('selected', { id: widget.id, item });
-												updateSettings();
-											}}
-										/>
-										<!-- Slider widget -->
-									{:else if widget.options.type === 'slider'}
-										<SliderWidget
-											placeholderValue={widget.options.default}
-											defaultValue={settings[category.id][widget.id]}
-											max={widget.options.max}
-											min={widget.options.min}
-											step={widget.options.step}
-											on:changed={(e) => {
-												const { value } = e.detail;
-												settings[category.id][widget.id] = value;
-												dispatch('slider', { id: widget.id, value });
-												updateSettings();
-											}}
-										/>
-										<!-- Custom widgets (Double Buttons & ModsUI) -->
-									{:else if widget.options.type === 'custom'}
-										<svelte:component this={widget.options.component} />
-									{/if}
-								</div>
-							{/each}
-						</div>
-					{/each}
-				</div>
+			<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-3 p-5 w-[95%] border-border/50">
+				<!-- <div> -->
+				<!-- Title + Description -->
+				<p class="text-3xl font-bold text-black dark:text-white">{panel.name}</p>
+				<p class="text-[13px] text-neutral-700 dark:text-neutral-300">
+					{@html panel.description}
+				</p>
 			</Card.Root>
+			<!-- Categories -->
+			{#each panel.categories || [] as category (category.id)}
+				<Card.Root class="font-mono grid grid-cols-1 h-full text-start ml-8 my-4 p-5 w-[95%] border-border/50">
+					<div>
+						<!-- Category Description -->
+						<p class="text-xl font-bold text-primary">{category.name}</p>
+						<p class="text-[13px] text-primary saturate-[20%] brightness-200 font-semibold">
+							{category.description}
+						</p>
+						{#each category.widgets || [] as widget (widget.id)}
+							<!-- Separator for the widgets (except button) -->
+							{#if widget.options.type !== 'button' && widget.options.type !== 'separator' && (widget.separator === undefined || widget.separator === true)}
+								<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
+							{/if}
+							<!-- Disable the widget if the button it is linked to is disabled -->
+							<div
+								class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-30 select-one group pointer-events-none'}`}
+							>
+								<!-- Description of the widget (except button) -->
+								{#if widget.options.type !== 'button'}
+									<div class={widget.options.type === 'slider' ? 'w-[500px]' : ''}>
+										<p class="font-bold text-foreground">
+											{widget.label}
+										</p>
+										<p class="text-[13px] text-foreground opacity-85">
+											{@html widget.description}
+										</p>
+									</div>
+								{/if}
+
+								<!-- Button widget -->
+								{#if widget.options.type == 'button'}
+									<ButtonWidget
+										label={widget.label}
+										description={widget.description}
+										variant={widget.options.variant}
+										icon={widget.options.icon || null}
+										on:click={() => {
+											dispatch('button', { id: widget.id });
+										}}
+									/>
+									<!-- Switch Widget -->
+								{:else if widget.options.type === 'switch'}
+									<SwitchWidget
+										defaultValue={settings[category.id][widget.id]}
+										on:clicked={(e) => {
+											const { state } = e.detail;
+											settings[category.id][widget.id] = state;
+											dispatch('switch', { id: widget.id, state });
+											updateSettings();
+										}}
+									/>
+								{:else if widget.options.type === 'separator'}
+									<Separator
+										orientation={widget.options.orientation}
+										class={cn('mt-3 mb-2 bg-gray-300 opacity-25', widget.options.class)}
+									/>
+									<!-- Input widget -->
+								{:else if widget.options.type === 'input'}
+									<div class="flex flex-1 justify-end">
+										<InputWidget
+											defaultValue={settings[category.id][widget.id]}
+											placeholder={widget.options.default}
+											whitelist={widget.options.whitelist}
+											blacklist={widget.options.blacklist}
+											on:inputChanged={(e) => {
+												const { input } = e.detail;
+												settings[category.id][widget.id] = input;
+												dispatch('input', { input });
+												updateSettings();
+											}}
+										/>
+									</div>
+									<!-- Filepicker widget -->
+								{:else if widget.options.type === 'filepicker'}
+									<FilepickerWidget
+										file={settings[category.id][widget.id]}
+										extensions={widget.options.extensions || null}
+										on:fileChosen={(e) => {
+											const filePath = e.detail.path;
+											settings[category.id][widget.id] = filePath;
+											dispatch('fileChosen', { id: widget.id, file: filePath });
+											updateSettings();
+										}}
+										on:fileRemoved={() => {
+											settings[category.id][widget.id] = null;
+											dispatch('fileRemoved', { id: widget.id });
+											updateSettings();
+										}}
+									/>
+									<!-- Dropdown Widget -->
+								{:else if widget.options.type === 'select'}
+									<SelectWidget
+										items={widget.options.items.sort((a, b) =>
+											a.value === 'default' ? -1 : b.value === 'default' ? 1 : 0
+										)}
+										defaultItem={settings[category.id][widget.id]}
+										on:itemSelected={(e) => {
+											const { item } = e.detail;
+											settings[category.id][widget.id] = item;
+											dispatch('selected', { id: widget.id, item });
+											updateSettings();
+										}}
+									/>
+									<!-- Slider widget -->
+								{:else if widget.options.type === 'slider'}
+									<SliderWidget
+										placeholderValue={widget.options.default}
+										defaultValue={settings[category.id][widget.id]}
+										max={widget.options.max}
+										min={widget.options.min}
+										step={widget.options.step}
+										on:changed={(e) => {
+											const { value } = e.detail;
+											settings[category.id][widget.id] = value;
+											dispatch('slider', { id: widget.id, value });
+											updateSettings();
+										}}
+									/>
+									<!-- Custom widgets (Double Buttons & ModsUI) -->
+								{:else if widget.options.type === 'custom'}
+									<svelte:component this={widget.options.component} />
+								{/if}
+							</div>
+						{/each}
+					</div>
+				</Card.Root>
+			{/each}
+			<!-- </div> -->
+			<!-- </Card.Root> -->
 		</div>
 	{:else}
 		<div class="flex h-[100vh] w-full items-center justify-center">

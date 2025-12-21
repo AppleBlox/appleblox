@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { events, init as neuInit } from '@neutralinojs/lib';
-	import { onMount } from 'svelte';
+	import Logo from '@/assets/appleblox.svg';
 	import { Progress } from '@/lib/components/ui/progress';
-	import Logo from '@/assets/favicon.png';
-	import { mode, ModeWatcher, setMode } from 'mode-watcher';
+	import { events, init as neuInit } from '@neutralinojs/lib';
+	import { ModeWatcher, setMode } from 'mode-watcher';
+	import { onMount } from 'svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	let progress = 0;
 	let text = 'Initializing...';
@@ -14,7 +15,7 @@
 		try {
 			neuInit();
 		} catch (e) {
-			console.error('Bootstrapper: Neutralino init failed:', e);
+			Logger.error('Bootstrapper: Neutralino init failed:', e);
 			text = 'Error: Could not connect to AppleBlox services.';
 			progress = 0;
 			return;
@@ -32,14 +33,14 @@
 		});
 
 		events.on('bootstrapper:close', async () => {
-			console.log('Bootstrapper received close event. Main process should terminate the viewer.');
+			Logger.info('Bootstrapper received close event. Main process should terminate the viewer.');
 		});
 
 		try {
 			await events.dispatch('bootstrapper:ready', { windowId: window.NL_PID });
-			console.log('Bootstrapper: Dispatched ready event.');
+			Logger.info('Bootstrapper: Dispatched ready event.');
 		} catch (e) {
-			console.error('Bootstrapper: Failed to dispatch bootstrapper:ready', e);
+			Logger.error('Bootstrapper: Failed to dispatch bootstrapper:ready', e);
 		}
 	});
 </script>

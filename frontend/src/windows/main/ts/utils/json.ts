@@ -54,7 +54,7 @@ class JSONParseError extends Error {
  *   const result = correctAndParseJSON('{"key: value}', { friendly: true });
  * } catch (e) {
  *   if (e instanceof JSONParseError) {
- *     console.log(e.friendly); // "Missing quotes around the key 'key'"
+ *     Logger.info(e.friendly); // "Missing quotes around the key 'key'"
  *   }
  * }
  */

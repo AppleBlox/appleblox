@@ -1,4 +1,5 @@
 import { shell, type ExecuteOptions } from './shell';
+import Logger from '@/windows/main/ts/utils/logger';
 
 /**
  * Creates the folder at the specified path.
@@ -111,7 +112,7 @@ export async function getInfo(path: string, options: ExecuteOptions = {}): Promi
 	if (result.exitCode === 1 || result.stdErr.trim().includes('No such file or directory')) {
 		return null;
 	} else if (result.stdErr.length > 0) {
-		console.error('Error while getting path info:', result.stdErr);
+		Logger.error('Error while getting path info:', result.stdErr);
 	}
 	const [name, size, mode, uid, gid, permissions, modTime] = result.stdOut.trim().split(',');
 	return { name, size, mode, uid, gid, permissions, modTime };

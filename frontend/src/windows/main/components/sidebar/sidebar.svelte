@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { os, events } from '@neutralinojs/lib';
 	import { createEventDispatcher } from 'svelte';
-	import { version } from '../../../../../package.json';
+	import { version } from '../../../../../../package.json';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	import EngineIcon from '@/assets/sidebar/engine.png';
 	import IntegrationsIcon from '@/assets/sidebar/integrations.png';
@@ -11,26 +11,39 @@
 	import ModsIcon from '@/assets/sidebar/mods.png';
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
+	import WorkshopIcon from '@/assets/sidebar/workshop.png';
 
 	import CreditsIcon from '@/assets/sidebar/info.png';
 	import MiscIcon from '@/assets/sidebar/misc.png';
 
 	import Button from '$lib/components/ui/button/button.svelte';
 	import path from 'path-browserify';
-	import shellFS from '../ts/tools/shellfs';
-	import { getMode } from '../ts/utils';
+	import shellFS from '../../ts/tools/shellfs';
+	import { getMode } from '../../ts/utils';
 	import SidebarBtn from './sidebar-btn.svelte';
-	import ColorImage from '../components/color-image.svelte';
+	import ColorImage from '../color-image.svelte';
+	import * as Card from '$lib/components/ui/card/index';
+	import Roblox from '../../ts/roblox';
+	import RobloxDownloadDialog from '../roblox/roblox-download-dialog.svelte';
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
 	export let id: string;
+	let showInstallDialog = false;
+	let robloxInstalled = true; // Assume installed until checked
+
+	// Check if Roblox is installed on mount
+	import { onMount } from 'svelte';
+	onMount(async () => {
+		robloxInstalled = await Roblox.Utils.hasRoblox();
+	});
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
 		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },
 		{ label: 'Engine', id: 'engine', icon: EngineIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
+		// { label: 'Workshop', id: 'Workshop', icon: WorkshopIcon },
 		{ label: 'Appearance', id: 'appearance', icon: AppearanceIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Info', id: 'info', icon: CreditsIcon },
@@ -44,20 +57,24 @@
 	}
 	(async () => {
 		if (await shellFS.exists(path.join(await os.getEnv('HOME'), 'adevmode'))) {
-			console.debug('[App] Running in "development" mode');
+			Logger.debug('Running in "development" mode');
 			if (!isDevBtnAdded) {
 				sidebarBtns.push({ label: 'Dev', id: 'dev', icon: '' });
 				isDevBtnAdded = true;
 			}
 		} else {
-			console.debug('[App] Running in "production" mode');
+			Logger.debug('Running in "production" mode');
 		}
 	})();
 
 	// Play button text and color
 	let isHovering = false;
-	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : 'Play';
-	$: buttonIcon = buttonState === 'Play' ? PlayIcon : buttonState === 'Active' ? RobloxIcon : KillIcon;
+	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : robloxInstalled ? 'Play' : 'Install';
+	$: buttonIcon =
+		buttonState === 'Install' ? RobloxIcon :
+		buttonState === 'Play' ? PlayIcon :
+		buttonState === 'Active' ? RobloxIcon :
+		KillIcon;
 
 	function handleMouseEnter() {
 		isHovering = true;
@@ -77,25 +94,12 @@
 	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
 </script>
 
-<div class="h-full bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col" {id}>
+<Card.Root
+	class="h-[96.5%] bg-card w-48 fixed top-0 left-0 overflow-x-hidden select-none flex flex-col my-3 ml-4 border-border/50 hover:bg-muted/30"
+	{id}
+>
 	<div class="flex flex-col">
-		<a
-			href="https://github.com/AppleBlox/appleblox"
-			class="flex items-center justify-center mt-3"
-			target="_blank"
-			rel="noreferrer"
-			on:click={() => {
-				os.open('https://github.com/AppleBlox/appleblox').catch((err) => {
-					console.error('[UI.Sidebar] ', err);
-				});
-			}}
-		>
-			<p class="text-primary font-bold font-mono text-2xl">AppleBlox</p>
-		</a>
-		<div class="my-3 mx-3">
-			<Separator />
-		</div>
-		<div class="flex flex-col justify-start items-start flex-grow w-full">
+		<div class="flex flex-col justify-start items-start flex-grow w-full my-3">
 			{#each sidebarBtns as { label, id, icon }, index}
 				<SidebarBtn
 					position={{ total: sidebarBtns.length, index }}
@@ -114,13 +118,25 @@
 
 		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
 			<Button
-				class={`${isLaunched ? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0' : 'bg-green-500/85 hover:bg-green-500/60'} font-mono w-full transition-all duration-200 group`}
-				on:click={() => {
+				class={`${
+					isLaunched
+						? 'bg-primary/80 -hue-rotate-90 hover:bg-red-500 hover:hue-rotate-0'
+						: buttonState === 'Install'
+							? 'bg-blue-500/85 hover:bg-blue-500/60'
+							: 'bg-green-500/85 hover:bg-green-500/60'
+				} font-mono w-full transition-all duration-200 group`}
+				on:click={async () => {
 					if (isLaunched) {
-						events.broadcast('instance:quit').catch(console.error);
+						events.broadcast('instance:quit').catch(Logger.error);
 						return;
 					}
-					dispatch('launchRoblox', true);
+
+					const isInstalled = await Roblox.Utils.hasRoblox();
+					if (isInstalled) {
+						dispatch('launchRoblox', true);
+					} else {
+						showInstallDialog = true;
+					}
 				}}
 			>
 				<ColorImage src={buttonIcon} alt="Button icon" class="w-5 h-5 mr-1 mt-[1px]" color="white" />
@@ -128,4 +144,13 @@
 			</Button>
 		</div>
 	</div>
-</div>
+</Card.Root>
+
+<RobloxDownloadDialog
+	bind:open={showInstallDialog}
+	on:downloadComplete={async () => {
+		// Re-check Roblox installation status after download completes
+		robloxInstalled = await Roblox.Utils.hasRoblox();
+		showInstallDialog = false;
+	}}
+/>

@@ -36,6 +36,12 @@ const LibPaths: LibPathsType = {
 			dev: '/bin/transparent_viewer_ablox',
 		},
 	},
+	roblox_updates_manager: {
+		darwin: {
+			prod: '/lib/roblox_updater_manager_ablox.sh',
+			dev: '/bin/roblox_updater_manager_ablox.sh',
+		},
+	},
 };
 
 export function libraryPath<T extends keyof LibPathsType>(libName: T): string {

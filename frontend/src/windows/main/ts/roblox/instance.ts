@@ -5,8 +5,8 @@ import { Notification } from '../tools/notifications';
 import { shell } from '../tools/shell';
 import { isProcessAlive, sleep } from '../utils';
 import { RobloxDelegate } from './delegate';
-import { getMostRecentRoblox } from './path';
 import { RobloxUtils } from './utils';
+import Logger from '@/windows/main/ts/utils/logger';
 
 type EventHandler = (data?: any) => void;
 type Event = 'exit' | 'gameInfo' | 'gameEvent';
@@ -106,17 +106,22 @@ export class RobloxInstance {
 	private lastFileSize = 0;
 	private logsDirectory: string | null = null;
 	private watchHandler: (evt: any) => void = () => {};
-	private pollInterval: Timer | null = null;
+	private pollInterval: NodeJS.Timeout | null = null;
 	private lastPollTime = 0;
 
-	// Polling configuration
-	private readonly POLL_INTERVAL = 8; // ~120Hz (8.33ms)
-	private readonly MIN_POLL_INTERVAL = 8; // Same as POLL_INTERVAL to maintain frequency
+	// Non-blocking 60fps configuration
+	private readonly POLL_INTERVAL = 16.67; // 60fps (16.67ms)
+	private readonly BATCH_SIZE = 32 * 1024; // 32KB max read per frame
+	private readonly PROCESSING_QUEUE_SIZE = 10; // Max queued processing tasks
 
 	// Performance monitoring
 	private pollCount = 0;
 	private lastPerformanceLog = 0;
 	private readonly PERFORMANCE_LOG_INTERVAL = 5000; // Log performance stats every 5 seconds
+
+	// Non-blocking processing queue
+	private processingQueue: string[][] = [];
+	private isProcessing = false;
 
 	watchLogs: boolean;
 	constructor(watch: boolean) {
@@ -150,13 +155,15 @@ export class RobloxInstance {
 	public async start(url?: string) {
 		if (this.gameInstance) throw new Error('An instance is already running');
 
-		console.info('[Roblox.Instance] Opening Roblox instance');
+		Logger.info('Opening Roblox instance');
+		await RobloxDelegate.toggle(false);
 
 		if (url) {
-			await RobloxDelegate.toggle(false);
 			await shell('open', [url]);
+			Logger.info(`Opening Roblox from URL.`);
 		} else {
-			await shell('open', [await getMostRecentRoblox()]);
+			await shell('open', ['roblox-player:']); // Experimental voice chat fix (we launch by deeplink instead of binary path)
+			Logger.info(`Opening Roblox from path.`);
 		}
 
 		await sleep(1000);
@@ -192,7 +199,7 @@ export class RobloxInstance {
 		this.isWatching = true;
 		if (this.watchLogs) {
 			await this.setupLogsWatcher().catch(async (err) => {
-				console.error("[Roblox.Instance] Couldn't start logs watcher:", err);
+				Logger.error("Couldn't start logs watcher:", err);
 				new Notification({
 					title: 'Unable to start Roblox',
 					content: 'AppleBlox was unable to monitor your logs due to an error. Roblox has been closed.',
@@ -208,7 +215,7 @@ export class RobloxInstance {
 			if (this.gameInstance && !(await isProcessAlive(this.gameInstance))) {
 				this.emit('exit');
 				await this.cleanup();
-				console.info('[Roblox.Instance] Instance is null, stopping.');
+				Logger.info('Instance is null, stopping.');
 				clearInterval(intervalId);
 			}
 		}, 500);
@@ -218,44 +225,87 @@ export class RobloxInstance {
 		if (!this.isWatching || !this.latestLogPath) return;
 
 		try {
-			const currentTime = Date.now();
+			const currentTime = performance.now();
 
 			// Log performance stats every 5 seconds
 			if (currentTime - this.lastPerformanceLog >= this.PERFORMANCE_LOG_INTERVAL) {
 				const pollRate = this.pollCount / (this.PERFORMANCE_LOG_INTERVAL / 1000);
+				Logger.debug(`Poll rate: ${pollRate.toFixed(1)}Hz, Queue size: ${this.processingQueue.length}`);
 				this.pollCount = 0;
 				this.lastPerformanceLog = currentTime;
 			}
 
-			// Only proceed if enough time has passed since last poll
-			if (currentTime - this.lastPollTime >= this.MIN_POLL_INTERVAL) {
+			// Only proceed if enough time has passed since last poll (60fps)
+			if (currentTime - this.lastPollTime >= this.POLL_INTERVAL) {
 				this.pollCount++;
 				this.lastPollTime = currentTime;
 
-				// Get file stats
+				// Get file stats (fast operation)
 				const stats = await filesystem.getStats(this.latestLogPath);
 
 				// Check if file has new content
 				if (stats.size > this.lastPosition) {
-					// Read only the new content
+					// Calculate read size (limit to batch size for non-blocking behavior)
+					const availableBytes = stats.size - this.lastPosition;
+					const readSize = Math.min(availableBytes, this.BATCH_SIZE);
+
+					// Read only the new content (limited batch size)
 					const content = await filesystem.readFile(this.latestLogPath, {
 						pos: this.lastPosition,
-						size: stats.size - this.lastPosition,
+						size: readSize,
 					});
 
-					this.lastPosition = stats.size;
+					this.lastPosition += readSize;
 					this.lastFileSize = stats.size;
 
-					// Process new content immediately
-					const lines = content.split('\n');
-					if (lines.length > 0) {
-						this.processLines(lines);
+					// Queue processing asynchronously (non-blocking)
+					if (content.length > 0) {
+						const lines = content.split('\n');
+						this.queueProcessing(lines);
 					}
 				}
 			}
 		} catch (err) {
-			console.error('[Roblox.Instance] Error checking log file:', err);
+			Logger.error('Error checking log file:', err);
 		}
+	}
+
+	private queueProcessing(lines: string[]) {
+		// Add to queue, but limit queue size to prevent memory issues
+		if (this.processingQueue.length < this.PROCESSING_QUEUE_SIZE) {
+			this.processingQueue.push(lines);
+		} else {
+			Logger.warn('Processing queue full, dropping lines');
+		}
+
+		// Start processing if not already running
+		if (!this.isProcessing) {
+			this.processQueueAsync();
+		}
+	}
+
+	private async processQueueAsync() {
+		if (this.isProcessing) return;
+		this.isProcessing = true;
+
+		// Use requestIdleCallback or setTimeout to process during idle time
+		const processNext = () => {
+			if (this.processingQueue.length === 0) {
+				this.isProcessing = false;
+				return;
+			}
+
+			const lines = this.processingQueue.shift();
+			if (lines) {
+				this.processLines(lines);
+			}
+
+			// Continue processing in next tick (non-blocking)
+			setTimeout(processNext, 0);
+		};
+
+		// Start processing in next tick
+		setTimeout(processNext, 0);
 	}
 
 	private async setupLogsWatcher() {
@@ -276,11 +326,11 @@ export class RobloxInstance {
 			const createdAt = (await filesystem.getStats(latestFilePath)).createdAt;
 			const timeDifference = (Date.now() - createdAt) / 1000;
 			if (timeDifference < 3) {
-				console.info(`[Roblox.Instance] Found latest log file: "${latestFilePath}"`);
+				Logger.info(`Found latest log file: "${latestFilePath}"`);
 				this.latestLogPath = latestFilePath;
 			} else {
 				tries--;
-				console.info(
+				Logger.info(
 					`[Roblox.Instance] Couldn't find a .log file created less than 3 seconds ago in "${this.logsDirectory}" (${tries}). Retrying in 1 second.`
 				);
 				await sleep(1000);
@@ -291,9 +341,25 @@ export class RobloxInstance {
 		try {
 			const initialStats = await filesystem.getStats(this.latestLogPath);
 			if (initialStats.size > 0) {
-				const initialContent = await filesystem.readFile(this.latestLogPath);
-				const initialLines = initialContent.split('\n');
-				this.processLines(initialLines);
+				// Read initial content in chunks to avoid blocking
+				const chunkSize = this.BATCH_SIZE;
+				let position = 0;
+
+				while (position < initialStats.size) {
+					const readSize = Math.min(chunkSize, initialStats.size - position);
+					const chunk = await filesystem.readFile(this.latestLogPath, {
+						pos: position,
+						size: readSize,
+					});
+
+					const lines = chunk.split('\n');
+					this.queueProcessing(lines);
+
+					position += readSize;
+
+					// Yield control to prevent blocking
+					await new Promise((resolve) => setTimeout(resolve, 0));
+				}
 
 				// Set position after processing initial content
 				this.lastPosition = initialStats.size;
@@ -303,33 +369,36 @@ export class RobloxInstance {
 				this.lastFileSize = 0;
 			}
 		} catch (err) {
-			console.error('[Roblox.Instance] Error reading initial log content:', err);
+			Logger.error('Error reading initial log content:', err);
 			this.lastPosition = 0;
 			this.lastFileSize = 0;
 		}
 
 		// Initialize performance monitoring
 		this.pollCount = 0;
-		this.lastPerformanceLog = Date.now();
-		this.lastPollTime = Date.now();
+		this.lastPerformanceLog = performance.now();
+		this.lastPollTime = performance.now();
 
-		// Set up polling interval
+		// Set up 60fps polling interval
 		this.pollInterval = setInterval(() => {
 			this.checkForNewContent().catch((err) => {
-				console.error('[Roblox.Instance] Error in poll interval:', err);
+				Logger.error('Error in poll interval:', err);
 			});
 		}, this.POLL_INTERVAL);
 
 		// Set up directory watcher as backup
 		this.watcherId = await filesystem.createWatcher(this.logsDirectory);
-		console.info(`[Roblox.Instance] Created directory watcher with ID: ${this.watcherId}`);
+		Logger.info(`Created directory watcher with ID: ${this.watcherId}`);
 
 		this.watchHandler = async (evt: any) => {
 			if (!this.isWatching || !this.latestLogPath || evt.detail.id !== this.watcherId) return;
 
 			// Trigger immediate check if file changed
 			if (evt.detail.path === this.latestLogPath) {
-				await this.checkForNewContent();
+				// Use setTimeout to make it non-blocking
+				setTimeout(() => {
+					this.checkForNewContent().catch(Logger.error);
+				}, 0);
 			}
 		};
 
@@ -338,41 +407,49 @@ export class RobloxInstance {
 	}
 
 	private processLines(lines: string[]) {
-		// Process high-frequency events first (GameMessageEntry)
-		const messageLines = lines.filter((line) => Patterns.find((p) => p.event === 'GameMessageEntry')?.regex.test(line));
+		try {
+			// Process high-frequency events first (GameMessageEntry)
+			const messageLines = lines.filter((line) => {
+				const pattern = Patterns.find((p) => p.event === 'GameMessageEntry');
+				return pattern?.regex.test(line);
+			});
 
-		for (const line of messageLines) {
-			const match = line.match(Patterns.find((p) => p.event === 'GameMessageEntry')!.regex);
-			if (match) {
-				this.emit('gameEvent', {
-					event: 'GameMessageEntry',
-					data: match[0],
-				});
-			}
-		}
-
-		// Process other events
-		for (const entry of Entries) {
-			const includedLines = lines.filter((line) => line.includes(entry.match));
-			for (const line of includedLines) {
-				this.emit('gameEvent', { event: entry.event, data: line });
-			}
-		}
-
-		// Process remaining pattern matches
-		for (const pattern of Patterns) {
-			// Skip GameMessageEntry as it's already processed
-			if (pattern.event === 'GameMessageEntry') continue;
-
-			const matchedLines = lines.filter((line) => pattern.regex.test(line));
-			// if (pattern.event === 'GameJoinedEntry' && matchedLines.length > 0) {
-			// }
-			for (const line of matchedLines) {
-				const match = line.match(pattern.regex);
-				if (match) {
-					this.emit('gameEvent', { event: pattern.event, data: match[0] });
+			for (const line of messageLines) {
+				const pattern = Patterns.find((p) => p.event === 'GameMessageEntry');
+				if (pattern) {
+					const match = line.match(pattern.regex);
+					if (match) {
+						this.emit('gameEvent', {
+							event: 'GameMessageEntry',
+							data: match[0],
+						});
+					}
 				}
 			}
+
+			// Process other events
+			for (const entry of Entries) {
+				const includedLines = lines.filter((line) => line.includes(entry.match));
+				for (const line of includedLines) {
+					this.emit('gameEvent', { event: entry.event, data: line });
+				}
+			}
+
+			// Process remaining pattern matches
+			for (const pattern of Patterns) {
+				// Skip GameMessageEntry as it's already processed
+				if (pattern.event === 'GameMessageEntry') continue;
+
+				const matchedLines = lines.filter((line) => pattern.regex.test(line));
+				for (const line of matchedLines) {
+					const match = line.match(pattern.regex);
+					if (match) {
+						this.emit('gameEvent', { event: pattern.event, data: match[0] });
+					}
+				}
+			}
+		} catch (err) {
+			Logger.error('Error processing lines:', err);
 		}
 	}
 
@@ -387,12 +464,16 @@ export class RobloxInstance {
 			this.pollInterval = null;
 		}
 
+		// Clear processing queue
+		this.processingQueue = [];
+		this.isProcessing = false;
+
 		if (this.watcherId) {
 			try {
 				await filesystem.removeWatcher(this.watcherId);
 				events.off('watchFile', this.watchHandler);
 			} catch (err) {
-				console.error('[Roblox.Instance] Error removing file watcher:', err);
+				Logger.error('Error removing file watcher:', err);
 			}
 			this.watcherId = null;
 		}
@@ -411,9 +492,9 @@ export class RobloxInstance {
 		const gameInstancePid = this.gameInstance;
 		await this.cleanup();
 		if (withoutRoblox) {
-			console.info('[Roblox.Instance] Closing this instance');
+			Logger.info('Closing this instance');
 		} else {
-			console.info('[Roblox.Instance] Quitting Roblox');
+			Logger.info('Quitting Roblox');
 			await shell('kill', ['-9', gameInstancePid]);
 		}
 	}

@@ -7,7 +7,9 @@
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Engine')
-		.setDescription('Advanced Roblox engine and interface settings')
+		.setDescription(
+			'Advanced Roblox engine and interface settings. <span style="color: hsl(var(--destructive));">Note: Many presets were removed due to the recent introduction of a fast flags allowlist by Roblox.</span>'
+		)
 		.setId('engine')
 		.addCategory((category) =>
 			category
@@ -25,45 +27,18 @@
 						{ label: 'Vulkan', value: 'vulkan' },
 						{ label: 'OpenGL', value: 'opengl' },
 					],
-				})
-				.addSlider({
-					label: 'FPS Target',
-					description:
-						'Sets the maximum number of frames per second. <br><span style="color: hsl(var(--warning));">Requires the Vulkan graphics API (Option above).</span>',
-					id: 'fps_target',
-					default: [60],
-					min: 1,
-					max: 240,
-					step: 1,
 					toggleable: {
-						id: 'engine',
-						type: 'select',
-						value: 'vulkan',
+						id: 'fps_cap',
+						type: 'switch',
+						value: false,
 					},
-				})
-				.addSelect({
-					label: 'Lighting Technology',
-					description: 'Override game lighting technology',
-					id: 'lightning',
-					items: [
-						{ label: 'Default', value: 'default' },
-						{ label: 'Voxel', value: 'voxel' },
-						{ label: 'ShadowMap', value: 'shadowmap' },
-						{ label: 'Future', value: 'future' },
-					],
-					default: 'default',
 				})
 				.addSwitch({
-					label: 'Disable Voxel Shadows',
+					label: 'Remove frame rate limit',
 					description:
-						'Remove shadows when using Voxel lighting <br><span style="color: hsl(var(--warning));">Requires Voxel lightning (Option above).</span>',
-					id: 'disable_voxel_shadows',
+						'Removes the limit of 60 frames per second imposed by MacOS (You will have to use the built-in FPS changer in Roblox in addition of this option). <br><span style="color: hsl(var(--warning));">This option is unstable as it requires the old and unspported OpenGL graphics API. You will probably get worse performance than when using Metal.</span>',
+					id: 'fps_cap',
 					default: false,
-					toggleable: {
-						id: 'lightning',
-						type: 'select',
-						value: 'voxel',
-					},
 				})
 				.addSwitch({
 					label: 'Separate Quality & Distance',
@@ -87,12 +62,6 @@
 					},
 				})
 				.addSwitch({
-					label: 'Visual Effects',
-					description: 'Enable post-processing effects',
-					id: 'postfx',
-					default: true,
-				})
-				.addSwitch({
 					label: 'Level-of-detail',
 					description: 'Reduce detail for distant objects',
 					id: 'lod',
@@ -111,53 +80,9 @@
 				.setDescription('Texture and visual enhancement settings')
 				.setId('visual')
 				.addSwitch({
-					label: 'Character Textures',
-					description: 'Enable player textures',
-					id: 'player_textures',
-					default: true,
-				})
-				.addSwitch({
 					label: 'Debug Skybox',
 					description: 'Use simple gray sky for testing',
 					id: 'debug_sky',
-					default: false,
-				})
-		)
-		.addCategory((category) =>
-			category
-				.setName('Interface')
-				.setDescription('UI customization options')
-				.setId('ui')
-				.addSelect({
-					label: 'Menu Style',
-					description: 'Choose in-game menu version',
-					id: 'menu_version',
-					items: [
-						{ label: 'Version 2 (2020)', value: 'v2' },
-						{ label: 'Default (Chrome)', value: 'default' },
-					],
-					default: 'default',
-				})
-		)
-		.addCategory((category) =>
-			category
-				.setName('Features')
-				.setDescription('Additional functionality')
-				.setId('utility')
-				.addSwitch({
-					label: 'GUI Shortcuts',
-					description: `Keyboard shortcuts to toggle UI elements (You need to be in the <a href="https://www.roblox.com/groups/8699949/AppleBlox-enjoyers#!/about">AppleBlox group</a>):
-                   </br>&nbspCMD + Shift + B: Toggles GUIs in 3D space (BillboardGuis, etc)
-					</br>&nbspCMD + Shift + C: Toggles game-defined ScreenGuis
-					</br>&nbspCMD + Shift + G: Toggles Roblox CoreGuis
-					</br>&nbspCMD + Shift + N: Toggles player names, and other that shows...`,
-					id: 'gui',
-					default: false,
-				})
-				.addSwitch({
-					label: 'Disable Telemetry',
-					description: 'Disable Roblox analytics collection',
-					id: 'telemetry',
 					default: false,
 				})
 		)

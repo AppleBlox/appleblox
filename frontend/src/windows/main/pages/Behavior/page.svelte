@@ -1,14 +1,17 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import { os } from '@neutralinojs/lib';
+	import { events, os } from '@neutralinojs/lib';
 	import { BugOff, CopyCheck, PictureInPicture, Play } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
-	import LoadingSpinner from '../components/loading-spinner.svelte';
-	import { SettingsPanelBuilder } from '../components/settings';
-	import Panel from '../components/settings/panel.svelte';
-	import type { SettingsOutput } from '../components/settings/types';
-	import Roblox from '../ts/roblox';
+	import LoadingSpinner from '../../components/loading-spinner.svelte';
+	import RobloxDownloadButton from '../../components/roblox/roblox-download-button.svelte';
+	import { SettingsPanelBuilder, setValue } from '../../components/settings';
+	import Panel from '../../components/settings/panel.svelte';
+	import type { SettingsOutput } from '../../components/settings/types';
+	import Roblox from '../../ts/roblox';
+	import MultiInstanceWarning from './multi-instance-warning.svelte';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let render = true;
 
@@ -30,7 +33,7 @@
 				try {
 					await Roblox.Utils.createShortcut();
 				} catch (err) {
-					console.error('[RobloxPanel] ', err);
+					Logger.error(err);
 					toast.error('An error occured while trying to save the shortcut', {
 						duration: 2000,
 					});
@@ -46,6 +49,16 @@
 			case 'delegate':
 				await Roblox.Delegate.toggle(state);
 				break;
+			case 'background_updates':
+				try {
+					await Roblox.Updates.setLaunchAgentState(state);
+				} catch (err) {
+					await setValue('roblox.background.background_updates', !state);
+					events.broadcast('app:reload');
+					if ((err as Error).message.includes('-128')) return;
+					toast.error('An error ocurred while setting Roblox background updates state');
+					Logger.error('An error ocurred while setting Roblox background updates state:', err);
+				}
 		}
 	}
 
@@ -55,29 +68,15 @@
 		.setId('roblox') // Not updating the ID to preserve old settings
 		.addCategory((category) =>
 			category
-				.setName('Multiple Instances')
-				.setDescription('Run multiple Roblox instances simultaneously')
-				.setId('multi_instances')
-				.addButton({
-					label: 'Enable Multi-Instance',
-					description: 'Update patch to allow multiple Roblox windows',
-					id: 'multi_roblox_btn',
-					variant: 'default',
-					icon: { component: CopyCheck },
-				})
-				.addButton({
-					label: 'New Instance',
-					description: 'Open an additional Roblox instance',
-					id: 'open_instance_btn',
-					variant: 'secondary',
-					icon: { component: PictureInPicture },
-				})
-				.addButton({
-					label: 'Close All',
-					description: 'Force close all Roblox windows (You should save your progress first)',
-					id: 'close_roblox_btn',
-					variant: 'destructive',
-					icon: { component: BugOff },
+				.setName('Background Processes')
+				.setDescription('Control background processes related to Roblox')
+				.setId('background')
+				.addSwitch({
+					label: 'Background updates',
+					description:
+						'Automatically update Roblox without needing AppleBlox or Roblox to opened. <br><span style="color: hsl(var(--warning));">(Requires administrator permissions)</span>',
+					default: false,
+					id: 'background_updates',
 				})
 		)
 		.addCategory((category) =>
@@ -118,6 +117,46 @@
 					variant: 'default',
 					icon: { component: Play },
 				})
+				.addCustom({
+					label: '',
+					description: '',
+					id: 'download_roblox',
+					component: RobloxDownloadButton,
+					separator: false,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Multiple Instances')
+				.setDescription('Run multiple Roblox instances simultaneously')
+				.setId('multi_instances')
+				.addCustom({
+					component: MultiInstanceWarning,
+					id: 'multi_instance_warning',
+					label: '',
+					description: '',
+				})
+				.addButton({
+					label: 'Enable Multi-Instance',
+					description: 'Update patch to allow multiple Roblox windows',
+					id: 'multi_roblox_btn',
+					variant: 'default',
+					icon: { component: CopyCheck },
+				})
+				.addButton({
+					label: 'New Instance',
+					description: 'Open an additional Roblox instance',
+					id: 'open_instance_btn',
+					variant: 'secondary',
+					icon: { component: PictureInPicture },
+				})
+				.addButton({
+					label: 'Close All',
+					description: 'Force close all Roblox windows (You should save your progress first)',
+					id: 'close_roblox_btn',
+					variant: 'destructive',
+					icon: { component: BugOff },
+				})
 		)
 		.build();
 
@@ -130,7 +169,7 @@
 				},
 			};
 		} catch (err) {
-			console.warn("Couldn't load overrides:", err);
+			Logger.warn("Couldn't load overrides:", err);
 		}
 	}
 </script>

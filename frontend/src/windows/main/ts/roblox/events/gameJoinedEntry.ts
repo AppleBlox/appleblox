@@ -1,7 +1,8 @@
 import { getValue } from '@/windows/main/components/settings';
 import { Notification } from '../../tools/notifications';
-import { curlGet } from '../../utils';
 import type { GameEventInfo } from '../instance';
+import Logger from '@/windows/main/ts/utils/logger';
+import { Curl } from '../../tools/curl';
 
 interface IPResponse {
 	ip: string;
@@ -22,11 +23,15 @@ async function gameJoinedEntry(data: GameEventInfo) {
 	// Prevent notifications spam
 	if (server === lastJoinedServer) return;
 	lastJoinedServer = server;
-	console.info(`[Activity] Current server: ${server[0]}, Port: ${server[1]}`);
+	Logger.info(`Current server: ${server[0]}, Port: ${server[1]}`);
 	if ((await getValue<boolean>('integrations.activity.notify_location')) === true) {
 		try {
-			const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
-			console.info(`[Activity] Server is located in "${ipReq.city}"`);
+			const response = await Curl.get(`https://ipinfo.io/${server[0]}/json`);
+			if (!response.success || !response.body) {
+				throw new Error(`Failed to fetch version info: ${response.error || 'No response body'}`);
+			}
+			const ipReq: IPResponse = JSON.parse(response.body);
+			Logger.info(`Server is located in "${ipReq.city}"`);
 
 			new Notification({
 				content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,

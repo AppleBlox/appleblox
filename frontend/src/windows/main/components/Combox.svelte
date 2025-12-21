@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { ChevronsUpDown, Check } from 'lucide-svelte';
+	import { Button } from '$lib/components/ui/button';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { cn } from '$lib/utils.js';
-	import { createEventDispatcher, tick } from 'svelte';
-	import { Button } from '$lib/components/ui/button';
 	import type { Selected } from 'bits-ui';
+	import { Check, ChevronsUpDown } from 'lucide-svelte';
+	import { createEventDispatcher, tick } from 'svelte';
 
 	let className = '';
 	export { className as class };

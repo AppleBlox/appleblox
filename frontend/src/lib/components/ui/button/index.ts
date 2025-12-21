@@ -40,4 +40,3 @@ export {
     //
     Root as Button, Root, buttonVariants, type Events as ButtonEvents, type Props as ButtonProps, type Events, type Props
 };
-

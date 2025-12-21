@@ -6,6 +6,7 @@
 @property (nonatomic, strong) NSFileHandle *logFileHandle;
 @property (nonatomic, strong) NSString *deeplinkArgument;
 @property (nonatomic, assign) BOOL isRequestingPermission;
+@property (nonatomic, assign) pid_t childPid;
 @end
 
 @implementation AppDelegate
@@ -47,9 +48,9 @@
 }
 
 - (void)setupActivationPolicy:(BOOL)browserMode {
-    if (browserMode) {
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-    }
+    // Hide bootstrap dock icon, show Neutralino icon
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
+    [self logMessage:@"Bootstrap running in accessory mode (hidden from dock)"];
 }
 
 - (void)centerWindow:(NSWindow *)window {
@@ -142,11 +143,11 @@
                                      @"--enable-extensions=true",
                                      @"--window-enable-inspector=true",
                                      nil];
-    
+
     if (browserMode) {
         [taskArguments addObject:@"--mode=browser"];
     }
-    
+
     if (self.deeplinkArgument) {
         [taskArguments addObject:self.deeplinkArgument];
     }
@@ -154,27 +155,28 @@
     self.mainTask.arguments = taskArguments;
     
     [self logMessage:[NSString stringWithFormat:@"Launching main executable with arguments: %@", taskArguments]];
-    
+
     self.outputPipe = [NSPipe pipe];
     self.mainTask.standardOutput = self.outputPipe;
     self.mainTask.standardError = self.outputPipe;
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleTaskOutput:)
                                                  name:NSFileHandleReadCompletionNotification
                                                object:[self.outputPipe fileHandleForReading]];
-    
+
     [[self.outputPipe fileHandleForReading] readInBackgroundAndNotify];
-    
+
     @try {
         [self.mainTask launch];
-        [self logMessage:@"Main executable launched successfully"];
+        self.childPid = [self.mainTask processIdentifier];
+        [self logMessage:[NSString stringWithFormat:@"Main executable launched successfully (PID: %d)", self.childPid]];
     } @catch (NSException *exception) {
         [self logMessage:[NSString stringWithFormat:@"ERROR: Failed to launch main executable: %@", exception.reason]];
         [NSApp terminate:nil];
         return;
     }
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(taskDidTerminate:)
                                                  name:NSTaskDidTerminateNotification
@@ -238,6 +240,7 @@
     [self logMessage:@"Main executable terminated, quitting bootstrap"];
     [NSApp terminate:nil];
 }
+
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     [self logMessage:@"Bootstrap is terminating, killing main executable"];

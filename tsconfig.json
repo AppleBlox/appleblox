@@ -1,6 +1,7 @@
 {
 	"extends": "@tsconfig/svelte/tsconfig.json",
 	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
 		"target": "ESNext",
 		"lib": ["DOM", "ESNext"],
 		"useDefineForClassFields": true,
@@ -14,6 +15,7 @@
 		 * Note that setting allowJs false does not prevent the use
 		 * of JS in `.svelte` files.
 		 */
+		"types": ["node"],
 		"strict": true,
 		"allowJs": true,
 		"checkJs": true,
@@ -27,5 +29,6 @@
 		}
 	},
 	"include": ["frontend/src/**/*.ts", "frontend/src/**/*.js", "frontend/src/**/*.svelte"],
+	"exclude": ["**/*.test.ts", "**/*.spec.ts", "tests/**/*"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

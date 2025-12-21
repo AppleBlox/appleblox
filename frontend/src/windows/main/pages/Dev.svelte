@@ -1,221 +1,234 @@
 <script lang="ts">
-	import { LucideAArrowUp } from 'lucide-svelte';
+	import { LucideSettings } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
+	import RobloxDownloadButton from '../components/roblox/roblox-download-button.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
-	import { Notification } from '../ts/tools/notifications';
 	import Roblox from '../ts/roblox';
+	import { Notification } from '../ts/tools/notifications';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	export let render = true;
 
-	async function onButtonClick(e: CustomEvent) {
-		const { id } = e.detail as { id: string };
-		if (!id.endsWith('_notif')) {
-			switch (id) {
-				case 'backup':
-					try {
-						Roblox.Mods.createBackup(true);
-						toast.success('Created backup :3', { duration: 3000 });
-					} catch (err) {
-						toast.error("Couldn't create backup", { duration: 3000 });
-						console.error(err);
-					}
-					break;
-			}
+	const notificationTypes: any = {
+		normal: () => ({
+			title: 'Standard Notification',
+			content: 'This is a standard notification with basic content.',
+			contentImage: 'https://i.scdn.co/image/ab67616d00001e0227047720beaa8d2b4c236380',
+			closeLabel: 'Close',
+			dropdownLabel: 'Options',
+			subtitle: 'System Message',
+			sound: 'hero',
+		}),
+		reply: () => ({
+			title: 'Reply Required',
+			content: 'This notification requires a response from the user.',
+			reply: true,
+		}),
+		action: () => ({
+			title: 'Action Selection',
+			content: 'Please select one of the available actions below.',
+			actions: [
+				{ label: 'Approve', value: 'approve' },
+				{ label: 'Reject', value: 'reject' },
+				{ label: 'Review', value: 'review' },
+			],
+		}),
+		timeout: () => ({
+			title: 'Timed Notification',
+			content: 'This notification will automatically close in 5 seconds.',
+			timeout: 5,
+		}),
+	};
+
+	async function handleButtonClick(event: CustomEvent) {
+		const { id } = event.detail as { id: string };
+
+		if (id === 'backup') {
+			await handleBackupCreation();
+			return;
 		}
-		const action = id.split('_')[0];
-		switch (action) {
-			case 'normal': {
-				const notif = new Notification({
-					title: 'Hello world',
-					content: 'Hiiii :3',
-					contentImage: 'https://i.scdn.co/image/ab67616d00001e0227047720beaa8d2b4c236380',
-					closeLabel: 'Close now',
-					dropdownLabel: 'The menu thingy',
-					subtitle: 'une tuile',
-					sound: 'hero',
-				});
-				notif.show();
-				notif.on('clicked', () => {
-					toast.info('Notif clicked');
-				});
-				break;
-			}
-			case 'reply': {
-				const notif = new Notification({
-					title: 'Reply notif',
-					content: 'aw hewl nah',
-					reply: true,
-				});
-				notif.show();
-				notif.on('clicked', () => {
-					toast.info('Notif clicked');
-				});
-				notif.on('replied', (reply) => {
-					toast.info(`Notif replied to: ${reply}`);
-				});
-				break;
-			}
-			case 'action': {
-				const notif = new Notification({
-					title: 'Action thingy',
-					content: 'kewl :D',
-					actions: [
-						{ label: 'This', value: 'this' },
-						{ label: 'Aber', value: 'aber' },
-						{ label: 'Schokolade', value: 'chocolat' },
-					],
-				});
-				notif.show();
-				notif.on('clicked', () => {
-					toast.info('Notif clicked');
-				});
-				notif.on('action', (action) => {
-					toast.info(`Notif action "${action.label}": "${action.value}"`);
-				});
-				break;
-			}
-			case 'timeout': {
-				const notif = new Notification({
-					title: 'Timeout clock',
-					content: 'This will be gone in 5 seconds',
-					timeout: 5,
-				});
-				notif.show();
-				notif.on('clicked', () => {
-					toast.info('Notif clicked');
-				});
-				notif.on('timeout', () => {
-					toast.info('Notification timeout');
-				});
-				break;
-			}
+
+		const [action, type] = id.split('_');
+		if (action in notificationTypes) {
+			handleNotificationTest(action as keyof typeof notificationTypes);
 		}
 	}
 
-	const devPanel = new SettingsPanelBuilder()
-		.setName('Dev Panel')
-		.setDescription('A panel to test dev things.')
-		.setId('dev')
+	async function handleBackupCreation() {
+		try {
+			await Roblox.Mods.createBackup(true);
+			toast.success('Backup created successfully', { duration: 3000 });
+		} catch (error) {
+			toast.error('Failed to create backup', { duration: 3000 });
+			Logger.error('Backup creation failed:', error);
+		}
+	}
+
+	function handleNotificationTest(type: keyof typeof notificationTypes) {
+		const config = notificationTypes[type]();
+		const notification = new Notification(config);
+
+		notification.show();
+
+		notification.on('clicked', () => {
+			toast.info('Notification clicked');
+		});
+
+		if (type === 'reply') {
+			notification.on('replied', (reply: string) => {
+				toast.info(`Reply received: ${reply}`);
+			});
+		}
+
+		if (type === 'action') {
+			notification.on('action', (action: { label: string; value: string }) => {
+				toast.info(`Action selected: ${action.label} (${action.value})`);
+			});
+		}
+
+		if (type === 'timeout') {
+			notification.on('timeout', () => {
+				toast.info('Notification timed out');
+			});
+		}
+	}
+
+	// Get launch arguments from Neutralino
+	const launchArgs = window.NL_ARGS.join(' ')
+
+	const developmentPanel = new SettingsPanelBuilder()
+		.setName('Development Panel')
+		.setDescription('Tools and utilities for development and testing.')
+		.setId('development')
 		.addCategory((category) =>
 			category
-				.setName('Widgets')
-				.setDescription('All possible widgets')
-				.setId('widgets')
-				.addButton({ label: 'Button', description: 'Button Widget', id: 'button', variant: 'default' })
-				.addCustom({
-					label: 'Custom',
-					description: 'Custom Widget',
-					id: 'custom',
-					component: LucideAArrowUp,
-				})
-				.addEmpty({ label: 'Empty', description: 'Empty Widget', id: 'empty' })
-				.addFilePicker({
-					label: 'Filepicker All',
-					description: 'Filepicker Widget (Accepts Anything)',
-					id: 'filepicker_all',
-				})
-				.addFilePicker({
-					label: 'Filepicker Png',
-					description: 'Filepicker Widget (Accepts only Png)',
-					id: 'filepicker_png',
-					accept: ['png'],
-				})
-				.addInput({ label: 'Input', description: 'Input Widget', id: 'input', default: '', blacklist: '!?123' })
-				.addSelect({
-					label: 'Select',
-					description: 'Select Widget',
-					id: 'select',
-					items: [
-						{ label: 'Element one', value: 'one' },
-						{ label: 'Another', value: 'another' },
-					],
-					default: 'one',
-				})
-				.addSlider({
-					label: 'Slider',
-					description: 'Slider Widget',
-					id: 'slider',
-					max: 100,
-					min: 1,
-					step: 1,
-					default: [10],
-				})
-				.addSlider({
-					label: 'Slider Step',
-					description: 'Slider Step Widget',
-					id: 'slider_step',
-					max: 100,
-					min: 1,
-					step: 0.5,
-					default: [10.5],
-				})
-				.addSwitch({ label: 'Switch', description: 'switch', id: 'switch', default: true })
-				.addButton({
-					label: 'Test toggle step',
-					description: 'Requires Slider Step value [35.5]',
-					id: 'slider_step_toggle_test',
-					variant: 'default',
-					toggleable: { id: 'slider_step', type: 'slider', value: [36.5] },
-				})
-				.addSelect({
-					label: 'Test toggle input',
-					description: 'Requires input value "balls"',
-					id: 'select_toggle_test',
-					items: [
-						{ label: 'Default', value: 'default' },
-						{ label: 'An option!!', value: 'option' },
-					],
-					default: 'default',
-					toggleable: {
-						id: 'input',
-						type: 'input',
-						value: 'balls',
-					},
+				.setName('Application Info')
+				.setDescription('Information about the running application')
+				.setId('appinfo')
+				.addInput({
+					label: 'Launch Arguments',
+					description: 'Command-line arguments passed to Neutralino (read-only)',
+					id: 'launch_args',
+					default: launchArgs,
 				})
 		)
 		.addCategory((category) =>
 			category
-				.setName('Notifications')
-				.setDescription('test notifs :3')
+				.setName('Interface Components')
+				.setDescription('Test various UI components and widgets')
+				.setId('components')
+				.addButton({
+					label: 'Standard Button',
+					description: 'Basic button component',
+					id: 'standard_button',
+					variant: 'default',
+				})
+				.addCustom({
+					label: 'Icon Component',
+					description: 'Custom icon widget',
+					id: 'icon_component',
+					component: LucideSettings,
+				})
+				.addInput({
+					label: 'Text Input',
+					description: 'Standard text input field',
+					id: 'text_input',
+					default: '',
+					blacklist: '!@#$%',
+				})
+				.addSelect({
+					label: 'Dropdown Selection',
+					description: 'Select from predefined options',
+					id: 'dropdown_select',
+					items: [
+						{ label: 'Option A', value: 'option_a' },
+						{ label: 'Option B', value: 'option_b' },
+						{ label: 'Option C', value: 'option_c' },
+					],
+					default: 'option_a',
+				})
+				.addSlider({
+					label: 'Value Slider',
+					description: 'Numeric value selection',
+					id: 'value_slider',
+					max: 100,
+					min: 0,
+					step: 1,
+					default: [50],
+				})
+				.addSwitch({
+					label: 'Toggle Switch',
+					description: 'Boolean value toggle',
+					id: 'toggle_switch',
+					default: false,
+				})
+				.addFilePicker({
+					label: 'File Selection',
+					description: 'Choose files from system',
+					id: 'file_picker',
+					accept: ['png', 'jpg', 'jpeg'],
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Notification System')
+				.setDescription('Test different notification types and behaviors')
 				.setId('notifications')
 				.addButton({
-					label: 'Normal',
-					description: 'Normal notification',
-					id: 'normal_notif',
+					label: 'Standard Notification',
+					description: 'Display a basic notification',
+					id: 'normal_test',
 					variant: 'outline',
 				})
 				.addButton({
-					label: 'Reply',
-					description: 'Reply notification',
-					id: 'reply_notif',
+					label: 'Reply Notification',
+					description: 'Notification with reply functionality',
+					id: 'reply_test',
 					variant: 'outline',
 				})
 				.addButton({
-					label: 'Action',
-					description: 'Action notification',
-					id: 'action_notif',
+					label: 'Action Notification',
+					description: 'Notification with action buttons',
+					id: 'action_test',
 					variant: 'outline',
 				})
 				.addButton({
-					label: 'Timeout',
-					description: 'Timeout notification',
-					id: 'timeout_notif',
+					label: 'Timeout Notification',
+					description: 'Auto-dismissing notification',
+					id: 'timeout_test',
 					variant: 'outline',
 				})
 		)
 		.addCategory((category) =>
-			category.setName('Others').setId('others').setDescription('balls').addButton({
-				label: 'Create Resources backup',
-				description: "Saves the Roblox's resources inside AppleBlox/cache",
-				id: 'backup',
-				variant: 'default',
-			})
+			category
+				.setName('System Operations')
+				.setDescription('System-level operations and utilities')
+				.setId('system')
+				.addButton({
+					label: 'Create Backup',
+					description: 'Generate a backup of Roblox resources',
+					id: 'backup',
+					variant: 'default',
+				})
+				.addCustom({
+					component: RobloxDownloadButton,
+					description: '',
+					id: 'roblox_download',
+					label: '',
+					separator: false,
+				})
 		)
 		.build();
 </script>
 
-<div>
-	<Panel panel={devPanel} {render} on:button={onButtonClick} />
-	<h2>Args: "{window.NL_ARGS}"</h2>
+<div class="development-panel">
+	<Panel panel={developmentPanel} {render} on:button={handleButtonClick} />
 </div>
+
+<style>
+	.development-panel {
+		min-height: 100vh;
+		padding: 1rem;
+	}
+</style>
