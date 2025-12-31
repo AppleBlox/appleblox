@@ -66,7 +66,7 @@ The build script utilizes pre-compiled binaries for `alerter` and `discord-rpc-c
 
 ## Contributing
 
-Contributions are welcome. Please feel free to submit issues, pull requests, or discuss ideas. For further discussion, contact `contact@origaming.ch` or reach out on Discord `@Origaming`.
+Contributions are welcome. Please feel free to submit issues, pull requests, or discuss ideas. For further discussion, contact `contact@origaming.ch` or reach out on Discord `@Origaming`. 
 
 ## Gallery
 
