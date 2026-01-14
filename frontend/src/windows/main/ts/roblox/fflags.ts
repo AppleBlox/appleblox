@@ -4,7 +4,7 @@ import { toast } from 'svelte-sonner';
 import { getAllProfiles, getSelectedProfile, writeProfile, type Profile } from '../../components/flag-editor';
 import { getConfigPath } from '../../components/settings';
 import shellFS from '../tools/shellfs';
-import { getMostRecentRoblox } from './path';
+import { detectRobloxPath } from './path';
 import Logger from '@/windows/main/ts/utils/logger';
 import { getValue, loadSettings } from '../../components/settings';
 
@@ -90,7 +90,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.quality_distance',
 			type: 'slider',
 			value: async (settingValue) => {
-				return settingValue === true && (await getValue<boolean>('engine.graphics.quality_distance_toggle')) === true;
+				return !!settingValue && (await getValue<boolean>('engine.graphics.quality_distance_toggle')) === true;
 			},
 		})
 		.addFlag({
@@ -213,7 +213,11 @@ export class RobloxFFlags {
 
 	static async writeClientAppSettings() {
 		Logger.info('Writing ClientAppSettings...');
-		const filePath = path.join(await getMostRecentRoblox(), 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
+		const robloxPath = await detectRobloxPath();
+		if (!robloxPath) {
+			throw new Error('Roblox installation not found. Cannot write ClientAppSettings.');
+		}
+		const filePath = path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
 
 		if (await shellFS.exists(filePath)) {
 			await filesystem.remove(filePath);

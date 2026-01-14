@@ -34,7 +34,7 @@
 					},
 				})
 				.addSwitch({
-					label: 'Remove frame rate limit',
+					label: 'Remove Frame Rate Limit',
 					description:
 						'Removes the limit of 60 frames per second imposed by MacOS (You will have to use the built-in FPS changer in Roblox in addition of this option). <br><span style="color: hsl(var(--warning));">This option is unstable as it requires the old and unspported OpenGL graphics API. You will probably get worse performance than when using Metal.</span>',
 					id: 'fps_cap',
@@ -52,7 +52,7 @@
 					description: 'Set base quality level (render distance controlled in-game)',
 					id: 'quality_distance',
 					default: [5],
-					max: 10,
+					max: 21,
 					min: 1,
 					step: 1,
 					toggleable: {
