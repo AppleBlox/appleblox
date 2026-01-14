@@ -4,18 +4,10 @@ import { RobloxFFlags } from './fflags';
 import { RobloxInstance } from './instance';
 import { launchRoblox } from './launch';
 import { RobloxMods } from './mods';
-import { getMostRecentRoblox } from './path';
+import { PathManager } from './path-manager';
 import { RobloxUpdates } from './updates';
 import { RobloxUtils } from './utils';
 import * as RobloxVersion from './version';
-import Logger from '@/windows/main/ts/utils/logger';
-
-let robloxPath = '/Applications/Roblox.app'; // Most common path
-getMostRecentRoblox()
-	.then((path) => (robloxPath = path))
-	.catch((err) => {
-		Logger.error("An error occured while trying to get Roblox's most recent path:", err);
-	});
 
 class Roblox {
 	static FFlags = RobloxFFlags;
@@ -24,10 +16,27 @@ class Roblox {
 	static Mods = RobloxMods;
 	static Delegate = RobloxDelegate;
 	static launch = launchRoblox;
-	static path = robloxPath;
 	static Version = RobloxVersion;
 	static Downloader = RobloxDownloader;
 	static Updates = RobloxUpdates;
+
+	/**
+	 * Gets the current Roblox installation path.
+	 * Returns null if Roblox is not found.
+	 * @returns The path to Roblox.app, or null if not found
+	 */
+	static get path(): string | null {
+		return PathManager.getPath();
+	}
+
+	/**
+	 * Re-runs Roblox path detection.
+	 * Useful when user clicks "Re-detect" or when cached path becomes invalid.
+	 * @returns The newly detected path, or null if not found
+	 */
+	static async refreshPath(): Promise<string | null> {
+		return PathManager.refreshPath();
+	}
 }
 
 export default Roblox;

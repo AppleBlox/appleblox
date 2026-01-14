@@ -6,6 +6,7 @@ import { shell } from '../tools/shell';
 import { isProcessAlive, sleep } from '../utils';
 import { RobloxDelegate } from './delegate';
 import { RobloxUtils } from './utils';
+import Roblox from './index';
 import Logger from '@/windows/main/ts/utils/logger';
 
 type EventHandler = (data?: any) => void;
@@ -158,12 +159,36 @@ export class RobloxInstance {
 		Logger.info('Opening Roblox instance');
 		await RobloxDelegate.toggle(false);
 
-		if (url) {
-			await shell('open', [url]);
-			Logger.info(`Opening Roblox from URL.`);
+		// Check if legacy resolution is enabled
+		const useLegacyResolution = (await getValue<boolean>('mods.general.fix_res')) === true;
+
+		if (useLegacyResolution) {
+			// Launch binary directly with -AppleMagnifiedMode YES for legacy resolution
+			// Note: This may break voice chat as we're not using deeplink
+			const robloxPath = Roblox.path;
+			if (!robloxPath) {
+				throw new Error('Roblox installation not found. Cannot launch with legacy resolution.');
+			}
+			const binaryPath = path.join(robloxPath, 'Contents/MacOS/RobloxPlayer');
+
+			if (url) {
+				// Launch with URL and legacy resolution argument
+				await shell('open', ['-a', binaryPath, '--args', '-AppleMagnifiedMode', 'YES', url]);
+				Logger.info('Opening Roblox from URL with legacy resolution (may break voice chat).');
+			} else {
+				// Launch with legacy resolution argument only
+				await shell('open', ['-a', binaryPath, '--args', '-AppleMagnifiedMode', 'YES']);
+				Logger.info('Opening Roblox with legacy resolution (may break voice chat).');
+			}
 		} else {
-			await shell('open', ['roblox-player:']); // Experimental voice chat fix (we launch by deeplink instead of binary path)
-			Logger.info(`Opening Roblox from path.`);
+			// Normal launch via deeplink (supports voice chat)
+			if (url) {
+				await shell('open', [url]);
+				Logger.info('Opening Roblox from URL.');
+			} else {
+				await shell('open', ['roblox-player:']); // Experimental voice chat fix (we launch by deeplink instead of binary path)
+				Logger.info('Opening Roblox from deeplink.');
+			}
 		}
 
 		await sleep(1000);
@@ -178,7 +203,8 @@ export class RobloxInstance {
 			).stdOut.trim();
 			if (info.length < 2) continue;
 			const processFileName = path.basename(info);
-			if (processFileName === 'RobloxPlayer') {
+			console.log(processFileName)
+			if (processFileName.includes('RobloxPlayer')) {
 				this.gameInstance = Number.parseInt(pid);
 			}
 		}

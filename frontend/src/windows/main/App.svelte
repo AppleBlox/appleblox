@@ -3,11 +3,12 @@
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import Cat from '@/assets/panel/cat.gif';
-	import { events, os } from '@neutralinojs/lib';
+	import { events, Icon, os } from '@neutralinojs/lib';
 	import { ModeWatcher, setMode } from 'mode-watcher';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
+	import { toast } from 'svelte-sonner';
 	import Code from './components/code.svelte';
 	import FlagEditorPage from './components/flag-editor/flag-editor-page.svelte';
 	import Onboarding from './components/onboarding/onboarding.svelte';
@@ -23,12 +24,54 @@
 	import Mods from './pages/Mods.svelte';
 	import Workshop from './pages/Workshop.svelte';
 	import Roblox from './ts/roblox';
+	import { PathManager } from './ts/roblox/path-manager';
 	import { sleep } from './ts/utils/';
 	import Logger from '@/windows/main/ts/utils/logger';
 
 	let currentPage: string;
 	let onboardingLoaded: boolean = false;
 	let showMainContent = true;
+
+	// Initialize Roblox PathManager early
+	onMount(async () => {
+		try {
+			Logger.info('Initializing Roblox PathManager...');
+			await PathManager.initialize();
+
+			const robloxPath = PathManager.getPath();
+
+			if (!robloxPath) {
+				Logger.warn('Roblox not found on this Mac');
+
+				// Show notification
+				try {
+					await os.showNotification(
+						'Roblox Not Found',
+						'AppleBlox could not find Roblox. Please install Roblox or specify its location in settings.',
+						Icon.WARNING
+					);
+				} catch (err) {
+					Logger.error('Failed to show notification:', err);
+				}
+
+				// Show toast and redirect to Behavior settings
+				toast.warning('Roblox not found. Please install or specify the path in Behavior settings.', {
+					duration: 5000,
+				});
+
+				// Redirect to Behavior page after short delay
+				setTimeout(() => {
+					currentPage = 'roblox';
+					events.broadcast('ui:change_page', { id: 'roblox' });
+				}, 1000);
+			} else {
+				Logger.info(`Roblox found at: ${robloxPath}`);
+			}
+		} catch (err) {
+			Logger.error('Failed to initialize Roblox PathManager:', err);
+			toast.error('Error initializing Roblox path detection. Please check settings.');
+		}
+	});
 
 	$: {
 		setContext('pageData', {

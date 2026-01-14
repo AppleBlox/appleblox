@@ -130,7 +130,8 @@
 				})
 				.addSwitch({
 					label: 'Legacy Resolution',
-					description: 'Lower resolution for mods not designed for Retina displays',
+					description:
+						'Lower resolution for mods not designed for Retina displays. <br><span style="color: hsl(var(--warning));">This feature may break voice chat.</span>',
 					id: 'fix_res',
 					default: false,
 				})

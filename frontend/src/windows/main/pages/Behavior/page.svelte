@@ -5,6 +5,7 @@
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import LoadingSpinner from '../../components/loading-spinner.svelte';
+	import PathSelector from '../../components/roblox/path-selector.svelte';
 	import RobloxDownloadButton from '../../components/roblox/roblox-download-button.svelte';
 	import { SettingsPanelBuilder, setValue } from '../../components/settings';
 	import Panel from '../../components/settings/panel.svelte';
@@ -24,7 +25,12 @@
 				await Roblox.Utils.enableMultiInstance();
 				break;
 			case 'open_instance_btn':
-				os.spawnProcess(`${path.join(Roblox.path, 'Contents/MacOS/RobloxPlayer')}; exit`);
+				const rbxPath = Roblox.path
+				if (!rbxPath) {
+					toast.error("Could not find Roblox installation")
+					break;
+				}
+				os.spawnProcess(`${path.join(rbxPath, 'Contents/MacOS/RobloxPlayer')}; exit`);
 				break;
 			case 'close_roblox_btn':
 				closeRobloxPopup = true;
@@ -66,6 +72,20 @@
 		.setName('Roblox')
 		.setDescription('Roblox application settings and other bootstrapper behavior')
 		.setId('roblox') // Not updating the ID to preserve old settings
+		.addCategory((category) =>
+			category
+				.setName('Roblox Installation')
+				.setDescription('Configure how AppleBlox detects your Roblox installation')
+				.setId('installation')
+				.addCustom({
+					label: 'Installation Path',
+					description:
+						'AppleBlox automatically searches your entire Mac for Roblox using Spotlight. You can override this by manually selecting a path.',
+					id: 'path_selector',
+					component: PathSelector,
+					separator: true,
+				})
+		)
 		.addCategory((category) =>
 			category
 				.setName('Background Processes')

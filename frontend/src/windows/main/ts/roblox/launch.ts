@@ -14,7 +14,7 @@ import onGameEvent from './events';
 import { RobloxFFlags } from './fflags';
 import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
-import { getMostRecentRoblox } from './path';
+import { detectRobloxPath } from './path';
 import { RobloxUtils } from './utils';
 import Logger from '../utils/logger';
 
@@ -241,16 +241,8 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	if (allowFixedDelays) await sleep(250);
 	await RobloxMods.applyCustomFont();
 
-	await updateBootstrapper('bootstrapper:text', { text: 'Configuring graphics settings...' });
-	await updateBootstrapper('bootstrapper:progress', { progress: 65 });
-	if (allowFixedDelays) await sleep(300);
-	await RobloxMods.toggleHighRes(!settings.fixResolution);
-
-	if (settings.areModsEnabled && settings.fixResolution) {
-		await updateBootstrapper('bootstrapper:text', { text: 'Optimizing resolution settings...' });
-		await updateBootstrapper('bootstrapper:progress', { progress: 70 });
-		if (allowFixedDelays) await sleep(350);
-	}
+	// Legacy resolution is now handled via launch argument in RobloxInstance.start()
+	// No need to modify plist file anymore
 
 	await updateBootstrapper('bootstrapper:text', { text: 'Initializing Roblox instance...' });
 	await updateBootstrapper('bootstrapper:progress', { progress: 80 });
@@ -289,7 +281,7 @@ async function setupRobloxInstance(
 			os.open('https://www.roblox.com');
 		}
 		await RobloxMods.restoreRobloxFolders(settings.areModsEnabled);
-		await RobloxMods.toggleHighRes(true);
+		// Legacy resolution is now handled via launch argument, no plist cleanup needed
 		RPCController.stop();
 
 		handlers.setRobloxConnected(false);
@@ -366,7 +358,10 @@ export async function launchRoblox(
 			return;
 		}
 
-		const robloxPath = await getMostRecentRoblox();
+		const robloxPath = await detectRobloxPath();
+		if (!robloxPath) {
+			throw new Error('Roblox installation not found. Cannot launch Roblox.');
+		}
 		await prepareRobloxSettings(robloxPath, fflags);
 
 		try {
@@ -385,7 +380,7 @@ export async function launchRoblox(
 				try {
 					await RobloxMods.restoreRobloxFolders(settings.areModsEnabled);
 					await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
-					await RobloxMods.toggleHighRes(true);
+					// Legacy resolution is now handled via launch argument, no plist cleanup needed
 				} catch (cleanupErr) {
 					logger.error('Error during error cleanup:', cleanupErr);
 				}
