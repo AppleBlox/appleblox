@@ -23,27 +23,63 @@
 	import SidebarBtn from './sidebar-btn.svelte';
 	import ColorImage from '../color-image.svelte';
 	import * as Card from '$lib/components/ui/card/index';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Roblox from '../../ts/roblox';
 	import RobloxDownloadDialog from '../roblox/roblox-download-dialog.svelte';
+	import { RotateCcw } from 'lucide-svelte';
+	import type { GameHistoryEntry } from '../../ts/activity/types';
+
+	function getTooltipText(game: GameHistoryEntry): string {
+		if (game.servers.length > 0) {
+			const server = game.servers[0];
+			const { city, country } = server.region;
+			const location = city && country ? `${city}, ${country}` : country || 'Unknown';
+			return `Rejoin ${game.name} in ${location}`;
+		}
+		return `Replay ${game.name}`;
+	}
 
 	export let isLaunched: boolean = false;
 	export let currentPage = 'integrations';
 	export let id: string;
 	let showInstallDialog = false;
 	let robloxInstalled = true; // Assume installed until checked
+	let lastPlayedGame: GameHistoryEntry | null = null;
 
-	// Check if Roblox is installed on mount
+	// Check if Roblox is installed on mount and load last played game
 	import { onMount } from 'svelte';
 	onMount(async () => {
 		robloxInstalled = await Roblox.Utils.hasRoblox();
+		await loadLastPlayedGame();
 	});
+
+	// Refresh last played game when Roblox session ends
+	let wasLaunched = false;
+	$: {
+		if (wasLaunched && !isLaunched) {
+			// Session just ended, refresh history
+			loadLastPlayedGame();
+		}
+		wasLaunched = isLaunched;
+	}
+
+	async function loadLastPlayedGame() {
+		try {
+			const { ActivityHistoryManager } = await import('../../ts/activity');
+			const history = await ActivityHistoryManager.getHistory();
+			lastPlayedGame = history.length > 0 ? history[0] : null;
+		} catch {
+			lastPlayedGame = null;
+		}
+	}
+
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
+		{ label: 'History', id: 'history', icon: WorkshopIcon },
 		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },
 		{ label: 'Engine', id: 'engine', icon: EngineIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
-		// { label: 'Workshop', id: 'Workshop', icon: WorkshopIcon },
 		{ label: 'Appearance', id: 'appearance', icon: AppearanceIcon },
 		{ label: 'Misc', id: 'misc', icon: MiscIcon },
 		{ label: 'Info', id: 'info', icon: CreditsIcon },
@@ -91,7 +127,21 @@
 	}
 
 	// Launch roblox event
-	const dispatch = createEventDispatcher<{ launchRoblox: boolean }>();
+	const dispatch = createEventDispatcher<{ launchRoblox: { url?: string } }>();
+
+	async function handleRejoin() {
+		if (!lastPlayedGame) return;
+		let url: string;
+		// If there's a server, rejoin that specific server
+		if (lastPlayedGame.servers.length > 0) {
+			const lastServer = lastPlayedGame.servers[0];
+			url = `roblox://experiences/start?placeId=${lastPlayedGame.placeId}&gameInstanceId=${lastServer.jobId}`;
+		} else {
+			// Otherwise just launch the game
+			url = `roblox://experiences/start?placeId=${lastPlayedGame.placeId}`;
+		}
+		dispatch('launchRoblox', { url });
+	}
 </script>
 
 <Card.Root
@@ -116,6 +166,32 @@
 	<div class="flex flex-col items-center mb-4 mt-auto">
 		<p class="text-sm text-muted-foreground mb-2">v{version}</p>
 
+		{#if lastPlayedGame && !isLaunched}
+			<div class="w-full px-4 mb-2">
+				<Tooltip.Root openDelay={0}>
+					<Tooltip.Trigger asChild let:builder>
+						<Button
+							builders={[builder]}
+							variant="outline"
+							class="font-mono w-full text-sm"
+							on:click={handleRejoin}
+						>
+							<RotateCcw class="w-4 h-4 mr-1.5" />
+							<span class="truncate">{lastPlayedGame.servers.length > 0 ? 'Rejoin' : 'Replay'}</span>
+						</Button>
+					</Tooltip.Trigger>
+					<Tooltip.Content side="right" class="flex items-center gap-2 max-w-xs">
+						<img
+							src={lastPlayedGame.iconUrl}
+							alt={lastPlayedGame.name}
+							class="w-6 h-6 rounded-full object-cover flex-shrink-0"
+						/>
+						<span class="text-sm">{getTooltipText(lastPlayedGame)}</span>
+					</Tooltip.Content>
+				</Tooltip.Root>
+			</div>
+		{/if}
+
 		<div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave} role="tooltip" class="w-full px-4">
 			<Button
 				class={`${
@@ -133,7 +209,7 @@
 
 					const isInstalled = await Roblox.Utils.hasRoblox();
 					if (isInstalled) {
-						dispatch('launchRoblox', true);
+						dispatch('launchRoblox', {});
 					} else {
 						showInstallDialog = true;
 					}

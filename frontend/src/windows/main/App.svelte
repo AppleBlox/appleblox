@@ -14,6 +14,7 @@
 	import Onboarding from './components/onboarding/onboarding.svelte';
 	import Sidebar from './components/sidebar/sidebar.svelte';
 	import Updater from './components/updater.svelte';
+	import History from './pages/History.svelte';
 	import Appearance from './pages/Appearance.svelte';
 	import BehaviorPage from './pages/Behavior/page.svelte';
 	import Dev from './pages/Dev.svelte';
@@ -149,12 +150,19 @@
 			showMainContent = true;
 		}, 10);
 	});
+
+	// Handle game launches from History page
+	events.on('history:launchGame', (evt: CustomEvent) => {
+		const { url } = evt.detail;
+		launchRobloxWithHandlers(true, url);
+	});
 </script>
 
 {#if showMainContent}
 	<main>
 		<div>
 			<Integrations render={false} />
+			<History render={false} />
 			<Engine render={false} />
 			<Misc render={false} />
 			<Mods render={false} />
@@ -168,14 +176,16 @@
 				<Sidebar
 					bind:currentPage
 					bind:isLaunched={launchInfo.isConnected}
-					on:launchRoblox={async () => {
-						await launchRobloxWithHandlers();
+					on:launchRoblox={async (e) => {
+						await launchRobloxWithHandlers(true, e.detail.url);
 					}}
 					id="sidebar"
 				/>
 				<div class="fixed overflow-y-scroll max-h-full top-0 left-48 w-[83%]" class:blur-sm={launchInfo.launching}>
 					{#if currentPage == 'integrations'}
 						<Integrations />
+					{:else if currentPage === 'history'}
+						<History />
 					{:else if currentPage === 'engine'}
 						<Engine />
 					{:else if currentPage === 'misc'}
