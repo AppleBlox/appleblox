@@ -16,15 +16,31 @@ interface IPResponse {
 	readme: string;
 }
 
-let lastJoinedServer: string[] | null = null;
+let lastJoinedServerIP: string | null = null;
 async function gameJoinedEntry(data: GameEventInfo) {
 	// Add the join server button
 	const server = data.data.substring(10).split('|');
-	// Prevent notifications spam
-	if (server === lastJoinedServer) return;
-	lastJoinedServer = server;
+	// Prevent notifications spam (compare by IP address value, not array reference)
+	if (server[0] === lastJoinedServerIP) return;
+	lastJoinedServerIP = server[0];
 	Logger.info(`Current server: ${server[0]}, Port: ${server[1]}`);
-	if ((await getValue<boolean>('integrations.activity.notify_location')) === true) {
+
+	// Get settings with defaults (true) if they don't exist yet
+	let notifyLocation = true;
+	let historyEnabled = true;
+	try {
+		notifyLocation = (await getValue<boolean>('integrations.activity.notify_location')) === true;
+	} catch {
+		// Setting doesn't exist yet, use default
+	}
+	try {
+		historyEnabled = (await getValue<boolean>('history.tracking.enabled')) !== false;
+	} catch {
+		// Setting doesn't exist yet, use default
+	}
+
+	// Only fetch IP info if we need it for notifications or history
+	if (notifyLocation || historyEnabled) {
 		try {
 			const response = await Curl.get(`https://ipinfo.io/${server[0]}/json`);
 			if (!response.success || !response.body) {
@@ -33,19 +49,42 @@ async function gameJoinedEntry(data: GameEventInfo) {
 			const ipReq: IPResponse = JSON.parse(response.body);
 			Logger.info(`Server is located in "${ipReq.city}"`);
 
-			new Notification({
-				content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
-				title: 'Server Joined',
-				timeout: 5,
-				sound: 'frog',
-			}).show();
+			// Capture server for activity history
+			if (historyEnabled) {
+				try {
+					const { ActivityHistoryManager, getEventContext } = await import('../../activity');
+					const ctx = getEventContext();
+					if (ctx) {
+						await ActivityHistoryManager.addServerToGame(ctx.placeId, {
+							jobId: ctx.jobId,
+							serverIP: server[0],
+							joinedAt: Date.now(),
+							region: { city: ipReq.city, region: ipReq.region, country: ipReq.country },
+						});
+					}
+				} catch (error) {
+					Logger.error('Failed to add server to activity history:', error);
+				}
+			}
+
+			// Show notification if enabled
+			if (notifyLocation) {
+				new Notification({
+					content: `Your server is located in ${ipReq.city}, ${ipReq.region}, ${ipReq.country}`,
+					title: 'Server Joined',
+					timeout: 5,
+					sound: 'frog',
+				}).show();
+			}
 		} catch {
-			new Notification({
-				content: "Something wrong happened while displaying server's region",
-				title: 'An error occured',
-				timeout: 5,
-				sound: 'hero',
-			});
+			if (notifyLocation) {
+				new Notification({
+					content: "Something wrong happened while displaying server's region",
+					title: 'An error occured',
+					timeout: 5,
+					sound: 'hero',
+				});
+			}
 		}
 	}
 }

@@ -107,6 +107,33 @@ async function gameJoiningEntry(data: GameEventInfo) {
 	}
 
 	RPCController.set(rpcOptions);
+
+	// Capture game for activity history (default to enabled)
+	let historyEnabled = true;
+	try {
+		historyEnabled = (await getValue<boolean>('history.tracking.enabled')) !== false;
+	} catch {
+		// Setting doesn't exist yet, use default (true)
+	}
+
+	if (historyEnabled) {
+		try {
+			const { ActivityHistoryManager, setEventContext } = await import('../../activity');
+			if (jobId) {
+				setEventContext(placeId, jobId);
+			}
+			await ActivityHistoryManager.addGameEntry({
+				placeId,
+				universeId: String(universeId),
+				name: gameInfo.name,
+				creator: gameInfo.creator.name,
+				iconUrl: gameImage.imageUrl,
+				lastPlayed: Date.now(),
+			});
+		} catch (error) {
+			Logger.error('Failed to add game to activity history:', error);
+		}
+	}
 }
 
 export default gameJoiningEntry;
