@@ -202,7 +202,7 @@
 						</p>
 						{#each category.widgets || [] as widget (widget.id)}
 							<!-- Separator for the widgets (except button) -->
-							{#if widget.options.type !== 'button' && widget.options.type !== 'separator' && (widget.separator === undefined || widget.separator === true)}
+							{#if !category.hideSeparator && widget.options.type !== 'button' && widget.options.type !== 'separator' && (widget.separator === undefined || widget.separator === true)}
 								<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
 							{/if}
 							<!-- Disable the widget if the button it is linked to is disabled -->
