@@ -209,8 +209,8 @@
 							<div
 								class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-30 select-one group pointer-events-none'}`}
 							>
-								<!-- Description of the widget (except button) -->
-								{#if widget.options.type !== 'button'}
+								<!-- Description of the widget (except button and custom with no label) -->
+								{#if widget.options.type !== 'button' && !(widget.options.type === 'custom' && !widget.label)}
 									<div class={widget.options.type === 'slider' ? 'w-[500px]' : ''}>
 										<p class="font-bold text-foreground">
 											{widget.label}

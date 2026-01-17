@@ -78,12 +78,11 @@
 				.setDescription('Configure how AppleBlox detects your Roblox installation')
 				.setId('installation')
 				.addCustom({
-					label: 'Installation Path',
-					description:
-						'AppleBlox automatically searches your entire Mac for Roblox using Spotlight. You can override this by manually selecting a path.',
+					label: '',
+					description: '',
 					id: 'path_selector',
 					component: PathSelector,
-					separator: true,
+					separator: false,
 				})
 		)
 		.addCategory((category) =>

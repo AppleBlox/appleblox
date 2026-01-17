@@ -152,6 +152,11 @@ events.on('ready', async () => {
 			}
 			setTimeout(async () => {
 				try {
+					// Initialize PathManager before launching (required since App.svelte doesn't mount)
+					const { PathManager } = await import('./ts/roblox/path-manager');
+					await PathManager.initialize();
+					deeplinkLogger.info('PathManager initialized for deeplink launch');
+
 					await Roblox.launch(
 						(isConnected) => deeplinkLogger.info(`Roblox Connected: ${isConnected}`),
 						(isLaunching) => deeplinkLogger.info(`Launching Roblox State: ${isLaunching}`),

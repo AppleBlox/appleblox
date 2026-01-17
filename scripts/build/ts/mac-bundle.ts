@@ -140,12 +140,17 @@ async function generateInfoPlist(appDist: string, logger: Signale) {
 		throw new Error('macOS config not found');
 	}
 
+	const copyright = BuildConfig.copyright || `Copyright © ${new Date().getFullYear()} ${BuildConfig.appName}`;
+	const urlSchemeName = `${BuildConfig.appName} URL Scheme`;
+
 	const InfoPlistTemplate = (await Bun.file(resolve(__dirname, '../templates/mac/Info.plist')).text())
-		.replace('{APP_NAME}', BuildConfig.appName)
-		.replace('{APP_ID}', neuConfig.applicationId)
-		.replace('{APP_BUNDLE}', BuildConfig.appBundleName)
-		.replace('{APP_MIN_OS}', BuildConfig.mac.minimumOS)
-		.replace('{APP_VERSION}', version);
+		.replace(/{APP_NAME}/g, BuildConfig.appName)
+		.replace(/{APP_ID}/g, neuConfig.applicationId)
+		.replace(/{APP_BUNDLE}/g, BuildConfig.appBundleName)
+		.replace(/{APP_MIN_OS}/g, BuildConfig.mac.minimumOS)
+		.replace(/{APP_VERSION}/g, version)
+		.replace(/{APP_COPYRIGHT}/g, copyright)
+		.replace(/{APP_URL_SCHEME_NAME}/g, urlSchemeName);
 
 	await Bun.write(InfoPlist, InfoPlistTemplate);
 	logger.success('Generated Info.plist');

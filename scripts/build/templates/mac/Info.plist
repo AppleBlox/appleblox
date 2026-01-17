@@ -6,8 +6,10 @@
         <true />
         <key>CFBundleExecutable</key>
         <string>bootstrap</string>
-        <key>CFBundleGetInfoString</key>
+        <key>CFBundleDisplayName</key>
         <string>{APP_NAME}</string>
+        <key>CFBundleGetInfoString</key>
+        <string>{APP_NAME} {APP_VERSION}, {APP_COPYRIGHT}</string>
         <key>CFBundleIconFile</key>
         <string>icon.icns</string>
         <key>CFBundleIdentifier</key>
@@ -16,12 +18,14 @@
         <string>{APP_BUNDLE}</string>
         <key>CFBundleShortVersionString</key>
         <string>{APP_VERSION}</string>
-        <key>CFBundleGetInfoString</key>
-        <string>{APP_NAME} {APP_VERSION}</string>
+        <key>CFBundleVersion</key>
+        <string>{APP_VERSION}</string>
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>LSMinimumSystemVersion</key>
         <string>{APP_MIN_OS}</string>
+        <key>NSHumanReadableCopyright</key>
+        <string>{APP_COPYRIGHT}</string>
         <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSAllowsArbitraryLoads</key>
@@ -31,7 +35,7 @@
         <array>
             <dict>
                 <key>CFBundleURLName</key>
-                <string>{APP_ID}</string>
+                <string>{APP_URL_SCHEME_NAME}</string>
                 <key>CFBundleURLSchemes</key>
                 <array>
                     <string>appleblox</string>

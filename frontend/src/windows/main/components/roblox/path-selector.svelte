@@ -106,80 +106,83 @@
 	}
 </script>
 
-<div class="path-selector space-y-3 p-4 border rounded-lg bg-card">
-	<!-- Path Display -->
-	<div class="space-y-1">
-		<div class="flex items-center justify-between">
-			<span class="text-sm font-medium text-muted-foreground">Current Path:</span>
-			{#if isValid}
-				<span class="flex items-center gap-1.5 text-xs">
-					<CheckCircle2 class="w-4 h-4 text-green-500" />
-					<span class="text-green-500">{isCustom ? 'User-specified' : 'Auto-detected'}</span>
-				</span>
-			{:else}
-				<span class="flex items-center gap-1.5 text-xs">
-					<XCircle class="w-4 h-4 text-red-500" />
-					<span class="text-red-500">Not found</span>
-				</span>
-			{/if}
-		</div>
+<div class="path-selector w-full">
+	<!-- Header -->
+	<div class="mb-4">
+		<h3 class="font-bold text-foreground text-lg">Installation Path</h3>
+		<p class="text-[13px] text-foreground opacity-85 mt-1">
+			AppleBlox automatically searches your entire Mac for Roblox using Spotlight. You can override this by
+			manually selecting a path.
+		</p>
+	</div>
 
-		<div class="flex items-center gap-2">
+	<!-- Path Display Card -->
+	<div class="space-y-4 p-4 border rounded-lg bg-card">
+		<div class="space-y-2">
+			<div class="flex items-center justify-between mb-1">
+				<span class="text-sm font-medium text-muted-foreground">Current Path:</span>
+				{#if isValid}
+					<span class="flex items-center gap-1.5 text-xs">
+						<CheckCircle2 class="w-4 h-4 text-green-500" />
+						<span class="text-green-500">{isCustom ? 'User-specified' : 'Auto-detected'}</span>
+					</span>
+				{:else}
+					<span class="flex items-center gap-1.5 text-xs">
+						<XCircle class="w-4 h-4 text-red-500" />
+						<span class="text-red-500">Not found</span>
+					</span>
+				{/if}
+			</div>
+
 			<code
-				class="flex-1 text-sm px-3 py-2 rounded bg-muted {isValid
+				class="block w-full text-sm px-3 py-2 rounded bg-muted {isValid
 					? 'text-foreground'
 					: 'text-muted-foreground italic'}"
 			>
 				{currentPath || 'Roblox installation not detected'}
 			</code>
 		</div>
-	</div>
 
-	<!-- Action Buttons -->
-	<div class="flex flex-wrap gap-2">
-		<!-- Browse Button -->
-		<Tooltip.Root>
-			<Tooltip.Trigger>
-				<Button variant="outline" size="sm" on:click={browsePath}>
-					<FolderOpen class="w-4 h-4 mr-2" />
-					Browse...
-				</Button>
-			</Tooltip.Trigger>
-			<Tooltip.Content>Manually select Roblox.app location</Tooltip.Content>
-		</Tooltip.Root>
-
-		<!-- Re-detect or Clear Override -->
-		{#if isCustom}
+		<!-- Action Buttons -->
+		<div class="flex flex-wrap gap-2">
+			<!-- Browse Button -->
 			<Tooltip.Root>
 				<Tooltip.Trigger>
-					<Button variant="outline" size="sm" on:click={clearOverride}>
-						<XCircle class="w-4 h-4 mr-2" />
-						Clear Override
+					<Button variant="outline" size="sm" on:click={browsePath}>
+						<FolderOpen class="w-4 h-4 mr-2" />
+						Browse...
 					</Button>
 				</Tooltip.Trigger>
-				<Tooltip.Content>Revert to automatic detection</Tooltip.Content>
+				<Tooltip.Content>Manually select Roblox.app location</Tooltip.Content>
 			</Tooltip.Root>
-		{:else}
-			<Tooltip.Root>
-				<Tooltip.Trigger>
-					<Button variant="outline" size="sm" on:click={reDetect} disabled={isDetecting}>
-						<RefreshCw class="w-4 h-4 mr-2 {isDetecting ? 'animate-spin' : ''}" />
-						Re-detect
-					</Button>
-				</Tooltip.Trigger>
-				<Tooltip.Content>Search for Roblox again</Tooltip.Content>
-			</Tooltip.Root>
-		{/if}
 
-		<!-- Download Button (only if not found) -->
-		{#if !isValid}
-			<RobloxDownloadButton />
-		{/if}
+			<!-- Re-detect or Clear Override -->
+			{#if isCustom}
+				<Tooltip.Root>
+					<Tooltip.Trigger>
+						<Button variant="outline" size="sm" on:click={clearOverride}>
+							<XCircle class="w-4 h-4 mr-2" />
+							Clear Override
+						</Button>
+					</Tooltip.Trigger>
+					<Tooltip.Content>Revert to automatic detection</Tooltip.Content>
+				</Tooltip.Root>
+			{:else}
+				<Tooltip.Root>
+					<Tooltip.Trigger>
+						<Button variant="outline" size="sm" on:click={reDetect} disabled={isDetecting}>
+							<RefreshCw class="w-4 h-4 mr-2 {isDetecting ? 'animate-spin' : ''}" />
+							Re-detect
+						</Button>
+					</Tooltip.Trigger>
+					<Tooltip.Content>Search for Roblox again</Tooltip.Content>
+				</Tooltip.Root>
+			{/if}
+
+			<!-- Download Button (only if not found) -->
+			{#if !isValid}
+				<RobloxDownloadButton />
+			{/if}
+		</div>
 	</div>
-
-	<!-- Info Text -->
-	<p class="text-xs text-muted-foreground">
-		AppleBlox automatically searches your entire Mac<br/>for Roblox using Spotlight. You can override this by manually
-		selecting a path.
-	</p>
 </div>
