@@ -159,16 +159,18 @@ export class RobloxInstance {
 		Logger.info('Opening Roblox instance');
 		await RobloxDelegate.toggle(false);
 
+		// Get the configured Roblox path (either custom or auto-detected)
+		const robloxPath = Roblox.path;
+		if (!robloxPath) {
+			throw new Error('Roblox installation not found. Cannot launch.');
+		}
+
 		// Check if legacy resolution is enabled
 		const useLegacyResolution = (await getValue<boolean>('mods.general.fix_res')) === true;
 
 		if (useLegacyResolution) {
 			// Launch binary directly with -AppleMagnifiedMode YES for legacy resolution
 			// Note: This may break voice chat as we're not using deeplink
-			const robloxPath = Roblox.path;
-			if (!robloxPath) {
-				throw new Error('Roblox installation not found. Cannot launch with legacy resolution.');
-			}
 			const binaryPath = path.join(robloxPath, 'Contents/MacOS/RobloxPlayer');
 
 			if (url) {
@@ -182,12 +184,13 @@ export class RobloxInstance {
 			}
 		} else {
 			// Normal launch via deeplink (supports voice chat)
+			// Use -a flag to ensure we launch the correct Roblox installation
 			if (url) {
-				await shell('open', [url]);
-				Logger.info('Opening Roblox from URL.');
+				await shell('open', ['-a', robloxPath, url]);
+				Logger.info(`Opening Roblox from URL using: ${robloxPath}`);
 			} else {
-				await shell('open', ['roblox-player:']); // Experimental voice chat fix (we launch by deeplink instead of binary path)
-				Logger.info('Opening Roblox from deeplink.');
+				await shell('open', ['-a', robloxPath, 'roblox-player:']);
+				Logger.info(`Opening Roblox from deeplink using: ${robloxPath}`);
 			}
 		}
 
