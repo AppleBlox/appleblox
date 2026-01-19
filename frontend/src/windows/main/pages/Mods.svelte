@@ -4,12 +4,15 @@
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book } from 'lucide-svelte';
 	import path from 'path-browserify';
+	import { toast } from 'svelte-sonner';
 	import ModsUi from '../components/mods-ui.svelte';
-	import { SettingsPanelBuilder } from '../components/settings';
+	import IconColorPicker from '../components/icon-color-picker.svelte';
+	import { SettingsPanelBuilder, getValue } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 	import shellFS from '../ts/tools/shellfs';
 	import Logger from '@/windows/main/ts/utils/logger';
 	import { getFontsCacheDir } from '../ts/utils/paths';
+	import { generateIconColorCache, removeIconColorCache } from '../ts/roblox/font-colorizer';
 
 	export let render = true;
 
@@ -78,6 +81,37 @@
 		}
 	}
 
+	async function onSwitchChanged(e: CustomEvent) {
+		const { id, state } = e.detail;
+		switch (id) {
+			case 'icon_color_enabled':
+				if (state) {
+					// When enabled, generate cache with saved color or default white
+					try {
+						let savedColor = '#FFFFFF';
+						try {
+							const color = await getValue<string | null>('mods.builtin.icon_color');
+							if (color) savedColor = color;
+						} catch {
+							// No saved color
+						}
+						await generateIconColorCache(savedColor);
+					} catch (err) {
+						Logger.error('Failed to generate icon color cache:', err);
+						toast.error(`Failed to generate icon color: ${(err as Error).message}`);
+					}
+				} else {
+					// When disabled, remove cache
+					try {
+						await removeIconColorCache();
+					} catch (err) {
+						Logger.error('Failed to remove icon color cache:', err);
+					}
+				}
+				break;
+		}
+	}
+
 	const panel = new SettingsPanelBuilder()
 		.setName('Mods')
 		.setDescription('Custom textures and UI enhancements')
@@ -92,6 +126,20 @@
 					description: 'Choose a custom font file to apply to Roblox',
 					id: 'custom_font',
 					accept: ['ttf', 'otf', 'ttc'],
+				})
+				.addSwitch({
+					label: 'Icons Color',
+					description: 'Change the color of Roblox UI icons',
+					id: 'icon_color_enabled',
+					default: false,
+				})
+				.addCustom({
+					label: '',
+					description: '',
+					id: 'icon_color_picker',
+					separator: false,
+					component: IconColorPicker,
+					toggleable: { id: 'icon_color_enabled', type: 'switch', value: true },
 				})
 		)
 		.addCategory((category) =>
@@ -165,4 +213,4 @@
 	};
 </script>
 
-<Panel {panel} on:button={onButtonClicked} on:fileChosen={onFileAdded} on:fileRemoved={onFileRemoved} {render} />
+<Panel {panel} on:button={onButtonClicked} on:fileChosen={onFileAdded} on:fileRemoved={onFileRemoved} on:switch={onSwitchChanged} {render} />

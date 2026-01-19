@@ -7,8 +7,9 @@ import { Notification } from '../tools/notifications';
 import { shell } from '../tools/shell';
 import shellFS from '../tools/shellfs';
 import Logger from '../utils/logger';
-import { getDataDir, getModsDir, getModsCacheDir, getFontsCacheDir } from '../utils/paths';
+import { getDataDir, getModsDir, getModsCacheDir, getFontsCacheDir, getCacheDir } from '../utils/paths';
 import { detectRobloxPath } from './path';
+import { getIconColorCacheDir, iconColorCacheExists } from './font-colorizer';
 
 const logger = Logger.withContext('Mods');
 
@@ -86,15 +87,8 @@ export class RobloxMods {
 		const resourcesFolder = path.join(robloxPath, 'Contents/Resources');
 		const resBackupFolder = path.join(await getModsCacheDir(), 'Resources');
 		if (!(await shellFS.exists(resBackupFolder))) {
-			if (areModsEnabled) {
-				toast.error("An error occured and mods couldn't be removed.");
-				new Notification({
-					title: 'Error while removing mods',
-					content: "An error occured and mods couldn't be removed.",
-					sound: 'sosumi',
-					timeout: 6,
-				}).show();
-			}
+			// No backup exists - this is fine if no mods were actually applied
+			// (e.g., mods enabled but no individual mods selected)
 			events.broadcast('mods:restoring', false);
 			return;
 		}
@@ -242,5 +236,129 @@ export class RobloxMods {
 			completeCommand: true,
 		});
 		logger.info(`Set NSHighResolutionCapable to ${state}`);
+	}
+
+	/** Applies the custom icon color */
+	static async applyIconColor() {
+		const robloxPath = Roblox.path;
+		if (!robloxPath) {
+			throw new Error('Roblox installation not found. Cannot apply icon color.');
+		}
+
+		// Check if icon color is enabled
+		let iconColorEnabled = false;
+		try {
+			iconColorEnabled = (await getValue('mods.builtin.icon_color_enabled')) === true;
+		} catch {
+			// Setting doesn't exist
+		}
+
+		if (!iconColorEnabled) return;
+
+		// Check if cache exists
+		if (!(await iconColorCacheExists())) {
+			logger.warn('Icon color is enabled but cache does not exist');
+			return;
+		}
+
+		logger.info('Applying custom icon color...');
+
+		const cacheDir = await getIconColorCacheDir();
+		const robloxBuilderIconsPath = path.join(
+			robloxPath,
+			'Contents/Resources/ExtraContent/LuaPackages/Packages/_Index/BuilderIcons/BuilderIcons'
+		);
+
+		// Copy cached colorized font files to Roblox
+		const cacheFontPath = path.join(cacheDir, 'Font');
+		const robloxFontPath = path.join(robloxBuilderIconsPath, 'Font');
+		if (await shellFS.exists(cacheFontPath)) {
+			await shellFS.merge(cacheFontPath + '/', robloxFontPath + '/');
+		}
+
+		// Copy the JSON file that references .otf files
+		const cacheJsonPath = path.join(cacheDir, 'BuilderIcons.json');
+		if (await shellFS.exists(cacheJsonPath)) {
+			await shellFS.copy(cacheJsonPath, path.join(robloxBuilderIconsPath, 'BuilderIcons.json'));
+		}
+
+		logger.info('Applied custom icon color');
+	}
+
+	/** Creates backup of BuilderIcons before any mods are applied */
+	static async createIconColorBackup() {
+		const robloxPath = Roblox.path;
+		if (!robloxPath) {
+			throw new Error('Roblox installation not found. Cannot create icon color backup.');
+		}
+
+		const iconColorBackupDir = path.join(await getCacheDir(), 'icon-color-backup');
+		if (await shellFS.exists(iconColorBackupDir)) {
+			// Backup already exists
+			return;
+		}
+
+		const robloxBuilderIconsPath = path.join(
+			robloxPath,
+			'Contents/Resources/ExtraContent/LuaPackages/Packages/_Index/BuilderIcons/BuilderIcons'
+		);
+
+		// Only create backup if BuilderIcons exists
+		if (!(await shellFS.exists(robloxBuilderIconsPath))) {
+			return;
+		}
+
+		logger.info('Creating backup of original BuilderIcons...');
+		await shellFS.createDirectory(iconColorBackupDir);
+		await shellFS.copy(path.join(robloxBuilderIconsPath, 'Font'), path.join(iconColorBackupDir, 'Font'), true);
+		await shellFS.copy(
+			path.join(robloxBuilderIconsPath, 'BuilderIcons.json'),
+			path.join(iconColorBackupDir, 'BuilderIcons.json')
+		);
+		logger.info('Created backup of original BuilderIcons');
+	}
+
+	/** Removes the custom icon color and restores original files */
+	static async removeIconColor(restoreFiles = true) {
+		const robloxPath = Roblox.path;
+		if (!robloxPath) {
+			throw new Error('Roblox installation not found. Cannot remove icon color.');
+		}
+
+		const iconColorBackupDir = path.join(await getCacheDir(), 'icon-color-backup');
+		if (!(await shellFS.exists(iconColorBackupDir))) {
+			// No backup exists, nothing to restore
+			return;
+		}
+
+		logger.info('Removing custom icon color...');
+
+		if (restoreFiles) {
+			const robloxBuilderIconsPath = path.join(
+				robloxPath,
+				'Contents/Resources/ExtraContent/LuaPackages/Packages/_Index/BuilderIcons/BuilderIcons'
+			);
+
+			// Restore font files from backup
+			const backupFontPath = path.join(iconColorBackupDir, 'Font');
+			const robloxFontPath = path.join(robloxBuilderIconsPath, 'Font');
+
+			if (await shellFS.exists(backupFontPath)) {
+				// Remove modified font files and restore originals
+				await shellFS.remove(robloxFontPath);
+				await shellFS.copy(backupFontPath, robloxFontPath, true);
+			}
+
+			// Restore JSON file from backup
+			const backupJsonPath = path.join(iconColorBackupDir, 'BuilderIcons.json');
+			if (await shellFS.exists(backupJsonPath)) {
+				await shellFS.copy(backupJsonPath, path.join(robloxBuilderIconsPath, 'BuilderIcons.json'));
+			}
+		}
+
+		// Remove backup
+		await shellFS.remove(iconColorBackupDir);
+
+		logger.info('Removed custom icon color');
 	}
 }

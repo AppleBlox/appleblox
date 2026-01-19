@@ -229,6 +229,12 @@ async function prepareRobloxSettings(robloxPath: string, fflags: any): Promise<v
 }
 
 async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string): Promise<RobloxInstance> {
+	// Create icon color backup BEFORE mods are applied (so we have the original files)
+	await updateBootstrapper('bootstrapper:text', { text: 'Creating backups...' });
+	await updateBootstrapper('bootstrapper:progress', { progress: 53 });
+	if (allowFixedDelays) await sleep(150);
+	await RobloxMods.createIconColorBackup();
+
 	if (settings.areModsEnabled) {
 		await updateBootstrapper('bootstrapper:text', { text: 'Copying mod files...' });
 		await updateBootstrapper('bootstrapper:progress', { progress: 55 });
@@ -240,6 +246,12 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	await updateBootstrapper('bootstrapper:progress', { progress: 60 });
 	if (allowFixedDelays) await sleep(250);
 	await RobloxMods.applyCustomFont();
+
+	// Apply icon color AFTER mods so it takes priority over any mod-modified BuilderIcons
+	await updateBootstrapper('bootstrapper:text', { text: 'Applying icon color...' });
+	await updateBootstrapper('bootstrapper:progress', { progress: 70 });
+	if (allowFixedDelays) await sleep(200);
+	await RobloxMods.applyIconColor();
 
 	// Legacy resolution is now handled via launch argument in RobloxInstance.start()
 	// No need to modify plist file anymore
@@ -281,6 +293,9 @@ async function setupRobloxInstance(
 			os.open('https://www.roblox.com');
 		}
 		await RobloxMods.restoreRobloxFolders(settings.areModsEnabled);
+		// Always restore from icon-color-backup since mods might be disabled
+		// (in which case restoreRobloxFolders doesn't restore the Resources folder)
+		await RobloxMods.removeIconColor(true);
 		// Legacy resolution is now handled via launch argument, no plist cleanup needed
 		RPCController.stop();
 
@@ -379,6 +394,7 @@ export async function launchRoblox(
 			setTimeout(async () => {
 				try {
 					await RobloxMods.restoreRobloxFolders(settings.areModsEnabled);
+					await RobloxMods.removeIconColor(true);
 					await shellFS.remove(path.join(robloxPath, 'Contents/MacOS/ClientSettings/'));
 					// Legacy resolution is now handled via launch argument, no plist cleanup needed
 				} catch (cleanupErr) {
