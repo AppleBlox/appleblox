@@ -46,6 +46,11 @@
 	let robloxInstalled = true; // Assume installed until checked
 	let lastPlayedGame: GameHistoryEntry | null = null;
 
+	// CMD + R to install Roblox
+	events.on('installRoblox', () => {
+		showInstallDialog = true;
+	});
+
 	// Check if Roblox is installed on mount and load last played game
 	import { onMount } from 'svelte';
 	onMount(async () => {
@@ -72,7 +77,6 @@
 			lastPlayedGame = null;
 		}
 	}
-
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
@@ -107,10 +111,13 @@
 	let isHovering = false;
 	$: buttonState = isLaunched ? (isHovering ? 'Kill' : 'Active') : robloxInstalled ? 'Play' : 'Install';
 	$: buttonIcon =
-		buttonState === 'Install' ? RobloxIcon :
-		buttonState === 'Play' ? PlayIcon :
-		buttonState === 'Active' ? RobloxIcon :
-		KillIcon;
+		buttonState === 'Install'
+			? RobloxIcon
+			: buttonState === 'Play'
+				? PlayIcon
+				: buttonState === 'Active'
+					? RobloxIcon
+					: KillIcon;
 
 	function handleMouseEnter() {
 		isHovering = true;
@@ -170,12 +177,7 @@
 			<div class="w-full px-4 mb-2">
 				<Tooltip.Root openDelay={0}>
 					<Tooltip.Trigger asChild let:builder>
-						<Button
-							builders={[builder]}
-							variant="outline"
-							class="font-mono w-full text-sm"
-							on:click={handleRejoin}
-						>
+						<Button builders={[builder]} variant="outline" class="font-mono w-full text-sm" on:click={handleRejoin}>
 							<RotateCcw class="w-4 h-4 mr-1.5" />
 							<span class="truncate">{lastPlayedGame.servers.length > 0 ? 'Rejoin' : 'Replay'}</span>
 						</Button>
