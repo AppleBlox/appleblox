@@ -1,5 +1,5 @@
 > [!NOTE]  
-> 0.9.0 will soon be released. You can try the [dev builds](https://appleblox.com/download/dev).
+> No, this project is not discontinued. Updates are coming. You can test them right now with the [dev builds](https://appleblox.com/download/dev).
 
 # AppleBlox
 
