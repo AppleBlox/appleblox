@@ -50,6 +50,13 @@ const sidecarFiles: SidecarFile[] = [
 		includeSuffix: true,
 	},
 	{
+		name: 'Keychain Helper',
+		filename: 'keychain.m',
+		type: 'objective-c',
+		args: ['-framework', 'Security', '-framework', 'Foundation'],
+		includeSuffix: true,
+	},
+	{
 		name: 'Transparent Viewer',
 		filename: 'transparent_viewer.swift',
 		type: 'swift',
