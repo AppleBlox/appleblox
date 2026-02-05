@@ -25,9 +25,9 @@
 				await Roblox.Utils.enableMultiInstance();
 				break;
 			case 'open_instance_btn':
-				const rbxPath = Roblox.path
+				const rbxPath = Roblox.path;
 				if (!rbxPath) {
-					toast.error("Could not find Roblox installation")
+					toast.error('Could not find Roblox installation');
 					break;
 				}
 				os.spawnProcess(`${path.join(rbxPath, 'Contents/MacOS/RobloxPlayer')}; exit`);
