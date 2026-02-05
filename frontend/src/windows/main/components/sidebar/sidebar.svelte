@@ -12,6 +12,8 @@
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
 	import WorkshopIcon from '@/assets/sidebar/workshop.png';
+	import HomeIcon from '@/assets/sidebar/misc.png';
+	import AccountIcon from '@/assets/sidebar/roblox.png';
 
 	import CreditsIcon from '@/assets/sidebar/info.png';
 	import MiscIcon from '@/assets/sidebar/misc.png';
@@ -79,6 +81,8 @@
 	}
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
+		{ label: 'Home', id: 'home', icon: HomeIcon },
+		{ label: 'Account', id: 'account', icon: AccountIcon },
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
 		{ label: 'History', id: 'history', icon: WorkshopIcon },
 		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },

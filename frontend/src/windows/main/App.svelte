@@ -24,6 +24,8 @@
 	import Misc from './pages/Misc.svelte';
 	import Mods from './pages/Mods.svelte';
 	import Workshop from './pages/Workshop.svelte';
+	import Account from './pages/Account.svelte';
+	import Home from './pages/Home.svelte';
 	import Roblox from './ts/roblox';
 	import { PathManager } from './ts/roblox/path-manager';
 	import { sleep } from './ts/utils/';
@@ -161,6 +163,8 @@
 {#if showMainContent}
 	<main>
 		<div>
+			<Home render={false} />
+			<Account render={false} />
 			<Integrations render={false} />
 			<History render={false} />
 			<Engine render={false} />
@@ -182,7 +186,11 @@
 					id="sidebar"
 				/>
 				<div class="fixed overflow-y-scroll max-h-full top-0 left-48 w-[83%]" class:blur-sm={launchInfo.launching}>
-					{#if currentPage == 'integrations'}
+					{#if currentPage === 'home'}
+						<Home />
+					{:else if currentPage === 'account'}
+						<Account />
+					{:else if currentPage == 'integrations'}
 						<Integrations />
 					{:else if currentPage === 'history'}
 						<History />
