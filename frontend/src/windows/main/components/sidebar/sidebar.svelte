@@ -11,7 +11,6 @@
 	import ModsIcon from '@/assets/sidebar/mods.png';
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
-	import WorkshopIcon from '@/assets/sidebar/workshop.png';
 	import HomeIcon from '@/assets/sidebar/misc.png';
 	import AccountIcon from '@/assets/sidebar/roblox.png';
 
@@ -81,10 +80,9 @@
 	}
 
 	const sidebarBtns: { label: string; id: string; icon: string }[] = [
-		{ label: 'Home', id: 'home', icon: HomeIcon },
+		{ label: 'Quickplay', id: 'home', icon: HomeIcon },
 		{ label: 'Account', id: 'account', icon: AccountIcon },
 		{ label: 'Integrations', id: 'integrations', icon: IntegrationsIcon },
-		{ label: 'History', id: 'history', icon: WorkshopIcon },
 		{ label: 'Behavior', id: 'roblox', icon: RobloxIcon },
 		{ label: 'Engine', id: 'engine', icon: EngineIcon },
 		{ label: 'Mods', id: 'mods', icon: ModsIcon },
