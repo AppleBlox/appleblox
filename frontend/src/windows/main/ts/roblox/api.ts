@@ -161,7 +161,9 @@ export async function getPublicServers(
  * This returns the DataCenterId which we need for region detection
  */
 export async function getJoinTicket(placeId: string, gameInstanceId: string): Promise<JoinGameResponse> {
+	logger.debug(`getJoinTicket: placeId=${placeId}, gameInstanceId=${gameInstanceId}`);
 	const csrfToken = await getCsrfToken();
+	logger.debug(`CSRF token obtained: ${csrfToken ? 'yes' : 'no'}`);
 
 	const headers: Record<string, string> = {
 		'Content-Type': 'application/json',
@@ -180,18 +182,22 @@ export async function getJoinTicket(placeId: string, gameInstanceId: string): Pr
 				placeId: parseInt(placeId, 10),
 				gameId: gameInstanceId,
 				gameJoinAttemptId: crypto.randomUUID(),
-				gamerTag: '',
-				isPlayTogetherGame: false,
 			},
 		},
 		true
 	);
 
 	if (response.status !== 200) {
+		logger.error(`Join ticket failed: status=${response.status}, body=${response.body.substring(0, 300)}`);
 		throw new Error(`Failed to get join ticket: ${response.status} - ${response.body}`);
 	}
 
-	return JSON.parse(response.body);
+	const parsed = JSON.parse(response.body);
+	logger.debug(`Join ticket parsed: jobId=${parsed.jobId}, status=${parsed.status}, joinScript keys=${parsed.joinScript ? Object.keys(parsed.joinScript).join(',') : 'none'}`);
+	if (parsed.status !== 2 && !parsed.joinScript) {
+		logger.warn(`Join ticket non-success: status=${parsed.status}, message=${parsed.message || 'none'}, raw=${response.body.substring(0, 500)}`);
+	}
+	return parsed;
 }
 
 /**
@@ -251,7 +257,9 @@ export async function getServerRegionInfo(
 	gameInstanceId: string
 ): Promise<{ dataCenterId: number | null; success: boolean }> {
 	try {
+		logger.debug(`getServerRegionInfo: placeId=${placeId}, gameInstanceId=${gameInstanceId}`);
 		const joinInfo = await getJoinTicket(placeId, gameInstanceId);
+		logger.debug(`Join ticket response: status=${joinInfo.status}, hasJoinScript=${!!joinInfo.joinScript}, DataCenterId=${joinInfo.joinScript?.DataCenterId}, MachineAddress=${joinInfo.joinScript?.MachineAddress}`);
 
 		return {
 			dataCenterId: joinInfo.joinScript?.DataCenterId ?? null,
@@ -266,6 +274,150 @@ export async function getServerRegionInfo(
 	}
 }
 
+/**
+ * Fetch the user's recently played games from Roblox API
+ * Uses the omni-recommendation discovery API (same as the website's home page)
+ * then enriches with game details and icons
+ */
+export async function getRecentGames(
+	maxGames = 50
+): Promise<
+	Array<{
+		placeId: string;
+		universeId: string;
+		name: string;
+		creator: string;
+		iconUrl: string;
+		lastPlayed: number;
+	}>
+> {
+	try {
+		const hasCookie = await hasRobloxCookie();
+		if (!hasCookie) {
+			return [];
+		}
+
+		// Use the discovery omni-recommendation API (what the Roblox website uses)
+		const response = await authenticatedRequest(
+			'https://apis.roblox.com/discovery-api/omni-recommendation',
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: {
+					pageType: 'Home',
+					sessionId: crypto.randomUUID(),
+					isTruncatedResultsEnabled: true,
+				},
+			},
+			true
+		);
+
+		if (response.status !== 200) {
+			logger.warn(`Discovery API failed: ${response.status}, body: ${response.body.substring(0, 200)}`);
+			return [];
+		}
+
+		const data = JSON.parse(response.body);
+		const sorts: Array<{
+			topic: string;
+			treatmentType: string;
+			recommendationList: Array<{ contentType: string; contentId: number }>;
+		}> = data.sorts || [];
+
+		// Find the "Continue Playing" / recently played sort
+		const recentSort = sorts.find(
+			(s) =>
+				s.topic?.includes('Continue') ||
+				s.topic?.includes('Recent') ||
+				s.topic?.includes('continue') ||
+				s.topic?.includes('Revisit')
+		);
+
+		if (!recentSort) {
+			logger.warn(
+				'Could not find Continue Playing sort. Available topics:',
+				sorts.map((s) => s.topic).join(', ')
+			);
+			return [];
+		}
+
+		logger.debug(`Found recent games sort: "${recentSort.topic}" with ${recentSort.recommendationList?.length || 0} games`);
+
+		// Extract universe IDs from the recommendation list
+		const universeIds = (recentSort.recommendationList || [])
+			.filter((r) => r.contentType === 'Game' || r.contentType === 'game' || r.contentId > 0)
+			.map((r) => r.contentId)
+			.slice(0, maxGames);
+
+		if (universeIds.length === 0) {
+			logger.debug('No universe IDs in Continue Playing sort');
+			return [];
+		}
+
+		// Fetch game details and icons in parallel
+		const [detailsRes, iconsRes] = await Promise.all([
+			Curl.get(`https://games.roblox.com/v1/games?universeIds=${universeIds.join(',')}`, {
+				headers: { Accept: 'application/json', 'User-Agent': 'AppleBlox/1.0' },
+			}),
+			Curl.get(
+				`https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeIds.join(',')}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`,
+				{
+					headers: { Accept: 'application/json', 'User-Agent': 'AppleBlox/1.0' },
+				}
+			),
+		]);
+
+		const detailsMap: Record<number, { name: string; creator: string; rootPlaceId: number }> = {};
+		if (detailsRes.success && detailsRes.body) {
+			const detailsData = JSON.parse(detailsRes.body);
+			for (const game of detailsData.data || []) {
+				detailsMap[game.id] = {
+					name: game.name,
+					creator: game.creator?.name || 'Unknown',
+					rootPlaceId: game.rootPlaceId,
+				};
+			}
+		}
+
+		const iconsMap: Record<number, string> = {};
+		if (iconsRes.success && iconsRes.body) {
+			const iconsData = JSON.parse(iconsRes.body);
+			for (const icon of iconsData.data || []) {
+				iconsMap[icon.targetId] = icon.imageUrl;
+			}
+		}
+
+		logger.debug(`Enriched ${Object.keys(detailsMap).length} games, ${Object.keys(iconsMap).length} icons`);
+
+		// Map in the original order from the recommendation list
+		return universeIds
+			.map((uid) => {
+				const details = detailsMap[uid];
+				if (!details) return null;
+
+				return {
+					placeId: String(details.rootPlaceId),
+					universeId: String(uid),
+					name: details.name,
+					creator: details.creator,
+					iconUrl: iconsMap[uid] || '',
+					lastPlayed: Date.now(),
+				};
+			})
+			.filter(Boolean) as Array<{
+			placeId: string;
+			universeId: string;
+			name: string;
+			creator: string;
+			iconUrl: string;
+			lastPlayed: number;
+		}>;
+	} catch (error) {
+		logger.warn('Failed to fetch recent games:', error);
+		return [];
+	}
+}
+
 export default {
 	getPublicServers,
 	getJoinTicket,
@@ -273,4 +425,5 @@ export default {
 	validateCookie,
 	isAuthenticated,
 	getServerRegionInfo,
+	getRecentGames,
 };
