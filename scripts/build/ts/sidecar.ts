@@ -64,6 +64,13 @@ const sidecarFiles: SidecarFile[] = [
 		includeSuffix: true,
 	},
 	{
+		name: 'Roblox Login WebView',
+		filename: 'roblox_login.swift',
+		type: 'swift',
+		args: ['-framework', 'Cocoa', '-framework', 'WebKit', '-framework', 'Security', '-target', 'x86_64-apple-macos11.0'],
+		includeSuffix: true,
+	},
+	{
 		name: 'Roblox Updater Script',
 		filename: 'roblox_updater.sh',
 		type: 'copy',

@@ -10,8 +10,10 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { storeRobloxCookie, deleteRobloxCookie, hasRobloxCookie } from '../../ts/tools/keychain';
 	import { validateCookie, type UserInfo } from '../../ts/roblox/api';
+	import { libraryPath } from '../../ts/libraries';
+	import { spawn } from '../../ts/tools/shell';
 	import Logger from '@/windows/main/ts/utils/logger';
-	import { Key, Trash2, RefreshCw, ShieldCheck, ExternalLink, User, AlertTriangle } from 'lucide-svelte';
+	import { Key, Trash2, RefreshCw, ShieldCheck, ExternalLink, User, AlertTriangle, Globe } from 'lucide-svelte';
 	import { Curl } from '../../ts/tools/curl';
 
 	const logger = Logger.withContext('CookieSetup');
@@ -22,6 +24,7 @@
 	let avatarUrl: string | null = null;
 	let isLoading = true;
 	let isValidating = false;
+	let isWebViewLoginActive = false;
 	let showSetupDialog = false;
 	let showDeleteDialog = false;
 	let cookieInput = '';
@@ -65,6 +68,54 @@
 			logger.error('Failed to check cookie status:', err);
 		}
 		isLoading = false;
+	}
+
+	async function handleWebViewLogin() {
+		if (isWebViewLoginActive) return;
+		isWebViewLoginActive = true;
+
+		try {
+			const loginPath = libraryPath('roblox_login');
+			const process = await spawn(loginPath, [], { timeoutMs: 330000 }); // 5.5min (slightly longer than binary's 5min timeout)
+
+			let stdoutBuffer = '';
+
+			process.on('stdOut', (data: string) => {
+				stdoutBuffer += data;
+			});
+
+			process.on('exit', async (exitCode: number) => {
+				isWebViewLoginActive = false;
+
+				const status = stdoutBuffer.trim();
+
+				if (status === 'LOGIN_SUCCESS') {
+					// Cookie was stored in Keychain by the native binary
+					// Validate it and update UI
+					const user = await validateCookie();
+					if (user) {
+						userInfo = user;
+						hasCookie = true;
+						avatarUrl = await fetchAvatar(user.id);
+						toast.success(`Connected as ${user.displayName} (@${user.name})`);
+						dispatch('change', { authenticated: true, user });
+					} else {
+						toast.error('Login succeeded but cookie validation failed. Please try again.');
+					}
+				} else if (status === 'LOGIN_CANCELLED') {
+					// User closed the window - no toast needed
+				} else if (status === 'LOGIN_TIMEOUT') {
+					toast.warning('Login timed out. Please try again.');
+				} else {
+					toast.error('Login failed. Please try again or use manual cookie entry.');
+					logger.error('WebView login returned unexpected status:', status);
+				}
+			});
+		} catch (err) {
+			isWebViewLoginActive = false;
+			logger.error('Failed to launch login webview:', err);
+			toast.error('Failed to open login window');
+		}
 	}
 
 	async function handleSaveCookie() {
@@ -194,32 +245,52 @@
 					<span class="text-sm">Your cookie has expired. Please re-authenticate.</span>
 				</div>
 				<div class="flex gap-2">
-					<Button variant="default" on:click={() => (showSetupDialog = true)}>Re-authenticate</Button>
+					<Button variant="default" on:click={handleWebViewLogin} disabled={isWebViewLoginActive}>
+						{#if isWebViewLoginActive}
+							<RefreshCw class="w-4 h-4 mr-2 animate-spin" />
+							Signing in...
+						{:else}
+							<Globe class="w-4 h-4 mr-2" />
+							Sign in with Browser
+						{/if}
+					</Button>
+					<Button variant="outline" on:click={() => (showSetupDialog = true)}>Manual</Button>
 					<Button variant="ghost" on:click={() => (showDeleteDialog = true)}>Remove</Button>
 				</div>
 			</div>
 		{:else}
 			<div class="space-y-3">
 				<p class="text-sm text-muted-foreground">
-					To use region selection, you need to provide your Roblox cookie. This is stored securely in your Mac's
+					To use region selection, you need to connect your Roblox account. This is stored securely in your Mac's
 					Keychain.
 				</p>
-				<Button variant="default" on:click={() => (showSetupDialog = true)}>
-					<Key class="w-4 h-4 mr-2" />
-					Connect Account
-				</Button>
+				<div class="flex gap-2">
+					<Button variant="default" on:click={handleWebViewLogin} disabled={isWebViewLoginActive}>
+						{#if isWebViewLoginActive}
+							<RefreshCw class="w-4 h-4 mr-2 animate-spin" />
+							Signing in...
+						{:else}
+							<Globe class="w-4 h-4 mr-2" />
+							Sign in with Browser
+						{/if}
+					</Button>
+					<Button variant="outline" on:click={() => (showSetupDialog = true)}>
+						<Key class="w-4 h-4 mr-2" />
+						Manual Cookie Entry
+					</Button>
+				</div>
 			</div>
 		{/if}
 	</Card.Content>
 </Card.Root>
 
-<!-- Setup Dialog -->
+<!-- Manual Cookie Setup Dialog -->
 <AlertDialog.Root bind:open={showSetupDialog}>
 	<AlertDialog.Content class="max-w-lg">
 		<AlertDialog.Header>
 			<AlertDialog.Title class="flex items-center gap-2">
 				<ShieldCheck class="w-5 h-5 text-primary" />
-				Connect Roblox Account
+				Manual Cookie Entry
 			</AlertDialog.Title>
 			<AlertDialog.Description class="text-left space-y-3">
 				<p>

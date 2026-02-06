@@ -42,6 +42,18 @@ const LibPaths: LibPathsType = {
 			dev: '/bin/roblox_updater_manager_ablox.sh',
 		},
 	},
+	keychain: {
+		darwin: {
+			prod: '/lib/keychain_ablox',
+			dev: '/bin/keychain_ablox',
+		},
+	},
+	roblox_login: {
+		darwin: {
+			prod: '/lib/roblox_login_ablox',
+			dev: '/bin/roblox_login_ablox',
+		},
+	},
 };
 
 export function libraryPath<T extends keyof LibPathsType>(libName: T): string {

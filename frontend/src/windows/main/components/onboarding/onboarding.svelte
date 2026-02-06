@@ -3,17 +3,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import { events, os } from '@neutralinojs/lib';
-	import {
-		Activity,
-		ChevronLeft,
-		ChevronRight,
-		ExternalLink,
-		FileWarning,
-		Rocket,
-		Rss,
-		Settings,
-		Users,
-	} from 'lucide-svelte';
+	import { Activity, ChevronLeft, ChevronRight, ExternalLink, FileWarning, Rocket, Rss, Settings, User, Users } from 'lucide-svelte';
 	import { quartInOut, quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import { loadSettings, saveSettings, setMultipleValues, setValue } from '../settings/files';
@@ -51,6 +41,7 @@
 	let currentStep = 0;
 	let showIcon = false;
 	let animationPhase: 'icon' | 'content' = 'icon';
+	let pendingAccountSetup = false;
 
 	interface OnboardingAction {
 		type: 'switch' | 'button' | 'info';
@@ -95,6 +86,39 @@
 					description: 'Display your Roblox activity on Discord',
 					value: true,
 					settingKey: 'integrations.rpc.enabled',
+				},
+			],
+		},
+		{
+			title: 'Roblox Account',
+			description: 'Optionally connect your Roblox account to unlock extra features. You can always do this later in the Account tab.',
+			icon: User,
+			actions: [
+				{
+					type: 'info',
+					label: 'See all your recent Roblox games',
+					description: 'Not just the ones played through AppleBlox',
+				},
+				{
+					type: 'info',
+					label: 'Choose your preferred server region',
+					description: 'Get better ping by selecting a region closer to you',
+				},
+				{
+					type: 'info',
+					label: 'Secure & private',
+					description: 'Your cookie is encrypted in macOS Keychain and only ever sent to Roblox.com',
+				},
+				{
+					type: 'button',
+					label: 'Connect Account',
+					description: 'Opens the Account page after setup completes',
+					variant: 'default',
+					icon: User,
+					action: () => {
+						pendingAccountSetup = true;
+						toast.success('Account setup will open after onboarding completes.');
+					},
 				},
 			],
 		},
@@ -243,6 +267,13 @@
 			Logger.error('Failed to complete onboarding:', error);
 			// Still allow onboarding to complete even if settings fail
 			onboardingLoaded = true;
+		}
+
+		// Navigate to Account page if user clicked "Connect Account"
+		if (pendingAccountSetup) {
+			setTimeout(() => {
+				events.broadcast('ui:change_page', { id: 'account' });
+			}, 500);
 		}
 	}
 
