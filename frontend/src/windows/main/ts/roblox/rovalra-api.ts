@@ -11,6 +11,7 @@ const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 
 export interface Datacenter {
 	id: number;
+	locationId: number;
 	name: string;
 	city: string;
 	state: string;
@@ -19,6 +20,35 @@ export interface Datacenter {
 	latitude: number;
 	longitude: number;
 	region: string;
+}
+
+/** Raw entry from the RoValra /v1/datacenters/list API */
+interface RoValraDatacenterEntry {
+	location_id: number;
+	dataCenterIds: number[];
+	location: {
+		city: string;
+		region: string;
+		country: string;
+		country_name: string;
+		latLong: [string, string];
+	};
+	inactive: boolean;
+	loadbalancing: boolean;
+}
+
+/** Server entry from the RoValra /v1/servers/region API */
+export interface RoValraServer {
+	server_id: string;
+	playing: number;
+	max_players: number;
+}
+
+/** Response from the RoValra /v1/servers/counts API */
+export interface RoValraServerCounts {
+	counts?: {
+		regions?: Record<string, number>;
+	};
 }
 
 export interface DatacenterMap {
@@ -94,6 +124,13 @@ async function loadCachedDatacenters(): Promise<{ data: DatacenterMap; timestamp
 		const parsed = JSON.parse(content);
 
 		if (parsed && parsed.data && parsed.timestamp) {
+			// Validate cache has a reasonable number of entries (the API returns 300+ datacenter IDs)
+			// A cache with very few entries is likely stale/corrupt from a previous parsing bug
+			const entryCount = Object.keys(parsed.data).length;
+			if (entryCount < 10) {
+				logger.warn(`Disk cache has only ${entryCount} entries, treating as invalid`);
+				return null;
+			}
 			return parsed;
 		}
 	} catch {}
@@ -127,7 +164,7 @@ async function saveCachedDatacenters(data: DatacenterMap): Promise<void> {
  * Fetch the datacenter list from RoValra's API
  */
 export async function fetchDatacenterList(): Promise<DatacenterMap> {
-	if (cachedDatacenters && Date.now() - cacheTimestamp < CACHE_DURATION_MS) {
+	if (cachedDatacenters && Object.keys(cachedDatacenters).length >= 10 && Date.now() - cacheTimestamp < CACHE_DURATION_MS) {
 		return cachedDatacenters;
 	}
 
@@ -139,77 +176,96 @@ export async function fetchDatacenterList(): Promise<DatacenterMap> {
 	}
 
 	try {
+		logger.debug(`Fetching datacenters from ${ROVALRA_API_BASE}/v1/datacenters/list`);
 		const response = await fetch(`${ROVALRA_API_BASE}/v1/datacenters/list`);
 
 		if (!response.ok) {
-			throw new Error(`Failed to fetch datacenters: ${response.status}`);
+			throw new Error(`Failed to fetch datacenters: ${response.status} ${response.statusText}`);
 		}
 
-		const data = await response.json();
+		const data: RoValraDatacenterEntry[] = await response.json();
+		logger.debug(`RoValra API response: ${Array.isArray(data) ? data.length : 0} entries`);
+
+		if (Array.isArray(data) && data.length > 0) {
+			logger.debug(`Sample entry: ${JSON.stringify(data[0])}`);
+		}
 
 		const datacenterMap: DatacenterMap = {};
 		if (Array.isArray(data)) {
-			for (const dc of data) {
-				datacenterMap[dc.id] = {
-					id: dc.id,
-					name: dc.name || 'Unknown',
-					city: dc.city || 'Unknown',
-					state: dc.state || '',
-					country: dc.country || 'Unknown',
-					countryCode: dc.countryCode || dc.country_code || '',
-					latitude: dc.latitude || dc.lat || 0,
-					longitude: dc.longitude || dc.lon || dc.lng || 0,
-					region: determineRegion(dc),
-				};
+			for (const entry of data) {
+				if (!entry.dataCenterIds || !Array.isArray(entry.dataCenterIds) || !entry.location) {
+					continue;
+				}
+				if (entry.inactive) {
+					continue;
+				}
+
+				const loc = entry.location;
+				const region = determineRegion(loc.country, loc.city);
+
+				for (const dcId of entry.dataCenterIds) {
+					datacenterMap[dcId] = {
+						id: dcId,
+						locationId: entry.location_id,
+						name: loc.city || 'Unknown',
+						city: loc.city || 'Unknown',
+						state: loc.region || '',
+						country: loc.country_name || loc.country || 'Unknown',
+						countryCode: loc.country || '',
+						latitude: loc.latLong ? parseFloat(loc.latLong[0]) : 0,
+						longitude: loc.latLong ? parseFloat(loc.latLong[1]) : 0,
+						region,
+					};
+				}
 			}
+		} else {
+			logger.warn(`Unexpected RoValra response format: ${JSON.stringify(data).substring(0, 500)}`);
 		}
 
 		cachedDatacenters = datacenterMap;
 		cacheTimestamp = Date.now();
 		await saveCachedDatacenters(datacenterMap);
 
-		logger.info(`Fetched ${Object.keys(datacenterMap).length} datacenters from RoValra`);
+		const regionCounts: Record<string, number> = {};
+		for (const dc of Object.values(datacenterMap)) {
+			regionCounts[dc.region] = (regionCounts[dc.region] || 0) + 1;
+		}
+		logger.info(`Fetched ${Object.keys(datacenterMap).length} datacenters from RoValra. Regions: ${JSON.stringify(regionCounts)}`);
 		return datacenterMap;
 	} catch (error) {
 		logger.error('Failed to fetch datacenters:', error);
 
 		if (diskCache) {
+			logger.info(`Using disk-cached datacenters (${Object.keys(diskCache.data).length} entries)`);
 			cachedDatacenters = diskCache.data;
 			cacheTimestamp = diskCache.timestamp;
 			return cachedDatacenters;
 		}
 
+		logger.warn('No datacenter data available (no cache, API failed)');
 		return {};
 	}
 }
 
-interface DatacenterInput {
-	countryCode?: string;
-	country_code?: string;
-	city?: string;
-	name?: string;
-}
-
 /**
- * Determine the region for a datacenter based on its location
+ * Determine the region for a datacenter based on country code and city
  */
-function determineRegion(dc: DatacenterInput): string {
-	const country = (dc.countryCode || dc.country_code || '').toUpperCase();
-	const city = (dc.city || '').toLowerCase();
-	const name = (dc.name || '').toLowerCase();
+function determineRegion(countryCode: string, city: string): string {
+	const country = (countryCode || '').toUpperCase();
+	const cityLower = (city || '').toLowerCase();
 
 	if (country === 'US') {
-		const eastCities = ['ashburn', 'virginia', 'atlanta', 'miami', 'new york', 'newark', 'washington'];
-		const westCities = ['los angeles', 'san jose', 'seattle', 'phoenix', 'denver', 'las vegas', 'california'];
-		const centralCities = ['dallas', 'chicago', 'kansas', 'houston', 'texas'];
+		const eastCities = ['ashburn', 'virginia', 'atlanta', 'miami', 'new york', 'newark', 'washington', 'columbus'];
+		const westCities = ['los angeles', 'san jose', 'seattle', 'phoenix', 'denver', 'las vegas', 'boardman'];
+		const centralCities = ['dallas', 'chicago', 'kansas', 'houston'];
 
-		if (eastCities.some((c) => city.includes(c) || name.includes(c))) {
+		if (eastCities.some((c) => cityLower.includes(c))) {
 			return 'US-EAST';
 		}
-		if (westCities.some((c) => city.includes(c) || name.includes(c))) {
+		if (westCities.some((c) => cityLower.includes(c))) {
 			return 'US-WEST';
 		}
-		if (centralCities.some((c) => city.includes(c) || name.includes(c))) {
+		if (centralCities.some((c) => cityLower.includes(c))) {
 			return 'US-CENTRAL';
 		}
 
@@ -240,7 +296,13 @@ function determineRegion(dc: DatacenterInput): string {
  */
 export async function getDatacenterById(id: number): Promise<Datacenter | null> {
 	const datacenters = await fetchDatacenterList();
-	return datacenters[id] || null;
+	const result = datacenters[id] || null;
+	if (result) {
+		logger.debug(`Datacenter lookup id=${id}: ${result.name} (${result.city}, ${result.country}) [${result.region}]`);
+	} else {
+		logger.warn(`Datacenter lookup id=${id}: NOT FOUND. Available IDs: ${Object.keys(datacenters).slice(0, 20).join(', ')}${Object.keys(datacenters).length > 20 ? '...' : ''}`);
+	}
+	return result;
 }
 
 /**
@@ -291,6 +353,72 @@ export async function contributeServerData(contribution: ServerContribution): Pr
 		logger.warn('Failed to contribute server data:', error);
 		return false;
 	}
+}
+
+/**
+ * Get server counts per region for a given place from RoValra API
+ * This lets us know which regions have active servers before probing
+ */
+export async function getServerCountsByRegion(placeId: string): Promise<Record<string, number>> {
+	try {
+		const response = await fetch(`${ROVALRA_API_BASE}/v1/servers/counts?place_id=${placeId}`);
+
+		if (!response.ok) {
+			logger.warn(`Server counts API failed: ${response.status}`);
+			return {};
+		}
+
+		const data: RoValraServerCounts = await response.json();
+		return data.counts?.regions || {};
+	} catch (error) {
+		logger.warn('Failed to get server counts:', error);
+		return {};
+	}
+}
+
+/**
+ * Get servers in a specific region from RoValra API
+ * This directly returns servers in the desired region without needing to probe each one
+ */
+export async function getServersInRegion(
+	placeId: string,
+	country: string,
+	city?: string
+): Promise<RoValraServer[]> {
+	try {
+		let url = `${ROVALRA_API_BASE}/v1/servers/region?place_id=${placeId}&country=${encodeURIComponent(country)}`;
+		if (city) {
+			url += `&city=${encodeURIComponent(city)}`;
+		}
+		url += '&cursor=0';
+
+		const response = await fetch(url);
+
+		if (!response.ok) {
+			logger.warn(`Servers in region API failed: ${response.status}`);
+			return [];
+		}
+
+		const data = await response.json();
+		return data.servers || [];
+	} catch (error) {
+		logger.warn('Failed to get servers in region:', error);
+		return [];
+	}
+}
+
+/**
+ * Get the city and country for a given region code from the datacenter map
+ * Used to query the RoValra servers/region API
+ */
+export async function getLocationForRegion(region: string): Promise<{ country: string; city: string } | null> {
+	const datacenters = await fetchDatacenterList();
+	for (const dc of Object.values(datacenters)) {
+		if (dc.region === region) {
+			return { country: dc.countryCode, city: dc.city };
+		}
+	}
+	return null;
 }
 
 /**
@@ -351,6 +479,9 @@ export default {
 	fetchDatacenterList,
 	getDatacenterById,
 	getDatacentersInRegion,
+	getServerCountsByRegion,
+	getServersInRegion,
+	getLocationForRegion,
 	contributeServerData,
 	calculateDistance,
 	getClosestDatacenter,

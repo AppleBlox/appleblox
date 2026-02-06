@@ -16,6 +16,13 @@ import { RobloxInstance } from './instance';
 import { RobloxMods } from './mods';
 import { detectRobloxPath } from './path';
 import { RobloxUtils } from './utils';
+import {
+	isRegionSelectionAvailable,
+	getRegionPreference,
+	parsePlaceIdFromUrl,
+	selectServerWithPreferredRegion,
+} from './region-selector';
+import { formatDatacenterLocation } from './rovalra-api';
 import Logger from '../utils/logger';
 
 const logger = Logger.withContext('Launch');
@@ -202,6 +209,65 @@ async function cleanupBootstrapper(): Promise<void> {
 	}
 }
 
+/**
+ * Apply region selection if enabled and available
+ * Returns the (possibly modified) URL to use for launching
+ */
+async function applyRegionSelection(originalUrl?: string): Promise<string | undefined> {
+	// Skip if no URL provided (manual launch)
+	if (!originalUrl) {
+		return undefined;
+	}
+
+	// Check if region selection is available
+	const available = await isRegionSelectionAvailable();
+	if (!available) {
+		logger.debug('Region selection not available');
+		return originalUrl;
+	}
+
+	const preference = await getRegionPreference();
+	if (!preference.enabled || preference.region === 'AUTO') {
+		logger.debug('Region selection disabled or set to AUTO');
+		return originalUrl;
+	}
+
+	// Extract place ID from URL
+	const placeId = parsePlaceIdFromUrl(originalUrl);
+	if (!placeId) {
+		logger.warn('Could not parse place ID from URL, skipping region selection');
+		return originalUrl;
+	}
+
+	await updateBootstrapper('bootstrapper:text', { text: `Finding server in ${preference.region}...` });
+
+	try {
+		const result = await selectServerWithPreferredRegion(placeId, originalUrl);
+
+		if (result.success && result.url) {
+			logger.info(`Region selection: ${result.message}`);
+
+			// Show notification about the region
+			if (result.region) {
+				toast.info(`Joining server in ${formatDatacenterLocation(result.region)}`);
+			} else {
+				toast.info(result.message || `Joining server in ${preference.region}`);
+			}
+
+			return result.url;
+		} else {
+			// Region selection failed, fall back to original URL
+			logger.warn(`Region selection failed: ${result.message}`);
+			toast.warning(result.message || 'Could not find server in preferred region');
+			return originalUrl;
+		}
+	} catch (error) {
+		logger.error('Region selection error:', error);
+		// Don't fail the launch, just use the original URL
+		return originalUrl;
+	}
+}
+
 async function prepareRobloxSettings(robloxPath: string, fflags: any): Promise<void> {
 	await updateBootstrapper('bootstrapper:text', { text: 'Checking existing settings...' });
 	await updateBootstrapper('bootstrapper:progress', { progress: 35 });
@@ -379,8 +445,11 @@ export async function launchRoblox(
 		}
 		await prepareRobloxSettings(robloxPath, fflags);
 
+		// Apply region selection if enabled
+		const finalUrl = await applyRegionSelection(robloxUrl);
+
 		try {
-			const robloxInstance = await applyModsAndLaunch(settings, robloxUrl);
+			const robloxInstance = await applyModsAndLaunch(settings, finalUrl);
 			await setupRobloxInstance(robloxInstance, settings, handlers);
 
 			setTimeout(async () => {
