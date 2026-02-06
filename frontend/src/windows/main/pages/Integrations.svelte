@@ -30,6 +30,18 @@
 		)
 		.addCategory((category) =>
 			category
+				.setName('Game History')
+				.setDescription('Track your recently played games')
+				.setId('history')
+				.addSwitch({
+					label: 'Enable Tracking',
+					description: 'Record games and servers you join (max 30 games, 10 servers each)',
+					id: 'enabled',
+					default: true,
+				})
+		)
+		.addCategory((category) =>
+			category
 				.setName('Bloxstrap SDK')
 				.setDescription('In-house implementation of Bloxstrap SDK for game developers')
 				.setId('sdk')

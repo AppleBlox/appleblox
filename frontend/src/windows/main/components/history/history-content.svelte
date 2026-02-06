@@ -29,7 +29,7 @@
 
 	async function checkTrackingEnabled() {
 		try {
-			trackingEnabled = (await getValue<boolean>('history.tracking.enabled')) !== false;
+			trackingEnabled = (await getValue<boolean>('integrations.history.enabled')) !== false;
 		} catch {
 			trackingEnabled = true;
 		}
@@ -88,9 +88,7 @@
 						<Gamepad2 class="w-6 h-6 text-muted-foreground" />
 					</div>
 					<h3 class="font-semibold text-foreground mb-2">Tracking Disabled</h3>
-					<p class="text-sm text-muted-foreground">
-						Enable tracking above to record your game history.
-					</p>
+					<p class="text-sm text-muted-foreground">Enable tracking above to record your game history.</p>
 				</Card.Content>
 			</Card.Root>
 		</div>
@@ -130,9 +128,7 @@
 					<Gamepad2 class="w-8 h-8 text-muted-foreground" />
 				</div>
 				<h2 class="text-lg font-semibold text-foreground mb-2">Failed to load history</h2>
-				<p class="text-muted-foreground max-w-md mb-4">
-					There was an error loading your game history.
-				</p>
+				<p class="text-muted-foreground max-w-md mb-4">There was an error loading your game history.</p>
 				<Button variant="outline" on:click={loadHistory}>
 					<RefreshCw class="w-4 h-4 mr-2" />
 					Retry
@@ -146,8 +142,7 @@
 				</div>
 				<h2 class="text-lg font-semibold text-foreground mb-2">No games played yet</h2>
 				<p class="text-muted-foreground max-w-md">
-					Your recently played games will appear here. Play some games through AppleBlox to start
-					building your history.
+					Your recently played games will appear here. Play some games through AppleBlox to start building your history.
 				</p>
 			</div>
 		{:else}

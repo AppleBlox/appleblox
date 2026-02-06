@@ -34,7 +34,7 @@ async function gameJoinedEntry(data: GameEventInfo) {
 		// Setting doesn't exist yet, use default
 	}
 	try {
-		historyEnabled = (await getValue<boolean>('history.tracking.enabled')) !== false;
+		historyEnabled = (await getValue<boolean>('integrations.history.enabled')) !== false;
 	} catch {
 		// Setting doesn't exist yet, use default
 	}
