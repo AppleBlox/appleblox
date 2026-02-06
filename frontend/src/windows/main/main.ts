@@ -14,7 +14,7 @@ import { shell } from './ts/tools/shell';
 import { getMode, sleep } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
 import Logger, { initializeLogger } from '@/windows/main/ts/utils/logger';
-import { initializeDataDirectory } from './ts/utils/paths';
+import { ensureDataDirs, initializeDataDirectory } from './ts/utils/paths';
 import { focusWindow, setWindowVisibility } from './ts/window';
 import { extractBundledIcons } from './ts/utils/bundled-icons';
 
@@ -71,9 +71,11 @@ async function pollBootstrapCommands() {
 init();
 
 // Initialize data directory (must be done after init())
-initializeDataDirectory().catch((err) => {
-	Logger.error('Failed to initialize data directory:', err);
-});
+initializeDataDirectory()
+	.then(() => ensureDataDirs())
+	.catch((err) => {
+		Logger.error('Failed to initialize data directory:', err);
+	});
 
 let isDeeplinkLaunch = false;
 let mainAppMounted = false;

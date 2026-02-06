@@ -108,6 +108,13 @@ export async function secureRequest(url: string, options: SecureRequestOptions =
 
 		configContent += 'write-out = "\\n__STATUS_CODE__:%{http_code}"\n';
 
+		// Ensure cache directory exists before writing config file
+		try {
+			await filesystem.createDirectory(cacheDir);
+		} catch {
+			// Directory may already exist
+		}
+
 		await filesystem.writeFile(configPath, configContent);
 
 		await shell('chmod', ['600', configPath], { skipStderrCheck: true });
