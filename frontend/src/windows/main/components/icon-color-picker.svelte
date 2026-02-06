@@ -278,7 +278,13 @@
 	$: hueX = (hue / 360) * 100;
 </script>
 
-<svelte:window on:mousemove={(e) => { handleSatBrightMove(e); handleHueMove(e); }} on:mouseup={handleMouseUp} />
+<svelte:window
+	on:mousemove={(e) => {
+		handleSatBrightMove(e);
+		handleHueMove(e);
+	}}
+	on:mouseup={handleMouseUp}
+/>
 
 <div class="color-picker">
 	<!-- Saturation/Brightness picker -->
@@ -290,34 +296,19 @@
 			class="sat-bright-canvas"
 			on:mousedown={handleSatBrightMouseDown}
 		></canvas>
-		<div
-			class="sat-bright-indicator"
-			style="left: {satBrightX}%; top: {satBrightY}%;"
-		></div>
+		<div class="sat-bright-indicator" style="left: {satBrightX}%; top: {satBrightY}%;"></div>
 	</div>
 
 	<!-- Hue slider -->
 	<div class="hue-container">
-		<canvas
-			bind:this={hueCanvas}
-			width="240"
-			height="16"
-			class="hue-canvas"
-			on:mousedown={handleHueMouseDown}
-		></canvas>
+		<canvas bind:this={hueCanvas} width="240" height="16" class="hue-canvas" on:mousedown={handleHueMouseDown}></canvas>
 		<div class="hue-indicator" style="left: {hueX}%;"></div>
 	</div>
 
 	<!-- Hex input -->
 	<div class="hex-row">
 		<span class="hex-label">Hex:</span>
-		<input
-			type="text"
-			value={hex}
-			on:input={handleHexInput}
-			maxlength="7"
-			class="hex-input"
-		/>
+		<input type="text" value={hex} on:input={handleHexInput} maxlength="7" class="hex-input" />
 		{#if isGenerating}
 			<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
 		{/if}
@@ -358,7 +349,9 @@
 		height: 18px;
 		border: 2px solid white;
 		border-radius: 50%;
-		box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+		box-shadow:
+			0 0 0 1px rgba(0, 0, 0, 0.3),
+			inset 0 0 0 1px rgba(0, 0, 0, 0.3);
 		transform: translate(-50%, -50%);
 		pointer-events: none;
 	}

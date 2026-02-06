@@ -279,7 +279,7 @@ export class RobloxDownloader {
 				onProgress: (progress) => {
 					this.checkAborted();
 
-					const scaledPercentage = 20 + (progress.percentage * 0.8);
+					const scaledPercentage = 20 + progress.percentage * 0.8;
 
 					this.emitProgress({
 						message: `Downloading... ${progress.percentage.toFixed(1)}%`,

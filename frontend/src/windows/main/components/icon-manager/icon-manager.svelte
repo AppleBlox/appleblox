@@ -350,36 +350,35 @@
 	{:else}
 		<div class="grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-5">
 			{#each icons as icon}
-			<div
-				class="icon-card {selectedIcon === icon.path ? 'selected' : ''}"
-				on:click={() => applyIcon(icon)}
-				on:keydown={(e) => handleKeyDown(e, icon)}
-				on:mousemove={handleMouseMove}
-				on:mouseleave={handleMouseLeave}
-				role="button"
-				tabindex="0"
-			>
-				<div class="icon-wrapper">
-					<img src={icon.displayUrl} alt={icon.name} class="icon-image" />
-					{#if !icon.isOriginal && !icon.isBundled}
-						<button
-							class="delete-button"
-							on:click={(e) => deleteIcon(icon, e)}
-							aria-label="Delete icon"
-							title="Delete icon"
-						>
-							<Trash2 class="h-4 w-4" />
-						</button>
-					{:else if icon.isBundled}
-						<div class="pin-indicator" title="Bundled icon">
-							<Pin class="h-4 w-4" />
-						</div>
-					{/if}
+				<div
+					class="icon-card {selectedIcon === icon.path ? 'selected' : ''}"
+					on:click={() => applyIcon(icon)}
+					on:keydown={(e) => handleKeyDown(e, icon)}
+					on:mousemove={handleMouseMove}
+					on:mouseleave={handleMouseLeave}
+					role="button"
+					tabindex="0"
+				>
+					<div class="icon-wrapper">
+						<img src={icon.displayUrl} alt={icon.name} class="icon-image" />
+						{#if !icon.isOriginal && !icon.isBundled}
+							<button
+								class="delete-button"
+								on:click={(e) => deleteIcon(icon, e)}
+								aria-label="Delete icon"
+								title="Delete icon"
+							>
+								<Trash2 class="h-4 w-4" />
+							</button>
+						{:else if icon.isBundled}
+							<div class="pin-indicator" title="Bundled icon">
+								<Pin class="h-4 w-4" />
+							</div>
+						{/if}
+					</div>
 				</div>
-			</div>
-		{/each}
-	</div>
-
+			{/each}
+		</div>
 	{/if}
 </div>
 

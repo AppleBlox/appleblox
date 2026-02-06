@@ -228,7 +228,10 @@ async function bundleIcons(appDist: string, logger: Signale) {
 	try {
 		// Get list of .icns files
 		const icnsFiles = await $`find ${bundledIconsPath} -name "*.icns" -type f`.text();
-		const files = icnsFiles.trim().split('\n').filter(f => f);
+		const files = icnsFiles
+			.trim()
+			.split('\n')
+			.filter((f) => f);
 
 		if (files.length === 0) {
 			logger.info('No .icns files found in bundled-icons directory');

@@ -213,4 +213,11 @@
 	};
 </script>
 
-<Panel {panel} on:button={onButtonClicked} on:fileChosen={onFileAdded} on:fileRemoved={onFileRemoved} on:switch={onSwitchChanged} {render} />
+<Panel
+	{panel}
+	on:button={onButtonClicked}
+	on:fileChosen={onFileAdded}
+	on:fileRemoved={onFileRemoved}
+	on:switch={onSwitchChanged}
+	{render}
+/>

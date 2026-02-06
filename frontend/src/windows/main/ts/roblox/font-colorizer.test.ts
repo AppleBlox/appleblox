@@ -91,5 +91,4 @@ describe('Font Colorizer', () => {
 			expect(result).toBe('#000000');
 		});
 	});
-
 });

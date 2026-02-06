@@ -111,8 +111,8 @@
 	<div class="mb-4">
 		<h3 class="font-bold text-foreground text-lg">Installation Path</h3>
 		<p class="text-[13px] text-foreground opacity-85 mt-1">
-			AppleBlox automatically searches your entire Mac for Roblox using Spotlight. You can override this by
-			manually selecting a path.
+			AppleBlox automatically searches your entire Mac for Roblox using Spotlight. You can override this by manually
+			selecting a path.
 		</p>
 	</div>
 

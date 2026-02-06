@@ -4,6 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { os } from '@neutralinojs/lib';
 	import { createEventDispatcher } from 'svelte';
+	import Logger from '../../ts/utils/logger';
 	import { Play, Globe, ExternalLink, Server } from 'lucide-svelte';
 	import type { GameHistoryEntry } from '../../ts/activity/types';
 

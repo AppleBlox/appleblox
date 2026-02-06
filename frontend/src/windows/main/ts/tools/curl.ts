@@ -435,12 +435,10 @@ export class Curl {
 					lastCheckTime = currentTime;
 
 					options.onProgress(progress);
-				} catch (e) {
-				}
+				} catch (e) {}
 			}, 500);
 
-			process.on('stdErr', (data: string) => {
-			});
+			process.on('stdErr', (data: string) => {});
 
 			return new Promise<CurlResponse>((resolve) => {
 				process.on('exit', (exitCode: number) => {

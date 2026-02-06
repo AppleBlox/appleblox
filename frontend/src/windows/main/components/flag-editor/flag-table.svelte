@@ -227,8 +227,7 @@
 			variant="outline"
 			size="sm"
 			disabled={selectedFlags.size < 1}
-			class={selectedFlags.size < 1 ? 'opacity-50' : ''}
-			><Clipboard class="h-4 w-4 mr-2" />Export</Button
+			class={selectedFlags.size < 1 ? 'opacity-50' : ''}><Clipboard class="h-4 w-4 mr-2" />Export</Button
 		>
 		<Button
 			on:click={removeSelected}

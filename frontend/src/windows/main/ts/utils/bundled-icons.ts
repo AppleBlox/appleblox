@@ -64,9 +64,13 @@ export async function extractBundledIcons(): Promise<void> {
 
 				// Extract the gzipped icon using shell command with proper escaping
 				try {
-					await shell('sh', ['-c', `gunzip -c '${gzippedPath.replace(/'/g, "'\\''")}' > '${destPath.replace(/'/g, "'\\''")}'`], {
-						skipStderrCheck: true,
-					});
+					await shell(
+						'sh',
+						['-c', `gunzip -c '${gzippedPath.replace(/'/g, "'\\''")}' > '${destPath.replace(/'/g, "'\\''")}'`],
+						{
+							skipStderrCheck: true,
+						}
+					);
 					Logger.info(`Extracted bundled icon: ${iconName}`);
 					extractedCount++;
 				} catch (error) {
@@ -105,7 +109,10 @@ export async function getBundledIconNames(): Promise<string[]> {
 		}
 
 		const content = await shellfs.readFile(markerPath);
-		return content.trim().split('\n').filter(name => name.length > 0);
+		return content
+			.trim()
+			.split('\n')
+			.filter((name) => name.length > 0);
 	} catch (error) {
 		Logger.warn('Failed to read bundled icons list:', error);
 		return [];

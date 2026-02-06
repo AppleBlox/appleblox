@@ -11,14 +11,14 @@
 		if (!role) return 'default';
 
 		const roleColors: Record<string, string> = {
-			'Developer': 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
-			'Artist': 'bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/30',
-			'Moderator': 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30',
-			'Tester': 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30',
-			'Framework': 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
-			'Language': 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/30',
-			'Icons': 'bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/30',
-			'Inspiration': 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30',
+			Developer: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
+			Artist: 'bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/30',
+			Moderator: 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30',
+			Tester: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30',
+			Framework: 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
+			Language: 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/30',
+			Icons: 'bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/30',
+			Inspiration: 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30',
 		};
 
 		return roleColors[role] || 'bg-secondary/20 text-secondary-foreground border-secondary/30';
@@ -28,14 +28,14 @@
 		if (!role) return '';
 
 		const tints: Record<string, string> = {
-			'Developer': 'card-tint-blue',
-			'Artist': 'card-tint-purple',
-			'Moderator': 'card-tint-green',
-			'Tester': 'card-tint-yellow',
-			'Framework': 'card-tint-orange',
-			'Language': 'card-tint-cyan',
-			'Icons': 'card-tint-pink',
-			'Inspiration': 'card-tint-rose',
+			Developer: 'card-tint-blue',
+			Artist: 'card-tint-purple',
+			Moderator: 'card-tint-green',
+			Tester: 'card-tint-yellow',
+			Framework: 'card-tint-orange',
+			Language: 'card-tint-cyan',
+			Icons: 'card-tint-pink',
+			Inspiration: 'card-tint-rose',
 		};
 
 		return tints[role] || '';
@@ -104,7 +104,11 @@
 						/>
 						{#if contributor.role}
 							<div class="absolute top-2 right-2">
-								<Badge class="badge-with-backdrop text-xs font-semibold shadow-lg border {getRoleColor(contributor.role)}">
+								<Badge
+									class="badge-with-backdrop text-xs font-semibold shadow-lg border {getRoleColor(
+										contributor.role
+									)}"
+								>
 									{contributor.role}
 								</Badge>
 							</div>

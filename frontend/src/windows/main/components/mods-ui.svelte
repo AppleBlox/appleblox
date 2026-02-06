@@ -60,7 +60,10 @@
 			try {
 				// Get asset count
 				const result = await shell('find', [mod.path, '-type', 'f'], { skipStderrCheck: true });
-				const files = result.stdOut.trim().split('\n').filter(f => f && !f.includes('.DS_Store'));
+				const files = result.stdOut
+					.trim()
+					.split('\n')
+					.filter((f) => f && !f.includes('.DS_Store'));
 				modInfo.assetCount = files.length;
 
 				// Get folder size in MB
@@ -69,7 +72,7 @@
 				modInfo.sizeMB = sizeMB;
 
 				// Get preview images (first 3 image files)
-				const imageFiles = files.filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f)).slice(0, 3);
+				const imageFiles = files.filter((f) => /\.(png|jpg|jpeg|webp)$/i.test(f)).slice(0, 3);
 				modInfo.previewImages = imageFiles;
 
 				// Copy preview images to cache and generate URLs
@@ -267,7 +270,8 @@
 								<!-- Statistics -->
 								<div class="flex gap-2 mt-auto">
 									<Badge variant="secondary" class="text-xs">
-										{mod.assetCount || 0} {mod.assetCount === 1 ? 'asset' : 'assets'}
+										{mod.assetCount || 0}
+										{mod.assetCount === 1 ? 'asset' : 'assets'}
 									</Badge>
 									<Badge variant="secondary" class="text-xs">
 										{mod.sizeMB || 0} MB
