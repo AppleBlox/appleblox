@@ -1,8 +1,10 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import { events, os } from '@neutralinojs/lib';
+	import { Input } from '$lib/components/ui/input';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { app, events, os } from '@neutralinojs/lib';
 	import { version } from '@root/package.json';
-	import { FileArchive, FolderCog, FolderOpen } from 'lucide-svelte';
+	import { FileArchive, FolderCog, FolderOpen, Trash2 } from 'lucide-svelte';
 	import path from 'path-browserify';
 	import { getContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -11,12 +13,49 @@
 	import Roblox from '../ts/roblox';
 	import { shell } from '../ts/tools/shell';
 	import shellFS from '../ts/tools/shellfs';
+	import { deleteRobloxCookie } from '../ts/tools/keychain';
+	import { getDataDir } from '../ts/utils/paths';
+	import Logger from '@/windows/main/ts/utils/logger';
 
 	const { getCurrentPage } = getContext('pageData') as { getCurrentPage: () => string };
 
 	export let render = true;
 
 	let exportSettingsPopup = false;
+	let resetStep1Open = false;
+	let resetStep2Open = false;
+	let resetConfirmText = '';
+
+	async function performFullReset() {
+		resetStep2Open = false;
+		resetConfirmText = '';
+
+		try {
+			toast.info('Resetting AppleBlox...', { duration: 3000 });
+
+			// 1. Delete keychain credentials
+			try {
+				await deleteRobloxCookie();
+			} catch (err) {
+				// Keychain may not have an entry - that's fine
+			}
+
+			// 2. Delete application data directory
+			try {
+				const dataDir = await getDataDir();
+				if (await shellFS.exists(dataDir)) {
+					await shellFS.remove(dataDir);
+				}
+			} catch (err) {
+				// Directory may not exist - that's fine
+			}
+
+			// 3. Quit the app immediately to avoid errors from missing directories
+			app.exit();
+		} catch (error) {
+			toast.error('Reset failed. Some data may not have been removed.');
+		}
+	}
 
 	// Had to do this because of a bug I couldn't fix
 	events.on('exportSettings', () => {
@@ -73,10 +112,17 @@
 				shellFS.open(path.join(await os.getEnv('HOME'), 'Library', 'Application Support', 'AppleBlox'), { reveal: true });
 				break;
 			case 'open_roblox_folder':
-				shellFS.open(path.join(Roblox.path, 'Contents'), { reveal: true });
+				if (Roblox.path) {
+					shellFS.open(path.join(Roblox.path, 'Contents'), { reveal: true });
+				} else {
+					toast.error('Roblox installation path not found.');
+				}
 				break;
 			case 'export_config':
 				exportSettingsPopup = true;
+				break;
+			case 'reset_all':
+				resetStep1Open = true;
 				break;
 		}
 	}
@@ -142,11 +188,20 @@
 						component: FolderOpen,
 					},
 				})
+				.addButton({
+					label: 'Reset AppleBlox',
+					description: 'Remove all app data including keychain, settings, mods, and cache',
+					id: 'reset_all',
+					variant: 'destructive',
+					icon: { component: Trash2 },
+				})
 		)
 		.build();
 </script>
 
 <Panel {panel} on:button={buttonClicked} {render} />
+
+<!-- Export Settings Dialog -->
 <AlertDialog.Root bind:open={exportSettingsPopup}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
@@ -159,6 +214,66 @@
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action on:click={exportSettings}>Export</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
+<!-- Reset Step 1: Warning -->
+<AlertDialog.Root bind:open={resetStep1Open}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title class="text-destructive">Reset AppleBlox?</AlertDialog.Title>
+			<AlertDialog.Description>
+				<p class="mb-3">This will permanently delete <strong>all</strong> AppleBlox data:</p>
+				<ul class="list-disc list-inside space-y-1 text-sm text-muted-foreground mb-3">
+					<li>Roblox cookie from the macOS Keychain</li>
+					<li>All settings and configuration</li>
+					<li>Installed mods and mod backups</li>
+					<li>Game history and cache</li>
+					<li>Logs and theme data</li>
+				</ul>
+				<p class="font-medium text-destructive">This action cannot be undone.</p>
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action
+				class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+				on:click={() => {
+					resetStep1Open = false;
+					resetConfirmText = '';
+					resetStep2Open = true;
+				}}
+			>
+				Continue
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
+<!-- Reset Step 2: Type RESET to confirm -->
+<AlertDialog.Root bind:open={resetStep2Open}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title class="text-destructive">Final Confirmation</AlertDialog.Title>
+			<AlertDialog.Description>
+				<p class="mb-4">Type <code class="px-1.5 py-0.5 rounded bg-muted font-mono font-bold">RESET</code> below to confirm you want to erase all AppleBlox data.</p>
+				<Input
+					bind:value={resetConfirmText}
+					placeholder="Type RESET to confirm"
+					class="font-mono"
+				/>
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel on:click={() => (resetConfirmText = '')}>Cancel</AlertDialog.Cancel>
+			<Button
+				variant="destructive"
+				disabled={resetConfirmText !== 'RESET'}
+				on:click={performFullReset}
+			>
+				Erase Everything
+			</Button>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
