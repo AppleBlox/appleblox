@@ -24,6 +24,30 @@ const DEFAULT_SERIALIZATION_OPTIONS: SerializationOptions = {
 	includeNonEnumerable: false,
 };
 
+// SECURITY: Patterns that should be redacted from logs
+// This prevents accidental leakage of sensitive data
+const SENSITIVE_PATTERNS: Array<{ pattern: RegExp; replacement: string }> = [
+	// Roblox security cookie
+	{ pattern: /\.ROBLOSECURITY[=:]\s*[^\s;,'"}\]]+/gi, replacement: '.ROBLOSECURITY=[REDACTED]' },
+	{ pattern: /_\|WARNING:-DO-NOT-SHARE-THIS[^\s;,'"}\]]*/gi, replacement: '[REDACTED_COOKIE]' },
+	// Generic cookie patterns
+	{ pattern: /Cookie:\s*[^\n]+/gi, replacement: 'Cookie: [REDACTED]' },
+	// Bearer tokens
+	{ pattern: /Bearer\s+[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]*\.?[A-Za-z0-9\-_=]*/gi, replacement: 'Bearer [REDACTED]' },
+];
+
+/**
+ * SECURITY: Redact sensitive information from a string
+ * This should be called on all log output to prevent credential leakage
+ */
+function redactSensitiveData(input: string): string {
+	let result = input;
+	for (const { pattern, replacement } of SENSITIVE_PATTERNS) {
+		result = result.replace(pattern, replacement);
+	}
+	return result;
+}
+
 let logPath: string | null = null;
 let isInitialized = false;
 let isNeutralinoReady = false;
@@ -247,9 +271,11 @@ class LogFormatter {
 
 		switch (typeof value) {
 			case 'string':
-				return value.length <= options.maxStringLength
-					? value
-					: `${value.substring(0, options.maxStringLength)}... [truncated]`;
+				// SECURITY: Always redact sensitive data from strings
+				const safeValue = redactSensitiveData(value);
+				return safeValue.length <= options.maxStringLength
+					? safeValue
+					: `${safeValue.substring(0, options.maxStringLength)}... [truncated]`;
 			case 'number':
 				return isNaN(value) ? 'NaN' : value.toString();
 			case 'boolean':
@@ -337,7 +363,9 @@ class LogFormatter {
 		const pid = Math.floor(Math.random() * 10000);
 		const prefix = context ? `[${fileName}] [${context}]` : `[${fileName}]`;
 
-		return `${timestamp} ${processName}[${pid}] <${levelMap[level]}> ${prefix} ${message}`;
+		// SECURITY: Final redaction pass to catch any edge cases
+		const safeMessage = redactSensitiveData(message);
+		return `${timestamp} ${processName}[${pid}] <${levelMap[level]}> ${prefix} ${safeMessage}`;
 	}
 }
 
@@ -408,8 +436,16 @@ async function writeToFile(
 	try {
 		const logLine = LogFormatter.formatLogLine(timestamp, level, fileName, context, message) + '\n';
 		await filesystem.appendFile(logPath, logLine);
-	} catch (error) {
-		console.error('Failed to write to log file:', error);
+	} catch {
+		// Directory may have been deleted (e.g. after a reset) - try to recreate it once
+		try {
+			const logsDir = path.dirname(logPath);
+			await filesystem.createDirectory(logsDir);
+			const logLine = LogFormatter.formatLogLine(timestamp, level, fileName, context, message) + '\n';
+			await filesystem.appendFile(logPath, logLine);
+		} catch {
+			// Silently give up - the data directory may be gone intentionally
+		}
 	}
 }
 
