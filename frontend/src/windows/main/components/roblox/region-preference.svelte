@@ -8,7 +8,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { Badge } from '$lib/components/ui/badge';
 	import { getValue, setValue } from '../../components/settings';
-	import { hasRobloxCookie } from '../../ts/tools/keychain';
+	import { hasRobloxCookie } from '../../ts/roblox/accounts';
 	import { AVAILABLE_REGIONS } from '../../ts/roblox/rovalra-api';
 	import Logger from '@/windows/main/ts/utils/logger';
 	import { Globe, Info, Shield, MapPin } from 'lucide-svelte';

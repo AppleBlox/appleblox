@@ -1,5 +1,5 @@
 import { getValue } from '../../components/settings';
-import { hasRobloxCookie } from '../tools/keychain';
+import { hasRobloxCookie } from './accounts';
 import { getPublicServers, getServerRegionInfo, type RobloxServer } from './api';
 import {
 	fetchDatacenterList,

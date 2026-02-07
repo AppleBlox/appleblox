@@ -44,9 +44,14 @@
 	async function handleButtonClick(event: CustomEvent) {
 		const { id } = event.detail as { id: string };
 
-		if (id === 'backup') {
-			await handleBackupCreation();
-			return;
+		switch (id) {
+			case "backup":
+				await handleBackupCreation();
+				return;
+			case "auth_ticket":
+				// const authTicket = await getAuthTicketForAccount()
+				// console.debug(authTicket)
+				return;
 		}
 
 		const [action, type] = id.split('_');
@@ -217,6 +222,18 @@
 					id: 'roblox_download',
 					label: '',
 					separator: false,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Advanced')
+				.setDescription('Other things')
+				.setId('advanced')
+				.addButton({
+					label: 'Get auth ticket',
+					description: 'Prints the auth ticket',
+					id: 'auth_ticket',
+					variant: 'destructive',
 				})
 		)
 		.build();

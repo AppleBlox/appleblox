@@ -11,8 +11,8 @@
 	import ModsIcon from '@/assets/sidebar/mods.png';
 	import PlayIcon from '@/assets/sidebar/play.png';
 	import RobloxIcon from '@/assets/sidebar/roblox.png';
-	import HomeIcon from '@/assets/sidebar/misc.png';
-	import AccountIcon from '@/assets/sidebar/roblox.png';
+	import HomeIcon from '@/assets/sidebar/home.png';
+	import AccountIcon from '@/assets/sidebar/account.png';
 
 	import CreditsIcon from '@/assets/sidebar/info.png';
 	import MiscIcon from '@/assets/sidebar/misc.png';
@@ -41,7 +41,7 @@
 	}
 
 	export let isLaunched: boolean = false;
-	export let currentPage = 'integrations';
+	export let currentPage = 'home';
 	export let id: string;
 	let showInstallDialog = false;
 	let robloxInstalled = true; // Assume installed until checked

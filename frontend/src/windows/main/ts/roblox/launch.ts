@@ -448,6 +448,11 @@ export async function launchRoblox(
 		// Apply region selection if enabled
 		const finalUrl = await applyRegionSelection(robloxUrl);
 
+		// Inject the active account's cookie into Roblox's binary cookies file
+		// so Roblox launches as the correct account
+		await updateBootstrapper('bootstrapper:text', { text: 'Setting up account...' });
+		
+
 		try {
 			const robloxInstance = await applyModsAndLaunch(settings, finalUrl);
 			await setupRobloxInstance(robloxInstance, settings, handlers);

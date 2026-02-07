@@ -93,7 +93,7 @@
 				.addSwitch({
 					label: 'Background updates',
 					description:
-						'Automatically update Roblox without needing AppleBlox or Roblox to opened. <br><span style="color: hsl(var(--warning));">(Requires administrator permissions)</span>',
+						'Automatically update Roblox without needing AppleBlox or Roblox to opened.',
 					default: false,
 					id: 'background_updates',
 				})

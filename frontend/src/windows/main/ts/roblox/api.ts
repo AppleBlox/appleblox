@@ -1,4 +1,4 @@
-import { getRobloxCookie, hasRobloxCookie } from '../tools/keychain';
+import { getRobloxCookie, hasRobloxCookie } from './accounts';
 import { secureRequest, secureGet } from '../tools/secure-http';
 import { Curl } from '../tools/curl';
 import { isRobloxDomain } from '../utils/security';
@@ -56,7 +56,7 @@ function isAllowedDomain(url: string): boolean {
  * Make an authenticated request to a Roblox API
  * SECURITY: Uses secure HTTP client - cookies are NOT visible in process arguments
  */
-async function authenticatedRequest(
+export async function authenticatedRequest(
 	url: string,
 	options: {
 		method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -109,11 +109,12 @@ async function authenticatedRequest(
  * Get CSRF token for POST requests
  * Roblox requires this for authenticated POST/PUT/DELETE requests
  */
-async function getCsrfToken(): Promise<string | null> {
+export async function getCsrfToken(): Promise<string | null> {
 	try {
 		const response = await authenticatedRequest('https://auth.roblox.com/v2/logout', { method: 'POST' }, true);
 
 		const token = response.headers['x-csrf-token'];
+		if (!token) logger.error(response)
 		return token || null;
 	} catch (error) {
 		logger.warn('Failed to get CSRF token:', error);
@@ -246,6 +247,33 @@ export async function validateCookie(): Promise<UserInfo | null> {
 export async function isAuthenticated(): Promise<boolean> {
 	const user = await validateCookie();
 	return user !== null;
+}
+
+/**
+ * Validate an arbitrary cookie (not yet stored) by making an authenticated API call.
+ * Used by the account manager to verify cookies before storing them.
+ */
+export async function validateArbitraryCookie(cookie: string): Promise<UserInfo | null> {
+	if (!cookie || cookie.length < 100) return null;
+	try {
+		const response = await secureRequest('https://users.roblox.com/v1/users/authenticated', {
+			method: 'GET',
+			headers: {
+				'User-Agent': 'AppleBlox/1.0',
+				Accept: 'application/json',
+			},
+			cookies: { '.ROBLOSECURITY': cookie },
+			timeout: 30,
+		});
+
+		if (!response.success || response.statusCode !== 200) {
+			return null;
+		}
+
+		return JSON.parse(response.body) as UserInfo;
+	} catch {
+		return null;
+	}
 }
 
 /**
@@ -423,6 +451,7 @@ export default {
 	getJoinTicket,
 	getCurrentUser,
 	validateCookie,
+	validateArbitraryCookie,
 	isAuthenticated,
 	getServerRegionInfo,
 	getRecentGames,
