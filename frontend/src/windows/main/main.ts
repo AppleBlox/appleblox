@@ -15,6 +15,7 @@ import { getMode, sleep } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
 import Logger, { initializeLogger } from '@/windows/main/ts/utils/logger';
 import { ensureDataDirs, initializeDataDirectory } from './ts/utils/paths';
+import { migrateFromSingleAccount } from './ts/roblox/accounts';
 import { focusWindow, setWindowVisibility } from './ts/window';
 import { extractBundledIcons } from './ts/utils/bundled-icons';
 
@@ -73,6 +74,7 @@ init();
 // Initialize data directory (must be done after init())
 initializeDataDirectory()
 	.then(() => ensureDataDirs())
+	.then(() => migrateFromSingleAccount())
 	.catch((err) => {
 		Logger.error('Failed to initialize data directory:', err);
 	});

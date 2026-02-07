@@ -7,7 +7,7 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { Badge } from '$lib/components/ui/badge';
 	import { ActivityHistoryManager, type GameHistoryEntry } from '../ts/activity';
-	import { hasRobloxCookie } from '../ts/tools/keychain';
+	import { hasRobloxCookie } from '../ts/roblox/accounts';
 	import { getRecentGames } from '../ts/roblox/api';
 	import { getCachedRecentGames, setCachedRecentGames } from '../ts/roblox/games-cache';
 	import ServerListDialog from '../components/activity/server-list-dialog.svelte';

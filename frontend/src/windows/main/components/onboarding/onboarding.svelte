@@ -3,7 +3,18 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import { events, os } from '@neutralinojs/lib';
-	import { Activity, ChevronLeft, ChevronRight, ExternalLink, FileWarning, Rocket, Rss, Settings, User, Users } from 'lucide-svelte';
+	import {
+		Activity,
+		ChevronLeft,
+		ChevronRight,
+		ExternalLink,
+		FileWarning,
+		Rocket,
+		Rss,
+		Settings,
+		User,
+		Users,
+	} from 'lucide-svelte';
 	import { quartInOut, quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import { loadSettings, saveSettings, setMultipleValues, setValue } from '../settings/files';
@@ -91,7 +102,8 @@
 		},
 		{
 			title: 'Roblox Account',
-			description: 'Optionally connect your Roblox account to unlock extra features. You can always do this later in the Account tab.',
+			description:
+				'Optionally connect your Roblox account to unlock extra features. You can always do this later in the Account tab.',
 			icon: User,
 			actions: [
 				{
@@ -117,7 +129,10 @@
 					icon: User,
 					action: () => {
 						pendingAccountSetup = true;
-						toast.success('Account setup will open after onboarding completes.');
+						toast.success('Account setup will open after onboarding completes.', {
+							dismissable: true,
+							duration: 2000,
+						});
 					},
 				},
 			],
@@ -131,7 +146,7 @@
 					type: 'button',
 					label: 'Enable background Roblox updates',
 					description:
-						'Roblox will automatically get updated in the background, without needing AppleBlox or Roblox to be opened <span style="color: hsl(var(--warning));">(Admin permissions needed)</span>',
+						'Roblox will automatically get updated in the background, without needing AppleBlox or Roblox to be opened',
 					variant: 'default',
 					icon: Rss,
 					action: () => {

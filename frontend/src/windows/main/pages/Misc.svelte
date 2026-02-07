@@ -13,7 +13,7 @@
 	import Roblox from '../ts/roblox';
 	import { shell } from '../ts/tools/shell';
 	import shellFS from '../ts/tools/shellfs';
-	import { deleteRobloxCookie } from '../ts/tools/keychain';
+	import { removeAllAccounts } from '../ts/roblox/accounts';
 	import { getDataDir } from '../ts/utils/paths';
 	import Logger from '@/windows/main/ts/utils/logger';
 
@@ -35,7 +35,7 @@
 
 			// 1. Delete keychain credentials
 			try {
-				await deleteRobloxCookie();
+				await removeAllAccounts();
 			} catch (err) {
 				// Keychain may not have an entry - that's fine
 			}
