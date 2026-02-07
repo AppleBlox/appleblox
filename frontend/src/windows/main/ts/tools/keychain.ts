@@ -5,7 +5,6 @@ import Logger from '@/windows/main/ts/utils/logger';
 const logger = Logger.withContext('Keychain');
 
 const SERVICE_NAME = 'ch.origaming.appleblox';
-const ROBLOX_COOKIE_ACCOUNT = 'roblox-cookie';
 
 /**
  * Store a credential in the macOS Keychain
@@ -112,55 +111,9 @@ export async function hasCredential(account: string, service: string = SERVICE_N
 	}
 }
 
-/**
- * Store the Roblox .ROBLOSECURITY cookie securely
- * @param cookie - The .ROBLOSECURITY cookie value
- * @returns true if successful
- */
-export async function storeRobloxCookie(cookie: string): Promise<boolean> {
-	if (!cookie || cookie.length < 100) {
-		logger.error('Invalid Roblox cookie format: too short');
-		return false;
-	}
-
-	if (!cookie.includes('WARNING') && !cookie.startsWith('_|')) {
-		logger.warn('Cookie may not be a valid .ROBLOSECURITY cookie');
-	}
-
-	return storeCredential(ROBLOX_COOKIE_ACCOUNT, cookie);
-}
-
-/**
- * Retrieve the stored Roblox .ROBLOSECURITY cookie
- * @returns The cookie if stored, null otherwise
- */
-export async function getRobloxCookie(): Promise<string | null> {
-	return retrieveCredential(ROBLOX_COOKIE_ACCOUNT);
-}
-
-/**
- * Delete the stored Roblox .ROBLOSECURITY cookie
- * @returns true if successful
- */
-export async function deleteRobloxCookie(): Promise<boolean> {
-	return deleteCredential(ROBLOX_COOKIE_ACCOUNT);
-}
-
-/**
- * Check if a Roblox cookie is stored
- * @returns true if a cookie is stored
- */
-export async function hasRobloxCookie(): Promise<boolean> {
-	return hasCredential(ROBLOX_COOKIE_ACCOUNT);
-}
-
 export default {
 	storeCredential,
 	retrieveCredential,
 	deleteCredential,
 	hasCredential,
-	storeRobloxCookie,
-	getRobloxCookie,
-	deleteRobloxCookie,
-	hasRobloxCookie,
 };
