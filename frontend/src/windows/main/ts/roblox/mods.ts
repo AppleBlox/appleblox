@@ -63,6 +63,16 @@ export class RobloxMods {
 			return;
 		}
 
+		// Remove mesh files, as they are used by mods going against the Roblox TOS
+		for (const mod of mods) {
+			const files = await filesystem.readDirectory(mod.path, { recursive: true });
+			for (const file of files) {
+				if (path.extname(file.entry).endsWith('mesh')) {
+					await filesystem.remove(file.entry);
+				}
+			}
+		}
+
 		await this.createBackup();
 		const resourcesFolder = path.join(robloxPath, 'Contents/Resources/');
 		for (const mod of mods) {
