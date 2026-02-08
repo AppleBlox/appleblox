@@ -206,7 +206,6 @@ export class RobloxInstance {
 			).stdOut.trim();
 			if (info.length < 2) continue;
 			const processFileName = path.basename(info);
-			console.log(processFileName);
 			if (processFileName.includes('RobloxPlayer')) {
 				this.gameInstance = Number.parseInt(pid);
 			}
