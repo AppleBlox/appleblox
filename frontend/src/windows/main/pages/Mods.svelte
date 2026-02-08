@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ApplebloxIcon from '@/assets/appleblox.svg';
 	import GamebananaIcon from '@/assets/panel/gamebanana.png';
+        import UpdateMods from '@/assets/panel/updatemods.png';
 	import { filesystem, os } from '@neutralinojs/lib';
 	import { Book } from 'lucide-svelte';
 	import path from 'path-browserify';
@@ -26,7 +27,7 @@
 				os.open('https://appleblox.com/discord');
 				break;
 			case 'mods_help':
-				os.open('https://github.com/pizzaboxer/bloxstrap/wiki/Adding-custom-mods');
+				os.open('https://bloxstraplabs.com/wiki/features/modding/');
 				break;
 		}
 	}
@@ -169,7 +170,7 @@
 					id: 'open_gamebanana',
 					variant: 'outline',
 					icon: { src: GamebananaIcon },
-				})
+                })
 				.addSwitch({
 					label: 'Enable Mods',
 					description: 'Apply installed mods to Roblox',
