@@ -34,6 +34,23 @@ export async function extractBundledIcons(): Promise<void> {
 		const iconsDir = `${dataDir}/icons`;
 		await shellfs.createDirectory(iconsDir);
 
+		// Migration: Force re-extraction if .newicons marker doesn't exist (for old versions)
+		const newIconsMarker = `${iconsDir}/.newicons`;
+		const hasNewIconsMarker = await shellfs.exists(newIconsMarker);
+
+		if (!hasNewIconsMarker) {
+			Logger.info('No .newicons marker found - clearing old bundled icons for migration');
+			try {
+				// Remove all .icns files and old marker files
+				await shell('sh', ['-c', `rm -f "${iconsDir}"/*.icns "${iconsDir}"/.bundled-icons`], {
+					skipStderrCheck: true
+				});
+				Logger.info('Cleared old bundled icons');
+			} catch (error) {
+				Logger.warn('Failed to clear old bundled icons:', error);
+			}
+		}
+
 		// List all .gz files in bundled-icons
 		try {
 			const result = await shell('ls', [bundledIconsPath], { skipStderrCheck: true });
@@ -83,6 +100,10 @@ export async function extractBundledIcons(): Promise<void> {
 				const markerPath = `${iconsDir}/.bundled-icons`;
 				await shellfs.writeFile(markerPath, bundledIconNames.join('\n'));
 			}
+
+			// Create .newicons marker to indicate icons have been updated to new version
+			const newIconsMarker = `${iconsDir}/.newicons`;
+			await shellfs.writeFile(newIconsMarker, new Date().toISOString());
 
 			if (extractedCount > 0) {
 				Logger.info(`Extracted ${extractedCount} bundled icon(s)`);

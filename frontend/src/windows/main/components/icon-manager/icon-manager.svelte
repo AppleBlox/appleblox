@@ -99,6 +99,14 @@
 					// No backup exists, create one
 					await shellfs.copy(originalIconPath, originalIconBackupPath);
 					Logger.info('Automatically backed up original icon to cache');
+
+					// Clear the PNG preview cache since we're creating a new backup
+					try {
+						await shellfs.remove(originalPngPath);
+						Logger.info('Cleared original icon preview cache');
+					} catch (e) {
+						// Preview might not exist yet, ignore
+					}
 				}
 			} catch (e) {
 				Logger.warn('Could not backup original icon:', e);
