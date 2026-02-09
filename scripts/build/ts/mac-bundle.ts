@@ -5,6 +5,7 @@ import { $, sleep } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
+import { buildLiquidGlassIcons } from './liquid-glass-icons';
 import {
 	copyWithProgress,
 	createProgressLogger,
@@ -88,6 +89,16 @@ export async function macBuildSingle(arch: string, distPath: string) {
 
 		// Bundle icons
 		await bundleIcons(appDist, logger);
+
+		// Build Liquid Glass icons (macOS 26+ only)
+		try {
+			const liquidGlassCompiled = await buildLiquidGlassIcons(appDist, logger);
+			if (liquidGlassCompiled) {
+				logger.success('✓ Liquid Glass icon support added');
+			}
+		} catch (error) {
+			logger.warn('Liquid Glass icon compilation skipped:', error instanceof Error ? error.message : String(error));
+		}
 
 		// Handle libraries
 		await handleLibraries(appDist, Libraries, LibrariesBlacklist, logger);

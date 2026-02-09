@@ -12,6 +12,8 @@
         <string>{APP_NAME} {APP_VERSION}, {APP_COPYRIGHT}</string>
         <key>CFBundleIconFile</key>
         <string>icon.icns</string>
+        <key>CFBundleIconName</key>
+        <string>AppIcon</string>
         <key>CFBundleIdentifier</key>
         <string>{APP_ID}</string>
         <key>CFBundleName</key>
