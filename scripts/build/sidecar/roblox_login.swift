@@ -122,6 +122,13 @@ let allowedRobloxDomains = [
     "login.roblox.com",
     "apis.roblox.com",
     "accountsettings.roblox.com",
+    "api.roblox.com",
+    "economy.roblox.com",
+    "users.roblox.com",
+    "presence.roblox.com",
+    "js.rbxcdn.com",
+    "images.rbxcdn.com",
+    "rbxcdn.com",
 ]
 
 let captchaDomains = [
@@ -153,6 +160,8 @@ class LoginAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     var processMonitor: ProcessMonitor?
     var cookieTimer: Timer?
     var timeoutTimer: Timer?
+    var watchdogTimer: Timer?
+    var lastNavigationUpdate: Date?
     var hasCompleted = false
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -199,7 +208,9 @@ class LoginAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         webView = WKWebView(frame: window.contentView!.bounds, configuration: webConfiguration)
         webView.autoresizingMask = [.width, .height]
         webView.navigationDelegate = self
-        webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+        // Use system default user agent to match current Safari version
+        // This prevents compatibility issues with modern Roblox login flows
+        webView.customUserAgent = nil
 
         window.contentView?.addSubview(webView)
 
@@ -215,8 +226,9 @@ class LoginAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 
-        // Start polling for the .ROBLOSECURITY cookie every second
-        cookieTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // Start polling for the .ROBLOSECURITY cookie every 2 seconds
+        // Reduced frequency to prevent blocking on newer macOS versions
+        cookieTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             self?.checkForCookie()
         }
 
@@ -225,6 +237,18 @@ class LoginAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
             guard let self = self, !self.hasCompleted else { return }
             self.cleanup()
             exitWithStatus("LOGIN_TIMEOUT")
+        }
+
+        // Watchdog timer: check if page loading is stuck
+        lastNavigationUpdate = Date()
+        watchdogTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
+            guard let self = self, !self.hasCompleted else { return }
+            if let lastUpdate = self.lastNavigationUpdate {
+                let elapsed = Date().timeIntervalSince(lastUpdate)
+                if elapsed > 45.0 {
+                    print("LOGIN_DEBUG: WebView appears stuck (no navigation updates for \(Int(elapsed))s)")
+                }
+            }
         }
 
         // Appear in dock while login is active
@@ -236,8 +260,12 @@ class LoginAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     private func checkForCookie() {
         guard !hasCompleted else { return }
 
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { [weak self] cookies in
+        // Dispatch to background queue to prevent main thread blocking
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self, !self.hasCompleted else { return }
+
+            self.webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { [weak self] cookies in
+                guard let self = self, !self.hasCompleted else { return }
 
             for cookie in cookies {
                 if cookie.name == ".ROBLOSECURITY"
@@ -263,10 +291,34 @@ class LoginAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
                     return
                 }
             }
+            }
         }
     }
 
     // MARK: - WKNavigationDelegate
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        lastNavigationUpdate = Date()
+        print("LOGIN_DEBUG: Started loading URL")
+    }
+
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        lastNavigationUpdate = Date()
+        print("LOGIN_DEBUG: Page committed, rendering content")
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        lastNavigationUpdate = Date()
+        print("LOGIN_DEBUG: Page finished loading")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        print("LOGIN_DEBUG: Navigation failed: \(error.localizedDescription)")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        print("LOGIN_DEBUG: Provisional navigation failed: \(error.localizedDescription)")
+    }
 
     func webView(
         _ webView: WKWebView,
@@ -309,6 +361,8 @@ class LoginAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         cookieTimer = nil
         timeoutTimer?.invalidate()
         timeoutTimer = nil
+        watchdogTimer?.invalidate()
+        watchdogTimer = nil
         processMonitor?.stopMonitoring()
 
         // Clear all WebView data
