@@ -28,6 +28,8 @@ export interface ExecuteOptions {
 	background?: boolean;
 	/** Directory from which to execute the command */
 	cwd?: string;
+	/** Named secrets to inject via stdin. Keys are variable names (used as $VAR_NAME in command), values are secret data. */
+	secrets?: Record<string, string>;
 }
 
 /**
@@ -52,6 +54,20 @@ export function buildCommand(command: string, args: (string | number)[]): string
 }
 
 /**
+ * Builds a command with secrets injected via read -s.
+ * @param command - The command template with $VAR_NAME placeholders.
+ * @param secrets - Record of variable names to secret values.
+ * @returns The complete command string with read -s statements.
+ */
+function buildCommandWithSecrets(command: string, secrets: Record<string, string>): string {
+	const readStatements = Object.keys(secrets)
+		.map(varName => `read -s ${varName}`)
+		.join('; ');
+	
+	return `${readStatements}; ${command}`;
+}
+
+/**
  * Executes a shell command safely.
  * @param command - The command to execute.
  * @param args - An optional array of arguments for the command.
@@ -64,6 +80,65 @@ export async function shell(
 	args: (string | number)[] = [],
 	options: ExecuteOptions = {}
 ): Promise<ExecutionResult> {
+	// If secrets are provided, use spawn() under the hood
+	if (options.secrets && Object.keys(options.secrets).length > 0) {
+		const fullCommand = options.completeCommand ? command : buildCommand(command, args);
+		const commandWithSecrets = buildCommandWithSecrets(fullCommand, options.secrets);
+		
+		return new Promise<ExecutionResult>(async (resolve, reject) => {
+			let stdOut = '';
+			let stdErr = '';
+			let exitCode = 0;
+			let timeoutId: NodeJS.Timeout | null = null;
+
+			try {
+				const process = await spawn('sh', ['-c', commandWithSecrets], {
+					skipStderrCheck: options.skipStderrCheck,
+					cwd: options.cwd,
+					completeCommand: false
+				});
+
+				process.on('stdOut', (data) => {
+					stdOut += data;
+				});
+
+				process.on('stdErr', (data) => {
+					stdErr += data;
+				});
+
+				process.on('exit', (code) => {
+					if (timeoutId) clearTimeout(timeoutId);
+					exitCode = code;
+
+					const result: ExecutionResult = { stdOut, stdErr, exitCode };
+
+					if (!options.skipStderrCheck && (stdErr.trim().length > 0 || exitCode === 1)) {
+						reject(new Error(`Command produced stderr output: ${stdErr}`));
+					} else {
+						resolve(result);
+					}
+				});
+
+				// Write secrets to stdin in order
+				for (const secretValue of Object.values(options.secrets!)) {
+					await process.writeStdin(secretValue + '\n');
+				}
+				await process.endStdin();
+
+				if (options.timeoutMs) {
+					timeoutId = setTimeout(async () => {
+						await process.kill(true);
+						reject(new Error(`Command execution timed out after ${options.timeoutMs}ms`));
+					}, options.timeoutMs);
+				}
+			} catch (error) {
+				if (timeoutId) clearTimeout(timeoutId);
+				reject(error);
+			}
+		});
+	}
+
+	// Original implementation without secrets
 	const fullCommand = options.completeCommand ? command : buildCommand(command, args);
 
 	const executePromise = new Promise<ExecutionResult>((resolve, reject) => {
@@ -115,6 +190,10 @@ export interface SpawnOptions {
 	cwd?: string;
 	/** If true, the command will be treated as a "whole" command and args will be ignored */
 	completeCommand?: boolean;
+	/** List of environnment variables to apply */
+	envs?: Record<string, string>;
+	/** Named secrets to inject via stdin. Keys are variable names (used as $VAR_NAME in command), values are secret data. */
+	secrets?: Record<string, string>;
 }
 
 /**
@@ -248,11 +327,22 @@ export async function spawn(
 	args: (string | number)[] = [],
 	options: SpawnOptions = {}
 ): Promise<SpawnEventEmitter> {
-	const fullCommand = options.completeCommand ? command : buildCommand(command, args);
+	let fullCommand: string;
+	let secretsToWrite: string[] | null = null;
+
+	// If secrets are provided, build command with read -s statements
+	if (options.secrets && Object.keys(options.secrets).length > 0) {
+		const baseCommand = options.completeCommand ? command : buildCommand(command, args);
+		fullCommand = buildCommandWithSecrets(baseCommand, options.secrets);
+		secretsToWrite = Object.values(options.secrets);
+	} else {
+		fullCommand = options.completeCommand ? command : buildCommand(command, args);
+	}
+
 	let timeoutId: NodeJS.Timeout | null = null;
 
 	try {
-		const process = await os.spawnProcess(fullCommand, options);
+		const process = await os.spawnProcess(fullCommand, { cwd: options.cwd, envs: options.envs });
 		const spawnedProcess = new SpawnedProcess(process.pid, process.id);
 		spawnedProcesses.set(process.id, spawnedProcess);
 
@@ -269,6 +359,14 @@ export async function spawn(
 				spawnedProcesses.delete(process.id);
 				throw new Error(`Process execution timed out after ${options.timeoutMs}ms`);
 			}, options.timeoutMs);
+		}
+
+		// If secrets were provided, write them to stdin immediately
+		if (secretsToWrite) {
+			for (const secret of secretsToWrite) {
+				await spawnedProcess.writeStdin(secret + '\n');
+			}
+			await spawnedProcess.endStdin();
 		}
 
 		return spawnedProcess;

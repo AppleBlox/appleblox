@@ -1,4 +1,4 @@
-import { filesystem, os } from '@neutralinojs/lib';
+import { events, filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 import { storeCredential, retrieveCredential, deleteCredential, hasCredential } from '../tools/keychain';
 import { parseBinaryCookies, extractRoblosecurity, buildRoblosecurityFile } from '../tools/binarycookies';
@@ -6,7 +6,7 @@ import { authenticatedRequest, getCsrfToken, validateArbitraryCookie, type UserI
 import Logger from '@/windows/main/ts/utils/logger';
 import { Curl } from '../tools/curl';
 import { detectRobloxPath } from './path';
-import { shell } from '../tools/shell';
+import { shell, spawn } from '../tools/shell';
 import { getValue } from '../../components/settings';
 import { RobloxDelegate } from './delegate';
 import { sleep } from '../utils';
@@ -32,10 +32,6 @@ interface AccountsData {
 	version: 1;
 }
 
-// ---------------------------------------------------------------------------
-// Internal: persistence
-// ---------------------------------------------------------------------------
-
 async function getAccountsFilePath(): Promise<string> {
 	const dataDir = path.join(await os.getPath('data'), 'AppleBlox', 'config');
 	return path.join(dataDir, 'accounts.json');
@@ -59,10 +55,6 @@ async function saveAccountsData(data: AccountsData): Promise<void> {
 function keychainAccountKey(userId: number): string {
 	return `roblox-cookie-${userId}`;
 }
-
-// ---------------------------------------------------------------------------
-// Public: account CRUD
-// ---------------------------------------------------------------------------
 
 export async function getAccounts(): Promise<AccountInfo[]> {
 	const data = await loadAccountsData();
@@ -402,21 +394,21 @@ export async function isAccountInBinaryCookies(userId: number): Promise<boolean>
 async function getAuthTicketForAccount(): Promise<string | null> {
 	const token = await getCsrfToken();
 	if (!token) {
-		logger.error("Couldn't get CSRF token")
+		logger.error("Couldn't get CSRF token");
 		return null;
-	};
+	}
 	try {
 		const res = await authenticatedRequest('https://auth.roblox.com/v1/authentication-ticket', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'x-csrf-token': token, Referer: 'https://www.roblox.com/' },
 		});
 		if (!res) {
-			logger.error("Authenticate response was null")
+			logger.error('Authenticate response was null');
 			return null;
-		};
+		}
 		const authTicket = res.headers?.['rbx-authentication-ticket'];
 		if (!authTicket) {
-			logger.error("Returned authTicket was null")
+			logger.error('Returned authTicket was null');
 			return null;
 		}
 		return authTicket;
@@ -427,12 +419,19 @@ async function getAuthTicketForAccount(): Promise<string | null> {
 }
 
 /**
- * Launches Roblox with the authenticate URL to connect the active account
+ * Launches Roblox with the authenticate URL to connect the active account.
+ *
+ * SECURITY NOTE: The auth ticket is passed via stdin using `read -s` to avoid terminal echo,
+ * but it will still appear briefly in the process arguments of the `open` command. This is
+ * an inherent limitation of the macOS `open` command requiring the URL as an argument.
+ *
+ * Mitigation: Auth tickets are short-lived (typically 5-30 seconds) and single-use only.
+ * The risk is limited to local processes that can read /proc or use `ps` during this window.
  */
 export async function launchRobloxWithActiveAccount(): Promise<void> {
 	const authTicket = await getAuthTicketForAccount();
 	if (!authTicket) {
-		throw new Error("Couldn't obtain auth ticket")
+		throw new Error("Couldn't obtain auth ticket");
 	}
 
 	// Delete the binary cookies file to ensure a clean login
@@ -452,11 +451,14 @@ export async function launchRobloxWithActiveAccount(): Promise<void> {
 	const launchTime = Date.now();
 	const launcherUrl = `https://assetgame.roblox.com/game/PlaceLauncher.ashx?request=RequestGame&browserTrackerId=${browserTrackerId}&placeId=109510215435892&isPlayTogetherGame=false`;
 
-	const url = `roblox-player:1+launchmode:play+gameinfo:${authTicket}+launchtime:${launchTime}+placelauncherurl:${launcherUrl}`;
+	const url = `roblox-player:1+launchmode:play+gameinfo:$AUTH_TICKET+launchtime:${launchTime}+placelauncherurl:${launcherUrl}`;
 
 	const isDelegateLaunchingEnabled = await getValue<boolean>('roblox.behavior.delegate');
 	await RobloxDelegate.toggle(false);
-	await shell('open', [url]);
+
+	// Use stdin injection to minimize exposure, though ticket will still appear in process args
+	await shell(`open "${url}"`, [], { completeCommand: true, secrets: { AUTH_TICKET: authTicket } });
+
 	await sleep(5000);
 	await RobloxDelegate.toggle(isDelegateLaunchingEnabled);
 }
