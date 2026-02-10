@@ -30,9 +30,9 @@ jobs:
           echo "Running on macOS $MACOS_VERSION"
 
           if [ "$MACOS_VERSION" -ge 26 ]; then
-            echo "✓ macOS 26+ detected - Liquid Glass icons will be compiled"
+            echo "macOS 26+ detected - Liquid Glass icons will be compiled"
           else
-            echo "ℹ macOS < 26 detected - will use traditional .icns icons"
+            echo "macOS < 26 detected - will use traditional .icns icons"
           fi
 
       - name: Setup Xcode (macOS 26+)
@@ -41,7 +41,7 @@ jobs:
           # Select Xcode 26 for Liquid Glass icon compilation
           sudo xcode-select -s /Applications/Xcode.app
           xcodebuild -version
-          echo "✓ Xcode configured for Liquid Glass asset compilation"
+          echo "Xcode configured for Liquid Glass asset compilation"
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
@@ -114,6 +114,11 @@ jobs:
         run: |
           echo "### Build Results 📦" >> $GITHUB_STEP_SUMMARY
           echo "Version: ${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          if ls .tmpbuild/mac_*/AppleBlox.app/Contents/Resources/Assets.car 1> /dev/null 2>&1; then
+            echo "- [x] Liquid Glass Icons" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [] Liquid Glass Icons" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### DMG Files" >> $GITHUB_STEP_SUMMARY
           echo "- x64 DMG: $(ls -lh dist/AppleBlox-${VERSION}_x64.dmg 2>/dev/null || echo 'Not built')" >> $GITHUB_STEP_SUMMARY
@@ -122,15 +127,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### Icon Support" >> $GITHUB_STEP_SUMMARY
           echo "- macOS Version: ${{ steps.macos_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-
-          # Check if any Assets.car was created (Liquid Glass icons)
-          if ls .tmpbuild/mac_*/AppleBlox.app/Contents/Resources/Assets.car 1> /dev/null 2>&1; then
-            echo "- Liquid Glass Icons: ✓ Compiled (macOS 26+)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- Liquid Glass Icons: ✗ Not compiled (requires macOS 26+)" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "- Traditional Icons: ✓ Included (all macOS versions)" >> $GITHUB_STEP_SUMMARY
 
   create-release:
     needs: build

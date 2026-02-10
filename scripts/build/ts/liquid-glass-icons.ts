@@ -89,8 +89,8 @@ export async function buildLiquidGlassIcons(appDist: string, logger: Signale): P
 			throw new Error('Assets.car was not created by actool');
 		}
 
-		logger.success('✓ Liquid Glass icon compiled successfully');
-		logger.success(`  Assets.car size: ${(await fs.stat(assetsCar)).size} bytes`);
+		logger.success('Liquid Glass icon compiled successfully');
+		logger.success(`Assets.car size: ${(await fs.stat(assetsCar)).size} bytes`);
 		return true;
 	} catch (error) {
 		// Non-fatal error - log warning and continue

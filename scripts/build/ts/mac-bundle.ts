@@ -94,7 +94,7 @@ export async function macBuildSingle(arch: string, distPath: string) {
 		try {
 			const liquidGlassCompiled = await buildLiquidGlassIcons(appDist, logger);
 			if (liquidGlassCompiled) {
-				logger.success('✓ Liquid Glass icon support added');
+				logger.success('Liquid Glass icon support added');
 			}
 		} catch (error) {
 			logger.warn('Liquid Glass icon compilation skipped:', error instanceof Error ? error.message : String(error));
