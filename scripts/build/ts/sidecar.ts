@@ -3,6 +3,7 @@ import { chmodSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
 import { extract } from 'tar';
+import { version } from '../../../package.json';
 
 const DRPC_RELEASE = 'https://github.com/AppleBlox/Discord-RPC-cli/releases/download/1.0.2/discord-rpc-cli';
 const ALERTER_RELEASE = 'https://github.com/vjeantet/alerter/releases/download/1.0.1/alerter_v1.0.1_darwin_amd64.zip';
@@ -26,6 +27,7 @@ type RepoFile = {
 	outputName: string;
 	buildOutput: string;  // path to the built binary within the cloned repo
 	includeSuffix?: boolean;
+	devBranch?: string;   // branch to use when building a dev version
 };
 
 type CopyFile = BaseFile & {
@@ -130,6 +132,7 @@ const repoFiles: RepoFile[] = [
 		url: 'https://github.com/AppleBlox/virtualdisplay.git',
 		outputName: 'virtualdisplay_ablox',
 		buildOutput: '.build/virtualdisplay',
+		devBranch: 'dev',
 	},
 ];
 
@@ -353,8 +356,11 @@ async function buildRepo(
 	const outPath = resolve(join(outputDir, file.outputName));
 	const repoDir = resolve(join('bin/.repos', file.outputName));
 
+	const isDevVersion = version.includes('-dev.');
+	const branch = isDevVersion && file.devBranch ? ['--branch', file.devBranch] : [];
+
 	await $`rm -rf ${repoDir}`;
-	await $`git clone --depth=1 ${file.url} ${repoDir}`;
+	await $`git clone --depth=1 ${branch} ${file.url} ${repoDir}`;
 
 	const makeArchs: Record<BuildArch, string[]> = {
 		arm64: ['arm64'],

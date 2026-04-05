@@ -1,6 +1,8 @@
 #!/bin/bash
-# $2 is the install target root:
-#   system install -> "/"               -> /Applications/AppleBlox.app
-#   user install   -> "/Users/username" -> /Users/username/Applications/AppleBlox.app
-xattr -cr "$2/Applications/AppleBlox.app"
+APP_PATH="$2/Applications/AppleBlox.app"
+xattr -cr "$APP_PATH"
+LOGGED_IN_USER=$(stat -f "%Su" /dev/console)
+if [ -n "$LOGGED_IN_USER" ] && [ "$LOGGED_IN_USER" != "root" ]; then
+    chown -R "$LOGGED_IN_USER" "$APP_PATH"
+fi
 exit 0
