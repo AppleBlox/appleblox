@@ -52,8 +52,6 @@
 	let currentStep = 0;
 	let showIcon = false;
 	let animationPhase: 'icon' | 'content' = 'icon';
-	let pendingAccountSetup = false;
-
 	interface OnboardingAction {
 		type: 'switch' | 'button' | 'info';
 		label: string;
@@ -103,37 +101,15 @@
 		{
 			title: 'Roblox Account',
 			description:
-				'Optionally connect your Roblox account to unlock extra features. You can always do this later in the Account tab.',
+				'Connect your Roblox account to unlock preferred region selection and see all your recent games. Your cookie is encrypted in macOS Keychain and only ever sent to Roblox.com.',
 			icon: User,
 			actions: [
 				{
-					type: 'info',
-					label: 'See all your recent Roblox games',
-					description: 'Not just the ones played through AppleBlox',
-				},
-				{
-					type: 'info',
-					label: 'Choose your preferred server region',
-					description: 'Get better ping by selecting a region closer to you',
-				},
-				{
-					type: 'info',
-					label: 'Secure & private',
-					description: 'Your cookie is encrypted in macOS Keychain and only ever sent to Roblox.com',
-				},
-				{
-					type: 'button',
-					label: 'Connect Account',
-					description: 'Opens the Account page after setup completes',
-					variant: 'default',
-					icon: User,
-					action: () => {
-						pendingAccountSetup = true;
-						toast.success('Account setup will open after onboarding completes.', {
-							dismissable: true,
-							duration: 2000,
-						});
-					},
+					type: 'switch',
+					label: 'Enable Account Features',
+					description: 'You can connect your account later in the Account tab',
+					value: false,
+					settingKey: 'account.features.enabled',
 				},
 			],
 		},
@@ -143,23 +119,11 @@
 			icon: Settings,
 			actions: [
 				{
-					type: 'button',
-					label: 'Enable background Roblox updates',
-					description:
-						'Roblox will automatically get updated in the background, without needing AppleBlox or Roblox to be opened',
-					variant: 'default',
-					icon: Rss,
-					action: () => {
-						try {
-							Roblox.Updates.setLaunchAgentState(true);
-							setValue('roblox.background.background_updates', true);
-						} catch (err) {
-							setValue('roblox.background.background_updates', false);
-							if ((err as Error).message.includes('-128')) return;
-							toast.error('An error ocurred while setting Roblox background updates state');
-							Logger.error('An error ocurred while setting Roblox background updates state:', err);
-						}
-					},
+					type: 'switch',
+					label: 'Background Roblox Updates',
+					description: 'Automatically update Roblox in the background without needing AppleBlox or Roblox to be open',
+					value: false,
+					settingKey: 'roblox.background.background_updates',
 				},
 				{
 					type: 'switch',
@@ -284,12 +248,6 @@
 			onboardingLoaded = true;
 		}
 
-		// Navigate to Account page if user clicked "Connect Account"
-		if (pendingAccountSetup) {
-			setTimeout(() => {
-				events.broadcast('ui:change_page', { id: 'account' });
-			}, 500);
-		}
 	}
 
 	function goToStep(step: number) {

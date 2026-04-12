@@ -1,5 +1,5 @@
 #!/bin/bash
-APP_PATH="$2/Applications/AppleBlox.app"
+APP_PATH="$2/AppleBlox.app"
 xattr -cr "$APP_PATH"
 LOGGED_IN_USER=$(stat -f "%Su" /dev/console)
 if [ -n "$LOGGED_IN_USER" ] && [ "$LOGGED_IN_USER" != "root" ]; then

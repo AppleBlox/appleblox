@@ -195,8 +195,8 @@
 					label: 'Allow fixed loading times',
 					description:
 						'Set a minimal time for loading steps during Roblox launching. That way, you can better see the bootstrapper.',
-					id: 'allow_fixed_loading_times',
-					default: true,
+					id: 'allow_fixed_Loading_times_v2',
+					default: false,
 				})
 				.addButton({
 					label: 'View Logs',

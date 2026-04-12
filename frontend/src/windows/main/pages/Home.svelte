@@ -8,6 +8,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { ActivityHistoryManager, type GameHistoryEntry } from '../ts/activity';
 	import { hasRobloxCookie } from '../ts/roblox/accounts';
+	import { getValue, loadSettings, saveSettings } from '../components/settings';
 	import { getRecentGames } from '../ts/roblox/api';
 	import { getCachedRecentGames, setCachedRecentGames } from '../ts/roblox/games-cache';
 	import ServerListDialog from '../components/activity/server-list-dialog.svelte';
@@ -21,6 +22,7 @@
 		RefreshCw,
 		Trash2,
 		Lightbulb,
+		X,
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -34,12 +36,15 @@
 	let isLoading = true;
 	let isRefreshing = false;
 	let hasAccount = false;
+	let tipDismissed = false;
 	let showClearDialog = false;
 	let serverDialogOpen = false;
 	let selectedGame: GameHistoryEntry | null = null;
 
 	onMount(async () => {
 		if (!render) return;
+		const tipSettings = await loadSettings('home_tip');
+		if (tipSettings?.dismissed) tipDismissed = true;
 		await loadInstant();
 		refreshFromApi();
 	});
@@ -48,7 +53,8 @@
 	async function loadInstant() {
 		isLoading = true;
 		try {
-			hasAccount = await hasRobloxCookie();
+			const accountFeaturesEnabled = (await getValue<boolean>('account.features.enabled')) === true;
+			hasAccount = accountFeaturesEnabled && (await hasRobloxCookie());
 
 			const [localHistory, cachedGames] = await Promise.all([
 				ActivityHistoryManager.getHistory(),
@@ -184,7 +190,7 @@
 			</Card.Root>
 
 			<!-- Tip Banner (when not logged in) -->
-			{#if !hasAccount}
+			{#if !hasAccount && !tipDismissed}
 				<Card.Root class="font-mono ml-8 my-2 w-[95%] border-primary/20 bg-primary/5">
 					<div class="flex items-center gap-3 p-4">
 						<Lightbulb class="w-5 h-5 text-primary flex-shrink-0" />
@@ -192,6 +198,9 @@
 							<span class="font-medium text-foreground">Tip:</span> Connect your Roblox account to see all your recent games, not just the ones played through AppleBlox.
 						</p>
 						<Button variant="outline" size="sm" on:click={goToAccount}>Connect</Button>
+						<button class="text-muted-foreground hover:text-foreground transition-colors p-1" on:click={() => { tipDismissed = true; saveSettings('home_tip', { dismissed: true }); }} aria-label="Dismiss">
+							<X class="w-4 h-4" />
+						</button>
 					</div>
 				</Card.Root>
 			{/if}

@@ -43,6 +43,13 @@ export async function getRegionPreference(): Promise<RegionPreference> {
 	let contributionConsent = false;
 
 	try {
+		const accountFeaturesEnabled = (await getValue<boolean>('account.features.enabled')) === true;
+		if (!accountFeaturesEnabled) return { enabled: false, region: 'AUTO', contributionConsent: false };
+	} catch {
+		return { enabled: false, region: 'AUTO', contributionConsent: false };
+	}
+
+	try {
 		enabled = (await getValue<boolean>('region.preferences.enabled')) === true;
 	} catch (err) {
 		logger.debug('Failed to read region.preferences.enabled:', err);

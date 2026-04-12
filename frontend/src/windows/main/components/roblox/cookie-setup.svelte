@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onMount, tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { os } from '@neutralinojs/lib';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -146,6 +146,7 @@
 	let pendingAddAccount = false;
 
 	async function handleKeychainConsent() {
+		const hadAccountsBefore = accounts.length > 0;
 		grantKeychainConsent();
 		showKeychainConsentDialog = false;
 		await migrateFromSingleAccount();
@@ -153,7 +154,11 @@
 
 		if (pendingAddAccount) {
 			pendingAddAccount = false;
-			showAddAccountDialog = true;
+			const autoDetectedNewAccounts = !hadAccountsBefore && accounts.length > 0;
+			if (!autoDetectedNewAccounts) {
+				await tick();
+				showAddAccountDialog = true;
+			}
 		}
 	}
 

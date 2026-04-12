@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { events } from '@neutralinojs/lib';
 	import { LucideSettings } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import RobloxDownloadButton from '../components/roblox/roblox-download-button.svelte';
@@ -49,6 +50,9 @@
 				await handleBackupCreation();
 				return;
 			case "auth_ticket":
+				return;
+			case "fake_update":
+				await events.broadcast('dev:fake-update');
 				return;
 		}
 
@@ -232,6 +236,12 @@
 					description: 'Prints the auth ticket',
 					id: 'auth_ticket',
 					variant: 'destructive',
+				})
+				.addButton({
+					label: 'Trigger fake update',
+					description: 'Opens the updater UI with a simulated download and install — does not modify any files',
+					id: 'fake_update',
+					variant: 'outline',
 				})
 		)
 		.build();

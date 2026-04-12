@@ -79,7 +79,7 @@ export async function macBuildSingle(arch: string, distPath: string, librariesPa
 		await generateInfoPlist(appDist, logger);
 
 		// Copy executables with proper permissions
-		await copyExecutables(appDist, executable, logger);
+		await copyExecutables(appDist, executable, Libraries, logger);
 
 		// Copy resources
 		await copyResources(appDist, neuResources, logger);
@@ -105,6 +105,9 @@ export async function macBuildSingle(arch: string, distPath: string, librariesPa
 
 		// Verify app bundle structure
 		await verifyAppBundle(appDist, logger);
+
+		// Ad-hoc codesign the entire bundle so Gatekeeper doesn't mark it as damaged
+		await adhocSignBundle(appDist, logger);
 
 		logger.complete(`mac_${arch} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 	} catch (error) {
@@ -167,12 +170,12 @@ async function generateInfoPlist(appDist: string, logger: Signale) {
 	logger.success('Generated Info.plist');
 }
 
-async function copyExecutables(appDist: string, executable: string, logger: Signale) {
+async function copyExecutables(appDist: string, executable: string, librariesPath: string, logger: Signale) {
 	const appBundle = `${BuildConfig.appName}.app`;
 	const MacOS = resolve(appDist, appBundle, 'Contents', 'MacOS');
 	const mainPath = resolve(MacOS, 'main');
 	const bootstrapPath = resolve(MacOS, 'bootstrap');
-	const bootstrapSource = resolve('bin/bootstrap_ablox');
+	const bootstrapSource = resolve(librariesPath, 'bootstrap_ablox');
 
 	// Copy main executable with retry
 	await executeWithRetry(
@@ -299,6 +302,34 @@ async function handleLibraries(appDist: string, librariesPath: string, libraries
 		logger.success('Processed libraries');
 	} catch (error) {
 		logger.info('No blacklisted files found or libraries processed successfully');
+	}
+}
+
+async function adhocSignBundle(appDist: string, logger: Signale) {
+	const appBundle = `${BuildConfig.appName}.app`;
+	const appPath = resolve(appDist, appBundle);
+
+	try {
+		// Strip any quarantine attributes that may have been picked up during copies
+		await $`xattr -cr "${appPath}"`.nothrow();
+
+		// Ad-hoc sign nested code first, then the outer bundle.
+		// --deep --force re-signs everything inside (including already-signed sidecars) so the
+		// whole tree is consistent under a single signature, which is what Gatekeeper checks.
+		const result = await $`codesign --force --deep --sign - --timestamp=none "${appPath}"`.nothrow();
+		if (result.exitCode !== 0) {
+			logger.warn(`codesign failed with exit ${result.exitCode}: ${result.stderr.toString()}`);
+			return;
+		}
+
+		const verify = await $`codesign --verify --verbose "${appPath}"`.nothrow();
+		if (verify.exitCode !== 0) {
+			logger.warn(`codesign verify failed: ${verify.stderr.toString()}`);
+		} else {
+			logger.success('Ad-hoc signed app bundle');
+		}
+	} catch (error) {
+		logger.warn('Failed to ad-hoc sign app bundle:', error instanceof Error ? error.message : String(error));
 	}
 }
 
