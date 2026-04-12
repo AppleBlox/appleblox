@@ -201,8 +201,8 @@ export class RobloxMods {
 
 		const fontExt = path.extname(fontValue);
 		const fontsFolderPath = path.join(robloxPath, 'Contents/Resources/content/fonts');
-		const customFontPath = path.join(robloxPath, fontsFolderPath, `CustomFont${fontExt}`);
-		const familiesPath = path.join(robloxPath, fontsFolderPath, 'families');
+		const customFontPath = path.join(fontsFolderPath, `CustomFont${fontExt}`);
+		const familiesPath = path.join(fontsFolderPath, 'families');
 		const cacheDir = path.join(await getFontsCacheDir(), 'families');
 		if (!(await shellFS.exists(cacheDir))) {
 			if (await shellFS.exists(customFontPath)) {

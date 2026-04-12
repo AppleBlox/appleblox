@@ -215,10 +215,10 @@ export class RobloxInstance {
 			throw new Error("Couldn't find the RobloxPlayer process. Exiting launch.");
 		}
 
-		const quitEventHandler = () => {
+		const quitEventHandler = async () => {
 			events.off('instance:quit', quitEventHandler);
 			this.emit('exit');
-			this.quit();
+			await this.quit();
 		};
 
 		events.off('instance:quit', quitEventHandler);
