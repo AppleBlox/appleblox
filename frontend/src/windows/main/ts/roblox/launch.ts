@@ -24,6 +24,7 @@ import {
 	selectServerWithPreferredRegion,
 } from './region-selector';
 import { formatDatacenterLocation } from './rovalra-api';
+import * as VirtualDisplay from './virtualdisplay';
 import { parseBootstrapperTheme } from '@/windows/bootstrapper/wpfui-theme';
 import Logger from '../utils/logger';
 
@@ -36,7 +37,7 @@ let _allowFixedDelays: boolean | null = null;
 async function getAllowFixedDelays(): Promise<boolean> {
 	if (_allowFixedDelays !== null) return _allowFixedDelays;
 	try {
-		_allowFixedDelays = (await getValue<boolean>('misc.advanced.allow_fixed_loading_times')) ?? true;
+		_allowFixedDelays = (await getValue<boolean>('misc.advanced.allow_fixed_Loading_times_v2')) ?? true;
 	} catch {
 		_allowFixedDelays = true;
 	}
@@ -45,7 +46,6 @@ async function getAllowFixedDelays(): Promise<boolean> {
 
 let rbxInstance: RobloxInstance | null = null;
 let bootstrapperProcess: SpawnEventEmitter | null = null;
-let virtualdisplayProcess: SpawnEventEmitter | null = null;
 let initialProgressListener: ((evt: { detail: string }) => Promise<void>) | null = null;
 
 interface LaunchSettings {
@@ -468,13 +468,10 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	await updateBootstrapper('bootstrapper:progress', { progress: 100 });
 	if (await getAllowFixedDelays()) await sleep(FIXED_STEP_DELAY);
 
-	if ((await getValue<boolean>('engine.graphics.fps_cap')) === true) {
-		const vdPath = libraryPath('virtualdisplay');
-		logger.info('FPS cap enabled: starting virtual display');
-		virtualdisplayProcess = await spawn(vdPath, ['--no-menu'], { skipStderrCheck: true });
-		virtualdisplayProcess.on('exit', () => {
-			virtualdisplayProcess = null;
-		});
+	const fpsUnlockRaw = await getValue<string | { label: string; value: string }>('engine.graphics.fps_unlock');
+	const fpsUnlockMethod = typeof fpsUnlockRaw === 'object' && fpsUnlockRaw !== null ? fpsUnlockRaw.value : (fpsUnlockRaw ?? 'vsync');
+	if (fpsUnlockMethod === 'virtualdisplay') {
+		await VirtualDisplay.start();
 	}
 
 	await cleanupBootstrapper();
@@ -499,10 +496,7 @@ async function setupRobloxInstance(
 	robloxInstance.on('exit', async () => {
 		logger.info('Roblox instance exited');
 
-		if (virtualdisplayProcess) {
-			await virtualdisplayProcess.kill(true);
-			virtualdisplayProcess = null;
-		}
+		await VirtualDisplay.stop();
 
 		if (settings.returnToWebsite) {
 			os.open('https://www.roblox.com');

@@ -55,6 +55,9 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.engine',
 			type: 'select',
 			value: async (settingValue) => {
+				const fpsMethod = await getValue<string | { value: string }>('engine.graphics.fps_unlock');
+				const resolved = typeof fpsMethod === 'object' && fpsMethod !== null ? fpsMethod.value : fpsMethod;
+				if (resolved === 'opengl') return false;
 				return (settingValue as { label: string; value: string }).value === 'opengl';
 			},
 		})
@@ -64,6 +67,9 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.engine',
 			type: 'select',
 			value: async (settingValue) => {
+				const fpsMethod = await getValue<string | { value: string }>('engine.graphics.fps_unlock');
+				const resolved = typeof fpsMethod === 'object' && fpsMethod !== null ? fpsMethod.value : fpsMethod;
+				if (resolved === 'opengl') return false;
 				return (settingValue as { label: string; value: string }).value === 'metal';
 			},
 		})
@@ -73,7 +79,23 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.engine',
 			type: 'select',
 			value: async (settingValue) => {
+				const fpsMethod = await getValue<string | { value: string }>('engine.graphics.fps_unlock');
+				const resolved = typeof fpsMethod === 'object' && fpsMethod !== null ? fpsMethod.value : fpsMethod;
+				if (resolved === 'opengl') return false;
 				return (settingValue as { label: string; value: string }).value === 'vulkan';
+			},
+		})
+		.addFlag({
+			name: 'FPS Unlock (OpenGL)',
+			flags: {
+				FFlagDebugGraphicsPreferOpenGL: true,
+				FFlagDebugGraphicsDisableMetal: true,
+				FFlagDebugGraphicsPreferMetal: false,
+			},
+			path: 'engine.graphics.fps_unlock',
+			type: 'select',
+			value: async (settingValue) => {
+				return (settingValue as { label: string; value: string }).value === 'opengl';
 			},
 		})
 		.addFlag({
@@ -98,7 +120,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		.addFlag({
 			name: 'Fractional Scaling',
 			flags: { DFFlagDisableDPIScale: true },
-			path: 'engine.graphics.fracscaling',
+			path: 'engine.rendering.fracscaling',
 			type: 'switch',
 			value: true,
 		})
