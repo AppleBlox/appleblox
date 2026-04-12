@@ -85,6 +85,8 @@ type WidgetOptions =
 			min: number;
 			/** Of how much to increase the slider value at each step */
 			step: number;
+			/** Warning shown when value exceeds a threshold */
+			warning?: { above: number; message: string };
 	  }
 	| {
 			/** Button Widget */

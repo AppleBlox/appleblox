@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FlagEditor from '../components/flag-editor/flag-editor.svelte';
+	import MonitorSelector from '../components/monitor-selector.svelte';
 	import { SettingsPanelBuilder } from '../components/settings';
 	import Panel from '../components/settings/panel.svelte';
 
@@ -13,31 +14,78 @@
 		.setId('engine')
 		.addCategory((category) =>
 			category
+				.setName('Frame Rate')
+				.setDescription('Frame rate unlock and virtual display settings')
+				.setId('graphics')
+				.addSelect({
+					label: 'Unlock Method',
+					description: 'Method used to uncap the frame rate',
+					id: 'fps_unlock',
+					default: 'vsync',
+					items: [
+						{ label: 'VSync (default)', value: 'vsync' },
+						{ label: 'Virtual Display', value: 'virtualdisplay' },
+						{ label: 'OpenGL', value: 'opengl' },
+					],
+				})
+				.addSlider({
+					label: 'Refresh Rate',
+					description: 'Refresh rate of the virtual display in Hz',
+					id: 'vd_hz',
+					default: [240],
+					max: 600,
+					min: 60,
+					step: 1,
+					warning: { above: 240, message: 'Degraded performance past 240Hz' },
+					toggleable: {
+						id: 'fps_unlock',
+						type: 'select',
+						value: 'virtualdisplay',
+					},
+				})
+				.addInput({
+					label: 'Custom Width',
+					description: 'Override the virtual display width in pixels (leave empty for auto)',
+					id: 'vd_width',
+					default: '',
+					placeholder: 'Auto',
+					whitelist: '0123456789',
+					toggleable: {
+						id: 'fps_unlock',
+						type: 'select',
+						value: 'virtualdisplay',
+					},
+				})
+				.addInput({
+					label: 'Custom Height',
+					description: 'Override the virtual display height in pixels (leave empty for auto)',
+					id: 'vd_height',
+					default: '',
+					placeholder: 'Auto',
+					whitelist: '0123456789',
+					toggleable: {
+						id: 'fps_unlock',
+						type: 'select',
+						value: 'virtualdisplay',
+					},
+				})
+				.addCustom({
+					label: '',
+					description: '',
+					id: 'vd_display',
+					component: MonitorSelector,
+					toggleable: {
+						id: 'fps_unlock',
+						type: 'select',
+						value: 'virtualdisplay',
+					},
+				})
+		)
+		.addCategory((category) =>
+			category
 				.setName('Graphics Engine')
 				.setDescription('Core graphics and performance settings')
-				.setId('graphics')
-				.addSwitch({
-					label: 'Remove Frame Rate Limit',
-					description:
-						'Create a 240hz virtual display that will let you go above your monitor\'s refresh rate in game.',
-					id: 'fps_cap',
-					default: false,
-				})
-				// .addSelect({
-				// 	label: 'Render Resolution',
-				// 	description: 'Override the internal rendering resolution. Higher values produce sharper images but require more GPU power.',
-				// 	id: 'resolution',
-				// 	default: 'default',
-				// 	items: [
-				// 		{ label: 'Default', value: 'default' },
-				// 		{ label: '8K (4320p)', value: '33178' },
-				// 		{ label: '4K (2160p)', value: '8294' },
-				// 		{ label: '1440p', value: '3686' },
-				// 		{ label: '1080p', value: '2074' },
-				// 		{ label: '720p', value: '922' },
-				// 		{ label: '480p', value: '410' },
-				// 	],
-				// })
+				.setId('rendering')
 				.addSelect({
 					label: 'Graphics API',
 					description: 'Select rendering backend',

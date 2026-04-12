@@ -303,6 +303,7 @@
 										max={widget.options.max}
 										min={widget.options.min}
 										step={widget.options.step}
+										warning={widget.options.warning}
 										on:changed={(e) => {
 											const { value } = e.detail;
 											settings[category.id][widget.id] = value;

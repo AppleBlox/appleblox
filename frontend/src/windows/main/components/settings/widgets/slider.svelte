@@ -12,53 +12,67 @@
 	export let placeholderValue: number[];
 	export let defaultValue: number;
 	export let value = [defaultValue];
+	export let warning: { above: number; message: string } | undefined = undefined;
+
+	$: showWarning = warning && value[0] > warning.above;
+
+	let inputValue = String(value[0]);
 
 	const dispatch = createEventDispatcher<{ changed: { value: number[] } }>();
 
 	function handleKeypress(e: any) {
 		if (e.key === 'Enter') {
 			e.target.blur();
+			return;
 		}
-		// Cancel event if char is not in whitelist or the string has already too much .
 		if (!WHITELIST.includes(e.key)) {
 			e.preventDefault();
 			return;
 		}
 	}
 
-	$: {
-		if (value[0] > max) {
-			value[0] = max;
-		} else if (value[0] < min) {
-			value[0] = min;
-		}
-		if (typeof value[0] === 'number') {
-			dispatch('changed', { value });
-		}
+	function commitInput() {
+		let num = parseInt(inputValue, 10);
+		if (isNaN(num)) num = min;
+		if (num > max) num = max;
+		if (num < min) num = min;
+		value = [num];
+		inputValue = String(num);
+		dispatch('changed', { value });
+	}
+
+	function onSliderChange(v: number[]) {
+		value = v;
+		inputValue = String(v[0]);
+		dispatch('changed', { value });
 	}
 
 	const isStepOne = step === 1;
 </script>
 
-<div class="flex flex-grow justify-end">
-	<!-- We bind so we can link the slider to the input -->
-	<Slider {max} {step} class="w-48 ml-7" bind:value />
+<div class="flex flex-grow justify-end items-center">
+	<Slider {max} {step} class="w-48 ml-7" value={value} onValueChange={onSliderChange} />
 	{#if isStepOne}
-		<Input
-			disabled={step !== 1}
-			type="number"
-			bind:value={value[0]}
-			class="w-32 text-cente bg-input border-none ml-5 mr-4"
-			placeholder={placeholderValue.toString()}
-			on:keypress={handleKeypress}
-		/>
+		<div class="relative ml-5 mr-4">
+			{#if showWarning}
+				<p class="absolute -top-5 left-0 right-0 text-center text-[11px] text-warning whitespace-nowrap">{warning?.message}</p>
+			{/if}
+			<Input
+				type="text"
+				bind:value={inputValue}
+				class="w-32 text-center border-none {showWarning ? 'bg-warning/20 ring-1 ring-warning' : 'bg-input'}"
+				placeholder={placeholderValue.toString()}
+				on:keypress={handleKeypress}
+				on:blur={commitInput}
+			/>
+		</div>
 	{:else}
 		<Tooltip.Root>
 			<Tooltip.Trigger>
 				<Input
 					disabled={step !== 1}
-					type="number"
-					bind:value={value[0]}
+					type="text"
+					value={String(value[0])}
 					class="w-32 text-center bg-input ml-5 mr-4"
 					placeholder={placeholderValue.toString()}
 					on:keypress={handleKeypress}
