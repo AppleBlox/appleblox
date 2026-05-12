@@ -486,6 +486,8 @@ export class RobloxDownloader {
 		await shell('unzip', [zipPath, '-d', dirname]);
 		await shellFS.remove(destPath);
 		await shellFS.move(robloxAppPath, destPath);
+		await shell('xattr', ['-c', destPath]);
+		await shell('codesign', ['--remove-signature', `${destPath}/Contents/MacOS/RobloxPlayer`]);
 		await shell('open', [destPath]);
 	}
 }
