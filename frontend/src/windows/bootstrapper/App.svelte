@@ -14,6 +14,17 @@
 	let text = 'Initializing...';
 	let theme: ParsedTheme | null = null;
 	let assetsDir = '';
+	let waitRemoved = false;
+
+	async function handleSkipWait() {
+		waitRemoved = true;
+		try {
+			await events.broadcast('bootstrapper:skip_wait');
+			Logger.info('Bootstrapper: Broadcasted skip_wait event.');
+		} catch (e) {
+			Logger.error('Bootstrapper: Failed to broadcast skip_wait:', e);
+		}
+	}
 
 	const params = new URLSearchParams(window.location.search);
 
@@ -186,6 +197,19 @@
 			<ThemeElement {el} {text} {progress} {resolveThemeUrl} />
 		{/each}
 		</div>
+		{#if !waitRemoved}
+			<button
+				on:click={handleSkipWait}
+				class="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 text-[11px] px-3 py-1 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm transition-all cursor-pointer border border-white/10"
+				id="themed_skip_wait_btn"
+			>
+				Dont want to wait any longer? Click to remove the wait
+			</button>
+		{:else}
+			<p class="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 text-[11px] px-3 py-1 rounded-full bg-black/60 text-white/70 backdrop-blur-sm animate-pulse border border-white/10">
+				Removing wait...
+			</p>
+		{/if}
 	</div>
 
 {:else}
@@ -209,9 +233,23 @@
 
 			<p class="text-[3vmin] text-foreground/70 font-medium tracking-wider mb-[2vh]">AppleBlox Bootstrapper</p>
 
-			<p class="text-[2.5vmin] text-foreground/50 font-mono">
+			<p class="text-[2.5vmin] text-foreground/50 font-mono mb-[1.5vh]">
 				{Math.round(progress)}%
 			</p>
+
+			{#if !waitRemoved}
+				<button
+					on:click={handleSkipWait}
+					class="text-[2.2vmin] text-primary/80 hover:text-primary hover:underline transition-all cursor-pointer font-medium"
+					id="skip_wait_btn"
+				>
+					Dont want to wait any longer? Click to remove the wait
+				</button>
+			{:else}
+				<p class="text-[2.2vmin] text-muted-foreground font-medium animate-pulse">
+					Removing wait...
+				</p>
+			{/if}
 		</div>
 	</div>
 {/if}

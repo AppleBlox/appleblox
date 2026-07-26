@@ -79,7 +79,7 @@ export async function macBuildSingle(arch: string, distPath: string, librariesPa
 		await generateInfoPlist(appDist, logger);
 
 		// Copy executables with proper permissions
-		await copyExecutables(appDist, executable, logger);
+		await copyExecutables(appDist, executable, arch, logger);
 
 		// Copy resources
 		await copyResources(appDist, neuResources, logger);
@@ -167,12 +167,15 @@ async function generateInfoPlist(appDist: string, logger: Signale) {
 	logger.success('Generated Info.plist');
 }
 
-async function copyExecutables(appDist: string, executable: string, logger: Signale) {
+async function copyExecutables(appDist: string, executable: string, arch: string, logger: Signale) {
 	const appBundle = `${BuildConfig.appName}.app`;
 	const MacOS = resolve(appDist, appBundle, 'Contents', 'MacOS');
 	const mainPath = resolve(MacOS, 'main');
 	const bootstrapPath = resolve(MacOS, 'bootstrap');
-	const bootstrapSource = resolve('bin/bootstrap_ablox');
+	// Try arch-specific path first, then fall back to root bin/ for backwards compatibility
+	const bootstrapSource = existsSync(resolve(`bin/${arch}/bootstrap_ablox`))
+		? resolve(`bin/${arch}/bootstrap_ablox`)
+		: resolve('bin/bootstrap_ablox');
 
 	// Copy main executable with retry
 	await executeWithRetry(

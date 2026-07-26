@@ -5,7 +5,7 @@ import { Signale } from 'signale';
 
 export async function buildViteAndNeu(buildVite = true) {
 	if (!(await checkNeutralino())) {
-		await $`bunx neu update`;
+		await $`./node_modules/.bin/neu update`;
 	}
 
 	const frontBuildLog = new Signale({
@@ -18,7 +18,7 @@ export async function buildViteAndNeu(buildVite = true) {
 		await $`rm -rf "${resolve('frontend/dist')}"`;
 
 		try {
-			await $`bunx vite build`;
+			await $`./node_modules/.bin/vite build`;
 
 			// Wait for build completion
 			let attempts = 0;
@@ -46,7 +46,7 @@ export async function buildViteAndNeu(buildVite = true) {
 	await sleep(500);
 
 	try {
-		await $`bunx neu build`;
+		await $`./node_modules/.bin/neu build`;
 	} catch (err) {
 		frontBuildLog.fatal('Neutralino build failed:');
 		frontBuildLog.fatal(err);

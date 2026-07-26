@@ -16,12 +16,15 @@
 				.setName('Graphics Engine')
 				.setDescription('Core graphics and performance settings')
 				.setId('graphics')
-				.addSwitch({
-					label: 'Remove Frame Rate Limit',
+				.addSlider({
+					label: 'Frame Rate Limit',
 					description:
-						'Create a 240hz virtual display that will let you go above your monitor\'s refresh rate in game.',
-					id: 'fps_cap',
-					default: false,
+						'Set your max FPS (0 = default 60hz limit). Values above 60hz will create a virtual display to bypass macOS v-sync limits. (120hz is great for battery saving)',
+					id: 'fps_limit',
+					default: 0,
+					min: 0,
+					max: 240,
+					step: 10,
 				})
 				// .addSelect({
 				// 	label: 'Render Resolution',

@@ -2,7 +2,7 @@ import { events, app as neuApp, window as neuWindow, os, filesystem, server } fr
 import beautify from 'json-beautify';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
-import { getValue } from '../../components/settings';
+import { getValue, setValue } from '../../components/settings';
 import { libraryPath } from '../libraries';
 import { Notification } from '../tools/notifications';
 import { RPCController } from '../tools/rpc';
@@ -47,6 +47,7 @@ let rbxInstance: RobloxInstance | null = null;
 let bootstrapperProcess: SpawnEventEmitter | null = null;
 let virtualdisplayProcess: SpawnEventEmitter | null = null;
 let initialProgressListener: ((evt: { detail: string }) => Promise<void>) | null = null;
+let skipWaitListener: (() => Promise<void>) | null = null;
 
 interface LaunchSettings {
 	areModsEnabled: boolean;
@@ -306,6 +307,17 @@ async function setupBootstrapper(): Promise<void> {
 	};
 	events.on('bootstrapper:ready', initialProgressListener);
 
+	skipWaitListener = async () => {
+		logger.info('Received bootstrapper:skip_wait event, disabling fixed loading delays');
+		_allowFixedDelays = false;
+		try {
+			await setValue('misc.advanced.allow_fixed_loading_times', false);
+		} catch (err) {
+			logger.warn('Failed to update allow_fixed_loading_times setting:', err);
+		}
+	};
+	events.on('bootstrapper:skip_wait', skipWaitListener);
+
 	await sleep(500);
 }
 
@@ -329,6 +341,13 @@ async function cleanupBootstrapper(): Promise<void> {
 			await events.off('bootstrapper:ready', initialProgressListener);
 		} catch {}
 		initialProgressListener = null;
+	}
+
+	if (skipWaitListener) {
+		try {
+			await events.off('bootstrapper:skip_wait', skipWaitListener);
+		} catch {}
+		skipWaitListener = null;
 	}
 
 	if (bootstrapperProcess) {
@@ -468,9 +487,15 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	await updateBootstrapper('bootstrapper:progress', { progress: 100 });
 	if (await getAllowFixedDelays()) await sleep(FIXED_STEP_DELAY);
 
-	if ((await getValue<boolean>('engine.graphics.fps_cap')) === true) {
+	let fpsLimit = await getValue<number>('engine.graphics.fps_limit');
+	if (fpsLimit === undefined || typeof fpsLimit === 'boolean') {
+		const oldFpsCap = await getValue<boolean>('engine.graphics.fps_cap');
+		fpsLimit = oldFpsCap ? 240 : 0;
+	}
+
+	if (fpsLimit && fpsLimit > 60) {
 		const vdPath = libraryPath('virtualdisplay');
-		logger.info('FPS cap enabled: starting virtual display');
+		logger.info(`FPS limit > 60 (${fpsLimit}): starting virtual display`);
 		virtualdisplayProcess = await spawn(vdPath, ['--no-menu'], { skipStderrCheck: true });
 		virtualdisplayProcess.on('exit', () => {
 			virtualdisplayProcess = null;
@@ -553,6 +578,16 @@ export async function launchRoblox(
 
 	try {
 		const fflags = await validateFlags(showFlagErrorPopup, checkFlags);
+
+		let fpsLimitLaunch = await getValue<number>('engine.graphics.fps_limit');
+		if (fpsLimitLaunch === undefined || typeof fpsLimitLaunch === 'boolean') {
+			const oldFpsCap = await getValue<boolean>('engine.graphics.fps_cap');
+			fpsLimitLaunch = oldFpsCap ? 240 : 0;
+		}
+
+		if (fpsLimitLaunch && fpsLimitLaunch > 0) {
+			fflags['DFIntTaskSchedulerTargetFps'] = fpsLimitLaunch.toString();
+		}
 
 		if (!robloxUrl) await setWindowVisibility(false);
 		await setupBootstrapper();
