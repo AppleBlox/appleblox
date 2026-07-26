@@ -487,9 +487,15 @@ async function applyModsAndLaunch(settings: LaunchSettings, robloxUrl?: string):
 	await updateBootstrapper('bootstrapper:progress', { progress: 100 });
 	if (await getAllowFixedDelays()) await sleep(FIXED_STEP_DELAY);
 
-	if ((await getValue<boolean>('engine.graphics.fps_cap')) === true) {
+	let fpsLimit = await getValue<number>('engine.graphics.fps_limit');
+	if (fpsLimit === undefined || typeof fpsLimit === 'boolean') {
+		const oldFpsCap = await getValue<boolean>('engine.graphics.fps_cap');
+		fpsLimit = oldFpsCap ? 240 : 0;
+	}
+
+	if (fpsLimit && fpsLimit > 60) {
 		const vdPath = libraryPath('virtualdisplay');
-		logger.info('FPS cap enabled: starting virtual display');
+		logger.info(`FPS limit > 60 (${fpsLimit}): starting virtual display`);
 		virtualdisplayProcess = await spawn(vdPath, ['--no-menu'], { skipStderrCheck: true });
 		virtualdisplayProcess.on('exit', () => {
 			virtualdisplayProcess = null;
@@ -572,6 +578,16 @@ export async function launchRoblox(
 
 	try {
 		const fflags = await validateFlags(showFlagErrorPopup, checkFlags);
+
+		let fpsLimitLaunch = await getValue<number>('engine.graphics.fps_limit');
+		if (fpsLimitLaunch === undefined || typeof fpsLimitLaunch === 'boolean') {
+			const oldFpsCap = await getValue<boolean>('engine.graphics.fps_cap');
+			fpsLimitLaunch = oldFpsCap ? 240 : 0;
+		}
+
+		if (fpsLimitLaunch && fpsLimitLaunch > 0) {
+			fflags['DFIntTaskSchedulerTargetFps'] = fpsLimitLaunch.toString();
+		}
 
 		if (!robloxUrl) await setWindowVisibility(false);
 		await setupBootstrapper();
