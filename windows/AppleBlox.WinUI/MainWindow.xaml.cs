@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using AppleBlox.WinUI.Models;
 using AppleBlox.WinUI.Services;
 using Microsoft.UI.Xaml;
@@ -14,6 +16,8 @@ public sealed partial class MainWindow : Window
     private readonly RobloxLaunchService _launchService = new();
     private readonly RobloxApiClient _apiClient = new();
     private readonly SettingsService _settingsService = new();
+    private readonly RobloxFastFlagsService _fastFlagsService = new();
+    private readonly RobloxAccountService _accountService = new();
 
     private RobloxInstallation? _installation;
     private string? _customPath;
@@ -22,6 +26,7 @@ public sealed partial class MainWindow : Window
     private TextBox? _launchUriTextBox;
     private TextBox? _customPathTextBox;
     private TextBlock? _latestVersionText;
+    private TextBox? _flagsTextBox;
 
     public MainWindow()
     {
@@ -83,6 +88,8 @@ public sealed partial class MainWindow : Window
         ContentFrame.Content = item.Tag?.ToString() switch
         {
             "roblox" => BuildRobloxPage(),
+            "accounts" => BuildAccountsPage(),
+            "flags" => BuildFastFlagsPage(),
             "settings" => BuildSettingsPage(),
             "about" => BuildAboutPage(),
             _ => BuildHomePage()
@@ -163,6 +170,120 @@ public sealed partial class MainWindow : Window
         _statusText = new TextBlock { Text = "", TextWrapping = TextWrapping.Wrap, Opacity = 0.72 };
         stack.Children.Add(_statusText);
         return PageFrame(stack);
+    }
+
+    private FrameworkElement BuildAccountsPage()
+    {
+        var stack = new StackPanel { Spacing = 14 };
+        stack.Children.Add(new TextBlock { Text = "Accounts", FontSize = 28, FontWeight = Windows.UI.Text.FontWeights.Bold });
+        stack.Children.Add(new TextBlock
+        {
+            Text = "The Windows port keeps account metadata local. It never puts Roblox cookies in process arguments or source-controlled files.",
+            TextWrapping = TextWrapping.Wrap,
+            Opacity = 0.72
+        });
+        var accountText = new TextBlock { Text = "Loading accounts…", TextWrapping = TextWrapping.Wrap };
+        stack.Children.Add(accountText);
+        var login = new Button { Content = "Open Roblox login" };
+        login.Click += (_, _) => Process.Start(new ProcessStartInfo
+        {
+            FileName = "https://www.roblox.com/login",
+            UseShellExecute = true
+        });
+        stack.Children.Add(login);
+        _ = LoadAccountsAsync(accountText);
+        return PageFrame(stack);
+    }
+
+    private async Task LoadAccountsAsync(TextBlock target)
+    {
+        var accounts = await _accountService.LoadAsync();
+        target.Text = accounts.Count == 0
+            ? "No local account profiles yet. Sign in through Roblox, then account linking can be added here."
+            : string.Join("\n", accounts.Select(account => $"{account.DisplayName} (@{account.Username}) — {account.UserId}"));
+    }
+
+    private FrameworkElement BuildFastFlagsPage()
+    {
+        var stack = new StackPanel { Spacing = 14 };
+        stack.Children.Add(new TextBlock { Text = "Fast Flags", FontSize = 28, FontWeight = Windows.UI.Text.FontWeights.Bold });
+        stack.Children.Add(new TextBlock
+        {
+            Text = "Edit Roblox's Windows ClientAppSettings.json. Only scalar flag values are accepted, and flag names are validated before writing.",
+            TextWrapping = TextWrapping.Wrap,
+            Opacity = 0.72
+        });
+        _flagsTextBox = new TextBox
+        {
+            Header = "ClientAppSettings.json",
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            MinHeight = 280,
+            FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Mono")
+        };
+        stack.Children.Add(_flagsTextBox);
+        var actions = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+        var load = new Button { Content = "Load" };
+        load.Click += async (_, _) => await LoadFastFlagsAsync();
+        var save = new Button { Content = "Save" };
+        save.Click += async (_, _) => await SaveFastFlagsAsync();
+        var clear = new Button { Content = "Clear" };
+        clear.Click += async (_, _) => await ClearFastFlagsAsync();
+        actions.Children.Add(load);
+        actions.Children.Add(save);
+        actions.Children.Add(clear);
+        stack.Children.Add(actions);
+        _statusText = new TextBlock { Text = "", TextWrapping = TextWrapping.Wrap, Opacity = 0.72 };
+        stack.Children.Add(_statusText);
+        _ = LoadFastFlagsAsync();
+        return PageFrame(stack);
+    }
+
+    private async Task LoadFastFlagsAsync()
+    {
+        if (_flagsTextBox is null || _installation is null)
+        {
+            if (_flagsTextBox is not null) _flagsTextBox.Text = "{}";
+            return;
+        }
+
+        var flags = await _fastFlagsService.LoadAsync(_installation);
+        _flagsTextBox.Text = flags.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        SetStatus("Loaded Windows ClientAppSettings.json.");
+    }
+
+    private async Task SaveFastFlagsAsync()
+    {
+        if (_flagsTextBox is null || _installation is null)
+        {
+            SetStatus("Roblox must be installed before fast flags can be saved.");
+            return;
+        }
+
+        try
+        {
+            var root = JsonNode.Parse(_flagsTextBox.Text) as JsonObject
+                ?? throw new JsonException("Fast flags must be a JSON object.");
+            await _fastFlagsService.WriteAsync(_installation, root.ToDictionary(pair => pair.Key, pair => pair.Value));
+            SetStatus("Fast flags saved for the detected Windows Roblox client.");
+        }
+        catch (Exception exception) when (exception is JsonException or ArgumentException or IOException)
+        {
+            SetStatus($"Fast flags were not saved: {exception.Message}");
+        }
+    }
+
+    private async Task ClearFastFlagsAsync()
+    {
+        if (_installation is null)
+        {
+            SetStatus("Roblox must be installed before fast flags can be cleared.");
+            return;
+        }
+
+        await _fastFlagsService.ClearAsync(_installation);
+        if (_flagsTextBox is not null) _flagsTextBox.Text = "{}";
+        SetStatus("Windows fast flags cleared.");
     }
 
     private FrameworkElement BuildSettingsPage()
