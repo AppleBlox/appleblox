@@ -12,7 +12,6 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>Assets\appleblox.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
