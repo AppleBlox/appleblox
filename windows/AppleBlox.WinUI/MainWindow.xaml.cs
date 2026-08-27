@@ -18,6 +18,7 @@ public sealed partial class MainWindow : Window
     private readonly SettingsService _settingsService = new();
     private readonly RobloxFastFlagsService _fastFlagsService = new();
     private readonly RobloxAccountService _accountService = new();
+    private readonly RobloxModsService _modsService = new();
 
     private RobloxInstallation? _installation;
     private string? _customPath;
@@ -90,6 +91,7 @@ public sealed partial class MainWindow : Window
             "roblox" => BuildRobloxPage(),
             "accounts" => BuildAccountsPage(),
             "flags" => BuildFastFlagsPage(),
+            "mods" => BuildModsPage(),
             "settings" => BuildSettingsPage(),
             "about" => BuildAboutPage(),
             _ => BuildHomePage()
@@ -284,6 +286,30 @@ public sealed partial class MainWindow : Window
         await _fastFlagsService.ClearAsync(_installation);
         if (_flagsTextBox is not null) _flagsTextBox.Text = "{}";
         SetStatus("Windows fast flags cleared.");
+    }
+
+    private FrameworkElement BuildModsPage()
+    {
+        var stack = new StackPanel { Spacing = 14 };
+        stack.Children.Add(new TextBlock { Text = "Mods", FontSize = 28, FontWeight = Windows.UI.Text.FontWeights.Bold });
+        stack.Children.Add(new TextBlock
+        {
+            Text = "Windows mods are loaded from %LOCALAPPDATA%\\AppleBlox\\mods. Each mod folder contains mod.json and an optional files folder.",
+            TextWrapping = TextWrapping.Wrap,
+            Opacity = 0.72
+        });
+        var modsText = new TextBlock { Text = "Loading mods…", TextWrapping = TextWrapping.Wrap };
+        stack.Children.Add(modsText);
+        _ = LoadModsAsync(modsText);
+        return PageFrame(stack);
+    }
+
+    private async Task LoadModsAsync(TextBlock target)
+    {
+        var mods = await _modsService.LoadAsync();
+        target.Text = mods.Count == 0
+            ? "No local mods found. Add a mod folder with a mod.json manifest to get started."
+            : string.Join("\n", mods.Select(mod => $"{mod.Name} — {mod.Description}"));
     }
 
     private FrameworkElement BuildSettingsPage()
