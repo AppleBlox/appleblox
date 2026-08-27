@@ -19,4 +19,4 @@ From the repository root:
 
 Open the Windows project in Visual Studio to run the app. The initial native port detects Roblox installations under %LOCALAPPDATA%\Roblox\Versions and the standard Program Files locations, launches RobloxPlayerBeta.exe, supports roblox-player URIs, and stores an optional custom installation path in %LOCALAPPDATA%\AppleBlox\settings.json.
 
-The existing Svelte/Neutralino implementation remains unchanged while this native Windows surface is brought up feature-by-feature.
+The native Windows surface currently includes Roblox discovery and launching, roblox-player URI support, client-version checks, local settings, a local account catalog, Windows ClientAppSettings fast-flag editing, and safe mod overlay primitives. The existing Svelte/Neutralino implementation remains unchanged while the remaining features are brought over feature-by-feature.
