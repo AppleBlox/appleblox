@@ -125,6 +125,9 @@ public sealed partial class MainWindow : Window
         refresh.Click += async (_, _) => await RefreshInstallationAsync();
         actions.Children.Add(launch);
         actions.Children.Add(refresh);
+        var install = new Button { Content = "Install Roblox" };
+        install.Click += (_, _) => OpenRobloxDownload();
+        actions.Children.Add(install);
         cardStack.Children.Add(actions);
         card.Child = cardStack;
         stack.Children.Add(card);
@@ -210,6 +213,15 @@ public sealed partial class MainWindow : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             Content = child
         };
+    }
+
+    private static void OpenRobloxDownload()
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "https://www.roblox.com/download",
+            UseShellExecute = true
+        });
     }
 
     private async Task LaunchRobloxAsync()
