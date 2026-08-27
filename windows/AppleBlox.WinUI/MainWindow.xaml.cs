@@ -21,6 +21,7 @@ public sealed partial class MainWindow : Window
     private TextBlock? _statusText;
     private TextBox? _launchUriTextBox;
     private TextBox? _customPathTextBox;
+    private TextBlock? _latestVersionText;
 
     public MainWindow()
     {
@@ -36,6 +37,25 @@ public sealed partial class MainWindow : Window
         _customPath = settings.CustomRobloxPath;
         if (_customPathTextBox is not null) _customPathTextBox.Text = _customPath ?? string.Empty;
         await RefreshInstallationAsync();
+        await RefreshLatestVersionAsync();
+    }
+
+    private async Task RefreshLatestVersionAsync()
+    {
+        try
+        {
+            var latest = await _apiClient.GetLatestClientVersionAsync();
+            if (_latestVersionText is not null)
+            {
+                _latestVersionText.Text = latest is null
+                    ? "Latest Roblox version could not be checked."
+                    : $"Latest Roblox client: {latest.Version}";
+            }
+        }
+        catch (HttpRequestException)
+        {
+            if (_latestVersionText is not null) _latestVersionText.Text = "Latest Roblox version is unavailable offline.";
+        }
     }
 
     private async Task RefreshInstallationAsync()
@@ -111,6 +131,8 @@ public sealed partial class MainWindow : Window
 
         _statusText = new TextBlock { Text = "Starting AppleBlox…", Opacity = 0.72, TextWrapping = TextWrapping.Wrap };
         stack.Children.Add(_statusText);
+        _latestVersionText = new TextBlock { Text = "Checking latest Roblox version…", Opacity = 0.72 };
+        stack.Children.Add(_latestVersionText);
         return PageFrame(stack);
     }
 
