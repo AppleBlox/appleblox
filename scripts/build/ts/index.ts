@@ -3,7 +3,7 @@ import { $ } from 'bun';
 import { resolve } from 'node:path';
 import { Signale } from 'signale';
 import { macBuild } from './mac-bundle';
-import { buildSidecar } from './sidecar';
+import { buildSidecar, type BuildArch } from './sidecar';
 import { buildViteAndNeu, getArchitectureFilter } from './utils';
 
 const { argv } = process;
@@ -33,7 +33,8 @@ export async function build() {
 
 	// Build macOS sidecar binaries
 	if (!argv.includes('--no-sidecar')) {
-		await buildSidecar();
+		const sidecarArch: BuildArch = architectureFilter ?? 'universal';
+		await buildSidecar(sidecarArch);
 	}
 
 	// Build Vite and Neutralino

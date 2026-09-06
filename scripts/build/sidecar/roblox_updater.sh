@@ -62,14 +62,36 @@ get_blob_dir() {
 
 find_roblox() {
     local roblox_path
-    roblox_path=$(find /Applications "$HOME/Applications" -maxdepth 1 -iname '*roblox*.app' -exec stat -f '%a %N' {} + 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
-    
+
+    # Strategy 1: Use mdfind (Spotlight) for system-wide search
+    log "Searching for Roblox using Spotlight (mdfind)..."
+    roblox_path=$(mdfind "kMDItemDisplayName == '*Roblox*.app' && kMDItemKind == 'Application'" 2>/dev/null | head -1)
+
+    # Strategy 2: Fallback to find in common locations if mdfind found nothing
     if [ -z "$roblox_path" ]; then
-        log "Roblox is not installed"
+        log "mdfind found nothing, trying find command..."
+        roblox_path=$(find /Applications "$HOME/Applications" -maxdepth 1 -iname '*roblox*.app' -exec stat -f '%m %N' {} + 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
+    fi
+
+    # Strategy 3: Check hardcoded common paths as last resort
+    if [ -z "$roblox_path" ]; then
+        log "find found nothing, checking common paths..."
+        for path in "/Applications/Roblox.app" "$HOME/Applications/Roblox.app"; do
+            if [ -d "$path" ]; then
+                roblox_path="$path"
+                break
+            fi
+        done
+    fi
+
+    # Validate found path has Info.plist
+    if [ -n "$roblox_path" ] && [ -f "$roblox_path/Contents/Info.plist" ]; then
+        log "Found Roblox at: $roblox_path"
+        echo "$roblox_path"
+    else
+        log "Roblox is not installed or invalid installation found"
         exit 0
     fi
-    
-    echo "$roblox_path"
 }
 
 get_local_version() {

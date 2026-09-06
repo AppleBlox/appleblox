@@ -20,7 +20,7 @@
 		}
 	}
 
-	$: parsedContent = marked.parse(content, { async: false }) as string;
+	$: parsedContent = marked.parse(content, { async: false, gfm: true, breaks: true }) as string;
 	$: sanitizedHtml = DOMPurify.sanitize(parsedContent);
 </script>
 

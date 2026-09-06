@@ -19,7 +19,6 @@ async function fetchThumbnail(assetId: number): Promise<string | null> {
 
 	try {
 		const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&returnPolicy=PlaceHolder&size=30x30&format=png&isCircular=false`;
-		console.debug(url);
 		const response = await Curl.get(url);
 
 		if (!response.body) {

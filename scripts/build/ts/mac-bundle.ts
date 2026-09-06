@@ -5,6 +5,7 @@ import { $, sleep } from 'bun';
 import { chmodSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
+import { buildLiquidGlassIcons } from './liquid-glass-icons';
 import {
 	copyWithProgress,
 	createProgressLogger,
@@ -44,11 +45,11 @@ export async function macBuild(architectureFilter?: string | null) {
 	logger.success(`macOS build completed for ${targetArchs.length} architecture(s)`);
 }
 
-export async function macBuildSingle(arch: string, distPath: string) {
+export async function macBuildSingle(arch: string, distPath: string, librariesPath?: string) {
 	const appTime = performance.now();
 	const appDist = resolve(distPath, `mac_${arch}`);
 	const logger = createProgressLogger(`mac-${arch}`);
-	const Libraries = resolve('bin');
+	const Libraries = librariesPath ?? resolve('bin');
 	const LibrariesBlacklist = ['bootstrap', 'neutralino'];
 
 	logger.await(`Building macOS app bundle for ${arch}`);
@@ -78,7 +79,7 @@ export async function macBuildSingle(arch: string, distPath: string) {
 		await generateInfoPlist(appDist, logger);
 
 		// Copy executables with proper permissions
-		await copyExecutables(appDist, executable, logger);
+		await copyExecutables(appDist, executable, Libraries, logger);
 
 		// Copy resources
 		await copyResources(appDist, neuResources, logger);
@@ -89,11 +90,24 @@ export async function macBuildSingle(arch: string, distPath: string) {
 		// Bundle icons
 		await bundleIcons(appDist, logger);
 
+		// Build Liquid Glass icons (macOS 26+ only)
+		try {
+			const liquidGlassCompiled = await buildLiquidGlassIcons(appDist, logger);
+			if (liquidGlassCompiled) {
+				logger.success('Liquid Glass icon support added');
+			}
+		} catch (error) {
+			logger.warn('Liquid Glass icon compilation skipped:', error instanceof Error ? error.message : String(error));
+		}
+
 		// Handle libraries
 		await handleLibraries(appDist, Libraries, LibrariesBlacklist, logger);
 
 		// Verify app bundle structure
 		await verifyAppBundle(appDist, logger);
+
+		// Ad-hoc codesign the entire bundle so Gatekeeper doesn't mark it as damaged
+		await adhocSignBundle(appDist, logger);
 
 		logger.complete(`mac_${arch} built in ${((performance.now() - appTime) / 1000).toFixed(3)}s`);
 	} catch (error) {
@@ -140,23 +154,28 @@ async function generateInfoPlist(appDist: string, logger: Signale) {
 		throw new Error('macOS config not found');
 	}
 
+	const copyright = BuildConfig.copyright || `Copyright © ${new Date().getFullYear()} ${BuildConfig.appName}`;
+	const urlSchemeName = `${BuildConfig.appName} URL Scheme`;
+
 	const InfoPlistTemplate = (await Bun.file(resolve(__dirname, '../templates/mac/Info.plist')).text())
-		.replace('{APP_NAME}', BuildConfig.appName)
-		.replace('{APP_ID}', neuConfig.applicationId)
-		.replace('{APP_BUNDLE}', BuildConfig.appBundleName)
-		.replace('{APP_MIN_OS}', BuildConfig.mac.minimumOS)
-		.replace('{APP_VERSION}', version);
+		.replace(/{APP_NAME}/g, BuildConfig.appName)
+		.replace(/{APP_ID}/g, neuConfig.applicationId)
+		.replace(/{APP_BUNDLE}/g, BuildConfig.appBundleName)
+		.replace(/{APP_MIN_OS}/g, BuildConfig.mac.minimumOS)
+		.replace(/{APP_VERSION}/g, version)
+		.replace(/{APP_COPYRIGHT}/g, copyright)
+		.replace(/{APP_URL_SCHEME_NAME}/g, urlSchemeName);
 
 	await Bun.write(InfoPlist, InfoPlistTemplate);
 	logger.success('Generated Info.plist');
 }
 
-async function copyExecutables(appDist: string, executable: string, logger: Signale) {
+async function copyExecutables(appDist: string, executable: string, librariesPath: string, logger: Signale) {
 	const appBundle = `${BuildConfig.appName}.app`;
 	const MacOS = resolve(appDist, appBundle, 'Contents', 'MacOS');
 	const mainPath = resolve(MacOS, 'main');
 	const bootstrapPath = resolve(MacOS, 'bootstrap');
-	const bootstrapSource = resolve('bin/bootstrap_ablox');
+	const bootstrapSource = resolve(librariesPath, 'bootstrap_ablox');
 
 	// Copy main executable with retry
 	await executeWithRetry(
@@ -223,7 +242,10 @@ async function bundleIcons(appDist: string, logger: Signale) {
 	try {
 		// Get list of .icns files
 		const icnsFiles = await $`find ${bundledIconsPath} -name "*.icns" -type f`.text();
-		const files = icnsFiles.trim().split('\n').filter(f => f);
+		const files = icnsFiles
+			.trim()
+			.split('\n')
+			.filter((f) => f);
 
 		if (files.length === 0) {
 			logger.info('No .icns files found in bundled-icons directory');
@@ -280,6 +302,34 @@ async function handleLibraries(appDist: string, librariesPath: string, libraries
 		logger.success('Processed libraries');
 	} catch (error) {
 		logger.info('No blacklisted files found or libraries processed successfully');
+	}
+}
+
+async function adhocSignBundle(appDist: string, logger: Signale) {
+	const appBundle = `${BuildConfig.appName}.app`;
+	const appPath = resolve(appDist, appBundle);
+
+	try {
+		// Strip any quarantine attributes that may have been picked up during copies
+		await $`xattr -cr "${appPath}"`.nothrow();
+
+		// Ad-hoc sign nested code first, then the outer bundle.
+		// --deep --force re-signs everything inside (including already-signed sidecars) so the
+		// whole tree is consistent under a single signature, which is what Gatekeeper checks.
+		const result = await $`codesign --force --deep --sign - --timestamp=none "${appPath}"`.nothrow();
+		if (result.exitCode !== 0) {
+			logger.warn(`codesign failed with exit ${result.exitCode}: ${result.stderr.toString()}`);
+			return;
+		}
+
+		const verify = await $`codesign --verify --verbose "${appPath}"`.nothrow();
+		if (verify.exitCode !== 0) {
+			logger.warn(`codesign verify failed: ${verify.stderr.toString()}`);
+		} else {
+			logger.success('Ad-hoc signed app bundle');
+		}
+	} catch (error) {
+		logger.warn('Failed to ad-hoc sign app bundle:', error instanceof Error ? error.message : String(error));
 	}
 }
 

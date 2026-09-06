@@ -202,15 +202,15 @@
 						</p>
 						{#each category.widgets || [] as widget (widget.id)}
 							<!-- Separator for the widgets (except button) -->
-							{#if widget.options.type !== 'button' && widget.options.type !== 'separator' && (widget.separator === undefined || widget.separator === true)}
+							{#if !category.hideSeparator && widget.options.type !== 'button' && widget.options.type !== 'separator' && (widget.separator === undefined || widget.separator === true)}
 								<Separator class="my-3 bg-gray-300 opacity-25" el={undefined} decorative={true} />
 							{/if}
 							<!-- Disable the widget if the button it is linked to is disabled -->
 							<div
 								class={`flex items-center w-full duration-200 ${isToggled(category, widget, widget.toggleable ? settings[category.id][widget.toggleable.id] : null) ? '' : 'cursor-not-allowed opacity-30 select-one group pointer-events-none'}`}
 							>
-								<!-- Description of the widget (except button) -->
-								{#if widget.options.type !== 'button'}
+								<!-- Description of the widget (except button and custom with no label) -->
+								{#if widget.options.type !== 'button' && !(widget.options.type === 'custom' && !widget.label)}
 									<div class={widget.options.type === 'slider' ? 'w-[500px]' : ''}>
 										<p class="font-bold text-foreground">
 											{widget.label}
@@ -303,6 +303,7 @@
 										max={widget.options.max}
 										min={widget.options.min}
 										step={widget.options.step}
+										warning={widget.options.warning}
 										on:changed={(e) => {
 											const { value } = e.detail;
 											settings[category.id][widget.id] = value;

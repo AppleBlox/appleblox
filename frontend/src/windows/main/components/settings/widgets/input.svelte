@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Input, type FormInputEvent } from '$lib/components/ui/input/index.js';
-	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { createEventDispatcher } from 'svelte';
 
 	export let placeholder: string;
@@ -20,7 +19,6 @@
 	const dispatch = createEventDispatcher<{ inputChanged: { input: string } }>();
 
 	function handleInput(e: any) {
-		// FormInputEvent causes the app to freeze, so we set to any
 		const input = e.target.value as string;
 		dispatch('inputChanged', { input });
 	}
@@ -33,7 +31,6 @@
 				return;
 			}
 		}
-		// Verify that the key is allowed
 		if (whitelist && !whitelist.includes(e.key)) {
 			warnAnimation();
 			e.preventDefault();
@@ -44,17 +41,10 @@
 	}
 </script>
 
-<Tooltip.Root bind:open={doWarnAnimation}>
-	<Tooltip.Trigger>
-		<Input
-			bind:value
-			class={`text-foreground text-center border-none w-[250px] font-sans mr-4 transition duration-150 ${doWarnAnimation ? 'animate-shake ring-red-900' : ''}`}
-			{placeholder}
-			on:keypress={handleKeypress}
-			on:change={handleInput}
-		/>
-	</Tooltip.Trigger>
-	<Tooltip.Content>
-		<p class="text-red-200">This character is not allowed!</p>
-	</Tooltip.Content>
-</Tooltip.Root>
+<Input
+	bind:value
+	class={`text-foreground text-center border-none w-[250px] font-sans mr-4 transition duration-150 ${doWarnAnimation ? 'animate-shake ring-red-900' : ''}`}
+	{placeholder}
+	on:keypress={handleKeypress}
+	on:change={handleInput}
+/>

@@ -20,17 +20,6 @@ export function sleep(ms = 0) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function isUrlReachable(url: string, timeout: number = 5000): Promise<boolean> {
-	const res = await shell(
-		`curl -I --silent --max-time ${timeout / 1000} ${url} > /dev/null && echo "true" || echo "false"`,
-		[],
-		{
-			completeCommand: true,
-		}
-	);
-	return res.stdOut.includes('true');
-}
-
 /**
  * Returns the current date in a format compatible with POSIX path names.
  * The format is: YYYY-MM-DD_HH-mm-ss

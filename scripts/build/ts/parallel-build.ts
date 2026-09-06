@@ -3,7 +3,7 @@ import { $ } from 'bun';
 import { resolve } from 'node:path';
 import { Signale } from 'signale';
 import { macBuildSingle } from './mac-bundle';
-import { buildSidecar } from './sidecar';
+import { buildSidecar, type BuildArch } from './sidecar';
 import { buildViteAndNeu, filterArchitectures, getArchitectureFilter } from './utils';
 
 const { argv } = process;
@@ -38,16 +38,20 @@ async function parallelBuild() {
 
 	await $`mkdir -p "${resolve('.tmpbuild')}"`;
 
-	// Build shared components sequentially (these can't be parallelized)
-	logger.await('Building shared components...');
-	await buildSidecar();
+	// Build sidecar binaries for each target architecture
+	logger.await('Building sidecar binaries...');
+	for (const arch of targetArchs) {
+		await buildSidecar(arch as BuildArch, resolve(`bin/${arch}`));
+	}
+	logger.success('Sidecar binaries built for all architectures');
+
+	// Build Vite and Neutralino (shared across all architectures)
 	await buildViteAndNeu(!argv.includes('--no-vite'));
-	logger.success('Shared components built');
 
 	// If only one architecture, build sequentially for better output
 	if (targetArchs.length === 1) {
 		logger.info(`Building single architecture ${targetArchs[0]} sequentially`);
-		await macBuildSingle(targetArchs[0], resolve('.tmpbuild'));
+		await macBuildSingle(targetArchs[0], resolve('.tmpbuild'), resolve(`bin/${targetArchs[0]}`));
 	} else {
 		// Run parallel builds for multiple architectures
 		logger.info(`Building ${targetArchs.length} architectures in parallel`);
@@ -57,7 +61,7 @@ async function parallelBuild() {
 			archLogger.await(`Building ${arch} in parallel`);
 
 			try {
-				await macBuildSingle(arch, resolve('.tmpbuild'));
+				await macBuildSingle(arch, resolve('.tmpbuild'), resolve(`bin/${arch}`));
 				archLogger.success(`${arch} build completed`);
 				return { arch, success: true };
 			} catch (error) {

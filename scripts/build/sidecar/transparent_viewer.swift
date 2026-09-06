@@ -470,7 +470,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKScri
             </style>
         </head>
         <body>
-            <div class="corner-indicator">4px Padding ✓</div>
+            <div class="corner-indicator">4px Padding</div>
             <h1>Transparent Webpage Viewer</h1>
             <p>No webpage specified. Use --url argument to load a website.</p>
             <p>Usage: ./TransparentViewer --width 800 --height 600 --url https://example.com</p>

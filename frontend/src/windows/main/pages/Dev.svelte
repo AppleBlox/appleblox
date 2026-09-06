@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { events } from '@neutralinojs/lib';
 	import { LucideSettings } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import RobloxDownloadButton from '../components/roblox/roblox-download-button.svelte';
@@ -44,9 +45,15 @@
 	async function handleButtonClick(event: CustomEvent) {
 		const { id } = event.detail as { id: string };
 
-		if (id === 'backup') {
-			await handleBackupCreation();
-			return;
+		switch (id) {
+			case "backup":
+				await handleBackupCreation();
+				return;
+			case "auth_ticket":
+				return;
+			case "fake_update":
+				await events.broadcast('dev:fake-update');
+				return;
 		}
 
 		const [action, type] = id.split('_');
@@ -95,7 +102,7 @@
 	}
 
 	// Get launch arguments from Neutralino
-	const launchArgs = window.NL_ARGS.join(' ')
+	const launchArgs = window.NL_ARGS.join(' ');
 
 	const developmentPanel = new SettingsPanelBuilder()
 		.setName('Development Panel')
@@ -217,6 +224,24 @@
 					id: 'roblox_download',
 					label: '',
 					separator: false,
+				})
+		)
+		.addCategory((category) =>
+			category
+				.setName('Advanced')
+				.setDescription('Other things')
+				.setId('advanced')
+				.addButton({
+					label: 'Get auth ticket',
+					description: 'Prints the auth ticket',
+					id: 'auth_ticket',
+					variant: 'destructive',
+				})
+				.addButton({
+					label: 'Trigger fake update',
+					description: 'Opens the updater UI with a simulated download and install — does not modify any files',
+					id: 'fake_update',
+					variant: 'outline',
 				})
 		)
 		.build();

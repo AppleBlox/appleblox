@@ -1,4 +1,4 @@
-import { os } from '@neutralinojs/lib';
+import { filesystem, os } from '@neutralinojs/lib';
 import path from 'path-browserify';
 
 /**
@@ -91,6 +91,22 @@ export async function getFontsCacheDir(): Promise<string> {
  */
 export async function getConfigDir(): Promise<string> {
 	return await getDataDir();
+}
+
+/**
+ * Ensure all essential data directories exist.
+ * Call this on app startup to recover from a reset or first launch.
+ */
+export async function ensureDataDirs(): Promise<void> {
+	const dataDir = await getDataDir();
+	const dirs = [dataDir, path.join(dataDir, 'cache'), path.join(dataDir, 'logs'), path.join(dataDir, 'config')];
+	for (const dir of dirs) {
+		try {
+			await filesystem.createDirectory(dir);
+		} catch {
+			// Directory may already exist
+		}
+	}
 }
 
 /**

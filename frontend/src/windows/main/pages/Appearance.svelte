@@ -3,6 +3,7 @@
 	import Panel from '../components/settings/panel.svelte';
 	import ThemeInput from '../components/theme-input/theme-input.svelte';
 	import IconManager from '../components/icon-manager/icon-manager.svelte';
+	import BootstrapperTheme from '../components/bootstrapper-theme/bootstrapper-theme.svelte';
 
 	const panel = new SettingsPanelBuilder()
 		.setName('Appearance')
@@ -21,6 +22,13 @@
 				.setDescription('Customize app appearance')
 				.setId('general')
 				.addCustom({ label: '', description: '', id: 'theme_input', component: ThemeInput })
+		)
+		.addCategory((category) =>
+			category
+				.setName('Bootstrapper Theme')
+				.setDescription('Apply a Bloxstrap/Fishstrap bootstrapper theme to the launch screen')
+				.setId('bootstrapper_theme')
+				.addCustom({ label: '', description: '', id: 'bootstrapper_theme_input', component: BootstrapperTheme })
 		)
 		.build();
 </script>

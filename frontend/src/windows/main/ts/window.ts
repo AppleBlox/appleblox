@@ -47,6 +47,11 @@ hotkeys('cmd+p,ctrl+p', () => {
 	return false;
 });
 
+hotkeys('cmd+r,ctrl+r', () => {
+	events.broadcast('installRoblox');
+	return false;
+});
+
 export async function focusWindow() {
 	try {
 		shell(

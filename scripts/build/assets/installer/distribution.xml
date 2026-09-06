@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>AppleBlox __VERSION__</title>
+    <welcome file="welcome.html" mime-type="text/html" />
+    <options customize="never" require-scripts="false" />
+    <domains enable_localSystem="true" enable_currentUserHome="true" />
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.appleblox.pkg" />
+        </line>
+    </choices-outline>
+    <choice id="default" />
+    <choice id="com.appleblox.pkg" visible="false">
+        <pkg-ref id="com.appleblox.pkg" />
+    </choice>
+    <pkg-ref id="com.appleblox.pkg" version="__VERSION__" onConclusion="none">AppleBlox.pkg</pkg-ref>
+</installer-gui-script>

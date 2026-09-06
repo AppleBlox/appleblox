@@ -85,6 +85,8 @@ type WidgetOptions =
 			min: number;
 			/** Of how much to increase the slider value at each step */
 			step: number;
+			/** Warning shown when value exceeds a threshold */
+			warning?: { above: number; message: string };
 	  }
 	| {
 			/** Button Widget */
@@ -138,6 +140,8 @@ export interface Category {
 	id: string;
 	widgets: PanelWidget[];
 	categories: Category[];
+	/** Hide the separator line before widgets in this category */
+	hideSeparator?: boolean;
 }
 
 export interface SettingsPanel {
@@ -157,6 +161,7 @@ class CategoryBuilder {
 			id,
 			widgets: [],
 			categories: [],
+			hideSeparator: false,
 		};
 	}
 
@@ -172,6 +177,11 @@ class CategoryBuilder {
 
 	setId(id: string): this {
 		this.category.id = id;
+		return this;
+	}
+
+	setHideSeparator(hide: boolean): this {
+		this.category.hideSeparator = hide;
 		return this;
 	}
 

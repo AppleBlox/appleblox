@@ -14,7 +14,8 @@ import { shell } from './ts/tools/shell';
 import { getMode, sleep } from './ts/utils';
 import { logDebugInfo } from './ts/utils/debug';
 import Logger, { initializeLogger } from '@/windows/main/ts/utils/logger';
-import { initializeDataDirectory } from './ts/utils/paths';
+import { ensureDataDirs, initializeDataDirectory } from './ts/utils/paths';
+import { migrateFromSingleAccount } from './ts/roblox/accounts';
 import { focusWindow, setWindowVisibility } from './ts/window';
 import { extractBundledIcons } from './ts/utils/bundled-icons';
 
@@ -71,9 +72,12 @@ async function pollBootstrapCommands() {
 init();
 
 // Initialize data directory (must be done after init())
-initializeDataDirectory().catch((err) => {
-	Logger.error('Failed to initialize data directory:', err);
-});
+initializeDataDirectory()
+	.then(() => ensureDataDirs())
+	.then(() => migrateFromSingleAccount())
+	.catch((err) => {
+		Logger.error('Failed to initialize data directory:', err);
+	});
 
 let isDeeplinkLaunch = false;
 let mainAppMounted = false;
@@ -152,6 +156,11 @@ events.on('ready', async () => {
 			}
 			setTimeout(async () => {
 				try {
+					// Initialize PathManager before launching (required since App.svelte doesn't mount)
+					const { PathManager } = await import('./ts/roblox/path-manager');
+					await PathManager.initialize();
+					deeplinkLogger.info('PathManager initialized for deeplink launch');
+
 					await Roblox.launch(
 						(isConnected) => deeplinkLogger.info(`Roblox Connected: ${isConnected}`),
 						(isLaunching) => deeplinkLogger.info(`Launching Roblox State: ${isLaunching}`),

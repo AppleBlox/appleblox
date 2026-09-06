@@ -7,6 +7,7 @@ export interface Config {
 	appName: string;
 	description: string;
 	appBundleName: string;
+	copyright?: string;
 	mac: {
 		architecture: MacArch[];
 		minimumOS: string;

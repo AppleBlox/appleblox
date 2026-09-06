@@ -7,7 +7,9 @@ body {
 	margin: 0;
 	padding: 0;
 	overflow: hidden;
-	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+	/* Try Segoe UI (matches Bloxstrap's WPF default), fall back to macOS system font */
+	font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
 	box-shadow: none !important;
 	border: none !important;
+	background: transparent;
 }

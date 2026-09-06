@@ -1,6 +1,6 @@
 import path from 'path-browserify';
 import shellFS from '../tools/shellfs';
-import { getMostRecentRoblox } from './path';
+import { detectRobloxPath } from './path';
 import Logger from '@/windows/main/ts/utils/logger';
 
 export let version: string | null = null;
@@ -20,7 +20,11 @@ function extractVersion(plistString: string): string | null {
 
 async function loadVersion() {
 	if (version) return;
-	const robloxPath = await getMostRecentRoblox();
+	const robloxPath = await detectRobloxPath();
+	if (!robloxPath) {
+		Logger.warn('Roblox installation not found. Cannot load version.');
+		return;
+	}
 	const plistPath = path.join(robloxPath, 'Contents/Info.plist');
 	const content = await shellFS.readFile(plistPath);
 	version = extractVersion(content);

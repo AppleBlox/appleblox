@@ -12,7 +12,6 @@ AppleBlox is a macOS-exclusive Roblox launcher built with Svelte (frontend) and 
 
 ```bash
 bun install
-brew install create-dmg  # Required for DMG creation
 ```
 
 ### Development
@@ -33,14 +32,14 @@ bun run build:universal        # Build universal binary
 bun run build:clean            # Clean build artifacts
 ```
 
-### Release (Build + DMG)
+### Release (Build + PKG)
 
 ```bash
-bun run release                # Build and create DMGs (parallel)
-bun run release:sequential     # Build and create DMGs (sequential)
-bun run release:arm64          # Build and create arm64 DMG
-bun run release:x64            # Build and create x64 DMG
-bun run release:universal      # Build and create universal DMG
+bun run release                # Build and create PKGs (parallel)
+bun run release:sequential     # Build and create PKGs (sequential)
+bun run release:arm64          # Build and create arm64 PKG
+bun run release:x64            # Build and create x64 PKG
+bun run release:universal      # Build and create universal PKG
 ```
 
 ### Testing
@@ -229,6 +228,8 @@ Prettier configuration (`.prettierrc`):
 - Semicolons required
 - Print width: 130
 - Svelte plugin enabled
+- Comments (except JSDoc) must be included in code — do not strip inline comments or block comments when writing or editing code
+- Only add comments for: (1) JSDoc on exported functions/types, (2) genuinely obscure tricks or workarounds that can't be made self-evident through naming. Do not add comments that restate what the code does, section headers, or obvious logic explanations.
 
 ## Common Development Workflows
 

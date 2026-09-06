@@ -13,11 +13,11 @@
 		},
 		// Testers & Moderators
 		{
-			name: "Satalights",
-			description: "Moderator & Tester",
-			avatar: "https://avatars.githubusercontent.com/u/98926761?v=4",
-			link: "https://github.com/SoiKr",
-			role: "Moderator"
+			name: 'Satalights',
+			description: 'Moderator & Tester',
+			avatar: 'https://avatars.githubusercontent.com/u/98926761?v=4',
+			link: 'https://github.com/SoiKr',
+			role: 'Moderator',
 		},
 		{
 			name: 'allFiction',
@@ -49,11 +49,11 @@
 		},
 		// Artists
 		{
-			name: "BakaTheSussy",
-			description: "Designer of the liquid glass icons",
-			avatar: "https://i.imgur.com/B9CzoKX.png",
+			name: 'BakaTheSussy',
+			description: 'Designer of the liquid glass icons',
+			avatar: 'https://i.imgur.com/B9CzoKX.png',
 			link: null,
-			role: "Artist"
+			role: 'Artist',
 		},
 		{
 			name: 'typeofnull',

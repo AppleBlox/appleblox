@@ -4,7 +4,7 @@ import { toast } from 'svelte-sonner';
 import { getAllProfiles, getSelectedProfile, writeProfile, type Profile } from '../../components/flag-editor';
 import { getConfigPath } from '../../components/settings';
 import shellFS from '../tools/shellfs';
-import { getMostRecentRoblox } from './path';
+import { detectRobloxPath } from './path';
 import Logger from '@/windows/main/ts/utils/logger';
 import { getValue, loadSettings } from '../../components/settings';
 
@@ -24,6 +24,7 @@ const ALLOWED_FLAGS = [
 	'FFlagDebugSkyGray',
 	'DFFlagDebugPauseVoxelizer',
 	'DFIntDebugFRMQualityLevelOverride',
+	'DFIntDebugDynamicRenderKiloPixels',
 	'FIntFRMMaxGrassDistance',
 	'FIntFRMMinGrassDistance',
 	'FFlagDebugGraphicsPreferVulkan',
@@ -54,10 +55,10 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.engine',
 			type: 'select',
 			value: async (settingValue) => {
-				return (
-					(settingValue as { label: string; value: string }).value === 'opengl' ||
-					(await getValue<boolean>('engine.graphics.fps_cap')) === true
-				);
+				const fpsMethod = await getValue<string | { value: string }>('engine.graphics.fps_unlock');
+				const resolved = typeof fpsMethod === 'object' && fpsMethod !== null ? fpsMethod.value : fpsMethod;
+				if (resolved === 'opengl') return false;
+				return (settingValue as { label: string; value: string }).value === 'opengl';
 			},
 		})
 		.addFlag({
@@ -66,10 +67,10 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.engine',
 			type: 'select',
 			value: async (settingValue) => {
-				return (
-					(settingValue as { label: string; value: string }).value === 'metal' &&
-					!((await getValue<boolean>('engine.graphics.fps_cap')) === true)
-				);
+				const fpsMethod = await getValue<string | { value: string }>('engine.graphics.fps_unlock');
+				const resolved = typeof fpsMethod === 'object' && fpsMethod !== null ? fpsMethod.value : fpsMethod;
+				if (resolved === 'opengl') return false;
+				return (settingValue as { label: string; value: string }).value === 'metal';
 			},
 		})
 		.addFlag({
@@ -78,10 +79,23 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.engine',
 			type: 'select',
 			value: async (settingValue) => {
-				return (
-					(settingValue as { label: string; value: string }).value === 'vulkan' &&
-					!((await getValue<boolean>('engine.graphics.fps_cap')) === true)
-				);
+				const fpsMethod = await getValue<string | { value: string }>('engine.graphics.fps_unlock');
+				const resolved = typeof fpsMethod === 'object' && fpsMethod !== null ? fpsMethod.value : fpsMethod;
+				if (resolved === 'opengl') return false;
+				return (settingValue as { label: string; value: string }).value === 'vulkan';
+			},
+		})
+		.addFlag({
+			name: 'FPS Unlock (OpenGL)',
+			flags: {
+				FFlagDebugGraphicsPreferOpenGL: true,
+				FFlagDebugGraphicsDisableMetal: true,
+				FFlagDebugGraphicsPreferMetal: false,
+			},
+			path: 'engine.graphics.fps_unlock',
+			type: 'select',
+			value: async (settingValue) => {
+				return (settingValue as { label: string; value: string }).value === 'opengl';
 			},
 		})
 		.addFlag({
@@ -90,7 +104,7 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 			path: 'engine.graphics.quality_distance',
 			type: 'slider',
 			value: async (settingValue) => {
-				return settingValue === true && (await getValue<boolean>('engine.graphics.quality_distance_toggle')) === true;
+				return !!settingValue && (await getValue<boolean>('engine.graphics.quality_distance_toggle')) === true;
 			},
 		})
 		.addFlag({
@@ -106,9 +120,18 @@ async function buildFlagsList(): Promise<FastFlagsList> {
 		.addFlag({
 			name: 'Fractional Scaling',
 			flags: { DFFlagDisableDPIScale: true },
-			path: 'engine.graphics.fracscaling',
+			path: 'engine.rendering.fracscaling',
 			type: 'switch',
 			value: true,
+		})
+		.addFlag({
+			name: 'Render Resolution',
+			flags: { DFIntDebugDynamicRenderKiloPixels: '%s' },
+			path: 'engine.graphics.resolution',
+			type: 'select',
+			value: async (settingValue) => {
+				return (settingValue as { label: string; value: string }).value !== 'default';
+			},
 		})
 		.addFlag({
 			name: 'Debug Sky',
@@ -213,7 +236,11 @@ export class RobloxFFlags {
 
 	static async writeClientAppSettings() {
 		Logger.info('Writing ClientAppSettings...');
-		const filePath = path.join(await getMostRecentRoblox(), 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
+		const robloxPath = await detectRobloxPath();
+		if (!robloxPath) {
+			throw new Error('Roblox installation not found. Cannot write ClientAppSettings.');
+		}
+		const filePath = path.join(robloxPath, 'Contents/MacOS/ClientSettings/ClientAppSettings.json');
 
 		if (await shellFS.exists(filePath)) {
 			await filesystem.remove(filePath);
@@ -246,7 +273,7 @@ export class RobloxFFlags {
 	}
 }
 
-class FastFlagsList {
+export class FastFlagsList {
 	private toParseFlags: AddFlagOpts[] = [];
 	private skipPanels: string[] = [];
 	private settings: { [key: string]: any } = {};

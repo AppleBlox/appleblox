@@ -12,6 +12,7 @@
 		Rocket,
 		Rss,
 		Settings,
+		User,
 		Users,
 	} from 'lucide-svelte';
 	import { quartInOut, quintOut } from 'svelte/easing';
@@ -51,7 +52,6 @@
 	let currentStep = 0;
 	let showIcon = false;
 	let animationPhase: 'icon' | 'content' = 'icon';
-
 	interface OnboardingAction {
 		type: 'switch' | 'button' | 'info';
 		label: string;
@@ -99,28 +99,31 @@
 			],
 		},
 		{
+			title: 'Roblox Account',
+			description:
+				'Connect your Roblox account to unlock preferred region selection and see all your recent games. Your cookie is encrypted in macOS Keychain and only ever sent to Roblox.com.',
+			icon: User,
+			actions: [
+				{
+					type: 'switch',
+					label: 'Enable Account Features',
+					description: 'You can connect your account later in the Account tab',
+					value: false,
+					settingKey: 'account.features.enabled',
+				},
+			],
+		},
+		{
 			title: 'Behavior Settings',
 			description: 'Define how AppleBlox interacts with Roblox.',
 			icon: Settings,
 			actions: [
 				{
-					type: 'button',
-					label: 'Enable background Roblox updates',
-					description:
-						'Roblox will automatically get updated in the background, without needing AppleBlox or Roblox to be opened <span style="color: hsl(var(--warning));">(Admin permissions needed)</span>',
-					variant: 'default',
-					icon: Rss,
-					action: () => {
-						try {
-							Roblox.Updates.setLaunchAgentState(true);
-							setValue('roblox.background.background_updates', true);
-						} catch (err) {
-							setValue('roblox.background.background_updates', false);
-							if ((err as Error).message.includes('-128')) return;
-							toast.error('An error ocurred while setting Roblox background updates state');
-							Logger.error('An error ocurred while setting Roblox background updates state:', err);
-						}
-					},
+					type: 'switch',
+					label: 'Background Roblox Updates',
+					description: 'Automatically update Roblox in the background without needing AppleBlox or Roblox to be open',
+					value: false,
+					settingKey: 'roblox.background.background_updates',
 				},
 				{
 					type: 'switch',
@@ -244,6 +247,7 @@
 			// Still allow onboarding to complete even if settings fail
 			onboardingLoaded = true;
 		}
+
 	}
 
 	function goToStep(step: number) {

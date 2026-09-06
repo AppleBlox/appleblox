@@ -1,3 +1,6 @@
+> [!NOTE]  
+> No, this project is not discontinued. Updates are coming. You can test them right now with the [dev builds](https://appleblox.com/download/dev).
+
 # AppleBlox
 
 <div align="center">
@@ -15,11 +18,10 @@
 
 AppleBlox is a Roblox launcher for **MacOS**, inspired by [Bloxstrap](https://github.com/pizzaboxer/bloxstrap). It includes features such as DiscordRPC and Fast-flags, with ongoing development for additional functionality.
 
-The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/main?preview).
+The latest version is available on the [Releases](https://github.com/AppleBlox/appleblox/releases/latest) page. For more recent builds, see the [nightly releases](https://nightly.link/AppleBlox/appleblox/workflows/build/dev?preview).
 
 Versions:
-
-- arm64 (Apple's own chips: M1, M2, M3, etc)
+- arm64 (Apple Silicon Chips such as: M1, M2, M3, etc)
 - x64 (Intel Architecture)
 - universal (Universal Version)
 
@@ -41,19 +43,23 @@ For the development version (more unstable but has the latest features and more)
 - Delegate Launching to Appleblox: Let AppleBlox configure settings before launching Roblox.
 - Disable Roblox Desktop App: Automatically close Roblox when leaving games.
 
+## Uninstallation
+
+1. Open AppleBlox, go to **Settings → Advanced** and click **Reset Data** to remove all app data and settings.
+2. Drag **AppleBlox.app** from your Applications folder to the Trash.
+
 ## Development
 
 Setting up the AppleBlox development environment:
 
 1. Clone the repository
 2. Execute `bun install`
-3. Install additional dependencies: `brew install create-dmg`
 
 Development commands:
 
 - `bun run --bun dev`: Start the development environment
-- `bun run --bun build`: Package the application (excluding DMG creation)
-- `bun run --bun release`: Package and create a DMG
+- `bun run --bun build`: Package the application
+- `bun run --bun release`: Build and create a PKG installer
 
 AppleBlox is built using [Svelte](https://svelte.dev) for the frontend and [NeutralinoJS](https://neutralino.js.org) for the backend. NeutralinoJS is a lightweight C++ alternative to Electron or NW.JS, suitable for single-platform applications. More information is available at [neutralino.js.org/docs](https://neutralino.js.org/docs).
 
@@ -63,6 +69,16 @@ The build script utilizes pre-compiled binaries for `alerter` and `discord-rpc-c
 
 - `alerter`: Sourced from [vjeantet/alerter](https://github.com/vjeantet/alerter) releases
 - `discord-rpc-cli`: Built from [AppleBlox/Discord-RPC-cli](https://github.com/AppleBlox/Discord-RPC-cli)
+
+## Privacy Policy
+
+AppleBlox connects to the following external services:
+
+- **Discord**: When Discord Rich Presence is enabled, your current game activity (game name, server region, elapsed time) is shared with Discord. This feature can be disabled at any time in Settings → Integrations.
+- **RoValra API**: Used to determine your game server's hosting region. No personally identifiable information is transmitted.
+- **Roblox services**: Used to check for and download Roblox client updates.
+
+AppleBlox does not collect, store, or transmit any personal data beyond what is described above. No analytics or telemetry are included.
 
 ## Contributing
 
@@ -86,4 +102,3 @@ Contributions are welcome. Please feel free to submit issues, pull requests, or 
 - Inspiration: @pizzaboxer's Bloxstrap
 - Icons: lucide-svelte & icons8
 - Objective-C sidecar: Generated with assistance from ClaudeAI and ChatGPT. Contributors are sought to replace this code.
--

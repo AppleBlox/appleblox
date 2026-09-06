@@ -5,6 +5,7 @@
 	import path from 'path-browserify';
 	import { toast } from 'svelte-sonner';
 	import LoadingSpinner from '../../components/loading-spinner.svelte';
+	import PathSelector from '../../components/roblox/path-selector.svelte';
 	import RobloxDownloadButton from '../../components/roblox/roblox-download-button.svelte';
 	import { SettingsPanelBuilder, setValue } from '../../components/settings';
 	import Panel from '../../components/settings/panel.svelte';
@@ -24,7 +25,12 @@
 				await Roblox.Utils.enableMultiInstance();
 				break;
 			case 'open_instance_btn':
-				os.spawnProcess(`${path.join(Roblox.path, 'Contents/MacOS/RobloxPlayer')}; exit`);
+				const rbxPath = Roblox.path;
+				if (!rbxPath) {
+					toast.error('Could not find Roblox installation');
+					break;
+				}
+				os.spawnProcess(`${path.join(rbxPath, 'Contents/MacOS/RobloxPlayer')}; exit`);
 				break;
 			case 'close_roblox_btn':
 				closeRobloxPopup = true;
@@ -34,7 +40,7 @@
 					await Roblox.Utils.createShortcut();
 				} catch (err) {
 					Logger.error(err);
-					toast.error('An error occured while trying to save the shortcut', {
+					toast.error('An error occurred while trying to save the shortcut', {
 						duration: 2000,
 					});
 					return;
@@ -56,8 +62,8 @@
 					await setValue('roblox.background.background_updates', !state);
 					events.broadcast('app:reload');
 					if ((err as Error).message.includes('-128')) return;
-					toast.error('An error ocurred while setting Roblox background updates state');
-					Logger.error('An error ocurred while setting Roblox background updates state:', err);
+					toast.error('An error occurred while setting Roblox background updates state');
+					Logger.error('An error occurred while setting Roblox background updates state:', err);
 				}
 		}
 	}
@@ -68,13 +74,26 @@
 		.setId('roblox') // Not updating the ID to preserve old settings
 		.addCategory((category) =>
 			category
+				.setName('Roblox Installation')
+				.setDescription('Configure how AppleBlox detects your Roblox installation')
+				.setId('installation')
+				.addCustom({
+					label: '',
+					description: '',
+					id: 'path_selector',
+					component: PathSelector,
+					separator: false,
+				})
+		)
+		.addCategory((category) =>
+			category
 				.setName('Background Processes')
 				.setDescription('Control background processes related to Roblox')
 				.setId('background')
 				.addSwitch({
 					label: 'Background updates',
 					description:
-						'Automatically update Roblox without needing AppleBlox or Roblox to opened. <br><span style="color: hsl(var(--warning));">(Requires administrator permissions)</span>',
+						'Automatically update Roblox without needing AppleBlox or Roblox to opened.',
 					default: false,
 					id: 'background_updates',
 				})
@@ -200,7 +219,7 @@
 	<Panel {panel} on:switch={switchClicked} on:button={buttonClicked} {render} {overrides} />
 {:catch error}
 	{#if render}
-		<h2 class="text-red-500">An error occured while loading settings overrides</h2>
+		<h2 class="text-red-500">An error occurred while loading settings overrides</h2>
 		<p class="text-red-300">{error}</p>
 	{/if}
 {/await}

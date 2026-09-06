@@ -8,6 +8,7 @@ const BuildConfig: Config = {
 	appName: 'AppleBlox',
 	description: 'A MacOS Roblox Launcher',
 	appBundleName: 'AppleBlox',
+	copyright: 'Copyright © 2024-2026 OrigamingWasTaken. Licensed under GPL-3.0.',
 	mac: {
 		architecture: ['universal', 'arm64', 'x64'],
 		appIcon: path('./scripts/build/assets/mac.icns'),

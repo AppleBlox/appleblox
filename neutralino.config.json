@@ -1,12 +1,22 @@
 {
 	"applicationId": "ch.origaming.appleblox",
-	"version": "0.1.0",
+	"version": "0.9.0",
 	"defaultMode": "window",
 	"documentRoot": "/frontend/dist",
 	"url": "/",
 	"enableServer": true,
 	"enableNativeAPI": true,
-	"nativeAllowList": ["server.*","events.*", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*", "app.*", "storage.*"],
+	"nativeAllowList": [
+		"server.*",
+		"events.*",
+		"os.*",
+		"filesystem.*",
+		"window.*",
+		"clipboard.*",
+		"computer.*",
+		"app.*",
+		"storage.*"
+	],
 	"exportAuthInfo": false,
 	"logging": {
 		"writeToLogFile": false,
